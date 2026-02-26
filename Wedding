@@ -1,0 +1,105 @@
+members-lounge-wedding-app/
+  server/
+    package.json
+    src/
+      db.js
+      schema.sql
+      seed.js
+      index.js
+      validate.js
+  client/
+    package.json
+    vite.config.js
+    src/
+      api.js
+      main.jsx
+      App.jsx
+      styles.css
+      pages/
+        Login.jsx
+        Dashboard.jsx
+        MenuSelection.jsx
+        DietaryTables.jsx
+        Quote.jsx
+{
+  "name": "members-lounge-wedding-server",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "node src/index.js",
+    "seed": "node src/seed.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^9.4.0",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "nanoid": "^5.0.7"
+  }
+}
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS events (
+  id TEXT PRIMARY KEY,
+  access_code TEXT UNIQUE NOT NULL,
+  couple_names TEXT NOT NULL,
+  event_date TEXT NOT NULL,
+  room TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  locked INTEGER NOT NULL DEFAULT 0,
+
+  -- pricing configuration
+  adult_price_cents INTEGER NOT NULL DEFAULT 9900,
+  child_price_cents INTEGER NOT NULL DEFAULT 3000,
+  drinks_price_cents INTEGER NOT NULL DEFAULT 2000,
+  gst_enabled INTEGER NOT NULL DEFAULT 0,
+
+  drinks_selected INTEGER NOT NULL DEFAULT 0,
+  deposit_paid_cents INTEGER NOT NULL DEFAULT 0,
+
+  signature_name TEXT,
+  signed_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS menu_items (
+  id TEXT PRIMARY KEY,
+  category TEXT NOT NULL, -- 'canape' | 'entree' | 'main' | 'dessert'
+  name TEXT NOT NULL,
+  description TEXT,
+  tags TEXT -- JSON string e.g. ["GF","V"]
+);
+
+CREATE TABLE IF NOT EXISTS menu_selections (
+  event_id TEXT NOT NULL,
+  menu_item_id TEXT NOT NULL,
+  category TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  PRIMARY KEY (event_id, menu_item_id),
+  FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+  FOREIGN KEY (menu_item_id) REFERENCES menu_items(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS dietary_tables (
+  id TEXT PRIMARY KEY,
+  event_id TEXT NOT NULL,
+  table_no INTEGER NOT NULL,
+  adults INTEGER NOT NULL DEFAULT 0,
+  children INTEGER NOT NULL DEFAULT 0,
+  highchairs INTEGER NOT NULL DEFAULT 0,
+
+  vegetarian INTEGER NOT NULL DEFAULT 0,
+  gluten_free INTEGER NOT NULL DEFAULT 0,
+  fructose_free INTEGER NOT NULL DEFAULT 0,
+  no_seafood INTEGER NOT NULL DEFAULT 0,
+  no_dairy INTEGER NOT NULL DEFAULT 0,
+  vegan INTEGER NOT NULL DEFAULT 0,
+
+  child_notes TEXT DEFAULT '',
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+
+  UNIQUE(event_id, table_no),
+  FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
+);
