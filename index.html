@@ -1,105 +1,1280 @@
-members-lounge-wedding-app/
-  server/
-    package.json
-    src/
-      db.js
-      schema.sql
-      seed.js
-      index.js
-      validate.js
-  client/
-    package.json
-    vite.config.js
-    src/
-      api.js
-      main.jsx
-      App.jsx
-      styles.css
-      pages/
-        Login.jsx
-        Dashboard.jsx
-        MenuSelection.jsx
-        DietaryTables.jsx
-        Quote.jsx
-{
-  "name": "members-lounge-wedding-server",
-  "version": "1.0.0",
-  "type": "module",
-  "private": true,
-  "scripts": {
-    "dev": "node src/index.js",
-    "seed": "node src/seed.js"
-  },
-  "dependencies": {
-    "better-sqlite3": "^9.4.0",
-    "cors": "^2.8.5",
-    "express": "^4.19.2",
-    "helmet": "^7.1.0",
-    "morgan": "^1.10.0",
-    "nanoid": "^5.0.7"
-  }
-}
-PRAGMA foreign_keys = ON;
+<!--
+  The Members Lounge — Avondale FC GameDay Catering (GitHub-ready)
+  Single-file app: just commit as index.html (plus optional logo asset).
+  Logo: put at /assets/MembersLoungeLogo.png (case-sensitive).
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Members Lounge | Avondale FC GameDay Catering</title>
 
-CREATE TABLE IF NOT EXISTS events (
-  id TEXT PRIMARY KEY,
-  access_code TEXT UNIQUE NOT NULL,
-  couple_names TEXT NOT NULL,
-  event_date TEXT NOT NULL,
-  room TEXT NOT NULL,
-  created_at TEXT NOT NULL,
-  locked INTEGER NOT NULL DEFAULT 0,
+  <style>
+    :root{
+      --bg:#ffffff;
+      --text:#0b0c10;
+      --muted:#4b5563;
+      --line:rgba(0,0,0,.10);
+      --gold:#b08d2a;
+      --goldSoft:rgba(176,141,42,.10);
+      --shadow:0 10px 26px rgba(0,0,0,.08);
+      --radius:16px;
+      --ok:#0f7a3a;
+      --warn:#b45309;
+      --bad:#b91c1c;
+      --chip:#f6f7f9;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    a{color:inherit}
+    header{
+      position:sticky; top:0; z-index:10;
+      background:rgba(255,255,255,.92);
+      backdrop-filter:saturate(180%) blur(10px);
+      border-bottom:1px solid var(--line);
+    }
+    .wrap{max-width:1100px; margin:0 auto; padding:18px 18px;}
+    .topbar{
+      display:flex; gap:14px; align-items:center; justify-content:space-between;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px; min-width:0;
+    }
+    .logo{
+      width:46px; height:46px; border-radius:12px;
+      background:linear-gradient(180deg,var(--goldSoft),transparent);
+      border:1px solid rgba(176,141,42,.35);
+      display:grid; place-items:center; overflow:hidden;
+      flex:0 0 auto;
+    }
+    .logo img{width:100%; height:100%; object-fit:cover}
+    .title{
+      min-width:0;
+      display:flex; flex-direction:column; gap:2px;
+    }
+    .title h1{
+      margin:0;
+      font-size:16px;
+      letter-spacing:.2px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .title .sub{
+      font-size:12px; color:var(--muted);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
 
-  -- pricing configuration
-  adult_price_cents INTEGER NOT NULL DEFAULT 9900,
-  child_price_cents INTEGER NOT NULL DEFAULT 3000,
-  drinks_price_cents INTEGER NOT NULL DEFAULT 2000,
-  gst_enabled INTEGER NOT NULL DEFAULT 0,
+    .tabs{
+      display:flex; gap:8px; flex-wrap:wrap;
+      padding:0 18px 14px 18px;
+      max-width:1100px; margin:0 auto;
+    }
+    .tabbtn{
+      border:1px solid var(--line);
+      background:#fff;
+      padding:10px 12px;
+      border-radius:999px;
+      cursor:pointer;
+      font-weight:650;
+      font-size:13px;
+      display:flex; align-items:center; gap:8px;
+      box-shadow:0 1px 0 rgba(0,0,0,.02);
+    }
+    .tabbtn.active{
+      border-color:rgba(176,141,42,.55);
+      box-shadow:0 6px 18px rgba(176,141,42,.12);
+      background:linear-gradient(180deg, rgba(176,141,42,.10), #fff);
+    }
 
-  drinks_selected INTEGER NOT NULL DEFAULT 0,
-  deposit_paid_cents INTEGER NOT NULL DEFAULT 0,
+    main{padding:18px;}
+    .grid{
+      max-width:1100px; margin:0 auto;
+      display:grid; gap:14px;
+      grid-template-columns: 1.2fr .8fr;
+    }
+    @media (max-width: 980px){
+      .grid{grid-template-columns:1fr}
+    }
+    .card{
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:#fff;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .card .hd{
+      padding:14px 16px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      border-bottom:1px solid var(--line);
+      background:linear-gradient(180deg, rgba(176,141,42,.07), transparent);
+    }
+    .card .hd h2{
+      margin:0; font-size:14px; letter-spacing:.2px;
+    }
+    .card .bd{padding:14px 16px;}
 
-  signature_name TEXT,
-  signed_at TEXT
-);
+    label{display:block; font-size:12px; color:var(--muted); margin:0 0 6px 2px;}
+    input, select, textarea{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:11px 12px;
+      outline:none;
+      font-size:14px;
+      background:#fff;
+    }
+    textarea{min-height:120px; resize:vertical;}
+    input:focus, select:focus, textarea:focus{
+      border-color:rgba(176,141,42,.65);
+      box-shadow:0 0 0 4px rgba(176,141,42,.12);
+    }
+    .row{display:grid; gap:10px; grid-template-columns:1fr 1fr;}
+    @media (max-width: 720px){ .row{grid-template-columns:1fr} }
+    .actions{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+      margin-top:10px;
+    }
+    .btn{
+      border:1px solid var(--line);
+      background:#fff;
+      padding:10px 12px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:700;
+      font-size:13px;
+    }
+    .btn.primary{
+      border-color:rgba(176,141,42,.55);
+      background:linear-gradient(180deg, rgba(176,141,42,.16), rgba(176,141,42,.08));
+    }
+    .btn.danger{
+      border-color:rgba(185, 28, 28,.35);
+      background:linear-gradient(180deg, rgba(185, 28, 28,.10), #fff);
+    }
 
-CREATE TABLE IF NOT EXISTS menu_items (
-  id TEXT PRIMARY KEY,
-  category TEXT NOT NULL, -- 'canape' | 'entree' | 'main' | 'dessert'
-  name TEXT NOT NULL,
-  description TEXT,
-  tags TEXT -- JSON string e.g. ["GF","V"]
-);
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      background:var(--chip);
+      border:1px solid var(--line);
+      font-size:12px; color:var(--muted);
+      flex-wrap:wrap;
+    }
+    .pill b{color:var(--text)}
+    .badge{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-size:11px;
+      font-weight:800;
+    }
+    .badge.gold{border-color:rgba(176,141,42,.5); background:rgba(176,141,42,.10);}
+    .badge.ok{border-color:rgba(15,122,58,.35); background:rgba(15,122,58,.08);}
+    .badge.warn{border-color:rgba(180,83,9,.35); background:rgba(180,83,9,.08);}
 
-CREATE TABLE IF NOT EXISTS menu_selections (
-  event_id TEXT NOT NULL,
-  menu_item_id TEXT NOT NULL,
-  category TEXT NOT NULL,
-  created_at TEXT NOT NULL,
-  PRIMARY KEY (event_id, menu_item_id),
-  FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
-  FOREIGN KEY (menu_item_id) REFERENCES menu_items(id) ON DELETE CASCADE
-);
+    table{width:100%; border-collapse:collapse; font-size:13px;}
+    th, td{padding:10px 8px; border-bottom:1px solid var(--line); vertical-align:top;}
+    th{font-size:12px; text-align:left; color:var(--muted); font-weight:800;}
+    .muted{color:var(--muted)}
+    .small{font-size:12px}
+    .kpi{
+      display:grid; gap:10px;
+      grid-template-columns:1fr 1fr;
+    }
+    .kpi .box{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+      background:linear-gradient(180deg, rgba(176,141,42,.06), #fff);
+    }
+    .kpi .box .label{font-size:12px; color:var(--muted); margin:0}
+    .kpi .box .value{margin-top:6px; font-weight:900; font-size:16px;}
+    .kpi .box .hint{margin-top:6px; font-size:12px; color:var(--muted);}
 
-CREATE TABLE IF NOT EXISTS dietary_tables (
-  id TEXT PRIMARY KEY,
-  event_id TEXT NOT NULL,
-  table_no INTEGER NOT NULL,
-  adults INTEGER NOT NULL DEFAULT 0,
-  children INTEGER NOT NULL DEFAULT 0,
-  highchairs INTEGER NOT NULL DEFAULT 0,
+    .note{
+      border-left:4px solid rgba(176,141,42,.55);
+      background:rgba(176,141,42,.08);
+      padding:10px 12px;
+      border-radius:12px;
+      color:var(--text);
+      font-size:13px;
+    }
 
-  vegetarian INTEGER NOT NULL DEFAULT 0,
-  gluten_free INTEGER NOT NULL DEFAULT 0,
-  fructose_free INTEGER NOT NULL DEFAULT 0,
-  no_seafood INTEGER NOT NULL DEFAULT 0,
-  no_dairy INTEGER NOT NULL DEFAULT 0,
-  vegan INTEGER NOT NULL DEFAULT 0,
+    .hidden{display:none !important;}
+    footer{
+      max-width:1100px; margin:16px auto 40px auto;
+      padding:0 18px;
+      color:var(--muted);
+      font-size:12px;
+    }
+  </style>
+</head>
 
-  child_notes TEXT DEFAULT '',
-  created_at TEXT NOT NULL,
-  updated_at TEXT NOT NULL,
+<body>
+  <header>
+    <div class="wrap">
+      <div class="topbar">
+        <div class="brand">
+          <div class="logo" title="The Members Lounge">
+            <img id="logoImg" alt="Members Lounge Logo" src="assets/MembersLoungeLogo.png"
+                 onerror="this.style.display='none'; this.parentElement.textContent='ML'; this.parentElement.style.fontWeight='900'; this.parentElement.style.color='var(--gold)';" />
+          </div>
+          <div class="title">
+            <h1>GameDay Catering — Avondale FC</h1>
+            <div class="sub">Kitchen readiness timing + room selection • The Members Lounge (Parkville)</div>
+          </div>
+        </div>
 
-  UNIQUE(event_id, table_no),
-  FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
-);
+        <div class="pill" title="App status">
+          <span class="badge gold">LOCAL</span>
+          <span><b id="nowText">—</b></span>
+          <span class="muted">Melbourne</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Navigation tabs">
+      <button class="tabbtn active" data-tab="fixtures">🏟️ Fixtures</button>
+      <button class="tabbtn" data-tab="training">🍝 Training Dinner</button>
+      <button class="tabbtn" data-tab="dashboard">👨‍🍳 Kitchen Dashboard</button>
+      <button class="tabbtn" data-tab="settings">⚙️ Settings</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- FIXTURES TAB -->
+    <section id="tab-fixtures">
+      <div class="grid">
+        <div class="card">
+          <div class="hd">
+            <h2>Home Fixtures (Avenger Park)</h2>
+            <div class="pill small">
+              <span class="badge ok">AUTO</span>
+              Ready time = Kickoff + <b id="prepHoursLabel">2.5</b> hrs
+            </div>
+          </div>
+          <div class="bd">
+            <div class="row">
+              <div>
+                <label for="teamFilter">Team</label>
+                <select id="teamFilter">
+                  <option value="all">All</option>
+                  <option value="mens">Men’s — NPL Victoria</option>
+                  <option value="womens">Women’s — NPL Victoria</option>
+                </select>
+              </div>
+              <div>
+                <label for="searchText">Search</label>
+                <input id="searchText" placeholder="Opponent, notes…" />
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="btn primary" id="btnAddFixture">➕ Add fixture</button>
+              <button class="btn" id="btnExportCSV">⬇️ Export CSV</button>
+              <button class="btn danger" id="btnClearFixtures">🗑️ Clear all</button>
+              <span class="muted small" id="fixtureCountText"></span>
+            </div>
+
+            <div style="margin-top:12px; overflow:auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Kickoff</th>
+                    <th>Team</th>
+                    <th>Opponent</th>
+                    <th>Ready (Kickoff + 2.5h)</th>
+                    <th>Room</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="fixturesTbody">
+                  <!-- rows -->
+                </tbody>
+              </table>
+            </div>
+
+            <div class="note" style="margin-top:12px;">
+              Tip: Set the room for each game so staff know where you’re placing the function —
+              <b>The Members Lounge</b>, <b>Bistroteca</b>, or <b>Ottimo Room</b>.
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="hd">
+            <h2>Add / Import Fixtures</h2>
+            <span class="badge gold">PASTE</span>
+          </div>
+          <div class="bd">
+            <label for="importArea">Paste CSV (header required)</label>
+            <textarea id="importArea" placeholder="date, kickoff, team, opponent, venue (optional), notes (optional)
+2026-03-14, 15:00, mens, Opponent FC, Avenger Park, Round 1"></textarea>
+
+            <div class="actions">
+              <button class="btn primary" id="btnImportCSV">Import CSV</button>
+              <button class="btn" id="btnLoadSample">Load sample rows</button>
+            </div>
+
+            <div class="muted small" style="margin-top:10px;">
+              CSV columns (required): <b>date</b> (YYYY-MM-DD), <b>kickoff</b> (HH:MM), <b>team</b> (mens/womens), <b>opponent</b>.
+              Optional: venue, notes.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRAINING TAB -->
+    <section id="tab-training" class="hidden">
+      <div class="grid">
+        <div class="card">
+          <div class="hd">
+            <h2>Senior Men — Training Dinner Planner</h2>
+            <span class="badge gold">FORTNIGHTLY</span>
+          </div>
+          <div class="bd">
+            <div class="row">
+              <div>
+                <label for="trainingStartDate">Start date (first dinner)</label>
+                <input id="trainingStartDate" type="date" />
+              </div>
+              <div>
+                <label for="trainingDay">Day</label>
+                <select id="trainingDay">
+                  <option value="thu">Thursday</option>
+                  <option value="wed">Wednesday</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row" style="margin-top:10px;">
+              <div>
+                <label for="trainingTime">Start time</label>
+                <input id="trainingTime" type="time" value="20:30" />
+              </div>
+              <div>
+                <label for="trainingRoom">Room</label>
+                <select id="trainingRoom">
+                  <option>The Members Lounge</option>
+                  <option>Bistroteca</option>
+                  <option>Ottimo Room</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row" style="margin-top:10px;">
+              <div>
+                <label for="trainingWeeks">Generate how many weeks ahead?</label>
+                <input id="trainingWeeks" type="number" min="2" step="2" value="16" />
+              </div>
+              <div>
+                <label for="trainingNotes">Notes</label>
+                <input id="trainingNotes" placeholder="e.g., pasta night / set menu / coach meeting" />
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="btn primary" id="btnGenerateTraining">Generate schedule</button>
+              <button class="btn" id="btnExportTrainingCSV">⬇️ Export CSV</button>
+            </div>
+
+            <div style="margin-top:12px; overflow:auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Start</th>
+                    <th>Room</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody id="trainingTbody"></tbody>
+              </table>
+            </div>
+
+            <div class="note" style="margin-top:12px;">
+              This generates <b>every second week</b> from your start date, on Wednesday or Thursday at 8:30pm (editable).
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="hd">
+            <h2>Quick Set (Recommended)</h2>
+            <span class="badge ok">DEFAULT</span>
+          </div>
+          <div class="bd">
+            <div class="muted small" style="line-height:1.5;">
+              I set a sensible default start date for you: the next Thursday from today (Melbourne time).
+              If your “next week Thursday” is different, just change the date above and regenerate.
+            </div>
+            <div class="actions" style="margin-top:12px;">
+              <button class="btn" id="btnSetNextThu">Set start date = next Thursday</button>
+              <button class="btn" id="btnSetNextWed">Set start date = next Wednesday</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DASHBOARD TAB -->
+    <section id="tab-dashboard" class="hidden">
+      <div class="grid">
+        <div class="card">
+          <div class="hd">
+            <h2>Today / Next Service</h2>
+            <span class="badge warn">LIVE</span>
+          </div>
+          <div class="bd">
+            <div class="kpi">
+              <div class="box">
+                <p class="label">Next event</p>
+                <div class="value" id="nextEventTitle">—</div>
+                <div class="hint" id="nextEventMeta">—</div>
+              </div>
+              <div class="box">
+                <p class="label">Time until Kitchen Ready</p>
+                <div class="value" id="countdownText">—</div>
+                <div class="hint" id="countdownHint">Ready = kickoff + 2.5 hours</div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px;" class="note" id="dashboardNote">
+              Add fixtures (Fixtures tab). This dashboard will automatically track the next upcoming game and countdown to kitchen ready time.
+            </div>
+
+            <div class="actions" style="margin-top:12px;">
+              <button class="btn" id="btnJumpNext">Jump to next fixture</button>
+              <button class="btn" id="btnPrint">🖨️ Print</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="hd">
+            <h2>Upcoming (Home Games)</h2>
+            <span class="badge gold">LIST</span>
+          </div>
+          <div class="bd" style="overflow:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Team</th>
+                  <th>Opponent</th>
+                  <th>Kickoff</th>
+                  <th>Ready</th>
+                  <th>Room</th>
+                </tr>
+              </thead>
+              <tbody id="upcomingTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS TAB -->
+    <section id="tab-settings" class="hidden">
+      <div class="grid">
+        <div class="card">
+          <div class="hd">
+            <h2>App Settings</h2>
+            <span class="badge gold">SAVE</span>
+          </div>
+          <div class="bd">
+            <div class="row">
+              <div>
+                <label for="prepHours">Prep offset hours (after kickoff)</label>
+                <input id="prepHours" type="number" min="0" step="0.25" value="2.5" />
+              </div>
+              <div>
+                <label for="defaultVenue">Default venue label</label>
+                <input id="defaultVenue" value="Avenger Park (Avondale FC)" />
+              </div>
+            </div>
+
+            <div class="row" style="margin-top:10px;">
+              <div>
+                <label for="defaultRoom">Default room for fixtures</label>
+                <select id="defaultRoom">
+                  <option>The Members Lounge</option>
+                  <option>Bistroteca</option>
+                  <option>Ottimo Room</option>
+                </select>
+              </div>
+              <div>
+                <label for="timezoneHint">Timezone</label>
+                <input id="timezoneHint" value="Australia/Melbourne" disabled />
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="btn primary" id="btnSaveSettings">Save settings</button>
+              <button class="btn danger" id="btnFactoryReset">Factory reset</button>
+            </div>
+
+            <div class="muted small" style="margin-top:10px; line-height:1.5;">
+              All data saves locally in your browser (localStorage). Perfect for iPhone/iPad + laptop.
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="hd">
+            <h2>GitHub Setup</h2>
+            <span class="badge ok">READY</span>
+          </div>
+          <div class="bd">
+            <div class="note">
+              Repo structure:
+              <div class="small" style="margin-top:8px;">
+                <b>/index.html</b><br/>
+                <b>/assets/MembersLoungeLogo.png</b> (optional)
+              </div>
+            </div>
+
+            <div class="muted small" style="margin-top:10px; line-height:1.5;">
+              <b>GitHub Pages:</b> Settings → Pages → Deploy from branch → main → /(root).<br/>
+              Then open the Pages URL and you’re live.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODAL: ADD FIXTURE -->
+    <div id="modal" class="hidden" style="
+      position:fixed; inset:0; background:rgba(0,0,0,.35);
+      display:flex; align-items:center; justify-content:center; padding:18px; z-index:50;">
+      <div class="card" style="max-width:720px; width:100%;">
+        <div class="hd">
+          <h2 id="modalTitle">Add Fixture</h2>
+          <button class="btn" id="btnCloseModal">✕</button>
+        </div>
+        <div class="bd">
+          <div class="row">
+            <div>
+              <label for="fxDate">Date</label>
+              <input id="fxDate" type="date" />
+            </div>
+            <div>
+              <label for="fxKickoff">Kickoff</label>
+              <input id="fxKickoff" type="time" />
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px;">
+            <div>
+              <label for="fxTeam">Team</label>
+              <select id="fxTeam">
+                <option value="mens">Men’s — NPL Victoria</option>
+                <option value="womens">Women’s — NPL Victoria</option>
+              </select>
+            </div>
+            <div>
+              <label for="fxOpponent">Opponent</label>
+              <input id="fxOpponent" placeholder="Opponent name" />
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px;">
+            <div>
+              <label for="fxRoom">Room</label>
+              <select id="fxRoom">
+                <option>The Members Lounge</option>
+                <option>Bistroteca</option>
+                <option>Ottimo Room</option>
+              </select>
+            </div>
+            <div>
+              <label for="fxNotes">Notes (optional)</label>
+              <input id="fxNotes" placeholder="e.g., buffet / seated / sponsor table" />
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn primary" id="btnSaveFixture">Save</button>
+            <button class="btn" id="btnCancelFixture">Cancel</button>
+          </div>
+
+          <div class="muted small" style="margin-top:10px;">
+            Ready time is calculated automatically (Kickoff + prep offset).
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    Members Lounge | Reggio Calabria Club, Parkville • Internal catering planner for Avondale FC (Home games).
+  </footer>
+
+  <script>
+    // ====== Storage Keys ======
+    const KEY_FIXTURES = "ml_avondale_fixtures_v1";
+    const KEY_SETTINGS = "ml_avondale_settings_v1";
+
+    // ====== Defaults ======
+    const DEFAULT_SETTINGS = {
+      prepHours: 2.5,
+      defaultRoom: "The Members Lounge",
+      defaultVenue: "Avenger Park (Avondale FC)",
+      trainingStartDate: null,
+      trainingDay: "thu",
+      trainingTime: "20:30",
+      trainingRoom: "The Members Lounge",
+      trainingWeeks: 16,
+      trainingNotes: ""
+    };
+
+    // ====== State ======
+    let fixtures = loadFixtures();
+    let settings = loadSettings();
+    let editingId = null;
+
+    // ====== DOM ======
+    const nowText = document.getElementById("nowText");
+    const prepHoursLabel = document.getElementById("prepHoursLabel");
+
+    // Tabs
+    const tabButtons = [...document.querySelectorAll(".tabbtn")];
+    const sections = {
+      fixtures: document.getElementById("tab-fixtures"),
+      training: document.getElementById("tab-training"),
+      dashboard: document.getElementById("tab-dashboard"),
+      settings: document.getElementById("tab-settings")
+    };
+
+    // Fixtures UI
+    const teamFilter = document.getElementById("teamFilter");
+    const searchText = document.getElementById("searchText");
+    const fixturesTbody = document.getElementById("fixturesTbody");
+    const fixtureCountText = document.getElementById("fixtureCountText");
+    const importArea = document.getElementById("importArea");
+
+    // Buttons
+    document.getElementById("btnAddFixture").addEventListener("click", () => openFixtureModal());
+    document.getElementById("btnExportCSV").addEventListener("click", exportFixturesCSV);
+    document.getElementById("btnImportCSV").addEventListener("click", importFixturesCSV);
+    document.getElementById("btnLoadSample").addEventListener("click", loadSampleCSV);
+    document.getElementById("btnClearFixtures").addEventListener("click", clearAllFixtures);
+
+    // Training UI
+    const trainingStartDate = document.getElementById("trainingStartDate");
+    const trainingDay = document.getElementById("trainingDay");
+    const trainingTime = document.getElementById("trainingTime");
+    const trainingRoom = document.getElementById("trainingRoom");
+    const trainingWeeks = document.getElementById("trainingWeeks");
+    const trainingNotes = document.getElementById("trainingNotes");
+    const trainingTbody = document.getElementById("trainingTbody");
+    document.getElementById("btnGenerateTraining").addEventListener("click", generateTraining);
+    document.getElementById("btnExportTrainingCSV").addEventListener("click", exportTrainingCSV);
+    document.getElementById("btnSetNextThu").addEventListener("click", () => setStartDateToNext("thu"));
+    document.getElementById("btnSetNextWed").addEventListener("click", () => setStartDateToNext("wed"));
+
+    // Dashboard UI
+    const nextEventTitle = document.getElementById("nextEventTitle");
+    const nextEventMeta = document.getElementById("nextEventMeta");
+    const countdownText = document.getElementById("countdownText");
+    const countdownHint = document.getElementById("countdownHint");
+    const dashboardNote = document.getElementById("dashboardNote");
+    const upcomingTbody = document.getElementById("upcomingTbody");
+    document.getElementById("btnJumpNext").addEventListener("click", () => switchTab("fixtures"));
+    document.getElementById("btnPrint").addEventListener("click", () => window.print());
+
+    // Settings UI
+    const prepHours = document.getElementById("prepHours");
+    const defaultVenue = document.getElementById("defaultVenue");
+    const defaultRoom = document.getElementById("defaultRoom");
+    document.getElementById("btnSaveSettings").addEventListener("click", saveSettingsFromUI);
+    document.getElementById("btnFactoryReset").addEventListener("click", factoryReset);
+
+    // Modal
+    const modal = document.getElementById("modal");
+    const modalTitle = document.getElementById("modalTitle");
+    const btnCloseModal = document.getElementById("btnCloseModal");
+    const btnCancelFixture = document.getElementById("btnCancelFixture");
+    const btnSaveFixture = document.getElementById("btnSaveFixture");
+    const fxDate = document.getElementById("fxDate");
+    const fxKickoff = document.getElementById("fxKickoff");
+    const fxTeam = document.getElementById("fxTeam");
+    const fxOpponent = document.getElementById("fxOpponent");
+    const fxRoom = document.getElementById("fxRoom");
+    const fxNotes = document.getElementById("fxNotes");
+    btnCloseModal.addEventListener("click", closeModal);
+    btnCancelFixture.addEventListener("click", closeModal);
+    btnSaveFixture.addEventListener("click", saveFixtureFromModal);
+    modal.addEventListener("click", (e)=> { if(e.target === modal) closeModal(); });
+
+    // ====== Init ======
+    hydrateSettingsUI();
+    applyTopLabels();
+    renderFixtures();
+    renderDashboard();
+    hydrateTrainingUI();
+    generateTraining(); // initial
+    tickClock();
+    setInterval(tickClock, 1000);
+
+    teamFilter.addEventListener("change", renderFixtures);
+    searchText.addEventListener("input", renderFixtures);
+
+    tabButtons.forEach(btn => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
+
+    // ====== Functions ======
+    function switchTab(tab){
+      tabButtons.forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+      Object.entries(sections).forEach(([k, el]) => el.classList.toggle("hidden", k !== tab));
+      // refresh views
+      if(tab === "dashboard") renderDashboard();
+      if(tab === "fixtures") renderFixtures();
+      if(tab === "settings") hydrateSettingsUI();
+      if(tab === "training") { hydrateTrainingUI(); generateTraining(); }
+      window.scrollTo({top:0, behavior:"smooth"});
+    }
+
+    function tickClock(){
+      const now = new Date();
+      nowText.textContent = now.toLocaleString("en-AU", { timeZone: "Australia/Melbourne", weekday:"short", year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+      updateCountdown();
+    }
+
+    function applyTopLabels(){
+      prepHoursLabel.textContent = Number(settings.prepHours).toString();
+      countdownHint.textContent = `Ready = kickoff + ${Number(settings.prepHours)} hours`;
+    }
+
+    function loadSettings(){
+      try{
+        const raw = localStorage.getItem(KEY_SETTINGS);
+        const obj = raw ? JSON.parse(raw) : {};
+        return { ...DEFAULT_SETTINGS, ...obj };
+      }catch{
+        return { ...DEFAULT_SETTINGS };
+      }
+    }
+    function saveSettings(){
+      localStorage.setItem(KEY_SETTINGS, JSON.stringify(settings));
+      applyTopLabels();
+    }
+
+    function loadFixtures(){
+      try{
+        const raw = localStorage.getItem(KEY_FIXTURES);
+        return raw ? JSON.parse(raw) : [];
+      }catch{
+        return [];
+      }
+    }
+    function saveFixtures(){
+      localStorage.setItem(KEY_FIXTURES, JSON.stringify(fixtures));
+      renderFixtures();
+      renderDashboard();
+    }
+
+    function hydrateSettingsUI(){
+      prepHours.value = settings.prepHours;
+      defaultVenue.value = settings.defaultVenue;
+      defaultRoom.value = settings.defaultRoom;
+    }
+    function saveSettingsFromUI(){
+      const ph = Number(prepHours.value);
+      settings.prepHours = (Number.isFinite(ph) && ph >= 0) ? ph : 2.5;
+      settings.defaultVenue = defaultVenue.value.trim() || DEFAULT_SETTINGS.defaultVenue;
+      settings.defaultRoom = defaultRoom.value;
+      saveSettings();
+      alert("Settings saved.");
+      renderFixtures();
+      renderDashboard();
+    }
+
+    function factoryReset(){
+      if(!confirm("Factory reset? This clears fixtures + settings on this device.")) return;
+      fixtures = [];
+      settings = { ...DEFAULT_SETTINGS };
+      localStorage.removeItem(KEY_FIXTURES);
+      localStorage.removeItem(KEY_SETTINGS);
+      hydrateSettingsUI();
+      hydrateTrainingUI();
+      applyTopLabels();
+      renderFixtures();
+      renderDashboard();
+      generateTraining();
+      alert("Reset complete.");
+    }
+
+    function clearAllFixtures(){
+      if(!confirm("Clear ALL fixtures?")) return;
+      fixtures = [];
+      saveFixtures();
+    }
+
+    function openFixtureModal(fixture=null){
+      editingId = fixture ? fixture.id : null;
+      modalTitle.textContent = fixture ? "Edit Fixture" : "Add Fixture";
+      const today = new Date();
+      fxDate.value = fixture?.date ?? today.toISOString().slice(0,10);
+      fxKickoff.value = fixture?.kickoff ?? "15:00";
+      fxTeam.value = fixture?.team ?? "mens";
+      fxOpponent.value = fixture?.opponent ?? "";
+      fxRoom.value = fixture?.room ?? settings.defaultRoom;
+      fxNotes.value = fixture?.notes ?? "";
+      modal.classList.remove("hidden");
+      setTimeout(()=> fxOpponent.focus(), 50);
+    }
+    function closeModal(){
+      modal.classList.add("hidden");
+      editingId = null;
+    }
+    function saveFixtureFromModal(){
+      const date = fxDate.value;
+      const kickoff = fxKickoff.value;
+      const team = fxTeam.value;
+      const opponent = fxOpponent.value.trim();
+      const room = fxRoom.value;
+      const notes = fxNotes.value.trim();
+
+      if(!date || !kickoff || !team || !opponent){
+        alert("Please fill Date, Kickoff, Team, Opponent.");
+        return;
+      }
+
+      const item = {
+        id: editingId ?? crypto.randomUUID(),
+        date,
+        kickoff,
+        team, // mens | womens
+        opponent,
+        venue: settings.defaultVenue,
+        room,
+        notes
+      };
+
+      if(editingId){
+        fixtures = fixtures.map(f => f.id === editingId ? item : f);
+      }else{
+        fixtures.push(item);
+      }
+
+      fixtures.sort((a,b)=> getKickoffDateTime(a).getTime() - getKickoffDateTime(b).getTime());
+      saveFixtures();
+      closeModal();
+    }
+
+    function deleteFixture(id){
+      if(!confirm("Delete this fixture?")) return;
+      fixtures = fixtures.filter(f => f.id !== id);
+      saveFixtures();
+    }
+
+    function getKickoffDateTime(fx){
+      // Interpret as Melbourne local time
+      const [y,m,d] = fx.date.split("-").map(Number);
+      const [hh,mm] = fx.kickoff.split(":").map(Number);
+      // Date(year, monthIndex, day, hours, minutes)
+      return new Date(y, m-1, d, hh, mm, 0, 0);
+    }
+
+    function getReadyDateTime(fx){
+      const kickoff = getKickoffDateTime(fx);
+      const ms = kickoff.getTime() + (Number(settings.prepHours) * 60 * 60 * 1000);
+      return new Date(ms);
+    }
+
+    function fmtDate(d){
+      return d.toLocaleDateString("en-AU", { weekday:"short", day:"2-digit", month:"short", year:"numeric" });
+    }
+    function fmtTime(d){
+      return d.toLocaleTimeString("en-AU", { hour:"2-digit", minute:"2-digit" });
+    }
+
+    function renderFixtures(){
+      const q = searchText.value.trim().toLowerCase();
+      const tf = teamFilter.value;
+
+      const filtered = fixtures.filter(f => {
+        const matchTeam = (tf === "all") ? true : (f.team === tf);
+        const matchSearch = !q ? true : (
+          (f.opponent || "").toLowerCase().includes(q) ||
+          (f.notes || "").toLowerCase().includes(q)
+        );
+        return matchTeam && matchSearch;
+      });
+
+      fixtureCountText.textContent = `${filtered.length} shown • ${fixtures.length} total`;
+
+      fixturesTbody.innerHTML = filtered.map(f => {
+        const kickoffDT = getKickoffDateTime(f);
+        const readyDT = getReadyDateTime(f);
+        const teamLabel = f.team === "mens" ? "Men’s NPL" : "Women’s NPL";
+        return `
+          <tr>
+            <td>${fmtDate(kickoffDT)}</td>
+            <td><b>${fmtTime(kickoffDT)}</b></td>
+            <td><span class="badge ${f.team==="mens"?"ok":"gold"}">${teamLabel}</span></td>
+            <td>${escapeHtml(f.opponent)}${f.notes ? `<div class="muted small">${escapeHtml(f.notes)}</div>` : ""}</td>
+            <td><b>${fmtTime(readyDT)}</b></td>
+            <td>${escapeHtml(f.room || settings.defaultRoom)}</td>
+            <td style="white-space:nowrap;">
+              <button class="btn" onclick="window.__editFixture('${f.id}')">Edit</button>
+              <button class="btn danger" onclick="window.__deleteFixture('${f.id}')">Delete</button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      // expose helpers for inline buttons (simple + reliable for single-file)
+      window.__editFixture = (id) => {
+        const fx = fixtures.find(x => x.id === id);
+        if(fx) openFixtureModal(fx);
+      };
+      window.__deleteFixture = (id) => deleteFixture(id);
+    }
+
+    function renderDashboard(){
+      const now = new Date();
+      const upcoming = fixtures
+        .map(f => ({ f, kickoff: getKickoffDateTime(f), ready: getReadyDateTime(f) }))
+        .filter(x => x.kickoff.getTime() >= now.getTime() - (8*60*60*1000)) // keep recent window
+        .sort((a,b)=> a.kickoff.getTime() - b.kickoff.getTime());
+
+      const next = upcoming.find(x => x.kickoff.getTime() >= now.getTime()) || upcoming[0];
+
+      if(!fixtures.length){
+        nextEventTitle.textContent = "No fixtures loaded";
+        nextEventMeta.textContent = "Add fixtures in the Fixtures tab.";
+        countdownText.textContent = "—";
+        dashboardNote.textContent = "Add fixtures (Fixtures tab). This dashboard will automatically track the next upcoming game and countdown to kitchen ready time.";
+        upcomingTbody.innerHTML = "";
+        return;
+      }
+
+      if(!next){
+        nextEventTitle.textContent = "No upcoming games found";
+        nextEventMeta.textContent = "Check your fixture dates.";
+        countdownText.textContent = "—";
+      }else{
+        const teamLabel = next.f.team === "mens" ? "Men’s NPL Victoria" : "Women’s NPL Victoria";
+        nextEventTitle.textContent = `${teamLabel} vs ${next.f.opponent}`;
+        nextEventMeta.textContent = `${fmtDate(next.kickoff)} • Kickoff ${fmtTime(next.kickoff)} • Ready ${fmtTime(next.ready)} • Room: ${next.f.room || settings.defaultRoom}`;
+        dashboardNote.textContent = "This is the next home game based on your fixtures list.";
+      }
+
+      // upcoming list (next 10)
+      const list = fixtures
+        .map(f => ({ f, kickoff: getKickoffDateTime(f), ready: getReadyDateTime(f) }))
+        .filter(x => x.kickoff.getTime() >= now.getTime() - (1*24*60*60*1000))
+        .sort((a,b)=> a.kickoff.getTime() - b.kickoff.getTime())
+        .slice(0, 10);
+
+      upcomingTbody.innerHTML = list.map(x => `
+        <tr>
+          <td>${fmtDate(x.kickoff)}</td>
+          <td>${x.f.team === "mens" ? "Men’s" : "Women’s"}</td>
+          <td>${escapeHtml(x.f.opponent)}</td>
+          <td><b>${fmtTime(x.kickoff)}</b></td>
+          <td><b>${fmtTime(x.ready)}</b></td>
+          <td>${escapeHtml(x.f.room || settings.defaultRoom)}</td>
+        </tr>
+      `).join("");
+    }
+
+    function updateCountdown(){
+      const now = new Date();
+      const upcoming = fixtures
+        .map(f => ({ f, kickoff: getKickoffDateTime(f), ready: getReadyDateTime(f) }))
+        .filter(x => x.kickoff.getTime() >= now.getTime())
+        .sort((a,b)=> a.kickoff.getTime() - b.kickoff.getTime());
+
+      const next = upcoming[0];
+      if(!next){
+        countdownText.textContent = "—";
+        return;
+      }
+
+      const diff = next.ready.getTime() - now.getTime();
+      if(diff <= 0){
+        countdownText.textContent = "READY NOW";
+        return;
+      }
+
+      const totalSec = Math.floor(diff / 1000);
+      const days = Math.floor(totalSec / 86400);
+      const hrs = Math.floor((totalSec % 86400) / 3600);
+      const mins = Math.floor((totalSec % 3600) / 60);
+
+      countdownText.textContent =
+        (days>0 ? `${days}d ` : "") + `${String(hrs).padStart(2,"0")}h ${String(mins).padStart(2,"0")}m`;
+    }
+
+    function loadSampleCSV(){
+      importArea.value =
+`date,kickoff,team,opponent,venue,notes
+2026-03-14,15:00,mens,Sample Opponent FC,Avenger Park,Round 1
+2026-03-21,16:00,womens,Sample United,Avenger Park,Home game`;
+      alert("Sample CSV loaded. Click Import CSV.");
+    }
+
+    function importFixturesCSV(){
+      const text = importArea.value.trim();
+      if(!text){
+        alert("Paste your CSV first.");
+        return;
+      }
+      const lines = text.split(/\r?\n/).filter(Boolean);
+      if(lines.length < 2){
+        alert("CSV needs a header row + at least 1 data row.");
+        return;
+      }
+      const header = lines[0].split(",").map(h => h.trim().toLowerCase());
+      const required = ["date","kickoff","team","opponent"];
+      const missing = required.filter(r => !header.includes(r));
+      if(missing.length){
+        alert("Missing required columns: " + missing.join(", "));
+        return;
+      }
+
+      const idx = (name) => header.indexOf(name);
+      const imported = [];
+
+      for(let i=1; i<lines.length; i++){
+        const cols = splitCSVLine(lines[i]);
+        const date = (cols[idx("date")] || "").trim();
+        const kickoff = (cols[idx("kickoff")] || "").trim();
+        const teamRaw = (cols[idx("team")] || "").trim().toLowerCase();
+        const opponent = (cols[idx("opponent")] || "").trim();
+        const venue = header.includes("venue") ? (cols[idx("venue")] || "").trim() : settings.defaultVenue;
+        const notes = header.includes("notes") ? (cols[idx("notes")] || "").trim() : "";
+
+        const team = (teamRaw === "mens" || teamRaw === "men" || teamRaw === "m") ? "mens"
+                   : (teamRaw === "womens" || teamRaw === "women" || teamRaw === "w") ? "womens"
+                   : teamRaw; // allow exact "mens"/"womens"
+
+        if(!date || !kickoff || !opponent || (team !== "mens" && team !== "womens")) continue;
+
+        imported.push({
+          id: crypto.randomUUID(),
+          date,
+          kickoff,
+          team,
+          opponent,
+          venue: venue || settings.defaultVenue,
+          room: settings.defaultRoom,
+          notes
+        });
+      }
+
+      if(!imported.length){
+        alert("No valid rows imported. Check team values are 'mens' or 'womens'.");
+        return;
+      }
+
+      fixtures = fixtures.concat(imported);
+      fixtures.sort((a,b)=> getKickoffDateTime(a).getTime() - getKickoffDateTime(b).getTime());
+      saveFixtures();
+      alert(`Imported ${imported.length} fixtures.`);
+    }
+
+    function exportFixturesCSV(){
+      if(!fixtures.length){
+        alert("No fixtures to export.");
+        return;
+      }
+      const rows = [
+        ["date","kickoff","team","opponent","ready_time","room","venue","notes"]
+      ];
+
+      fixtures.forEach(f => {
+        const ready = getReadyDateTime(f);
+        rows.push([
+          f.date,
+          f.kickoff,
+          f.team,
+          f.opponent,
+          ready.toISOString().slice(11,16), // HH:MM
+          f.room || settings.defaultRoom,
+          f.venue || settings.defaultVenue,
+          f.notes || ""
+        ]);
+      });
+
+      downloadCSV("avondale_gameday_fixtures.csv", rows);
+    }
+
+    // ===== Training =====
+    function hydrateTrainingUI(){
+      // Default start: next Thu from today if unset
+      if(!settings.trainingStartDate){
+        settings.trainingStartDate = nextWeekdayDateString("thu");
+        saveSettings();
+      }
+      trainingStartDate.value = settings.trainingStartDate;
+      trainingDay.value = settings.trainingDay;
+      trainingTime.value = settings.trainingTime;
+      trainingRoom.value = settings.trainingRoom;
+      trainingWeeks.value = settings.trainingWeeks;
+      trainingNotes.value = settings.trainingNotes;
+    }
+
+    function setStartDateToNext(day){
+      const d = nextWeekdayDateString(day);
+      trainingStartDate.value = d;
+      trainingDay.value = day;
+      saveTrainingSettingsFromUI();
+      generateTraining();
+    }
+
+    function saveTrainingSettingsFromUI(){
+      settings.trainingStartDate = trainingStartDate.value;
+      settings.trainingDay = trainingDay.value;
+      settings.trainingTime = trainingTime.value;
+      settings.trainingRoom = trainingRoom.value;
+      settings.trainingWeeks = Number(trainingWeeks.value) || 16;
+      settings.trainingNotes = trainingNotes.value.trim();
+      saveSettings();
+    }
+
+    function generateTraining(){
+      saveTrainingSettingsFromUI();
+
+      const start = settings.trainingStartDate;
+      const day = settings.trainingDay; // wed/thu
+      const time = settings.trainingTime || "20:30";
+      const room = settings.trainingRoom || "The Members Lounge";
+      const weeks = Math.max(2, Number(settings.trainingWeeks) || 16);
+      const notes = settings.trainingNotes || "";
+
+      if(!start){
+        trainingTbody.innerHTML = "";
+        return;
+      }
+
+      // Start date is the first dinner date. Then every 2 weeks.
+      const startDate = parseLocalDate(start);
+      // Ensure it matches the chosen weekday (optional: adjust forward)
+      const targetDow = (day === "wed") ? 3 : 4; // 0=Sun,3=Wed,4=Thu
+      let first = new Date(startDate);
+      while(first.getDay() !== targetDow){
+        first.setDate(first.getDate() + 1);
+      }
+
+      const events = [];
+      const iterations = Math.ceil(weeks / 2);
+      for(let i=0; i<iterations; i++){
+        const dt = new Date(first);
+        dt.setDate(first.getDate() + (i * 14));
+        const [hh, mm] = time.split(":").map(Number);
+        dt.setHours(hh, mm, 0, 0);
+
+        events.push({
+          date: dt,
+          start: dt,
+          room,
+          notes
+        });
+      }
+
+      trainingTbody.innerHTML = events.map(ev => `
+        <tr>
+          <td>${fmtDate(ev.date)}</td>
+          <td><b>${fmtTime(ev.start)}</b></td>
+          <td>${escapeHtml(ev.room)}</td>
+          <td>${notes ? escapeHtml(ev.notes) : "<span class='muted'>—</span>"}</td>
+        </tr>
+      `).join("");
+
+      // store generated list for CSV export
+      window.__trainingEvents = events;
+    }
+
+    function exportTrainingCSV(){
+      const events = window.__trainingEvents || [];
+      if(!events.length){
+        alert("No training dinners generated.");
+        return;
+      }
+      const rows = [["date","start_time","room","notes"]];
+      events.forEach(ev => {
+        rows.push([
+          ev.date.toISOString().slice(0,10),
+          ev.start.toISOString().slice(11,16),
+          ev.room,
+          ev.notes || ""
+        ]);
+      });
+      downloadCSV("avondale_training_dinners.csv", rows);
+    }
+
+    // ===== Helpers =====
+    function parseLocalDate(yyyy_mm_dd){
+      const [y,m,d] = yyyy_mm_dd.split("-").map(Number);
+      return new Date(y, m-1, d, 0, 0, 0, 0);
+    }
+
+    function nextWeekdayDateString(day){
+      // returns YYYY-MM-DD for next Wed/Thu from today (or today if matches? -> next occurrence)
+      const now = new Date();
+      const target = (day === "wed") ? 3 : 4;
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0,0,0,0);
+      do{
+        d.setDate(d.getDate() + 1);
+      }while(d.getDay() !== target);
+      return d.toISOString().slice(0,10);
+    }
+
+    function downloadCSV(filename, rows){
+      const csv = rows.map(r => r.map(cell => csvEscape(String(cell ?? ""))).join(",")).join("\n");
+      const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function csvEscape(s){
+      if(/[",\n]/.test(s)) return `"${s.replace(/"/g,'""')}"`;
+      return s;
+    }
+
+    function splitCSVLine(line){
+      // Minimal CSV parser (handles quoted commas)
+      const out = [];
+      let cur = "", inQuotes = false;
+      for(let i=0;i<line.length;i++){
+        const ch = line[i];
+        if(ch === '"' ){
+          if(inQuotes && line[i+1] === '"'){ cur += '"'; i++; }
+          else inQuotes = !inQuotes;
+        } else if(ch === "," && !inQuotes){
+          out.push(cur); cur = "";
+        } else {
+          cur += ch;
+        }
+      }
+      out.push(cur);
+      return out;
+    }
+
+    function escapeHtml(str){
+      return String(str).replace(/[&<>"']/g, (m)=>({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+      }[m]));
+    }
+  </script>
+</body>
+</html>
