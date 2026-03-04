@@ -4,17 +4,18 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>The Members Lounge | Event Signature Selection</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --bg:#ffffff;
-      --text:#0b0c10;
-      --muted:#4b5563;
+      --bg:#f5f5f5;
+      --text:#333333;
+      --muted:#666666;
       --line:rgba(0,0,0,.10);
-      --gold:#b08d2a;
-      --goldSoft:rgba(176,141,42,.10);
-      --shadow:0 10px 26px rgba(0,0,0,.06);
-      --radius:16px;
+      --accent:#4CAF50;
+      --accentSoft:rgba(76,175,80,.10);
+      --shadow:0 2px 10px rgba(0,0,0,.1);
+      --radius:8px;
       --ok:#0f7a3a;
       --warn:#b45309;
       --bad:#b91c1c;
@@ -22,145 +23,147 @@
     *{box-sizing:border-box}
     body{
       margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'Roboto', sans-serif;
       background:var(--bg);
       color:var(--text);
     }
     header{
-      padding:22px 18px 12px;
+      padding:20px;
       text-align:center;
       border-bottom:1px solid var(--line);
-      background: linear-gradient(to bottom, #fff, #fff, rgba(176,141,42,.04));
+      background:#ffffff;
+      box-shadow:var(--shadow);
     }
     .brandline{display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap;}
     .logoWrap{
       display:flex; align-items:center; justify-content:center;
       padding:10px 14px;
       border:1px solid var(--line);
-      border-radius:999px;
-      background:#fff;
-      box-shadow:0 6px 18px rgba(0,0,0,.03);
+      border-radius:50%;
+      background:#ffffff;
+      box-shadow:var(--shadow);
       gap:10px;
     }
-    .logoImg{ height:34px; width:auto; display:block; }
+    .logoImg{ height:80px; width:auto; display:block; }
     .logoFallback{
       display:inline-flex; align-items:center; gap:10px;
-      font-weight:800; letter-spacing:.14em; font-size:12px;
+      font-weight:700; letter-spacing:.1em; font-size:14px;
     }
-    h1{margin:12px 0 6px; font-size:28px}
+    h1{margin:12px 0 6px; font-size:28px; font-family: 'Montserrat', sans-serif;}
     .sub{color:var(--muted); font-size:14px}
-    .gold{color:var(--gold)}
-    main{max-width:1180px; margin:0 auto; padding:10px 18px 70px;}
+    .accent{color:var(--accent)}
+    main{max-width:1200px; margin:0 auto; padding:20px;}
 
     .tabs-wrap{
       position:sticky; top:0; z-index:10;
-      padding:10px 0 12px;
-      background: linear-gradient(to bottom, rgba(255,255,255,.98), rgba(255,255,255,.90), rgba(255,255,255,0));
-      backdrop-filter: blur(6px);
+      padding:10px 0;
+      background:#ffffff;
+      box-shadow:var(--shadow);
     }
     .tabs{display:flex; flex-wrap:wrap; gap:10px; justify-content:center;}
     .tab{
       cursor:pointer; user-select:none;
       border:1px solid var(--line);
-      background:#fff; color:var(--text);
-      padding:10px 12px; border-radius:999px;
-      font-size:13px; display:flex; gap:8px; align-items:center;
-      transition:transform .08s ease, background .15s ease, border-color .15s ease;
-      box-shadow:0 6px 18px rgba(0,0,0,.03);
+      background:#ffffff; color:var(--text);
+      padding:8px 16px; border-radius:8px;
+      font-size:14px; display:flex; gap:8px; align-items:center;
+      transition:background .15s ease, border-color .15s ease;
+      box-shadow:var(--shadow);
       white-space:nowrap;
     }
-    .tab:hover{transform: translateY(-1px)}
-    .tab.active{border-color: rgba(176,141,42,.60); background:var(--goldSoft); font-weight:800;}
-    .ghost{border-color: rgba(176,141,42,.60); background:var(--goldSoft); font-weight:900;}
+    .tab:hover{background:var(--accentSoft)}
+    .tab.active{border-color: var(--accent); background:var(--accentSoft); font-weight:700;}
+    .ghost{border-color: var(--accent); background:var(--accentSoft); font-weight:700;}
 
     .page{display:none}
     .page.active{display:block}
 
-    .grid{display:grid; grid-template-columns:1fr; gap:14px; margin-top:8px;}
+    .grid{display:grid; grid-template-columns:1fr; gap:20px; margin-top:20px;}
     @media(min-width:920px){ .grid{grid-template-columns:1fr 1fr;} .span2{grid-column:1/-1;} }
 
     .card{
-      background:#fff;
+      background:#ffffff;
       border:1px solid var(--line);
       border-radius:var(--radius);
-      padding:16px;
+      padding:20px;
       box-shadow:var(--shadow);
     }
-    .card h2{margin:0 0 10px; font-size:16px;}
-    .hint{color:var(--muted); font-size:12px}
+    .card h2{margin:0 0 10px; font-size:18px; font-family: 'Montserrat', sans-serif;}
+    .hint{color:var(--muted); font-size:13px}
 
-    label{display:block; font-size:12px; color:var(--muted); margin:10px 0 6px;}
+    label{display:block; font-size:13px; color:var(--muted); margin:10px 0 6px;}
     input, select, textarea{
       width:100%;
-      padding:12px 12px;
-      border-radius:12px;
+      padding:10px;
+      border-radius:8px;
       border:1px solid var(--line);
-      background:#fff;
+      background:#ffffff;
       color:var(--text);
       outline:none;
     }
-    textarea{min-height:90px; resize:vertical}
-    input::placeholder, textarea::placeholder{color:rgba(75,85,99,.7)}
+    textarea{min-height:100px; resize:vertical}
+    input::placeholder, textarea::placeholder{color:var(--muted)}
 
-    .row{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
-    .divider{height:1px; background:var(--line); margin:12px 0}
-    .small{font-size:12px; color:var(--muted)}
-    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:15px;}
+    .divider{height:1px; background:var(--line); margin:15px 0}
+    .small{font-size:13px; color:var(--muted)}
+    .mono{font-family: monospace;}
 
-    .actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
+    .actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:15px;}
     .btn{
       cursor:pointer;
       border:1px solid var(--line);
-      background:#fff;
+      background:#ffffff;
       color:var(--text);
-      padding:10px 12px;
-      border-radius:12px;
-      font-size:13px;
+      padding:10px 16px;
+      border-radius:8px;
+      font-size:14px;
       display:inline-flex;
       align-items:center;
       gap:8px;
-      box-shadow:0 10px 22px rgba(0,0,0,.04);
+      box-shadow:var(--shadow);
+      transition:background .15s ease;
     }
-    .btn:hover{border-color: rgba(176,141,42,.60)}
-    .btn.primary{border-color: rgba(176,141,42,.75); background:var(--goldSoft); font-weight:900;}
-    .btn.ghost{border-color: rgba(176,141,42,.75); background:var(--goldSoft); font-weight:900;}
+    .btn:hover{background:var(--accentSoft)}
+    .btn.primary{border-color: var(--accent); background:var(--accentSoft); font-weight:700;}
+    .btn.ghost{border-color: var(--accent); background:var(--accentSoft); font-weight:700;}
 
-    .table{width:100%; border-collapse:collapse; font-size:13px;}
-    .table td{padding:10px 8px; border-bottom:1px solid var(--line); vertical-align:top;}
-    .table td:last-child{text-align:right; font-weight:900;}
+    .table{width:100%; border-collapse:collapse; font-size:14px;}
+    .table td{padding:10px; border-bottom:1px solid var(--line); vertical-align:top;}
+    .table td:last-child{text-align:right; font-weight:700;}
     .total{
-      display:flex; justify-content:space-between; align-items:baseline; gap:12px;
-      padding:12px 14px;
-      border-radius:14px;
-      border:1px solid rgba(176,141,42,.35);
-      background: rgba(176,141,42,.08);
-      margin-top:10px;
-      font-weight:900;
+      display:flex; justify-content:space-between; align-items:center; gap:12px;
+      padding:12px;
+      border-radius:8px;
+      border:1px solid var(--accentSoft);
+      background: var(--accentSoft);
+      margin-top:15px;
+      font-weight:700;
     }
 
-    .course{margin-top:12px; border-top:1px solid var(--line); padding-top:12px;}
-    .course h3{margin:0 0 8px; font-size:14px;}
-    .count{color:var(--muted); font-size:12px; margin-top:8px;}
+    .course{margin-top:15px; border-top:1px solid var(--line); padding-top:15px;}
+    .course h3{margin:0 0 10px; font-size:16px; font-family: 'Montserrat', sans-serif;}
+    .count{color:var(--muted); font-size:13px; margin-top:10px;}
     .warnBox{
       margin-top:10px;
-      padding:10px 12px;
-      border-radius:12px;
-      border:1px solid rgba(176,141,42,.35);
-      background: rgba(176,141,42,.08);
+      padding:10px;
+      border-radius:8px;
+      border:1px solid rgba(180,83,9,.35);
+      background: rgba(180,83,9,.08);
       color:#47370a;
       display:none;
-      font-size:12px;
-      font-weight:800;
+      font-size:13px;
+      font-weight:700;
     }
     .statusRow{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:10px;}
     .badge{
       display:inline-flex; gap:8px; align-items:center;
-      padding:6px 10px;
-      border-radius:999px;
+      padding:6px 12px;
+      border-radius:8px;
       border:1px solid var(--line);
-      background:#fff;
-      font-size:12px;
-      font-weight:800;
+      background:#ffffff;
+      font-size:13px;
+      font-weight:700;
     }
     .badge.ok{border-color: rgba(15,122,58,.35); background: rgba(15,122,58,.08); color: var(--ok);}
     .badge.warn{border-color: rgba(180,83,9,.35); background: rgba(180,83,9,.08); color: var(--warn);}
@@ -168,11 +171,11 @@
 
     .pill{
       display:inline-flex; align-items:center; gap:8px;
-      padding:6px 10px; border-radius:999px;
-      background:var(--goldSoft);
-      border:1px solid rgba(176,141,42,.35);
+      padding:6px 12px; border-radius:8px;
+      background:var(--accentSoft);
+      border:1px solid var(--accentSoft);
       color:var(--text);
-      font-size:12px;
+      font-size:13px;
       margin:6px 6px 0 0;
     }
     .hotTag{
@@ -181,28 +184,29 @@
       gap:6px;
       margin-left:8px;
       padding:2px 8px;
-      border-radius:999px;
+      border-radius:8px;
       border:1px solid rgba(180,83,9,.35);
       background: rgba(180,83,9,.08);
       color: var(--warn);
-      font-size:11px;
-      font-weight:900;
+      font-size:12px;
+      font-weight:700;
       white-space:nowrap;
     }
 
-    .kpi{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;}
+    .kpi{display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-top:15px;}
     @media(min-width:920px){ .kpi{grid-template-columns:1fr 1fr 1fr 1fr;} }
-    .kpi .box{border:1px solid var(--line); background:#fff; border-radius:14px; padding:12px;}
-    .kpi .box .label{font-size:11px; color:var(--muted)}
-    .kpi .box .value{font-size:18px; font-weight:900; margin-top:4px}
+    .kpi .box{border:1px solid var(--line); background:#ffffff; border-radius:8px; padding:12px; box-shadow:var(--shadow);}
+    .kpi .box .label{font-size:12px; color:var(--muted)}
+    .kpi .box .value{font-size:18px; font-weight:700; margin-top:4px}
 
     footer{
       text-align:center;
       color:var(--muted);
-      font-size:12px;
-      padding:18px 0 26px;
+      font-size:13px;
+      padding:20px 0;
       border-top:1px solid var(--line);
-      background:#fff;
+      background:#ffffff;
+      box-shadow:var(--shadow);
     }
     @media print{
       .tabs-wrap, .actions, .btn { display:none !important; }
@@ -215,13 +219,13 @@
   <header>
     <div class="brandline">
       <div class="logoWrap">
-        <img class="logoImg" id="brandLogo" src="members.png" alt="Brand Logo"
+        <img class="logoImg" id="brandLogo" src="members_lounge_logo.png" alt="Brand Logo"
              onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='inline-flex';">
         <span class="logoFallback" id="logoFallback" style="display:none;">✨ <span>THE MEMBERS LOUNGE</span></span>
       </div>
     </div>
 
-    <h1><span class="gold" id="brandTitle">Event Signature Selection</span></h1>
+    <h1><span class="accent" id="brandTitle">Event Signature Selection</span></h1>
     <div class="sub" id="brandSubtitle">Reggio Calabria Club, Parkville</div>
   </header>
 
@@ -404,6 +408,11 @@
 
         <div class="divider"></div>
 
+        <div class="actions">
+          <button class="btn" onclick="selectAll(true)">Select All (up to max)</button>
+          <button class="btn" onclick="selectAll(false)">Deselect All</button>
+        </div>
+
         <div class="grid">
           <div class="card">
             <h2>Per-Adult Course Pricing (AUD)</h2>
@@ -412,22 +421,22 @@
             <div class="row">
               <div>
                 <label for="pCanapes">Canapés</label>
-                <input id="pCanapes" type="number" min="0" step="0.5" value="10">
+                <input id="pCanapes" type="number" min="0" step="0.5" value="12">
               </div>
               <div>
                 <label for="pAntipasto">Antipasto</label>
-                <input id="pAntipasto" type="number" min="0" step="0.5" value="25">
+                <input id="pAntipasto" type="number" min="0" step="0.5" value="28">
               </div>
             </div>
 
             <div class="row">
               <div>
                 <label for="pPasta">Entrée / Pasta</label>
-                <input id="pPasta" type="number" min="0" step="0.5" value="20">
+                <input id="pPasta" type="number" min="0" step="0.5" value="15">
               </div>
               <div>
                 <label for="pMains">Mains</label>
-                <input id="pMains" type="number" min="0" step="0.5" value="30">
+                <input id="pMains" type="number" min="0" step="0.5" value="34">
               </div>
             </div>
 
@@ -438,7 +447,7 @@
               </div>
               <div>
                 <label for="pSupper">Supper (Pizza)</label>
-                <input id="pSupper" type="number" min="0" step="0.5" value="5">
+                <input id="pSupper" type="number" min="0" step="0.5" value="0">
               </div>
             </div>
 
@@ -595,7 +604,7 @@
           <h2>Selected Items</h2>
           <div id="chips"></div>
           <div class="divider"></div>
-          <div class="small">Put <b>members.png</b>, <b>fior.png</b>, <b>alora.png</b> next to <b>index.html</b> to switch branding automatically.</div>
+          <div class="small">The logo is incorporated in the header. Save 'members_lounge_logo.png' in the same folder.</div>
         </div>
       </div>
     </section>
@@ -621,10 +630,10 @@
   const VENUE_PROFILES = {
     members: {
       label: "Members Lounge / Reggio Calabria Club (Parkville)",
-      logo: "members.png",
+      logo: "members_lounge_logo.png",
       subtitle: "Reggio Calabria Club, Parkville",
       footer: "Members Lounge | Reggio Calabria Club, Parkville",
-      defaults: { roomHire: 6900, dryHire: 0, security: 0 }
+      defaults: { roomHire: 0, dryHire: 0, security: 0 }
     },
     fior: {
       label: "FIOR Parkville",
@@ -651,8 +660,8 @@
     if(fallback) fallback.style.display = "none";
 
     img.onerror = function(){
-      if(src !== "members.png"){
-        safeSetLogo("members.png");
+      if(src !== "members_lounge_logo.png"){
+        safeSetLogo("members_lounge_logo.png");
         return;
       }
       img.style.display = "none";
@@ -705,56 +714,53 @@
 
   const MENU = {
     canapes: [
-      'Potato Croquettes',
-      'Arancini (vegetarian)',
-      'Pizza slices 🔥',
-      'Meatballs in sugo 🔥',
-      'Italian sausages 🔥'
+      "Arancini",
+      "Focaccia Pugliese",
+      "Prawn roll",
+      "Parmesan bites with honey drizzle",
+      "Corn empanadas",
+      "Croquettes"
     ],
     antipasto: [
-      'Italian dinner rolls',
-      'Bocconcini & Ricotta',
-      'Salumi (prosciutto & mortadella)',
-      'Eggplant parmigiana (vegetarian)',
-      'Grilled capsicum, artichokes, & olives (vegetarian)',
-      'Tomato bruschetta',
-      'Cocktail sausages 🔥',
-      'Calamari fritti 🔥',
-      'Polpette di casa (meatballs in ragu) 🔥'
+      "Bruschettta di pomodoro",
+      "Salumi selection",
+      "Feta & Kefalograviera",
+      "Tiropita",
+      "Trio of dips with pita",
+      "Grilled & pickled vegetables",
+      "Eggplant parmigiana",
+      "Bocconcini & ricotta",
+      "Calamari fritti",
+      "Meatballs in sugo",
+      "Cevape",
+      "Italian pork sausages"
     ],
     pasta: [
-      'Elicoidali Al Ragú (four-meat sauce)',
-      'Gnocchi Pesto (walnut pesto, vegetarian)',
-      'Pasta alla Norma (eggplant in Napoli sauce, vegetarian)',
-      'Tortellini al Brodo (veal tortellini in broth 🔥)',
-      'Lasagna (ragù with béchamel)',
-      'Risotto con Funghi Porcini (mushrooms, vegetarian)',
-      'Cassarecce all\'Amatriciana (guanciale, chilli 🔥)'
+      "Pasta al Ragú (four meat sauce)",
+      "Gnocchi Pesto (vegetarian)",
+      "Gnocchi Gorgonzola (blue vein cheese sauce)",
+      "Pasta Napoli (tomato & basil)"
     ],
     mains: [
-      'Pollo alla Rosmarino (roasted chicken with rosemary 🔥)',
-      'Pesce con Salmoriglio (baked barramundi with herb dressing 🔥)',
-      'Pollo Provenciale (chargrilled chicken with chimichurri 🔥)',
-      'Cotoletta di Pesce (panko barramundi 🔥)',
-      'Porchetta (spiced pork loin 🔥)',
-      'Capretto (braised goat 🔥)',
-      'Melanzana Ripiena (stuffed eggplant, vegetarian)',
-      'Vegetable Stack (vegan)'
+      "Chargrilled chicken breast with a chimichurri dressing",
+      "Italian herb crumbed barramundi fillet",
+      "Lamb shank with white wine and tomato",
+      "Braised beef short ribs in a red wine jus",
+      "Bondiola, pork fillet with a salmoriglio sauce",
+      "Stuffed pepper with seasonal vegetables and cauliflower steak"
     ],
     dessert: [
-      'Tiramisu',
-      'Panna Cotta with berries',
-      'Cannoli Siciliani di Ricotta',
-      'Mini cheesecakes',
-      'Lemon tarts',
-      'Gelato assortment (chocolate, vanilla, strawberry)'
+      "Roaming assorted desserts (mini cannoli & baklava)",
+      "Tiramisu & cheese cake (alternating)",
+      "Gelato dessert (cassata, tartufo, baci)"
     ]
   };
 
   const HOT_ANTIPASTO = {
-    'Cocktail sausages 🔥': true,
-    'Calamari fritti 🔥': true,
-    'Polpette di casa (meatballs in ragu) 🔥': true
+    "Calamari fritti": true,
+    "Cevape": true,
+    "Meatballs in sugo": true,
+    "Italian pork sausages": true
   };
 
   const RULES = {
@@ -978,6 +984,21 @@
     });
   }
 
+  function selectAll(checked) {
+    Object.keys(RULES).forEach(courseKey => {
+      const items = document.querySelectorAll(`input[type="checkbox"][data-course="${courseKey}"]`);
+      if (checked) {
+        for (let i = 0; i < Math.min(items.length, RULES[courseKey].max); i++) {
+          items[i].checked = true;
+        }
+      } else {
+        items.forEach(item => item.checked = false);
+      }
+      enforceLimit(courseKey);
+    });
+    renderAll();
+  }
+
   // -----------------------------
   // CALCULATIONS
   // -----------------------------
@@ -1173,12 +1194,12 @@
     adultFactorEl.value = 1.00;
     childFactorEl.value = 0.30;
 
-    pCanapesEl.value = 10;
-    pAntipastoEl.value = 25;
-    pPastaEl.value = 20;
-    pMainsEl.value = 30;
+    pCanapesEl.value = 12;
+    pAntipastoEl.value = 28;
+    pPastaEl.value = 15;
+    pMainsEl.value = 34;
     pDessertEl.value = 10;
-    pSupperEl.value = 5;
+    pSupperEl.value = 0;
 
     tablesEl.value = 10;
     fruitPerTableEl.value = 35;
