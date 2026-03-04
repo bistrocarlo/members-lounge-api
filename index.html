@@ -8,12 +8,12 @@
 
   <style>
     :root{
-      --bg:#f5f5f5;
-      --text:#333333;
-      --muted:#666666;
+      --bg:#ffffff;
+      --text:#0b0c10;
+      --muted:#4b5563;
       --line:rgba(0,0,0,.10);
-      --accent:#4CAF50;
-      --accentSoft:rgba(76,175,80,.10);
+      --gold:#b08d2a;
+      --goldSoft:rgba(176,141,42,.10);
       --shadow:0 2px 10px rgba(0,0,0,.1);
       --radius:8px;
       --ok:#0f7a3a;
@@ -51,7 +51,7 @@
     }
     h1{margin:12px 0 6px; font-size:28px; font-family: 'Montserrat', sans-serif;}
     .sub{color:var(--muted); font-size:14px}
-    .accent{color:var(--accent)}
+    .gold{color:var(--gold)}
     main{max-width:1200px; margin:0 auto; padding:20px;}
 
     .tabs-wrap{
@@ -71,9 +71,9 @@
       box-shadow:var(--shadow);
       white-space:nowrap;
     }
-    .tab:hover{background:var(--accentSoft)}
-    .tab.active{border-color: var(--accent); background:var(--accentSoft); font-weight:700;}
-    .ghost{border-color: var(--accent); background:var(--accentSoft); font-weight:700;}
+    .tab:hover{background:var(--goldSoft)}
+    .tab.active{border-color: var(--gold); background:var(--goldSoft); font-weight:700;}
+    .ghost{border-color: var(--gold); background:var(--goldSoft); font-weight:700;}
 
     .page{display:none}
     .page.active{display:block}
@@ -127,9 +127,9 @@
       min-width:120px; /* Easier touch targets */
       justify-content:center;
     }
-    .btn:hover{background:var(--accentSoft)}
-    .btn.primary{border-color: var(--accent); background:var(--accentSoft); font-weight:700;}
-    .btn.ghost{border-color: var(--accent); background:var(--accentSoft); font-weight:700;}
+    .btn:hover{background:var(--goldSoft)}
+    .btn.primary{border-color: var(--gold); background:var(--goldSoft); font-weight:700;}
+    .btn.ghost{border-color: var(--gold); background:var(--goldSoft); font-weight:700;}
 
     .table{width:100%; border-collapse:collapse; font-size:14px;}
     .table td{padding:10px; border-bottom:1px solid var(--line); vertical-align:top;}
@@ -138,8 +138,8 @@
       display:flex; justify-content:space-between; align-items:center; gap:12px;
       padding:12px;
       border-radius:8px;
-      border:1px solid var(--accentSoft);
-      background: var(--accentSoft);
+      border:1px solid var(--goldSoft);
+      background: var(--goldSoft);
       margin-top:15px;
       font-weight:700;
     }
@@ -175,8 +175,8 @@
     .pill{
       display:inline-flex; align-items:center; gap:8px;
       padding:6px 12px; border-radius:8px;
-      background:var(--accentSoft);
-      border:1px solid var(--accentSoft);
+      background:var(--goldSoft);
+      border:1px solid var(--goldSoft);
       color:var(--text);
       font-size:13px;
       margin:6px 6px 0 0;
@@ -252,7 +252,7 @@
       </div>
     </div>
 
-    <h1><span class="accent" id="brandTitle">Event Signature Selection</span></h1>
+    <h1><span class="gold" id="brandTitle">Event Signature Selection</span></h1>
     <div class="sub" id="brandSubtitle">Reggio Calabria Club, Parkville</div>
   </header>
 
@@ -320,8 +320,6 @@
           </div>
 
           <div class="actions">
-            <button class="btn" id="saveDraft">💾 Save Draft</button>
-            <button class="btn" id="loadDraft">📥 Load Draft</button>
             <button class="btn" id="resetAll">🧹 Reset</button>
             <button class="btn" id="printQuote">🖨️ Print</button>
             <button class="btn primary" id="nextQ">👻 Next</button>
@@ -342,27 +340,6 @@
             <div class="box"><div class="label">Food subtotal</div><div class="value mono" id="kpiFood">$0.00</div></div>
             <div class="box"><div class="label">Avg per guest</div><div class="value mono" id="kpiAvg">$0.00</div></div>
           </div>
-
-          <div class="divider"></div>
-
-          <h2>Admin Pricing (Editable)</h2>
-          <div class="hint">Course pricing is per adult. If a course has at least 1 selection, that course price applies.</div>
-
-          <div class="row">
-            <div>
-              <label for="adultFactor">Adult pricing factor</label>
-              <input id="adultFactor" type="number" min="0" step="0.05" value="1.00">
-              <div class="small">Scales all adult food course pricing (1.00 = normal).</div>
-            </div>
-            <div>
-              <label for="childFactor">Child pricing factor</label>
-              <input id="childFactor" type="number" min="0" step="0.05" value="0.30">
-              <div class="small">Kids cost as a fraction of adult food (default 0.30).</div>
-            </div>
-          </div>
-
-          <div class="divider"></div>
-          <div class="small">Tip: If you want kids to be exactly “$30”, we can swap this factor model to a fixed child price later.</div>
         </div>
       </div>
     </section>
@@ -442,52 +419,6 @@
 
         <div class="grid">
           <div class="card">
-            <h2>Per-Adult Course Pricing (AUD)</h2>
-            <div class="hint">Applied when that course has 1+ selections (edit anytime).</div>
-
-            <div class="row">
-              <div>
-                <label for="pCanapes">Canapés</label>
-                <input id="pCanapes" type="number" min="0" step="0.5" value="12">
-              </div>
-              <div>
-                <label for="pAntipasto">Antipasto</label>
-                <input id="pAntipasto" type="number" min="0" step="0.5" value="28">
-              </div>
-            </div>
-
-            <div class="row">
-              <div>
-                <label for="pPasta">Entrée / Pasta</label>
-                <input id="pPasta" type="number" min="0" step="0.5" value="15">
-              </div>
-              <div>
-                <label for="pMains">Mains</label>
-                <input id="pMains" type="number" min="0" step="0.5" value="34">
-              </div>
-            </div>
-
-            <div class="row">
-              <div>
-                <label for="pDessert">Dessert</label>
-                <input id="pDessert" type="number" min="0" step="0.5" value="10">
-              </div>
-              <div>
-                <label for="pSupper">Supper (Pizza)</label>
-                <input id="pSupper" type="number" min="0" step="0.5" value="0">
-              </div>
-            </div>
-
-            <div class="divider"></div>
-
-            <label style="margin-top:0;">
-              <input id="enableSupperPricing" type="checkbox">
-              Add supper pricing to food total (Pizza)
-            </label>
-            <div class="small">If unchecked, supper remains informational and won’t affect the quote.</div>
-          </div>
-
-          <div class="card">
             <h2>Extras (Optional)</h2>
 
             <div class="small">Extras moved to the bottom under Supper (as requested).</div>
@@ -551,7 +482,7 @@
             </div>
             <div>
               <label for="fruitPerTable">Fruit platter per table (AUD)</label>
-              <input id="fruitPerTable" type="number" min="0" step="1" value="35">
+              <input id="fruitPerTable" type="number" min="0" step="1" value="35" readonly>
             </div>
           </div>
           <div class="small">This add-on is added to food total when checked.</div>
@@ -798,6 +729,15 @@
     dessert:   { min: 0, max: 1 }
   };
 
+  const FIXED_PRICES = {
+    canapes: 12,
+    antipasto: 28,
+    pasta: 15,
+    mains: 34,
+    dessert: 10,
+    supper: 0
+  };
+
   // -----------------------------
   // NAV
   // -----------------------------
@@ -857,15 +797,6 @@
   const dryHireEl  = $("dryHire");
   const securityEl = $("security");
 
-  const adultFactorEl = $("adultFactor");
-  const childFactorEl = $("childFactor");
-
-  const pCanapesEl  = $("pCanapes");
-  const pAntipastoEl= $("pAntipasto");
-  const pPastaEl    = $("pPasta");
-  const pMainsEl    = $("pMains");
-  const pDessertEl  = $("pDessert");
-  const pSupperEl   = $("pSupper");
   const enableSupperPricingEl = $("enableSupperPricing");
 
   const fruitPlatterEl = $("fruitPlatter");
@@ -1032,21 +963,19 @@
   function calculateFood(){
     const adults = Number(adultsEl.value||0);
     const children = Number(childrenEl.value||0);
-    const adultFactor = Number(adultFactorEl.value||1);
-    const childFactor = Number(childFactorEl.value||0);
 
     const sel = getSelections();
     let perAdult = 0;
 
-    if(sel.canapes.length) perAdult += Number(pCanapesEl.value||0);
-    if(sel.antipasto.length) perAdult += Number(pAntipastoEl.value||0);
-    if(sel.pasta.length) perAdult += Number(pPastaEl.value||0);
-    if(sel.mains.length) perAdult += Number(pMainsEl.value||0);
-    if(sel.dessert.length) perAdult += Number(pDessertEl.value||0);
-    if(enableSupperPricingEl.checked) perAdult += Number(pSupperEl.value||0);
+    if(sel.canapes.length) perAdult += FIXED_PRICES.canapes;
+    if(sel.antipasto.length) perAdult += FIXED_PRICES.antipasto;
+    if(sel.pasta.length) perAdult += FIXED_PRICES.pasta;
+    if(sel.mains.length) perAdult += FIXED_PRICES.mains;
+    if(sel.dessert.length) perAdult += FIXED_PRICES.dessert;
+    if(enableSupperPricingEl?.checked) perAdult += FIXED_PRICES.supper;
 
-    const adultTotal = adults * perAdult * adultFactor;
-    const childTotal = children * perAdult * childFactor;
+    const adultTotal = adults * perAdult;
+    const childTotal = children * perAdult * 0.3; // Fixed child factor
 
     let fruitTotal = 0;
     if(fruitPlatterEl.checked){
@@ -1129,81 +1058,7 @@
   // -----------------------------
   // SAVE / LOAD
   // -----------------------------
-  function saveDraft(){
-    const data = {
-      adults: adultsEl.value,
-      children: childrenEl.value,
-      room: roomHireEl.value,
-      dry: dryHireEl.value,
-      sec: securityEl.value,
-
-      drinkMode: drinkModeEl.value,
-      customDrinkPrice: customDrinkPriceEl.value,
-      customDrinkNote: customDrinkNoteEl.value,
-
-      enableSupperPricing: enableSupperPricingEl.checked,
-      fruitPlatter: fruitPlatterEl.checked,
-      tables: tablesEl.value,
-      fruitPerTable: fruitPerTableEl.value,
-      adultFactor: adultFactorEl.value,
-      childFactor: childFactorEl.value,
-
-      coupleName: coupleNameEl.value,
-      weddingDate: weddingDateEl.value,
-      venueSpace: venueSpaceEl.value,
-      email: emailEl.value,
-      phone: phoneEl.value,
-      notes: notesEl.value,
-
-      sel: getSelections()
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    alert("Draft Saved");
-  }
-
-  function loadDraft(){
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(!raw) return alert("No draft found");
-    const d = JSON.parse(raw);
-
-    adultsEl.value = d.adults||0;
-    childrenEl.value = d.children||0;
-    roomHireEl.value = d.room||0;
-    dryHireEl.value = d.dry||0;
-    securityEl.value = d.sec||0;
-
-    enableSupperPricingEl.checked = !!d.enableSupperPricing;
-    fruitPlatterEl.checked = !!d.fruitPlatter;
-    tablesEl.value = d.tables ?? tablesEl.value;
-    fruitPerTableEl.value = d.fruitPerTable ?? fruitPerTableEl.value;
-    adultFactorEl.value = d.adultFactor ?? adultFactorEl.value;
-    childFactorEl.value = d.childFactor ?? childFactorEl.value;
-
-    drinkModeEl.value = d.drinkMode || "bar";
-    customDrinkPriceEl.value = d.customDrinkPrice || 0;
-    customDrinkNoteEl.value = d.customDrinkNote || "";
-    updateDrinkUI();
-
-    coupleNameEl.value = d.coupleName || "";
-    weddingDateEl.value = d.weddingDate || "";
-    venueSpaceEl.value = d.venueSpace || "members";
-    emailEl.value = d.email || "";
-    phoneEl.value = d.phone || "";
-    notesEl.value = d.notes || "";
-
-    applyVenueProfile(venueSpaceEl.value);
-
-    document.querySelectorAll('input[type="checkbox"][data-course]').forEach(cb=>cb.checked=false);
-    Object.entries(d.sel||{}).forEach(([course,items])=>{
-      items.forEach(item=>{
-        const cb = document.querySelector(`input[data-course="${course}"][value="${CSS.escape(item)}"]`);
-        if(cb) cb.checked=true;
-      });
-    });
-
-    Object.keys(RULES).forEach(enforceLimit);
-    renderAll();
-  }
+  // Removed save/load draft as admin features
 
   function resetAll(){
     if(!confirm("Reset everything?")) return;
@@ -1218,15 +1073,6 @@
     // restore default values you want
     adultsEl.value = 120;
     childrenEl.value = 20;
-    adultFactorEl.value = 1.00;
-    childFactorEl.value = 0.30;
-
-    pCanapesEl.value = 12;
-    pAntipastoEl.value = 28;
-    pPastaEl.value = 15;
-    pMainsEl.value = 34;
-    pDessertEl.value = 10;
-    pSupperEl.value = 0;
 
     tablesEl.value = 10;
     fruitPerTableEl.value = 35;
@@ -1270,8 +1116,6 @@
     el.addEventListener("change", renderAll);
   });
 
-  on($("saveDraft"),"click",saveDraft);
-  on($("loadDraft"),"click",loadDraft);
   on($("resetAll"),"click",resetAll);
   on($("printQuote"),"click",()=>window.print());
 
