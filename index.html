@@ -100,7 +100,7 @@
       background:#ffffff;
       color:var(--text);
       outline:none;
-      font-size:16px; /* Larger for mobile touch */
+      font-size:16px;
     }
     textarea{min-height:100px; resize:vertical}
     input::placeholder, textarea::placeholder{color:var(--muted)}
@@ -124,7 +124,7 @@
       gap:8px;
       box-shadow:var(--shadow);
       transition:background .15s ease;
-      min-width:120px; /* Easier touch targets */
+      min-width:120px;
       justify-content:center;
     }
     .btn:hover{background:var(--goldSoft)}
@@ -229,15 +229,61 @@
       .btn { min-width: 100%; margin-bottom: 10px; }
       .actions { flex-direction: column; }
       .logoImg { max-height: 60px; }
-      input, select, textarea { font-size: 16px; } /* Ensure readable on mobile */
+      input, select, textarea { font-size: 16px; }
       label { font-size: 14px; }
     }
-
     @media (max-width: 480px) {
       .tabs { gap: 5px; }
       .tab { padding: 6px 10px; font-size: 12px; }
       .course h3 { font-size: 14px; }
       .kpi { grid-template-columns: 1fr; }
+    }
+
+    /* ✅ REPAIRED MENU OPTION LAYOUT */
+    .optionsGrid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+    @media(min-width:920px){
+      .optionsGrid{ grid-template-columns: 1fr 1fr; }
+    }
+    .opt{
+      display:flex;
+      align-items:flex-start;
+      gap:12px;
+      padding:10px 12px;
+      border:1px solid var(--line);
+      border-radius:10px;
+      background:#fff;
+      box-shadow: var(--shadow);
+    }
+    .opt input[type="checkbox"]{
+      width:auto;
+      margin-top:3px;
+      transform: scale(1.2);
+      flex:0 0 auto;
+    }
+    .optNum{
+      flex:0 0 auto;
+      min-width:26px;
+      height:26px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:8px;
+      border:1px solid var(--line);
+      background: var(--goldSoft);
+      font-weight:700;
+      font-size:13px;
+    }
+    .optText{
+      flex:1 1 auto;
+      line-height:1.25;
+      font-size:14px;
+      color: var(--text);
+      font-weight:600;
     }
   </style>
 </head>
@@ -263,7 +309,7 @@
       <div class="tab" data-page="food" role="tab" aria-selected="false">🍽️ Food</div>
       <div class="tab" data-page="drinks" role="tab" aria-selected="false">🍾 Drinks</div>
       <div class="tab" data-page="summary" role="tab" aria-selected="false">✅ Summary</div>
-      <div class="tab ghost" id="ghostNext" title="Tap to move to next tab">👻 Next</div>
+      <div class="tab ghost" id="ghostNext" title="Tap to move to next tab">Next ➜</div>
     </div>
   </div>
 
@@ -322,7 +368,7 @@
           <div class="actions">
             <button class="btn" id="resetAll">🧹 Reset</button>
             <button class="btn" id="printQuote">🖨️ Print</button>
-            <button class="btn primary" id="nextQ">👻 Next</button>
+            <button class="btn primary" id="nextQ">Next ➜</button>
           </div>
         </div>
 
@@ -361,7 +407,7 @@
             <div>
               <label for="venueSpace">Venue Space</label>
               <select id="venueSpace">
-                <option value="members">Sala Reggio Ballroom</option>
+                <option value="sala">Sala Reggio Ballroom</option>
                 <option value="members">Members Lounge Restaurant</option>
                 <option value="fior">FIOR Parkville</option>
                 <option value="alora">ALORA Macedon</option>
@@ -380,8 +426,8 @@
           <textarea id="notes" placeholder="Dietary notes, timing, styling, music, special requests…"></textarea>
 
           <div class="actions">
-            <button class="btn ghost" id="backC">⬅️ Back</button>
-            <button class="btn primary" id="nextC">👻 Next</button>
+            <button class="btn ghost" id="backC">◀ Back</button>
+            <button class="btn primary" id="nextC">Next ➜</button>
           </div>
         </div>
 
@@ -401,8 +447,7 @@
       <div class="card">
         <h2>Food Builder (Course-Driven)</h2>
         <div class="hint">
-          Pick as many items as you like. If you select at least <b>one</b> item in a course, that course price is added to the quote.
-          You can do “Entrée only” or “Full package” — it will always add up correctly.
+          Select items. Each course adds its course price if at least one item is selected in that course.
         </div>
 
         <div class="statusRow">
@@ -417,22 +462,9 @@
           <button class="btn" onclick="selectAll(false)">Deselect All</button>
         </div>
 
-        <div class="grid">
-          <div class="card">
-            <h2>Extras (Optional)</h2>
-
-            <div class="small">Extras moved to the bottom under Supper (as requested).</div>
-
-            <div class="actions">
-              <button class="btn ghost" id="backF1">⬅️ Back</button>
-              <button class="btn primary" id="nextF1">👻 Next</button>
-            </div>
-          </div>
-        </div>
-
         <div class="course" data-course="canapes">
           <h3>Canapés (choose up to 3)</h3>
-          <div class="row" id="list-canapes"></div>
+          <div class="optionsGrid" id="list-canapes"></div>
           <div class="count" id="count-canapes">0 selected</div>
           <div class="warnBox" id="warn-canapes"></div>
         </div>
@@ -440,28 +472,28 @@
         <div class="course" data-course="antipasto">
           <h3>Antipasto Plates (choose up to 7)</h3>
           <div class="small">Hot items are marked 🔥 (Calamari, Cevape, Meatballs in sugo, Sausages).</div>
-          <div class="row" id="list-antipasto"></div>
+          <div class="optionsGrid" id="list-antipasto"></div>
           <div class="count" id="count-antipasto">0 selected</div>
           <div class="warnBox" id="warn-antipasto"></div>
         </div>
 
         <div class="course" data-course="pasta">
           <h3>Entrée / Pasta (choose up to 2)</h3>
-          <div class="row" id="list-pasta"></div>
+          <div class="optionsGrid" id="list-pasta"></div>
           <div class="count" id="count-pasta">0 selected</div>
           <div class="warnBox" id="warn-pasta"></div>
         </div>
 
         <div class="course" data-course="mains">
           <h3>Mains (choose up to 2)</h3>
-          <div class="row" id="list-mains"></div>
+          <div class="optionsGrid" id="list-mains"></div>
           <div class="count" id="count-mains">0 selected</div>
           <div class="warnBox" id="warn-mains"></div>
         </div>
 
         <div class="course" data-course="dessert">
           <h3>Dessert (choose up to 1)</h3>
-          <div class="row" id="list-dessert"></div>
+          <div class="optionsGrid" id="list-dessert"></div>
           <div class="count" id="count-dessert">0 selected</div>
           <div class="warnBox" id="warn-dessert"></div>
         </div>
@@ -471,10 +503,11 @@
           <div class="small">Pizza Only (fixed). No selection required.</div>
           <div class="count">Included: Pizza</div>
 
-          <!-- ✅ FRUIT PLATTER MOVED HERE (BOTTOM UNDER SUPPER) -->
           <div class="divider"></div>
           <h3 style="margin-top:0;">Optional Add-on: Fruit Platter</h3>
-          <label><input id="fruitPlatter" type="checkbox"> Add Fruit Platter (per table)</label>
+          <label style="display:flex; align-items:center; gap:10px; color:var(--text); font-weight:700;">
+            <input id="fruitPlatter" type="checkbox" style="width:auto;"> Add Fruit Platter (per table)
+          </label>
           <div class="row">
             <div>
               <label for="tables">Estimated Tables</label>
@@ -489,8 +522,8 @@
         </div>
 
         <div class="actions">
-          <button class="btn ghost" id="backF2">⬅️ Back</button>
-          <button class="btn primary" id="nextF2">👻 Next</button>
+          <button class="btn ghost" id="backF2">◀ Back</button>
+          <button class="btn primary" id="nextF2">Next ➜</button>
         </div>
       </div>
     </section>
@@ -523,8 +556,8 @@
           <div class="small" id="drinkInfo"></div>
 
           <div class="actions">
-            <button class="btn ghost" id="backD">⬅️ Back</button>
-            <button class="btn primary" id="nextD">👻 Next</button>
+            <button class="btn ghost" id="backD">◀ Back</button>
+            <button class="btn primary" id="nextD">Next ➜</button>
           </div>
         </div>
 
@@ -553,8 +586,8 @@
           </div>
 
           <div class="actions" style="margin-top:14px">
-            <button class="btn ghost" id="backS">⬅️ Back</button>
-            <button class="btn primary" id="toQuote">👻 Back to Quote</button>
+            <button class="btn ghost" id="backS">◀ Back</button>
+            <button class="btn primary" id="toQuote">Back to Quote ◀</button>
           </div>
         </div>
 
@@ -562,7 +595,7 @@
           <h2>Selected Items</h2>
           <div id="chips"></div>
           <div class="divider"></div>
-          <div class="small">The logo is incorporated in the header. Save 'members_lounge_logo.png' in the same folder.</div>
+          <div class="small">Save 'members_lounge_logo.png' in the same folder as this file.</div>
         </div>
       </div>
     </section>
@@ -586,8 +619,15 @@
   // VENUE PROFILES (EDIT THESE NUMBERS)
   // -----------------------------
   const VENUE_PROFILES = {
+    sala: {
+      label: "Sala Reggio Ballroom (Parkville)",
+      logo: "members_lounge_logo.png",
+      subtitle: "Reggio Calabria Club, Parkville",
+      footer: "Members Lounge | Reggio Calabria Club, Parkville",
+      defaults: { roomHire: 0, dryHire: 0, security: 0 }
+    },
     members: {
-      label: "Members Lounge / Reggio Calabria Club (Parkville)",
+      label: "Members Lounge Restaurant (Parkville)",
       logo: "members_lounge_logo.png",
       subtitle: "Reggio Calabria Club, Parkville",
       footer: "Members Lounge | Reggio Calabria Club, Parkville",
@@ -734,8 +774,7 @@
     antipasto: 28,
     pasta: 15,
     mains: 34,
-    dessert: 10,
-    supper: 0
+    dessert: 10
   };
 
   // -----------------------------
@@ -774,8 +813,6 @@
   on($("nextQ"), "click", nextPage);
   on($("backC"), "click", prevPage);
   on($("nextC"), "click", nextPage);
-  on($("backF1"), "click", prevPage);
-  on($("nextF1"), "click", nextPage);
   on($("backF2"), "click", prevPage);
   on($("nextF2"), "click", nextPage);
   on($("backD"), "click", prevPage);
@@ -797,8 +834,6 @@
   const dryHireEl  = $("dryHire");
   const securityEl = $("security");
 
-  const enableSupperPricingEl = $("enableSupperPricing");
-
   const fruitPlatterEl = $("fruitPlatter");
   const tablesEl = $("tables");
   const fruitPerTableEl = $("fruitPerTable");
@@ -811,10 +846,6 @@
 
   const coupleNameEl = $("coupleName");
   const weddingDateEl = $("weddingDate");
-  const venueSpaceEl = $("venueSpace");
-  const emailEl = $("email");
-  const phoneEl = $("phone");
-  const notesEl = $("notes");
 
   const qRoomEl   = $("qRoom");
   const qFoodEl   = $("qFood");
@@ -837,8 +868,6 @@
   // -----------------------------
   // HELPERS
   // -----------------------------
-  const STORAGE_KEY = "memberslounge_event_signature_selection_clean_v2";
-
   function aud(n){
     const x = Number(n || 0);
     return x.toLocaleString("en-AU", { style:"currency", currency:"AUD" });
@@ -859,17 +888,15 @@
     }
 
     if(drinkInfoEl){
-      if(mode === "bar"){
-        drinkInfoEl.textContent = "Bar pricing is indicative only (drinks = $0 in the quote).";
-      } else {
-        drinkInfoEl.textContent = "Custom price adds your set amount per adult into the quote.";
-      }
+      drinkInfoEl.textContent = (mode === "bar")
+        ? "Bar pricing is indicative only (drinks = $0 in the quote)."
+        : "Custom price adds your set amount per adult into the quote.";
     }
     renderAll();
   }
 
   // -----------------------------
-  // MENU RENDER
+  // ✅ MENU RENDER (REPAIRED: checkbox + number + text)
   // -----------------------------
   function addCheckboxList(courseKey, listId){
     const wrap = document.getElementById(listId);
@@ -878,12 +905,15 @@
 
     (MENU[courseKey] || []).forEach((item, idx) => {
       const div = document.createElement("div");
+      div.className = "opt";
+
       const isHot = (courseKey === "antipasto" && HOT_ANTIPASTO[item]);
       const id = `cb-${courseKey}-${idx}`;
 
       div.innerHTML = `
-        <label style="display: flex; align-items: center; margin-bottom: 10px;">
-          <input type="checkbox" data-course="${courseKey}" value="${escapeHtml(item)}" id="${id}" style="margin-right: 10px; transform: scale(1.2);">
+        <input type="checkbox" data-course="${courseKey}" value="${escapeHtml(item)}" id="${id}">
+        <span class="optNum">${idx + 1}</span>
+        <label for="${id}" class="optText" style="margin:0; cursor:pointer;">
           ${escapeHtml(item)}
           ${isHot ? `<span class="hotTag">🔥 HOT</span>` : ``}
         </label>
@@ -972,13 +1002,12 @@
     if(sel.pasta.length) perAdult += FIXED_PRICES.pasta;
     if(sel.mains.length) perAdult += FIXED_PRICES.mains;
     if(sel.dessert.length) perAdult += FIXED_PRICES.dessert;
-    if(enableSupperPricingEl?.checked) perAdult += FIXED_PRICES.supper;
 
     const adultTotal = adults * perAdult;
-    const childTotal = children * perAdult * 0.3; // Fixed child factor
+    const childTotal = children * perAdult * 0.3;
 
     let fruitTotal = 0;
-    if(fruitPlatterEl.checked){
+    if(fruitPlatterEl && fruitPlatterEl.checked){
       fruitTotal = Number(tablesEl.value||0) * Number(fruitPerTableEl.value||0);
     }
 
@@ -988,7 +1017,6 @@
   function calculateDrinks(){
     const adults = Number(adultsEl.value||0);
     const mode = drinkModeEl.value;
-
     if(mode === "custom") return adults * Number(customDrinkPriceEl.value||0);
     return 0;
   }
@@ -1020,7 +1048,6 @@
     const guestTotal = adults + children;
     kpiAvgEl.textContent = guestTotal ? aud(total/guestTotal) : aud(0);
 
-    // Badge updates
     const sel = getSelections();
     const anyFood = Object.values(sel).some(a=>a.length);
     setBadge(foodCompleteBadgeEl, anyFood ? "ok":"warn", anyFood?"Menu Ready":"Menu Empty");
@@ -1030,7 +1057,6 @@
       drinkMode==="bar" ? "warn" : "ok",
       drinkMode==="bar" ? "Bar Pricing" : "Custom Drinks");
 
-    // Summary
     finalSummaryEl.innerHTML = `
       <b>${escapeHtml(coupleNameEl.value||"Event")}</b><br>
       Date: ${escapeHtml(weddingDateEl.value||"-")}<br>
@@ -1043,7 +1069,6 @@
       <b>Total: ${aud(total)}</b>
     `;
 
-    // Chips
     chipsEl.innerHTML="";
     Object.entries(sel).forEach(([course,items])=>{
       items.forEach(item=>{
@@ -1055,40 +1080,34 @@
     });
   }
 
-  // -----------------------------
-  // SAVE / LOAD
-  // -----------------------------
-  // Removed save/load draft as admin features
-
   function resetAll(){
     if(!confirm("Reset everything?")) return;
 
-    // reset inputs (keep reasonable defaults for some)
-    document.querySelectorAll("input").forEach(i=>{
-      if(i.type==="checkbox") i.checked=false;
-      else if(i.type==="number") i.value=0;
-      else i.value="";
-    });
+    // Clear checkboxes only
+    document.querySelectorAll('input[type="checkbox"][data-course]').forEach(cb => cb.checked = false);
 
-    // restore default values you want
+    // Reset form fields
     adultsEl.value = 120;
     childrenEl.value = 20;
+    roomHireEl.value = 0;
+    dryHireEl.value = 0;
+    securityEl.value = 0;
 
     tablesEl.value = 10;
-    fruitPerTableEl.value = 35;
+    if(fruitPlatterEl) fruitPlatterEl.checked = false;
 
     drinkModeEl.value = "bar";
     customDrinkPriceEl.value = 0;
     customDrinkNoteEl.value = "";
 
-    updateDrinkUI();
+    // enforce counts
+    Object.keys(RULES).forEach(enforceLimit);
 
+    updateDrinkUI();
     renderAll();
   }
 
-  // -----------------------------
   // SUMMARY ACTIONS
-  // -----------------------------
   on($("copySummary"), "click", async ()=>{
     const text = finalSummaryEl.innerText;
     try{
@@ -1100,16 +1119,19 @@
   });
   on($("printSummary"), "click", ()=>window.print());
 
-  // -----------------------------
   // INIT
-  // -----------------------------
   addCheckboxList("canapes","list-canapes");
   addCheckboxList("antipasto","list-antipasto");
   addCheckboxList("pasta","list-pasta");
   addCheckboxList("mains","list-mains");
   addCheckboxList("dessert","list-dessert");
 
-  attachLimitListeners();
+  // attach limit listeners after render
+  function attachAfterRender(){
+    attachLimitListeners();
+    Object.keys(RULES).forEach(enforceLimit);
+  }
+  attachAfterRender();
 
   document.querySelectorAll("input,select,textarea").forEach(el=>{
     el.addEventListener("input", renderAll);
@@ -1120,7 +1142,7 @@
   on($("printQuote"),"click",()=>window.print());
 
   on(drinkModeEl, "change", updateDrinkUI);
-  on(venueSpaceEl, "change", ()=> applyVenueProfile(venueSpaceEl.value));
+  on($("venueSpace"), "change", ()=> applyVenueProfile($("venueSpace").value));
 
   applyVenueProfile("members");
   updateDrinkUI();
