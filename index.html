@@ -6,7 +6,7 @@
   <title>The Members Lounge | Ultimate Event Planner</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400&display=swap" rel="stylesheet">
   <style>
-    /* === STYLES (unchanged, same as before) === */
+    /* === STYLES (unchanged) === */
     :root{
       --bg:#ffffff;
       --text:#0b0c10;
@@ -347,6 +347,10 @@
     .summary-items li {
       padding: 2px 0;
     }
+    .per-adult-warn {
+      color: var(--warn);
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
@@ -631,7 +635,7 @@
       </div>
     </section>
 
-    <!-- PAGE 5: SUMMARY (unchanged) -->
+    <!-- PAGE 5: SUMMARY (updated with per-adult food cost and max $99 note) -->
     <section class="page" id="page-summary">
       <div class="grid">
         <div class="card">
@@ -1060,14 +1064,14 @@
         if (sel.dessert.length) perAdult += FIXED_PRICES.dessert;
 
         const adultTotal = adults * perAdult;
-        const childTotal = children * CHILD_FIXED_PRICE; // fixed, not percentage
+        const childTotal = children * CHILD_FIXED_PRICE;
 
         let fruitTotal = 0;
         if (fruitPlatterEl && fruitPlatterEl.checked) {
           fruitTotal = Number(tablesEl.value || 0) * Number(fruitPerTableEl.value || 0);
         }
 
-        return adultTotal + childTotal + fruitTotal;
+        return { total: adultTotal + childTotal + fruitTotal, perAdult };
       }
 
       function calculateDrinks() {
@@ -1088,7 +1092,10 @@
         const dry = Number(dryHireEl.value || 0);
         const sec = Number(securityEl.value || 0);
 
-        const food = calculateFood();
+        const foodCalc = calculateFood(); // returns { total, perAdult }
+        const food = foodCalc.total;
+        const perAdultFood = foodCalc.perAdult;
+
         const drinks = calculateDrinks();
         const total = room + dry + sec + food + drinks;
 
@@ -1145,6 +1152,9 @@
           if (note) drinkDetails += ` (${escapeHtml(note)})`;
         }
 
+        // Per-adult warning class if > $99
+        const perAdultClass = perAdultFood > 99 ? 'per-adult-warn' : '';
+
         const summaryHtml = `
           <div class="summary-section">
             <div class="summary-line"><span>Quote:</span> <span>${escapeHtml(quoteRef)}</span></div>
@@ -1159,6 +1169,7 @@
             <h3>🍽️ Food</h3>
             ${foodItemsHtml ? `<ul class="summary-items">${foodItemsHtml}${fruitHtml}</ul>` : '<p>No food items selected</p>'}
             <div class="summary-line"><span>Food subtotal:</span> <span>${aud(food)}</span></div>
+            <div class="summary-line ${perAdultClass}"><span>Food per adult:</span> <span>${aud(perAdultFood)} (max $99 before fruit)</span></div>
           </div>
 
           <div class="summary-section">
