@@ -496,10 +496,10 @@
         </div>
 
         <div class="course" data-course="antipasto">
-          <h3>Antipasto Plates (choose up to 7)</h3>
-          <div class="small">Hot items are marked (Calamari, Cevape, Meatballs in sugo, Sausages).</div>
+          <h3>Antipasto Plates (max 2 hot, max 5 non‑hot)</h3>
+          <div class="small">Hot items are marked. You may select up to 2 hot and up to 5 cold items.</div>
           <div class="optionsGrid" id="list-antipasto"></div>
-          <div class="count" id="count-antipasto">0 selected</div>
+          <div class="count" id="count-antipasto">Hot: 0/2 · Cold: 0/5</div>
           <div class="warnBox" id="warn-antipasto"></div>
         </div>
 
@@ -783,7 +783,7 @@
 
   const RULES = {
     canapes:   { max: 3 },
-    antipasto: { max: 7 },
+    antipasto: { max: 7 },          // overall max not used directly now, but kept for reference
     pasta:     { max: 2 },
     mains:     { max: 2 },
     dessert:   { max: 1 }
@@ -931,7 +931,61 @@
     return out;
   }
 
+  // Enhanced limit enforcement for antipasto (hot/cold)
+  function enforceAntipastoLimit() {
+    const course = 'antipasto';
+    const checkboxes = document.querySelectorAll('input[type="checkbox"][data-course="' + course + '"]');
+    let hotChecked = [], coldChecked = [];
+    checkboxes.forEach(cb => {
+      if (!cb.checked) return;
+      if (HOT_ANTIPASTO[cb.value]) hotChecked.push(cb);
+      else coldChecked.push(cb);
+    });
+
+    const hotOver = hotChecked.length > 2;
+    const coldOver = coldChecked.length > 5;
+
+    // If either limit exceeded, we need to uncheck some.
+    // We'll uncheck the last checked in the offending category (by DOM order, not perfect but simple)
+    if (hotOver) {
+      // uncheck the last hot item (closest to bottom)
+      const lastHot = hotChecked[hotChecked.length - 1];
+      if (lastHot) lastHot.checked = false;
+    }
+    if (coldOver) {
+      const lastCold = coldChecked[coldChecked.length - 1];
+      if (lastCold) lastCold.checked = false;
+    }
+
+    // Recount after potential unchecks
+    hotChecked = []; coldChecked = [];
+    checkboxes.forEach(cb => {
+      if (!cb.checked) return;
+      if (HOT_ANTIPASTO[cb.value]) hotChecked.push(cb);
+      else coldChecked.push(cb);
+    });
+
+    const countEl = document.getElementById("count-antipasto");
+    if (countEl) {
+      countEl.textContent = `Hot: ${hotChecked.length}/2 · Cold: ${coldChecked.length}/5`;
+    }
+
+    const warnEl = document.getElementById("warn-antipasto");
+    if (warnEl) {
+      if (hotChecked.length === 2 || coldChecked.length === 5) {
+        warnEl.style.display = "block";
+        warnEl.textContent = "Maximum selections reached for one or both categories.";
+      } else {
+        warnEl.style.display = "none";
+      }
+    }
+  }
+
   function enforceLimit(courseKey){
+    if (courseKey === 'antipasto') {
+      enforceAntipastoLimit();
+      return;
+    }
     const rule = RULES[courseKey];
     if(!rule) return;
 
@@ -967,17 +1021,29 @@
   }
 
   window.selectAll = function(checked){
-    Object.keys(RULES).forEach(courseKey => {
-      const items = document.querySelectorAll('input[type="checkbox"][data-course="' + courseKey + '"]');
-      if(checked){
+    // For antipasto, we must respect hot/cold limits. Select up to 2 hot and 5 cold.
+    if (checked) {
+      // Canapés, pasta, mains, dessert: select up to max
+      ['canapes', 'pasta', 'mains', 'dessert'].forEach(courseKey => {
+        const items = document.querySelectorAll('input[type="checkbox"][data-course="' + courseKey + '"]');
         for(let i=0;i<Math.min(items.length, RULES[courseKey].max); i++){
           items[i].checked = true;
         }
-      }else{
-        items.forEach(i => i.checked = false);
-      }
-      enforceLimit(courseKey);
-    });
+        enforceLimit(courseKey);
+      });
+
+      // Antipasto: select first 2 hot, first 5 cold
+      const hotItems = Array.from(document.querySelectorAll('input[type="checkbox"][data-course="antipasto"]')).filter(cb => HOT_ANTIPASTO[cb.value]);
+      const coldItems = Array.from(document.querySelectorAll('input[type="checkbox"][data-course="antipasto"]')).filter(cb => !HOT_ANTIPASTO[cb.value]);
+      hotItems.slice(0,2).forEach(cb => cb.checked = true);
+      coldItems.slice(0,5).forEach(cb => cb.checked = true);
+      enforceAntipastoLimit();
+    } else {
+      document.querySelectorAll('input[type="checkbox"][data-course]').forEach(i => i.checked = false);
+      // re-enforce limits to update UI
+      Object.keys(RULES).forEach(enforceLimit);
+      enforceAntipastoLimit();
+    }
     renderAll();
   };
 
@@ -1131,7 +1197,15 @@
     }
 
     // Show counts per course
-    const counts = Object.keys(COURSE_LABEL).map(c => `${COURSE_LABEL[c]}: ${sel[c].length}`).join(' · ');
+    const counts = Object.keys(COURSE_LABEL).map(c => {
+      if (c === 'antipasto') {
+        const hot = (sel.antipasto.filter(i => HOT_ANTIPASTO[i])).length;
+        const cold = sel.antipasto.length - hot;
+        return `Antipasto: ${hot} hot, ${cold} cold`;
+      } else {
+        return `${COURSE_LABEL[c]}: ${sel[c].length}`;
+      }
+    }).join(' · ');
     summaryCourseCountsEl.textContent = counts;
   }
 
@@ -1153,7 +1227,9 @@
     customDrinkPriceEl.value = 0;
     customDrinkNoteEl.value = "";
 
+    // Re-enforce limits to reset UI
     Object.keys(RULES).forEach(enforceLimit);
+    enforceAntipastoLimit();
     updateDrinkUI();
     renderAll();
   }
@@ -1173,6 +1249,8 @@
   addCheckboxList("dessert","list-dessert");
 
   attachLimitListeners();
+  // Initial enforcement for antipasto to set correct count display
+  enforceAntipastoLimit();
   Object.keys(RULES).forEach(enforceLimit);
 
   document.querySelectorAll("input,select,textarea").forEach(el=>{
