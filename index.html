@@ -44,7 +44,7 @@
       box-shadow:var(--shadow);
       gap:10px;
     }
-    .logoImg{ height:80px; width:auto; display:block; }
+    .logoImg{ max-height:80px; width:auto; display:block; }
     .logoFallback{
       display:inline-flex; align-items:center; gap:10px;
       font-weight:700; letter-spacing:.1em; font-size:14px;
@@ -100,6 +100,7 @@
       background:#ffffff;
       color:var(--text);
       outline:none;
+      font-size:16px; /* Larger for mobile touch */
     }
     textarea{min-height:100px; resize:vertical}
     input::placeholder, textarea::placeholder{color:var(--muted)}
@@ -123,6 +124,8 @@
       gap:8px;
       box-shadow:var(--shadow);
       transition:background .15s ease;
+      min-width:120px; /* Easier touch targets */
+      justify-content:center;
     }
     .btn:hover{background:var(--accentSoft)}
     .btn.primary{border-color: var(--accent); background:var(--accentSoft); font-weight:700;}
@@ -211,6 +214,30 @@
     @media print{
       .tabs-wrap, .actions, .btn { display:none !important; }
       .card{ box-shadow:none; }
+    }
+
+    /* Enhanced Mobile Responsiveness */
+    @media (max-width: 768px) {
+      main { padding: 10px; }
+      .grid { gap: 15px; }
+      .row { grid-template-columns: 1fr; gap: 10px; }
+      .tabs { flex-direction: row; overflow-x: auto; justify-content: flex-start; padding: 0 10px; }
+      .tab { font-size: 13px; padding: 8px 12px; }
+      .card { padding: 15px; }
+      h1 { font-size: 24px; }
+      .card h2 { font-size: 16px; }
+      .btn { min-width: 100%; margin-bottom: 10px; }
+      .actions { flex-direction: column; }
+      .logoImg { max-height: 60px; }
+      input, select, textarea { font-size: 16px; } /* Ensure readable on mobile */
+      label { font-size: 14px; }
+    }
+
+    @media (max-width: 480px) {
+      .tabs { gap: 5px; }
+      .tab { padding: 6px 10px; font-size: 12px; }
+      .course h3 { font-size: 14px; }
+      .kpi { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -924,8 +951,8 @@
       const id = `cb-${courseKey}-${idx}`;
 
       div.innerHTML = `
-        <label>
-          <input type="checkbox" data-course="${courseKey}" value="${escapeHtml(item)}" id="${id}">
+        <label style="display: flex; align-items: center; margin-bottom: 10px;">
+          <input type="checkbox" data-course="${courseKey}" value="${escapeHtml(item)}" id="${id}" style="margin-right: 10px; transform: scale(1.2);">
           ${escapeHtml(item)}
           ${isHot ? `<span class="hotTag">🔥 HOT</span>` : ``}
         </label>
