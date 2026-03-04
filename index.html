@@ -1,367 +1,1023 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Members Lounge | Wedding Signature Series</title>
 
-<title>The Members Lounge | Wedding Signature Series</title>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --text:#0b0c10;
+      --muted:#4b5563;
+      --line:rgba(0,0,0,.10);
+      --gold:#b08d2a;
+      --goldSoft:rgba(176,141,42,.10);
+      --shadow:0 10px 26px rgba(0,0,0,.06);
+      --radius:16px;
+      --ok:#0f7a3a;
+      --warn:#b45309;
+      --bad:#b91c1c;
+      --card:#ffffff;
+    }
 
-<style>
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
 
-body{
-font-family:Arial, Helvetica, sans-serif;
-margin:0;
-background:#ffffff;
-color:#111;
-}
+    .wrap{max-width:1120px;margin:0 auto;padding:18px 16px 34px}
 
-header{
-padding:20px;
-border-bottom:1px solid #ddd;
-display:flex;
-align-items:center;
-gap:15px;
-}
+    header{
+      display:flex;align-items:center;gap:14px;justify-content:space-between;
+      padding:14px 14px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:linear-gradient(180deg,#fff,rgba(176,141,42,.05));
+      box-shadow:var(--shadow);
+    }
+    .leftHead{display:flex;align-items:center;gap:14px;min-width:260px}
+    .logo{
+      width:54px;height:54px;border-radius:14px;
+      border:1px solid var(--line);
+      background:#fff;
+      display:grid;place-items:center;
+      overflow:hidden;flex:0 0 auto;
+    }
+    .logo img{width:100%;height:100%;object-fit:contain;padding:6px}
+    .brand h1{margin:0;font-size:18px;letter-spacing:.2px}
+    .brand p{margin:2px 0 0;color:var(--muted);font-size:12.5px}
 
-header img{
-height:55px;
-}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+    .tabBtn{
+      appearance:none;border:1px solid var(--line);
+      background:#fff;color:var(--text);
+      padding:10px 12px;border-radius:999px;
+      font-size:13px;cursor:pointer;
+      box-shadow:0 6px 16px rgba(0,0,0,.04);
+      transition:.15s transform, .15s border-color, .15s background;
+      white-space:nowrap;
+    }
+    .tabBtn:hover{transform:translateY(-1px);border-color:rgba(176,141,42,.35)}
+    .tabBtn.active{
+      border-color:rgba(176,141,42,.55);
+      background:rgba(176,141,42,.08);
+    }
 
-h1{
-font-size:20px;
-margin:0;
-}
+    .grid{margin-top:14px;display:grid;grid-template-columns:1fr;gap:14px}
 
-.container{
-max-width:1100px;
-margin:auto;
-padding:20px;
-}
+    .card{
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:var(--card);
+      box-shadow:var(--shadow);
+      padding:16px;
+    }
 
-.section{
-margin-bottom:40px;
-}
+    h2{margin:0 0 10px;font-size:16px;letter-spacing:.2px}
+    .hint{color:var(--muted);font-size:12.5px;margin:-6px 0 0}
+    .divider{height:1px;background:var(--line);margin:14px 0}
 
-.section h2{
-border-bottom:1px solid #ddd;
-padding-bottom:6px;
-}
+    .row{
+      display:grid;
+      grid-template-columns:repeat(12,1fr);
+      gap:10px;
+      margin-top:12px;
+    }
+    .col-12{grid-column:span 12}
+    .col-6,.col-4,.col-3{grid-column:span 12}
+    @media (min-width:820px){
+      .col-6{grid-column:span 6}
+      .col-4{grid-column:span 4}
+      .col-3{grid-column:span 3}
+    }
 
-.grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:10px;
-}
+    label{display:block;font-size:12.5px;color:var(--muted);margin:0 0 6px}
+    input[type="text"], input[type="date"], input[type="number"], select, textarea{
+      width:100%;
+      padding:12px 12px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      outline:none;
+      background:#fff;
+      font-size:14px;
+    }
+    textarea{min-height:92px;resize:vertical}
 
-.option{
-border:1px solid #ddd;
-padding:10px;
-border-radius:6px;
-}
+    .summaryBox{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
+      background:linear-gradient(180deg,#fff,rgba(176,141,42,.04));
+    }
+    .summaryBox h3{margin:0 0 8px;font-size:14px}
+    .summaryBox p{margin:6px 0;color:var(--text);font-size:13.5px;line-height:1.35}
+    .muted{color:var(--muted)}
 
-.hot{
-color:#b00000;
-font-weight:bold;
-font-size:12px;
-}
+    .choiceGrid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+    @media (min-width:820px){
+      .choiceGrid{grid-template-columns:1fr 1fr}
+    }
+    .choice{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px 12px;
+      display:flex;gap:10px;align-items:flex-start;
+      background:linear-gradient(180deg,#fff,rgba(176,141,42,.03));
+    }
+    .choice input{margin-top:3px}
+    .choice .meta{flex:1}
+    .choice .title{margin:0;font-size:13.5px;line-height:1.25}
 
-button{
-background:#b08d2a;
-color:white;
-border:none;
-padding:12px 20px;
-border-radius:6px;
-cursor:pointer;
-font-size:14px;
-}
+    .tag{
+      display:inline-block;
+      font-size:11px;
+      padding:4px 8px;
+      border-radius:999px;
+      margin-top:6px;
+      border:1px solid var(--line);
+      color:var(--muted);
+      background:#fff;
+    }
+    .tag.hot{border-color:rgba(185,28,28,.35);background:rgba(185,28,28,.06);color:var(--bad)}
+    .tag.limit{border-color:rgba(176,141,42,.45);background:rgba(176,141,42,.09);color:var(--gold)}
+    .tag.ok{border-color:rgba(15,122,58,.25);background:rgba(15,122,58,.06);color:var(--ok)}
 
-input,select{
-padding:10px;
-border:1px solid #ccc;
-border-radius:6px;
-width:100%;
-}
+    .statusLine{
+      margin-top:10px;
+      display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+      color:var(--muted);
+      font-size:12.5px;
+    }
+    .pill{border:1px solid var(--line);background:#fff;padding:6px 10px;border-radius:999px}
+    .pill.ok{border-color:rgba(15,122,58,.25);background:rgba(15,122,58,.06);color:var(--ok)}
+    .pill.warn{border-color:rgba(180,83,9,.25);background:rgba(180,83,9,.06);color:var(--warn)}
+    .pill.bad{border-color:rgba(185,28,28,.25);background:rgba(185,28,28,.06);color:var(--bad)}
+    .pill.limit{border-color:rgba(176,141,42,.45);background:rgba(176,141,42,.09);color:var(--gold)}
 
-.summary{
-background:#f7f7f7;
-padding:20px;
-border-radius:6px;
-}
+    .btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .btn{
+      border:1px solid var(--line);
+      background:#fff;
+      padding:12px 14px;border-radius:12px;
+      font-size:14px;cursor:pointer;
+      box-shadow:0 8px 18px rgba(0,0,0,.05);
+    }
+    .btn.primary{
+      border-color:rgba(176,141,42,.55);
+      background:var(--gold);
+      color:#fff;
+    }
+    .btn.ghost{
+      border-color:rgba(176,141,42,.35);
+      background:rgba(176,141,42,.08);
+      color:var(--text);
+    }
 
-@media print{
+    .kpiRow{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+    @media (min-width:820px){.kpiRow{grid-template-columns:repeat(4,1fr)}}
+    .kpi{
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+      background:#fff;
+    }
+    .kpi .label{color:var(--muted);font-size:12px}
+    .kpi .value{font-size:16px;margin-top:4px}
 
-body *{
-visibility:hidden;
-}
+    .floorWrap{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px}
+    @media (min-width:820px){.floorWrap{grid-template-columns:1fr 1fr 1fr}}
+    .floorCard{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:12px;
+      background:#fff;
+    }
+    .floorCard h3{margin:0 0 8px;font-size:14px}
+    .floorCard img{
+      width:100%;
+      height:220px;
+      object-fit:contain;
+      border:1px dashed rgba(0,0,0,.18);
+      border-radius:14px;
+      background:#fff;
+    }
+    .floorCard .small{margin-top:8px;color:var(--muted);font-size:12px}
 
-#printSummary, #printSummary *{
-visibility:visible;
-}
+    /* Toast */
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:18px;
+      transform:translateX(-50%);
+      background:rgba(11,12,16,.92);
+      color:#fff;
+      padding:10px 12px;
+      border-radius:999px;
+      font-size:13px;
+      box-shadow:0 14px 36px rgba(0,0,0,.18);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .18s ease, transform .18s ease;
+      z-index:9999;
+      max-width:92vw;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(-2px);}
 
-#printSummary{
-position:absolute;
-top:0;
-left:0;
-width:100%;
-padding:40px;
-}
-
-}
-
-</style>
+    /* PRINT */
+    @media print{
+      body *{visibility:hidden !important;}
+      #printSummary, #printSummary *{visibility:visible !important;}
+      #printSummary{
+        position:absolute;left:0;top:0;width:100%;
+        padding:18px 18px;
+        font-family:"Century Gothic", Arial, sans-serif;
+      }
+      .noPrint{display:none !important;}
+      #printSummary h1{margin:0 0 4px;font-size:22px}
+      #printSummary h2{margin:0 0 14px;font-size:16px;color:#111}
+      #printSummary h3{margin:14px 0 6px;font-size:13.5px}
+      #printSummary p{margin:6px 0;font-size:12.5px;line-height:1.35}
+      #printSummary .section{border-top:1px solid rgba(0,0,0,.15);padding-top:10px;margin-top:10px}
+      #printSummary img{border:1px solid rgba(0,0,0,.15);border-radius:10px;background:#fff;padding:6px}
+      #printSummary .twoCol{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+      #printSummary .oneCol{display:grid;grid-template-columns:1fr;gap:10px}
+      #printSummary .block{white-space:pre-wrap}
+    }
+  </style>
 </head>
 
 <body>
-
-<header>
-
-<img src="MembersLoungeLogo.png">
-
-<h1>Members Lounge Wedding Signature Series</h1>
-
-</header>
-
-<div class="container">
-
-<div class="section">
-
-<h2>Couple Details</h2>
-
-<div class="grid">
-
-<div>
-<label>Bride</label>
-<input id="bride">
-</div>
-
-<div>
-<label>Groom</label>
-<input id="groom">
-</div>
-
-<div>
-<label>Wedding Date</label>
-<input type="date" id="date">
-</div>
-
-<div>
-<label>Venue</label>
-<select id="venue">
-<option>The Members Lounge</option>
-<option>Sala Reggio Ballroom</option>
-<option>Fior Parkville</option>
-</select>
-</div>
-
-</div>
-
-</div>
-
-
-<div class="section">
-
-<h2>Canapés (Choose 3)</h2>
-
-<div class="grid">
-
-<label class="option"><input type="checkbox" name="canapes" value="Arancini"> Arancini</label>
-<label class="option"><input type="checkbox" name="canapes" value="Meatballs"> Meatballs</label>
-<label class="option"><input type="checkbox" name="canapes" value="Prawn Wraps"> Prawn Wraps</label>
-<label class="option"><input type="checkbox" name="canapes" value="Parmesan Honey"> Parmesan with Honey</label>
-<label class="option"><input type="checkbox" name="canapes" value="Caprese Bites"> Caprese Bites</label>
-<label class="option"><input type="checkbox" name="canapes" value="Croquettes"> Croquettes</label>
-
-</div>
-
-</div>
-
-
-<div class="section">
-
-<h2>Antipasto (Choose 7 — Max 2 Hot)</h2>
-
-<div class="grid">
-
-<label class="option">
-<input type="checkbox" name="antipasto" data-hot="1" value="Calamari">
-Calamari <span class="hot">HOT</span>
-</label>
-
-<label class="option">
-<input type="checkbox" name="antipasto" data-hot="1" value="Cevapi">
-Cevapi <span class="hot">HOT</span>
-</label>
-
-<label class="option">
-<input type="checkbox" name="antipasto" data-hot="1" value="Sausages">
-Sausages <span class="hot">HOT</span>
-</label>
-
-<label class="option"><input type="checkbox" name="antipasto" value="Tiropita"> Tiropita</label>
-<label class="option"><input type="checkbox" name="antipasto" value="Feta"> Feta</label>
-<label class="option"><input type="checkbox" name="antipasto" value="Kefalograviera"> Kefalograviera</label>
-<label class="option"><input type="checkbox" name="antipasto" value="Trio of dips"> Trio of dips</label>
-<label class="option"><input type="checkbox" name="antipasto" value="Prosciutto"> Prosciutto</label>
-<label class="option"><input type="checkbox" name="antipasto" value="Salami"> Salami</label>
-<label class="option"><input type="checkbox" name="antipasto" value="Olives"> Olives</label>
-<label class="option"><input type="checkbox" name="antipasto" value="Grilled Vegetables"> Grilled Vegetables</label>
-<label class="option"><input type="checkbox" name="antipasto" value="Caprese"> Caprese</label>
-
-</div>
-
-</div>
-
-
-<div class="section">
-
-<h2>Main Courses (Choose 2)</h2>
-
-<div class="grid">
-
-<label class="option"><input type="checkbox" name="mains" value="Chicken Chimichurri"> Chicken Chimichurri</label>
-<label class="option"><input type="checkbox" name="mains" value="Barramundi"> Italian Crumbed Barramundi</label>
-<label class="option"><input type="checkbox" name="mains" value="Lamb Shank"> Lamb Shank</label>
-<label class="option"><input type="checkbox" name="mains" value="Beef Short Ribs"> Braised Beef Short Ribs</label>
-<label class="option"><input type="checkbox" name="mains" value="Bondiola"> Pork Bondiola</label>
-<label class="option"><input type="checkbox" name="mains" value="Stuffed Pepper"> Stuffed Pepper</label>
-
-</div>
-
-</div>
-
-
-<div class="section">
-
-<h2>Quote</h2>
-
-<div class="grid">
-
-<div>
-<label>Adults</label>
-<input id="adults" type="number" value="0">
-</div>
-
-<div>
-<label>Children</label>
-<input id="children" type="number" value="0">
-</div>
-
-<div>
-<label>Food per head</label>
-<input id="foodprice" type="number" value="0">
-</div>
-
-<div>
-<label>Drinks per head</label>
-<input id="drinkprice" type="number" value="0">
-</div>
-
-</div>
-
-</div>
-
-
-<div class="section summary">
-
-<h2>Summary</h2>
-
-<p id="summary"></p>
-
-<button onclick="printSummary()">Print Wedding Summary</button>
-
-</div>
-
-</div>
-
-
-<div id="printSummary" style="display:none">
-
-<h1>The Members Lounge</h1>
-
-<h2>Wedding Event Summary</h2>
-
-<p id="printContent"></p>
-
-</div>
-
-
-<script>
-
-function getChecked(name){
-
-let arr=[]
-
-document.querySelectorAll("input[name='"+name+"']:checked")
-.forEach(el=>arr.push(el.value))
-
-return arr
-
-}
-
-
-function antipastoSplit(){
-
-let hot=[]
-let cold=[]
-
-document.querySelectorAll("input[name='antipasto']:checked")
-.forEach(el=>{
-
-if(el.dataset.hot=="1") hot.push(el.value)
-else cold.push(el.value)
-
-})
-
-return {hot,cold}
-
-}
-
-
-function printSummary(){
-
-let bride=document.getElementById("bride").value
-let groom=document.getElementById("groom").value
-let date=document.getElementById("date").value
-let venue=document.getElementById("venue").value
-
-let canapes=getChecked("canapes")
-
-let mains=getChecked("mains")
-
-let antipasto=antipastoSplit()
-
-let text=`
-
-Couple: ${bride} & ${groom}
-
-Date: ${date}
-
-Venue: ${venue}
-
-Canapés
-${canapes.join(", ")}
-
-Antipasto
-HOT: ${antipasto.hot.join(", ")}
-NON HOT: ${antipasto.cold.join(", ")}
-
-Main Courses
-${mains.join(", ")}
-
-Supper
-Pizza service
-
-`
-
-document.getElementById("printContent").innerText=text
-
-document.getElementById("printSummary").style.display="block"
-
-window.print()
-
-}
-
-</script>
-
+  <div class="wrap">
+    <header class="noPrint">
+      <div class="leftHead">
+        <div class="logo" title="Members Lounge Logo">
+          <img src="MembersLoungeLogo.png" alt="The Members Lounge Logo"
+               onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=&quot;color:rgba(0,0,0,.45);font-size:11px;padding:8px;text-align:center&quot;>Add<br>Logo</div>';">
+        </div>
+        <div class="brand">
+          <h1>The Members Lounge — Wedding Signature Series</h1>
+          <p>Build selections, estimate a quote, and print a complete event summary.</p>
+        </div>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="App Sections">
+        <button class="tabBtn active" data-tab="tab-details" type="button">1) Couple</button>
+        <button class="tabBtn" data-tab="tab-menu" type="button">2) Menu</button>
+        <button class="tabBtn" data-tab="tab-quote" type="button">3) Quote</button>
+        <button class="tabBtn" data-tab="tab-floor" type="button">4) Floor Plans</button>
+        <button class="tabBtn" data-tab="tab-summary" type="button">5) Print Summary</button>
+      </div>
+    </header>
+
+    <div class="grid">
+
+      <!-- TAB 1 -->
+      <section id="tab-details" class="card tabPane">
+        <h2>Couple & Event Details</h2>
+        <p class="hint">These fields print exactly on the final summary.</p>
+
+        <div class="row">
+          <div class="col-6">
+            <label for="brideName">Bride Name</label>
+            <input id="brideName" type="text" placeholder="e.g., Laura" />
+          </div>
+          <div class="col-6">
+            <label for="groomName">Groom Name</label>
+            <input id="groomName" type="text" placeholder="e.g., Daniel" />
+          </div>
+
+          <div class="col-4">
+            <label for="eventDate">Wedding Date</label>
+            <input id="eventDate" type="date" />
+          </div>
+          <div class="col-4">
+            <label for="venueSelect">Venue</label>
+            <select id="venueSelect">
+              <option value="The Members Lounge">The Members Lounge</option>
+              <option value="Sala Reggio Ballroom">Sala Reggio Ballroom</option>
+              <option value="Fior Parkville">Fior Parkville</option>
+            </select>
+          </div>
+          <div class="col-4">
+            <label for="eventStart">Ceremony / Arrival Time (optional)</label>
+            <input id="eventStart" type="text" placeholder="e.g., 5:30pm" />
+          </div>
+
+          <div class="col-6">
+            <label for="adultsTop">Adults</label>
+            <input id="adultsTop" type="number" min="0" step="1" value="0" />
+          </div>
+          <div class="col-6">
+            <label for="childrenTop">Children (Under 12)</label>
+            <input id="childrenTop" type="number" min="0" step="1" value="0" />
+          </div>
+
+          <div class="col-12">
+            <label for="notes">Notes / Dietary / Special Requests</label>
+            <textarea id="notes" placeholder="Allergies, timings, preferences, etc."></textarea>
+          </div>
+        </div>
+
+        <div class="btnRow">
+          <button class="btn primary" type="button" onclick="goTab('tab-menu')">Next: Menu →</button>
+        </div>
+      </section>
+
+      <!-- TAB 2 -->
+      <section id="tab-menu" class="card tabPane" style="display:none">
+        <h2>Menu Selections</h2>
+        <p class="hint">
+          Limits: <strong>Canapés = 3</strong> • <strong>Antipasto = 7 total</strong> with <strong>2 hot</strong> + <strong>5 non-hot</strong> • <strong>Mains = 2</strong>
+        </p>
+
+        <div class="divider"></div>
+
+        <!-- CANAPES -->
+        <div class="summaryBox">
+          <h3>Canapés (Choose 3 of 6)</h3>
+          <div class="choiceGrid" id="canapesGrid"></div>
+          <div class="statusLine">
+            <span class="pill limit" id="canapesCountPill">Selected: 0 / 3</span>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- ANTIPASTO -->
+        <div class="summaryBox">
+          <h3>Antipasto (Choose 7 total: 2 Hot + 5 Non-Hot)</h3>
+          <p class="muted" style="margin:6px 0 0">
+            Hot items are highlighted. You may select <strong>only 2</strong> hot items, and <strong>5</strong> non-hot items.
+          </p>
+          <div class="choiceGrid" id="antipastoGrid"></div>
+          <div class="statusLine">
+            <span class="pill limit" id="antipastoTotalPill">Total: 0 / 7</span>
+            <span class="pill warn" id="antipastoHotPill">Hot: 0 / 2</span>
+            <span class="pill ok" id="antipastoNonHotPill">Non-Hot: 0 / 5</span>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- MAINS -->
+        <div class="summaryBox">
+          <h3>Main Courses (Choose 2 of 6)</h3>
+          <div class="choiceGrid" id="mainsGrid"></div>
+          <div class="statusLine">
+            <span class="pill limit" id="mainsCountPill">Selected: 0 / 2</span>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- DESSERT -->
+        <div class="summaryBox">
+          <h3>Dessert (Select one or more)</h3>
+          <div class="choiceGrid" id="dessertGrid"></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- SUPPER -->
+        <div class="summaryBox">
+          <h3>Supper</h3>
+          <p style="margin:0;color:var(--text)">Late night pizza service (fixed)</p>
+        </div>
+
+        <div class="btnRow">
+          <button class="btn ghost" type="button" onclick="goTab('tab-details')">← Back</button>
+          <button class="btn primary" type="button" onclick="goTab('tab-quote')">Next: Quote →</button>
+        </div>
+      </section>
+
+      <!-- TAB 3 -->
+      <section id="tab-quote" class="card tabPane" style="display:none">
+        <h2>Quote Estimate</h2>
+        <p class="hint">This estimator prints neatly alongside the menu selections.</p>
+
+        <div class="row">
+          <div class="col-3">
+            <label for="foodPerHead">Food (per head)</label>
+            <input id="foodPerHead" type="number" min="0" step="1" value="0" />
+          </div>
+          <div class="col-3">
+            <label for="drinksPerHead">Drinks (per head)</label>
+            <input id="drinksPerHead" type="number" min="0" step="1" value="0" />
+          </div>
+          <div class="col-3">
+            <label for="roomHire">Room Hire (AUD)</label>
+            <input id="roomHire" type="number" min="0" step="50" value="0" />
+          </div>
+          <div class="col-3">
+            <label for="dryHire">Dry Hire (AUD)</label>
+            <input id="dryHire" type="number" min="0" step="50" value="0" />
+          </div>
+
+          <div class="col-4">
+            <label for="security">Security (AUD)</label>
+            <input id="security" type="number" min="0" step="50" value="0" />
+          </div>
+          <div class="col-8">
+            <label for="quoteNotes">Quote Notes (optional)</label>
+            <input id="quoteNotes" type="text" placeholder="Optional notes for the quote section (will print)." />
+          </div>
+        </div>
+
+        <div class="kpiRow">
+          <div class="kpi">
+            <div class="label">Guests</div>
+            <div class="value" id="kpiGuests">0</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Estimated Food</div>
+            <div class="value" id="kpiFood">$0</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Estimated Drinks</div>
+            <div class="value" id="kpiDrinks">$0</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Estimated Total</div>
+            <div class="value" id="kpiTotal">$0</div>
+          </div>
+        </div>
+
+        <div class="btnRow">
+          <button class="btn" type="button" onclick="recalc()">Recalculate</button>
+          <button class="btn ghost" type="button" onclick="goTab('tab-menu')">← Back</button>
+          <button class="btn primary" type="button" onclick="goTab('tab-floor')">Next: Floor Plans →</button>
+        </div>
+      </section>
+
+      <!-- TAB 4 -->
+      <section id="tab-floor" class="card tabPane" style="display:none">
+        <h2>Floor Plans (Attach Images)</h2>
+        <p class="hint">Upload each floor plan image below. They will appear on the printed summary.</p>
+
+        <div class="floorWrap">
+          <div class="floorCard">
+            <h3>The Members Lounge</h3>
+            <img id="fpMembersPreview" alt="Members Lounge floor plan preview" />
+            <div class="small">Upload: <input type="file" accept="image/*" id="fpMembers" /></div>
+          </div>
+
+          <div class="floorCard">
+            <h3>Sala Reggio Ballroom</h3>
+            <img id="fpBallroomPreview" alt="Ballroom floor plan preview" />
+            <div class="small">Upload: <input type="file" accept="image/*" id="fpBallroom" /></div>
+          </div>
+
+          <div class="floorCard">
+            <h3>Fior Parkville</h3>
+            <img id="fpFiorPreview" alt="Fior floor plan preview" />
+            <div class="small">Upload: <input type="file" accept="image/*" id="fpFior" /></div>
+          </div>
+        </div>
+
+        <div class="btnRow">
+          <button class="btn ghost" type="button" onclick="goTab('tab-quote')">← Back</button>
+          <button class="btn primary" type="button" onclick="goTab('tab-summary')">Next: Print Summary →</button>
+        </div>
+      </section>
+
+      <!-- TAB 5 -->
+      <section id="tab-summary" class="card tabPane" style="display:none">
+        <h2>Printable Summary</h2>
+        <p class="hint">This prints everything: couple, full food selected, antipasto hot/non-hot split, quote estimate, notes, and floor plans.</p>
+
+        <div class="summaryBox" id="liveSummaryBox">
+          <h3>Live Summary</h3>
+          <p><strong>Couple:</strong> <span id="liveCouple">—</span></p>
+          <p><strong>Date:</strong> <span id="liveDate">—</span> <span class="muted" id="liveTime"></span></p>
+          <p><strong>Venue:</strong> <span id="liveVenue">—</span></p>
+          <p><strong>Guests:</strong> <span id="liveGuests">0</span></p>
+
+          <div class="divider"></div>
+
+          <p><strong>Canapés:</strong> <span id="liveCanapes">—</span></p>
+          <p><strong>Antipasto:</strong> <span id="liveAntipasto">—</span></p>
+          <p><strong>Main Courses:</strong> <span id="liveMains">—</span></p>
+          <p><strong>Dessert:</strong> <span id="liveDessert">—</span></p>
+          <p><strong>Supper:</strong> Late night pizza service</p>
+
+          <div class="divider"></div>
+
+          <p><strong>Estimate:</strong> <span id="liveTotal">$0</span> <span class="muted">(Food + Drinks + Room Hire + Dry Hire + Security)</span></p>
+
+          <div class="divider"></div>
+
+          <p><strong>Notes:</strong> <span id="liveNotes" class="muted">—</span></p>
+          <p><strong>Quote Notes:</strong> <span id="liveQuoteNotes" class="muted">—</span></p>
+        </div>
+
+        <div class="btnRow noPrint">
+          <button class="btn ghost" type="button" onclick="goTab('tab-floor')">← Back</button>
+          <button class="btn primary" type="button" onclick="printQuote()">Print Wedding Summary</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- PRINT ONLY -->
+  <div id="printSummary" style="display:none">
+    <h1>The Members Lounge</h1>
+    <h2>Wedding Event Summary</h2>
+
+    <p><strong>Couple:</strong> <span id="pCouple"></span></p>
+    <p><strong>Date:</strong> <span id="pDate"></span> <span id="pTime"></span></p>
+    <p><strong>Guests:</strong> <span id="pGuests"></span></p>
+    <p><strong>Venue:</strong> <span id="pVenue"></span></p>
+
+    <div class="section">
+      <h3>Menu Selections</h3>
+      <p><strong>Canapés:</strong> <span id="pCanapes"></span></p>
+
+      <h3>Antipasto (7 total: 2 hot + 5 non-hot)</h3>
+      <p class="block" id="pAntipastoSplit"></p>
+
+      <p><strong>Main Courses:</strong> <span id="pMains"></span></p>
+      <p><strong>Dessert:</strong> <span id="pDessert"></span></p>
+      <p><strong>Supper:</strong> Late night pizza service</p>
+    </div>
+
+    <div class="section">
+      <h3>Quote Estimate</h3>
+      <div class="twoCol">
+        <div>
+          <p><strong>Food:</strong> <span id="pFood"></span></p>
+          <p><strong>Drinks:</strong> <span id="pDrinks"></span></p>
+          <p><strong>Estimated Total:</strong> <span id="pTotal"></span></p>
+        </div>
+        <div>
+          <p><strong>Room Hire:</strong> <span id="pRoomHire"></span></p>
+          <p><strong>Dry Hire:</strong> <span id="pDryHire"></span></p>
+          <p><strong>Security:</strong> <span id="pSecurity"></span></p>
+        </div>
+      </div>
+      <p><strong>Quote Notes:</strong> <span id="pQuoteNotes"></span></p>
+    </div>
+
+    <div class="section">
+      <h3>Notes</h3>
+      <p id="pNotes"></p>
+    </div>
+
+    <div class="section">
+      <h2>Venue Floor Plans</h2>
+      <div class="oneCol">
+        <div>
+          <h3>The Members Lounge</h3>
+          <img id="pFpMembers" alt="Members Lounge floor plan" style="width:100%;max-width:760px" />
+        </div>
+        <div>
+          <h3>Sala Reggio Ballroom</h3>
+          <img id="pFpBallroom" alt="Ballroom floor plan" style="width:100%;max-width:760px" />
+        </div>
+        <div>
+          <h3>Fior Parkville</h3>
+          <img id="pFpFior" alt="Fior floor plan" style="width:100%;max-width:760px" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // -----------------------
+    // MENU DATA
+    // -----------------------
+    const CANAPES = [
+      "Arancini",
+      "Meatballs",
+      "Prawn wraps",
+      "Parmesan with honey drizzle",
+      "Caprese bites",
+      "Croquettes"
+    ];
+
+    // Antipasto: hot flagged (HOT items are Calamari, Cevapi, Sausages)
+    const ANTIPASTO = [
+      { label:"Calamari", hot:true },
+      { label:"Cevapi", hot:true },
+      { label:"Sausages", hot:true },
+      { label:"Tiropita", hot:false },
+      { label:"Feta", hot:false },
+      { label:"Kefalograviera", hot:false },
+      { label:"Trio of dips with pita", hot:false },
+      { label:"Prosciutto", hot:false },
+      { label:"Salami", hot:false },
+      { label:"Olives", hot:false },
+      { label:"Grilled vegetables", hot:false },
+      { label:"Caprese", hot:false }
+    ];
+
+    const MAINS = [
+      "Chargrilled chicken breast with a chimichurri dressing",
+      "Italian crumbed barramundi fillet",
+      "Lamb shank with white wine and tomato",
+      "Braised beef short ribs in a red wine jus",
+      "Bondiola (pork fillet) with a salmoriglio sauce",
+      "Stuffed pepper with seasonal vegetables and cauliflower steak"
+    ];
+
+    const DESSERT = [
+      "Wedding cake served",
+      "Cannoli station",
+      "Gelato cups",
+      "Tiramisu cups"
+    ];
+
+    const LIMITS = {
+      canapes: 3,
+      mains: 2,
+      antipastoTotal: 7,
+      antipastoHot: 2,
+      antipastoNonHot: 5
+    };
+
+    // Floorplan data URLs for printing
+    const floorplans = { members:"", ballroom:"", fior:"" };
+
+    // -----------------------
+    // Toast
+    // -----------------------
+    let toastTimer = null;
+    function showToast(msg){
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(()=>t.classList.remove("show"), 1600);
+    }
+
+    // -----------------------
+    // UI BUILDERS
+    // -----------------------
+    function buildChoice(gridId, name, items, opts = {}){
+      const grid = document.getElementById(gridId);
+      grid.innerHTML = "";
+
+      items.forEach((it) => {
+        const value = (typeof it === "string") ? it : it.label;
+        const hot = (typeof it === "object") ? !!it.hot : false;
+
+        const wrap = document.createElement("label");
+        wrap.className = "choice";
+
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.name = name;
+        input.value = value;
+
+        // Store hot/nonhot on antipasto checkboxes
+        if(name === "antipasto"){
+          input.dataset.hot = hot ? "1" : "0";
+        }
+
+        input.addEventListener("change", () => {
+          if(name === "antipasto"){
+            enforceAntipastoSplit(input);
+          } else if(name === "canapes"){
+            enforceSimpleLimit("canapes", LIMITS.canapes, input, "You can only choose 3 canapés.");
+          } else if(name === "mains"){
+            enforceSimpleLimit("mains", LIMITS.mains, input, "You can only choose 2 main courses.");
+          }
+          updateCounts();
+          updateLiveSummary();
+        });
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+
+        const title = document.createElement("p");
+        title.className = "title";
+        title.textContent = value;
+
+        meta.appendChild(title);
+
+        if(opts.showHotTag && hot){
+          const tag = document.createElement("span");
+          tag.className = "tag hot";
+          tag.textContent = "HOT ITEM";
+          meta.appendChild(tag);
+        }
+
+        wrap.appendChild(input);
+        wrap.appendChild(meta);
+        grid.appendChild(wrap);
+      });
+    }
+
+    function enforceSimpleLimit(name, limit, changedInput, msg){
+      if(!limit) return;
+      const checked = Array.from(document.querySelectorAll(`input[name="${name}"]:checked`));
+      if(checked.length > limit){
+        changedInput.checked = false;
+        if(msg) showToast(msg);
+      }
+    }
+
+    // Antipasto must be up to 7 total, with max 2 hot and max 5 non-hot.
+    function enforceAntipastoSplit(changedInput){
+      const counts = countAntipasto();
+
+      // Total
+      if(counts.total > LIMITS.antipastoTotal){
+        changedInput.checked = false;
+        showToast("Antipasto: total is 7 items (max).");
+        return;
+      }
+
+      // Hot limit
+      const isHot = changedInput.dataset.hot === "1";
+      if(isHot && counts.hot > LIMITS.antipastoHot){
+        changedInput.checked = false;
+        showToast("Antipasto: only 2 HOT items allowed.");
+        return;
+      }
+
+      // Non-hot limit
+      const isNonHot = changedInput.dataset.hot === "0";
+      if(isNonHot && counts.nonHot > LIMITS.antipastoNonHot){
+        changedInput.checked = false;
+        showToast("Antipasto: only 5 NON-HOT items allowed.");
+        return;
+      }
+    }
+
+    function getCheckedList(name){
+      return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(el => el.value);
+    }
+
+    function countAntipasto(){
+      const checked = Array.from(document.querySelectorAll(`input[name="antipasto"]:checked`));
+      let hot = 0, nonHot = 0;
+      checked.forEach(el => (el.dataset.hot === "1" ? hot++ : nonHot++));
+      return { hot, nonHot, total: checked.length };
+    }
+
+    function getAntipastoSplitLists(){
+      const checked = Array.from(document.querySelectorAll(`input[name="antipasto"]:checked`));
+      const hot = checked.filter(el=>el.dataset.hot==="1").map(el=>el.value);
+      const nonHot = checked.filter(el=>el.dataset.hot==="0").map(el=>el.value);
+      return { hot, nonHot };
+    }
+
+    function updateCounts(){
+      // Canapés
+      document.getElementById("canapesCountPill").textContent =
+        `Selected: ${getCheckedList("canapes").length} / ${LIMITS.canapes}`;
+
+      // Mains
+      document.getElementById("mainsCountPill").textContent =
+        `Selected: ${getCheckedList("mains").length} / ${LIMITS.mains}`;
+
+      // Antipasto split pills
+      const a = countAntipasto();
+      const totalP = document.getElementById("antipastoTotalPill");
+      const hotP   = document.getElementById("antipastoHotPill");
+      const nonP   = document.getElementById("antipastoNonHotPill");
+
+      totalP.textContent = `Total: ${a.total} / ${LIMITS.antipastoTotal}`;
+      hotP.textContent   = `Hot: ${a.hot} / ${LIMITS.antipastoHot}`;
+      nonP.textContent   = `Non-Hot: ${a.nonHot} / ${LIMITS.antipastoNonHot}`;
+
+      totalP.className = "pill " + (a.total === LIMITS.antipastoTotal ? "ok" : "limit");
+      hotP.className   = "pill " + (a.hot === LIMITS.antipastoHot ? "ok" : "warn");
+      nonP.className   = "pill " + (a.nonHot === LIMITS.antipastoNonHot ? "ok" : "ok");
+    }
+
+    // -----------------------
+    // TABS
+    // -----------------------
+    function goTab(id){
+      document.querySelectorAll(".tabPane").forEach(p => p.style.display = "none");
+      document.getElementById(id).style.display = "block";
+
+      document.querySelectorAll(".tabBtn").forEach(b => b.classList.remove("active"));
+      const btn = document.querySelector(`.tabBtn[data-tab="${id}"]`);
+      if(btn) btn.classList.add("active");
+
+      updateLiveSummary();
+      recalc();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // -----------------------
+    // DETAILS (Couple display)
+    // -----------------------
+    function coupleDisplay(){
+      const b = (document.getElementById("brideName").value || "").trim();
+      const g = (document.getElementById("groomName").value || "").trim();
+      const combo = [b,g].filter(Boolean).join(" & ");
+      return combo || "—";
+    }
+
+    // -----------------------
+    // QUOTE CALC
+    // -----------------------
+    function money(n){
+      const x = Number.isFinite(n) ? n : 0;
+      return x.toLocaleString("en-AU",{style:"currency",currency:"AUD",maximumFractionDigits:0});
+    }
+
+    function guestsCount(){
+      const a = parseInt(document.getElementById("adultsTop").value || "0",10) || 0;
+      const c = parseInt(document.getElementById("childrenTop").value || "0",10) || 0;
+      return a + c;
+    }
+
+    function recalc(){
+      const guests = guestsCount();
+      const perFood = parseFloat(document.getElementById("foodPerHead").value || "0") || 0;
+      const perDrink = parseFloat(document.getElementById("drinksPerHead").value || "0") || 0;
+      const roomHire = parseFloat(document.getElementById("roomHire").value || "0") || 0;
+      const dryHire = parseFloat(document.getElementById("dryHire").value || "0") || 0;
+      const security = parseFloat(document.getElementById("security").value || "0") || 0;
+
+      const foodTotal = guests * perFood;
+      const drinkTotal = guests * perDrink;
+      const total = foodTotal + drinkTotal + roomHire + dryHire + security;
+
+      document.getElementById("kpiGuests").textContent = String(guests);
+      document.getElementById("kpiFood").textContent = money(foodTotal);
+      document.getElementById("kpiDrinks").textContent = money(drinkTotal);
+      document.getElementById("kpiTotal").textContent = money(total);
+
+      const liveTotal = document.getElementById("liveTotal");
+      if(liveTotal) liveTotal.textContent = money(total);
+
+      return { guests, foodTotal, drinkTotal, roomHire, dryHire, security, total };
+    }
+
+    // -----------------------
+    // LIVE SUMMARY (Tab 5)
+    // -----------------------
+    function joinOrDash(list){ return (list && list.length) ? list.join(", ") : "—"; }
+
+    function formatAntipastoSplitInline(){
+      const { hot, nonHot } = getAntipastoSplitLists();
+      const hotTxt = hot.length ? hot.join(", ") : "—";
+      const nonTxt = nonHot.length ? nonHot.join(", ") : "—";
+      return `HOT (max 2): ${hotTxt}  |  NON-HOT (max 5): ${nonTxt}`;
+    }
+
+    function updateLiveSummary(){
+      const date = document.getElementById("eventDate").value || "—";
+      const time = (document.getElementById("eventStart").value || "").trim();
+      const venue = document.getElementById("venueSelect").value || "—";
+      const guests = guestsCount();
+
+      document.getElementById("liveCouple").textContent = coupleDisplay();
+      document.getElementById("liveDate").textContent = date;
+      document.getElementById("liveTime").textContent = time ? `(${time})` : "";
+      document.getElementById("liveVenue").textContent = venue;
+      document.getElementById("liveGuests").textContent = String(guests);
+
+      document.getElementById("liveCanapes").textContent = joinOrDash(getCheckedList("canapes"));
+      document.getElementById("liveAntipasto").textContent = formatAntipastoSplitInline(); // ✅ FIXED
+      document.getElementById("liveMains").textContent = joinOrDash(getCheckedList("mains"));
+      document.getElementById("liveDessert").textContent = joinOrDash(getCheckedList("dessert"));
+
+      const notes = (document.getElementById("notes").value || "").trim();
+      const qn = (document.getElementById("quoteNotes").value || "").trim();
+      document.getElementById("liveNotes").textContent = notes || "—";
+      document.getElementById("liveQuoteNotes").textContent = qn || "—";
+    }
+
+    // -----------------------
+    // PRINT SUMMARY (Everything)
+    // -----------------------
+    function setPrintImage(imgEl, dataUrl){
+      if(dataUrl){
+        imgEl.src = dataUrl;
+        imgEl.style.display = "block";
+      } else {
+        imgEl.removeAttribute("src");
+        imgEl.style.display = "none";
+      }
+    }
+
+    function printQuote(){
+      const q = recalc();
+      updateLiveSummary();
+
+      document.getElementById("pCouple").textContent = coupleDisplay();
+      document.getElementById("pDate").textContent = (document.getElementById("eventDate").value || "—");
+
+      const time = (document.getElementById("eventStart").value || "").trim();
+      document.getElementById("pTime").textContent = time ? `(${time})` : "";
+
+      document.getElementById("pGuests").textContent = String(q.guests);
+      document.getElementById("pVenue").textContent = (document.getElementById("venueSelect").value || "—");
+
+      document.getElementById("pCanapes").textContent = joinOrDash(getCheckedList("canapes"));
+      document.getElementById("pMains").textContent = joinOrDash(getCheckedList("mains"));
+      document.getElementById("pDessert").textContent = joinOrDash(getCheckedList("dessert"));
+
+      // ✅ Antipasto split for print
+      const split = getAntipastoSplitLists();
+      const hotTxt = split.hot.length ? split.hot.join(", ") : "—";
+      const nonTxt = split.nonHot.length ? split.nonHot.join(", ") : "—";
+      document.getElementById("pAntipastoSplit").textContent =
+        `HOT (max 2): ${hotTxt}\nNON-HOT (max 5): ${nonTxt}`;
+
+      document.getElementById("pFood").textContent = money(q.foodTotal);
+      document.getElementById("pDrinks").textContent = money(q.drinkTotal);
+      document.getElementById("pRoomHire").textContent = money(q.roomHire);
+      document.getElementById("pDryHire").textContent = money(q.dryHire);
+      document.getElementById("pSecurity").textContent = money(q.security);
+      document.getElementById("pTotal").textContent = money(q.total);
+
+      const quoteNotes = (document.getElementById("quoteNotes").value || "").trim();
+      document.getElementById("pQuoteNotes").textContent = quoteNotes || "—";
+
+      const notes = (document.getElementById("notes").value || "").trim();
+      document.getElementById("pNotes").textContent = notes || "—";
+
+      setPrintImage(document.getElementById("pFpMembers"), floorplans.members);
+      setPrintImage(document.getElementById("pFpBallroom"), floorplans.ballroom);
+      setPrintImage(document.getElementById("pFpFior"), floorplans.fior);
+
+      const ps = document.getElementById("printSummary");
+      ps.style.display = "block";
+      window.print();
+      ps.style.display = "none";
+    }
+
+    // -----------------------
+    // FLOORPLAN UPLOADS
+    // -----------------------
+    function wireFloorUpload(fileInputId, previewId, key){
+      const input = document.getElementById(fileInputId);
+      const preview = document.getElementById(previewId);
+      input.addEventListener("change", () => {
+        const file = input.files && input.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          const url = reader.result;
+          preview.src = url;
+          floorplans[key] = url;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // -----------------------
+    // INIT
+    // -----------------------
+    function init(){
+      // Build menu grids
+      buildChoice("canapesGrid", "canapes", CANAPES);
+      buildChoice("antipastoGrid", "antipasto", ANTIPASTO, { showHotTag:true });
+      buildChoice("mainsGrid", "mains", MAINS);
+      buildChoice("dessertGrid", "dessert", DESSERT);
+
+      // Tabs
+      document.querySelectorAll(".tabBtn").forEach(btn => {
+        btn.addEventListener("click", () => goTab(btn.dataset.tab));
+      });
+
+      // Field listeners
+      [
+        "brideName","groomName","eventDate","venueSelect","eventStart",
+        "adultsTop","childrenTop","notes",
+        "foodPerHead","drinksPerHead","roomHire","dryHire","security","quoteNotes"
+      ].forEach(id=>{
+        const el = document.getElementById(id);
+        if(!el) return;
+        el.addEventListener("input", () => { recalc(); updateLiveSummary(); });
+        el.addEventListener("change", () => { recalc(); updateLiveSummary(); });
+      });
+
+      // Floorplan uploads
+      wireFloorUpload("fpMembers","fpMembersPreview","members");
+      wireFloorUpload("fpBallroom","fpBallroomPreview","ballroom");
+      wireFloorUpload("fpFior","fpFiorPreview","fior");
+
+      // Start
+      updateCounts();
+      recalc();
+      updateLiveSummary();
+    }
+
+    init();
+  </script>
 </body>
 </html>
