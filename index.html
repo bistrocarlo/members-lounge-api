@@ -6,6 +6,7 @@
   <title>The Members Lounge | Ultimate Event Planner</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400&display=swap" rel="stylesheet">
   <style>
+    /* === STYLES (unchanged, same as before) === */
     :root{
       --bg:#ffffff;
       --text:#0b0c10;
@@ -385,22 +386,19 @@
   </div>
 
   <main>
-    <!-- PAGE 1: QUOTE (unchanged) -->
+    <!-- PAGE 1: QUOTE (Child % removed, now fixed $30 per child) -->
     <section class="page active" id="page-quote">
       <div class="grid">
         <div class="card">
           <h2>Indicative Quote (Live)</h2>
-          <div class="hint">Room hire + dry hire + security + selected food courses + selected drinks = estimate.</div>
+          <div class="hint">Room hire + dry hire + security + selected food courses + selected drinks = estimate. Children charged at a fixed $30 each.</div>
           <div class="divider"></div>
           <div class="row">
             <div>
               <label for="quoteRef">Quote Reference</label>
               <input id="quoteRef" placeholder="e.g., Smith Wedding" value="Event 2025">
             </div>
-            <div>
-              <label for="childPercent">Child meal (%)</label>
-              <input id="childPercent" type="number" min="0" max="100" step="1" value="30">
-            </div>
+            <!-- Child % input removed -->
           </div>
           <div class="row">
             <div>
@@ -408,7 +406,7 @@
               <input id="adults" type="number" min="0" step="1" value="120">
             </div>
             <div>
-              <label for="children">Children (Under 12)</label>
+              <label for="children">Children (Under 12) – fixed $30 each</label>
               <input id="children" type="number" min="0" step="1" value="20">
             </div>
           </div>
@@ -462,7 +460,7 @@
       </div>
     </section>
 
-    <!-- PAGE 2: EVENT (formerly Couple) -->
+    <!-- PAGE 2: EVENT (unchanged) -->
     <section class="page" id="page-event">
       <div class="grid">
         <div class="card">
@@ -840,7 +838,7 @@
       // DOM elements
       const adultsEl = $("adults");
       const childrenEl = $("children");
-      const childPercentEl = $("childPercent");
+      // childPercentEl removed
       const roomHireEl = $("roomHire");
       const dryHireEl = $("dryHire");
       const securityEl = $("security");
@@ -856,7 +854,7 @@
       const customDrinkNoteEl = $("customDrinkNote");
       const drinkInfoEl = $("drinkInfo");
 
-      // Event fields (formerly couple)
+      // Event fields
       const eventTypeEl = $("eventType");
       const eventNameEl = $("eventName");
       const eventDateEl = $("eventDate");
@@ -1049,7 +1047,8 @@
       function calculateFood() {
         const adults = Number(adultsEl.value || 0);
         const children = Number(childrenEl.value || 0);
-        const childPercent = Number(childPercentEl.value || 30) / 100;
+        // Fixed $30 per child
+        const CHILD_FIXED_PRICE = 30;
 
         const sel = getSelections();
         let perAdult = 0;
@@ -1061,7 +1060,7 @@
         if (sel.dessert.length) perAdult += FIXED_PRICES.dessert;
 
         const adultTotal = adults * perAdult;
-        const childTotal = children * perAdult * childPercent;
+        const childTotal = children * CHILD_FIXED_PRICE; // fixed, not percentage
 
         let fruitTotal = 0;
         if (fruitPlatterEl && fruitPlatterEl.checked) {
@@ -1153,7 +1152,7 @@
             <div class="summary-line"><span>Event name:</span> <span>${escapeHtml(eventName)}</span></div>
             <div class="summary-line"><span>Date:</span> <span>${escapeHtml(eventDate)}</span></div>
             <div class="summary-line"><span>Venue:</span> <span>${escapeHtml(venueText)}</span></div>
-            <div class="summary-line"><span>Guests:</span> <span>${adults} adults, ${children} children</span></div>
+            <div class="summary-line"><span>Guests:</span> <span>${adults} adults, ${children} children (fixed $30 each)</span></div>
           </div>
 
           <div class="summary-section">
@@ -1266,13 +1265,13 @@
       }
 
       // ----------------------------------------------------------------------
-      // Save / Load to localStorage
+      // Save / Load to localStorage (updated: removed childPercent)
       function saveToStorage() {
         const state = {
           quoteRef: quoteRefEl.value,
           adults: adultsEl.value,
           children: childrenEl.value,
-          childPercent: childPercentEl.value,
+          // childPercent removed
           roomHire: roomHireEl.value,
           dryHire: dryHireEl.value,
           security: securityEl.value,
@@ -1311,7 +1310,7 @@
           quoteRefEl.value = state.quoteRef || 'Event 2025';
           adultsEl.value = state.adults || 120;
           childrenEl.value = state.children || 20;
-          childPercentEl.value = state.childPercent || 30;
+          // childPercent no longer used
           roomHireEl.value = state.roomHire || 0;
           dryHireEl.value = state.dryHire || 0;
           securityEl.value = state.security || 0;
@@ -1333,7 +1332,8 @@
           if (state.menuSelections) {
             Object.entries(state.menuSelections).forEach(([course, items]) => {
               items.forEach(item => {
-                const cb = document.querySelector(`input[type="checkbox"][data-course="${course}"][value="${escapeHtml(item)}"]`);
+                // Find checkbox by value (exact match)
+                const cb = Array.from(document.querySelectorAll(`input[type="checkbox"][data-course="${course}"]`)).find(c => c.value === item);
                 if (cb) cb.checked = true;
               });
             });
@@ -1366,7 +1366,7 @@
         document.querySelectorAll('input[type="checkbox"][data-course]').forEach(cb => cb.checked = false);
         adultsEl.value = 120;
         childrenEl.value = 20;
-        childPercentEl.value = 30;
+        // childPercent removed
         roomHireEl.value = 0;
         dryHireEl.value = 0;
         securityEl.value = 0;
