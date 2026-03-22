@@ -208,6 +208,10 @@
             position: sticky;
             top: 0;
         }
+        /* Staff names in matrix – black text */
+        th.employee-name {
+            color: #1e1e1e;
+        }
         .available-yes {
             background: #D4AF37;
             color: white;
@@ -269,7 +273,6 @@
             margin-bottom: 20px;
             border: 1px solid #e0e0e0;
         }
-
         /* Modal styles */
         .modal {
             display: none;
@@ -826,19 +829,20 @@
             return;
         }
 
-        let html = '<div class="scrollable-table"><table style="min-width:600px;"><thead> <tr><th>Event</th>';
+        let html = '<div class="scrollable-table"><table style="min-width:600px;"><thead><tr><th>Event</th>';
         filteredEmployees.forEach(emp => {
-            html += `<th>#${emp.empNumber}<br>${escapeHtml(emp.name)}</th>`;
+            // Add a class to employee headers for black text
+            html += `<th class="employee-name">#${emp.empNumber}<br>${escapeHtml(emp.name)}</th>`;
         });
-        html += ' </thead><tbody>';
+        html += '</tr></thead><tbody>';
 
         events.forEach(event => {
-            html += ` dp\n<td><strong>${formatDate(event.date)}<br>${event.venue}</strong>`;
+            html += `<tr><td><strong>${formatDate(event.date)}<br>${event.venue}</strong></td>`;
             filteredEmployees.forEach(emp => {
                 const available = (submissions[emp.id] || []).includes(event.id);
-                html += `<td class="text-center">${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}`;
+                html += `<td>${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}</td>`;
             });
-            html += ';</tr>';
+            html += '</tr>';
         });
         html += '</tbody></table></div>';
 
