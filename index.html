@@ -5,11 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Member's Lounge – Staff Availability</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
-            background: #000000;
-            color: #ffffff;
-            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            background: #f5f5f5;
+            color: #1e1e1e;
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
             line-height: 1.6;
             padding: 20px;
         }
@@ -19,14 +23,15 @@
         }
         /* Header */
         .app-header {
-            background: #000000;
-            border-bottom: 2px solid #D4AF37;
+            background: white;
+            border-bottom: 3px solid #D4AF37;
             padding: 15px 20px;
             margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         .logo {
             display: flex;
@@ -35,7 +40,7 @@
         }
         .logo-icon {
             background: #D4AF37;
-            color: #000000;
+            color: white;
             width: 50px;
             height: 50px;
             border-radius: 50%;
@@ -46,34 +51,34 @@
             font-size: 28px;
         }
         .logo h1 {
-            color: #D4AF37;
+            color: #1e1e1e;
             font-size: 1.8rem;
             letter-spacing: 1px;
         }
         .tagline {
-            color: #B0B0B0;
+            color: #666;
             font-size: 0.9rem;
         }
         .tabs {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
-            border-bottom: 2px solid #D4AF37;
+            border-bottom: 1px solid #ddd;
             padding-bottom: 10px;
         }
         .tab-btn {
-            background: #1E1E1E;
+            background: #f0f0f0;
             border: none;
             padding: 10px 20px;
             cursor: pointer;
-            color: #ffffff;
+            color: #1e1e1e;
             border-radius: 8px 8px 0 0;
             transition: background 0.3s;
+            font-weight: 500;
         }
         .tab-btn.active {
             background: #D4AF37;
-            color: #000000;
-            font-weight: bold;
+            color: white;
         }
         .tab-pane {
             display: none;
@@ -82,11 +87,12 @@
             display: block;
         }
         .card {
-            background: #1E1E1E;
+            background: white;
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 20px;
-            border: 1px solid #333;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         .card h2, .card h3 {
             color: #D4AF37;
@@ -98,51 +104,57 @@
         label {
             display: block;
             margin-bottom: 5px;
-            color: #B0B0B0;
+            color: #555;
+            font-weight: 500;
         }
         input, select, button {
             padding: 10px;
-            background: #2D2D2D;
-            border: 1px solid #444;
+            background: #fff;
+            border: 1px solid #ccc;
             border-radius: 6px;
-            color: #ffffff;
+            color: #1e1e1e;
             font-size: 14px;
+            width: 100%;
         }
         button {
             background: #D4AF37;
-            color: #000000;
+            color: white;
             border: none;
             cursor: pointer;
             font-weight: bold;
+            width: auto;
         }
         button:hover {
-            background: #C6A22E;
+            background: #b58f2a;
         }
         .btn-secondary {
-            background: #444;
-            color: white;
+            background: #f0f0f0;
+            color: #333;
+            border: 1px solid #ccc;
         }
         .date-list {
             max-height: 500px;
             overflow-y: auto;
             margin-top: 15px;
-            border: 1px solid #333;
+            border: 1px solid #e0e0e0;
             border-radius: 8px;
         }
         .date-item {
             display: flex;
             align-items: center;
             padding: 10px;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid #eee;
         }
         .date-item label {
             flex: 1;
             margin: 0;
             cursor: pointer;
+            color: #1e1e1e;
         }
         .date-item input {
             margin-right: 10px;
             transform: scale(1.2);
+            width: auto;
         }
         .employee-list {
             display: flex;
@@ -151,9 +163,10 @@
             margin-bottom: 20px;
         }
         .employee-card {
-            background: #2D2D2D;
+            background: #fafafa;
             padding: 12px;
             border-radius: 8px;
+            border: 1px solid #e0e0e0;
             min-width: 280px;
         }
         .employee-card .name {
@@ -163,42 +176,46 @@
         }
         .employee-card .sections {
             font-size: 0.8rem;
-            color: #B0B0B0;
+            color: #666;
             margin: 5px 0;
         }
         .employee-card button {
             background: #ff4444;
+            color: white;
             padding: 4px 8px;
             font-size: 12px;
             margin-top: 5px;
             margin-right: 5px;
+            width: auto;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
+            background: white;
         }
         th, td {
             padding: 8px;
             text-align: left;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid #eee;
         }
         th {
             color: #D4AF37;
+            background: #fafafa;
             position: sticky;
             top: 0;
-            background: #1E1E1E;
         }
         .available-yes {
-            background: #1e4620;
-            color: #a5d6a5;
+            background: #D4AF37;
+            color: white;
             padding: 2px 6px;
             border-radius: 4px;
             display: inline-block;
+            font-weight: bold;
         }
         .available-no {
-            background: #4a1c1c;
-            color: #ffb3b3;
+            background: #f0f0f0;
+            color: #999;
             padding: 2px 6px;
             border-radius: 4px;
             display: inline-block;
@@ -210,14 +227,16 @@
             flex-wrap: wrap;
         }
         .filter-btn {
-            background: #2D2D2D;
+            background: #f0f0f0;
             padding: 5px 12px;
             border-radius: 20px;
             cursor: pointer;
+            border: none;
+            color: #333;
         }
         .filter-btn.active {
             background: #D4AF37;
-            color: #000;
+            color: white;
         }
         .success-msg, .error-msg {
             padding: 10px;
@@ -225,12 +244,14 @@
             margin-bottom: 15px;
         }
         .success-msg {
-            background: #1e4620;
-            color: #a5d6a5;
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
         }
         .error-msg {
-            background: #4a1c1c;
-            color: #ffb3b3;
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
         }
         .hidden {
             display: none;
@@ -239,10 +260,11 @@
             overflow-x: auto;
         }
         .staff-info {
-            background: #2D2D2D;
+            background: #fafafa;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
+            border: 1px solid #e0e0e0;
         }
         @media (max-width: 768px) {
             .date-item {
@@ -450,7 +472,6 @@
             }
         } catch(e) { events = [...defaultEvents]; console.error(e); }
 
-        // Ensure events are sorted
         sortEvents();
     }
 
@@ -528,10 +549,10 @@
             div.style.justifyContent = 'space-between';
             div.style.alignItems = 'center';
             div.style.padding = '8px';
-            div.style.borderBottom = '1px solid #333';
+            div.style.borderBottom = '1px solid #eee';
             div.innerHTML = `
                 <span>${formatDate(event.date)} – ${event.venue}</span>
-                <button class="delete-event" data-id="${event.id}" style="background:#ff4444; padding:2px 8px;">Delete</button>
+                <button class="delete-event" data-id="${event.id}" style="background:#ff4444; color:white; padding:2px 8px;">Delete</button>
             `;
             container.appendChild(div);
         });
@@ -553,7 +574,7 @@
             card.className = 'employee-card';
             card.innerHTML = `
                 <div class="name">#${emp.empNumber} – ${escapeHtml(emp.name)}</div>
-                <div class="sections">Sections: ${emp.sections.length ? emp.sections.map(s => `<span style="background:#D4AF37;color:#000;padding:2px 4px;border-radius:3px;">${s}</span>`).join(' ') : 'None'}</div>
+                <div class="sections">Sections: ${emp.sections.length ? emp.sections.map(s => `<span style="background:#D4AF37; color:white; padding:2px 4px; border-radius:3px; margin-right:4px;">${s}</span>`).join(' ') : 'None'}</div>
                 <button class="remove-emp" data-id="${emp.id}">Remove Employee</button>
             `;
             container.appendChild(card);
@@ -647,17 +668,17 @@
             return;
         }
 
-        let html = '<div class="scrollable-table"><table style="min-width:600px;"><thead> tr><th>Event</th>';
+        let html = '<div class="scrollable-table"><table style="min-width:600px;"><thead><tr><th>Event</th>';
         filteredEmployees.forEach(emp => {
             html += `<th>#${emp.empNumber}<br>${escapeHtml(emp.name)}</th>`;
         });
-        html += ' </thead><tbody>';
+        html += '</tr></thead><tbody>';
 
         events.forEach(event => {
-            html += ` dp\n<td><strong>${formatDate(event.date)}<br>${event.venue}</strong></td>`;
+            html += `<tr><td><strong>${formatDate(event.date)}<br>${event.venue}</strong></td>`;
             filteredEmployees.forEach(emp => {
                 const available = (submissions[emp.id] || []).includes(event.id);
-                html += `<td class="text-center">${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}</td>`;
+                html += `<td>${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}</td>`;
             });
             html += '</tr>';
         });
@@ -801,7 +822,7 @@
         currentEmployeeId = employee.id;
         document.getElementById('display-name').innerText = employee.name;
         const sectionsSpan = document.getElementById('display-sections');
-        sectionsSpan.innerHTML = employee.sections.map(s => `<span style="background:#D4AF37;color:#000;padding:4px 8px;border-radius:4px;margin-right:5px;">${s}</span>`).join('') || 'None';
+        sectionsSpan.innerHTML = employee.sections.map(s => `<span style="background:#D4AF37;color:white;padding:4px 8px;border-radius:4px;margin-right:5px;">${s}</span>`).join('') || 'None';
         document.getElementById('staff-details').classList.remove('hidden');
         loadEmployeeAvailability(employee.id);
         document.getElementById('staff-message').classList.add('hidden');
