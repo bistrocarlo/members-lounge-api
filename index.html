@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Member's Lounge Staff Availability</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             background: #000000;
             color: #ffffff;
@@ -14,7 +18,7 @@
             padding: 20px;
         }
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
         .tabs {
@@ -90,7 +94,7 @@
             color: white;
         }
         .date-list {
-            max-height: 400px;
+            max-height: 500px;
             overflow-y: auto;
             margin-top: 15px;
             border: 1px solid #333;
@@ -117,23 +121,31 @@
             gap: 10px;
             margin-bottom: 15px;
         }
-        .employee-badge {
+        .employee-card {
             background: #2D2D2D;
-            padding: 5px 10px;
-            border-radius: 20px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            padding: 10px;
+            border-radius: 8px;
+            min-width: 200px;
         }
-        .employee-badge button {
+        .employee-card .name {
+            font-weight: bold;
+            color: #D4AF37;
+        }
+        .employee-card .sections {
+            font-size: 0.8rem;
+            color: #B0B0B0;
+            margin: 5px 0;
+        }
+        .employee-card button {
             background: #ff4444;
-            color: white;
-            padding: 2px 8px;
+            padding: 4px 8px;
             font-size: 12px;
+            margin-top: 5px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 13px;
         }
         th, td {
             padding: 8px;
@@ -142,6 +154,9 @@
         }
         th {
             color: #D4AF37;
+            position: sticky;
+            top: 0;
+            background: #1E1E1E;
         }
         .available-yes {
             background: #1e4620;
@@ -157,28 +172,44 @@
             border-radius: 4px;
             display: inline-block;
         }
-        .success-msg {
-            background: #1e4620;
+        .section-filter {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            background: #2D2D2D;
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .filter-btn.active {
+            background: #D4AF37;
+            color: #000;
+        }
+        .success-msg, .error-msg {
             padding: 10px;
             border-radius: 6px;
             margin-bottom: 15px;
         }
+        .success-msg {
+            background: #1e4620;
+            color: #a5d6a5;
+        }
         .error-msg {
             background: #4a1c1c;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 15px;
+            color: #ffb3b3;
         }
         .hidden {
             display: none;
         }
+        .scrollable-table {
+            overflow-x: auto;
+        }
         @media (max-width: 768px) {
             .date-item {
                 flex-wrap: wrap;
-            }
-            .date-item label {
-                width: 100%;
-                margin-bottom: 5px;
             }
         }
     </style>
@@ -187,10 +218,11 @@
 <div class="container">
     <div class="tabs">
         <button class="tab-btn active" data-tab="staff">Staff Availability</button>
-        <button class="tab-btn" data-tab="admin">Admin View</button>
+        <button class="tab-btn" data-tab="admin">Admin Panel</button>
+        <button class="tab-btn" data-tab="availability">Availability Matrix</button>
     </div>
 
-    <!-- STAFF PANE -->
+    <!-- Staff Panel -->
     <div id="staff-pane" class="tab-pane active">
         <div class="card">
             <h2>Mark Your Availability</h2>
@@ -203,45 +235,59 @@
                 <label>Select Dates You Can Work</label>
                 <div id="dates-container" class="date-list"></div>
             </div>
-            <button id="submit-availability">Submit My Availability</button>
+            <button id="submit-availability">Save My Availability</button>
         </div>
     </div>
 
-    <!-- ADMIN PANE -->
+    <!-- Admin Panel -->
     <div id="admin-pane" class="tab-pane">
         <div class="card">
-            <h2>Manage Employees</h2>
-            <div class="employee-list" id="employee-list"></div>
-            <div class="form-group">
-                <input type="text" id="new-employee-name" placeholder="New employee name">
-                <button id="add-employee">Add Employee</button>
+            <h2>Manage Employees & Sections</h2>
+            <div id="employee-list" class="employee-list"></div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <input type="text" id="new-employee-name" placeholder="Employee name" style="flex:1;">
+                <div>
+                    <label>Assign Sections:</label>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 5px;">
+                        <label><input type="checkbox" value="kitchen"> Kitchen</label>
+                        <label><input type="checkbox" value="floor"> Floor</label>
+                        <label><input type="checkbox" value="bar"> Bar</label>
+                        <label><input type="checkbox" value="cleaner"> Cleaner</label>
+                        <label><input type="checkbox" value="setup"> Setup Crew</label>
+                    </div>
+                </div>
+                <button id="add-employee" style="align-self: flex-end;">Add Employee</button>
             </div>
         </div>
         <div class="card">
-            <h2>All Submissions</h2>
-            <button id="export-csv">Export as CSV</button>
-            <div style="overflow-x: auto; margin-top: 15px;">
-                <table id="submissions-table">
-                    <thead>
-                        <tr>
-                            <th>Employee</th>
-                            <th>Date</th>
-                            <th>Available</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+            <h2>Export Data</h2>
+            <button id="export-csv">Export All Submissions (CSV)</button>
+        </div>
+    </div>
+
+    <!-- Availability Matrix Panel -->
+    <div id="availability-pane" class="tab-pane">
+        <div class="card">
+            <h2>Availability by Section & Event</h2>
+            <div class="section-filter" id="section-filters">
+                <button class="filter-btn active" data-section="all">All Sections</button>
+                <button class="filter-btn" data-section="kitchen">Kitchen</button>
+                <button class="filter-btn" data-section="floor">Floor</button>
+                <button class="filter-btn" data-section="bar">Bar</button>
+                <button class="filter-btn" data-section="cleaner">Cleaner</button>
+                <button class="filter-btn" data-section="setup">Setup Crew</button>
             </div>
+            <div class="scrollable-table" id="availability-matrix"></div>
         </div>
     </div>
 </div>
 
 <script>
-    // -------- DATA STORAGE --------
-    let employees = [];   // list of employee names (strings)
-    let submissions = {}; // key: employeeName, value: array of dateIds where available
+    // ---------- DATA MODELS ----------
+    let employees = [];        // { id, name, sections[] }
+    let submissions = {};      // key: employeeId, value: array of eventIds where available
 
-    // -------- EVENT DATES (44 events from your list) --------
+    // Events (44 from your list)
     const events = [
         { id: '1', date: '2026-03-28', venue: 'Sala Reggio Ballroom' },
         { id: '2', date: '2026-04-18', venue: 'Fior Events' },
@@ -289,26 +335,26 @@
         { id: '44', date: '2027-03-27', venue: 'Fior Events' }
     ];
 
-    // Format date for display
+    // Helper: format date
     function formatDate(dateStr) {
         return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     }
 
-    // Load data from localStorage
+    // Load/save localStorage
     function loadData() {
-        const storedEmployees = localStorage.getItem('availability_employees');
+        const storedEmployees = localStorage.getItem('ml_employees');
         if (storedEmployees) {
             employees = JSON.parse(storedEmployees);
         } else {
-            // Default employees: Employee 1 to Employee 15
+            // Default: 15 employees, each with no sections (admin can assign later)
             employees = [];
             for (let i = 1; i <= 15; i++) {
-                employees.push(`Employee ${i}`);
+                employees.push({ id: Date.now() + i, name: `Employee ${i}`, sections: [] });
             }
             saveEmployees();
         }
 
-        const storedSubmissions = localStorage.getItem('availability_submissions');
+        const storedSubmissions = localStorage.getItem('ml_submissions');
         if (storedSubmissions) {
             submissions = JSON.parse(storedSubmissions);
         } else {
@@ -318,54 +364,59 @@
     }
 
     function saveEmployees() {
-        localStorage.setItem('availability_employees', JSON.stringify(employees));
+        localStorage.setItem('ml_employees', JSON.stringify(employees));
     }
 
     function saveSubmissions() {
-        localStorage.setItem('availability_submissions', JSON.stringify(submissions));
+        localStorage.setItem('ml_submissions', JSON.stringify(submissions));
     }
 
-    // Render employee list in admin panel
-    function renderEmployeeList() {
+    // Render employees in admin panel
+    function renderAdminEmployees() {
         const container = document.getElementById('employee-list');
         container.innerHTML = '';
         employees.forEach(emp => {
-            const badge = document.createElement('div');
-            badge.className = 'employee-badge';
-            badge.innerHTML = `${emp} <button class="remove-emp" data-name="${emp}">✖</button>`;
-            container.appendChild(badge);
+            const card = document.createElement('div');
+            card.className = 'employee-card';
+            card.innerHTML = `
+                <div class="name">${escapeHtml(emp.name)}</div>
+                <div class="sections">Sections: ${emp.sections.length ? emp.sections.map(s => `<span class="role-badge" style="background:#D4AF37;color:#000;padding:2px 4px;border-radius:3px;">${s}</span>`).join(' ') : 'None'}</div>
+                <button class="remove-emp" data-id="${emp.id}">Remove</button>
+            `;
+            container.appendChild(card);
         });
 
-        // Add remove event listeners
+        // Add remove listeners
         document.querySelectorAll('.remove-emp').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const name = btn.getAttribute('data-name');
-                if (confirm(`Remove ${name}?`)) {
-                    employees = employees.filter(e => e !== name);
-                    delete submissions[name];
+            btn.addEventListener('click', () => {
+                const id = parseInt(btn.getAttribute('data-id'));
+                if (confirm('Remove this employee? All their availability data will be lost.')) {
+                    employees = employees.filter(e => e.id !== id);
+                    delete submissions[id];
                     saveEmployees();
                     saveSubmissions();
-                    renderEmployeeList();
+                    renderAdminEmployees();
                     renderEmployeeSelect();
-                    renderSubmissionsTable();
+                    renderAvailabilityMatrix(document.querySelector('.filter-btn.active')?.dataset.section || 'all');
                 }
             });
         });
     }
 
-    // Render employee dropdown for staff pane
+    // Render employee dropdown in staff panel
     function renderEmployeeSelect() {
         const select = document.getElementById('employee-select');
         select.innerHTML = '<option value="">-- Select your name --</option>';
         employees.forEach(emp => {
+            const sectionsText = emp.sections.length ? ` (${emp.sections.join(', ')})` : '';
             const option = document.createElement('option');
-            option.value = emp;
-            option.textContent = emp;
+            option.value = emp.id;
+            option.textContent = `${emp.name}${sectionsText}`;
             select.appendChild(option);
         });
     }
 
-    // Render the list of dates with checkboxes
+    // Render dates with checkboxes
     function renderDates() {
         const container = document.getElementById('dates-container');
         container.innerHTML = '';
@@ -380,9 +431,9 @@
         });
     }
 
-    // When employee changes, load their previously saved availability (if any)
-    function loadEmployeeAvailability(employeeName) {
-        const saved = submissions[employeeName] || [];
+    // Load employee's saved availability when selected
+    function loadEmployeeAvailability(employeeId) {
+        const saved = submissions[employeeId] || [];
         const checkboxes = document.querySelectorAll('#dates-container input[type="checkbox"]');
         checkboxes.forEach(cb => {
             const eventId = cb.getAttribute('data-id');
@@ -390,11 +441,11 @@
         });
     }
 
-    // Submit availability for selected employee
+    // Submit availability
     function submitAvailability() {
-        const employeeSelect = document.getElementById('employee-select');
-        const employeeName = employeeSelect.value;
-        if (!employeeName) {
+        const select = document.getElementById('employee-select');
+        const employeeId = parseInt(select.value);
+        if (!employeeId) {
             showMessage('staff-message', 'Please select your name first.', 'error');
             return;
         }
@@ -405,61 +456,108 @@
             if (cb.checked) selected.push(cb.getAttribute('data-id'));
         });
 
-        submissions[employeeName] = selected;
+        submissions[employeeId] = selected;
         saveSubmissions();
-        showMessage('staff-message', `Availability saved for ${employeeName}. Thank you!`, 'success');
-        renderSubmissionsTable();
+        const emp = employees.find(e => e.id === employeeId);
+        showMessage('staff-message', `Availability saved for ${emp.name}. Thank you!`, 'success');
+        renderAvailabilityMatrix(document.querySelector('.filter-btn.active')?.dataset.section || 'all');
     }
 
-    // Show temporary message
     function showMessage(containerId, text, type) {
         const container = document.getElementById(containerId);
         container.textContent = text;
         container.className = type === 'success' ? 'success-msg' : 'error-msg';
         container.classList.remove('hidden');
-        setTimeout(() => {
-            container.classList.add('hidden');
-        }, 3000);
+        setTimeout(() => container.classList.add('hidden'), 3000);
     }
 
-    // Render submissions table in admin panel
-    function renderSubmissionsTable() {
-        const tbody = document.querySelector('#submissions-table tbody');
-        tbody.innerHTML = '';
-        // Create a map: eventId -> event details
-        const eventMap = {};
-        events.forEach(e => { eventMap[e.id] = e; });
+    // Availability Matrix: shows events as rows, employees as columns, with section filter
+    function renderAvailabilityMatrix(sectionFilter = 'all') {
+        const container = document.getElementById('availability-matrix');
+        if (!container) return;
 
-        for (const employee of employees) {
-            const availableEventIds = submissions[employee] || [];
-            for (const event of events) {
-                const isAvailable = availableEventIds.includes(event.id);
-                const row = tbody.insertRow();
-                row.insertCell(0).textContent = employee;
-                row.insertCell(1).textContent = `${formatDate(event.date)} – ${event.venue}`;
-                const availCell = row.insertCell(2);
-                availCell.innerHTML = isAvailable ? '<span class="available-yes">✓ Available</span>' : '<span class="available-no">✗ Not Available</span>';
-            }
+        // Filter employees by section (if not 'all')
+        let filteredEmployees = employees;
+        if (sectionFilter !== 'all') {
+            filteredEmployees = employees.filter(emp => emp.sections.includes(sectionFilter));
         }
-        // If no employees, show message
-        if (employees.length === 0) {
-            const row = tbody.insertRow();
-            const cell = row.insertCell(0);
-            cell.colSpan = 3;
-            cell.textContent = 'No employees added yet.';
+
+        if (filteredEmployees.length === 0) {
+            container.innerHTML = '<p>No employees in this section.</p>';
+            return;
         }
+
+        // Build table: rows = events, columns = employees
+        let html = '<div class="scrollable-table"><table style="min-width:600px;"><thead><tr><th>Event</th>';
+        filteredEmployees.forEach(emp => {
+            html += `<th>${escapeHtml(emp.name)}</th>`;
+        });
+        html += '</tr></thead><tbody>';
+
+        events.forEach(event => {
+            html += `<tr><td><strong>${formatDate(event.date)}<br>${event.venue}</strong></td>`;
+            filteredEmployees.forEach(emp => {
+                const available = (submissions[emp.id] || []).includes(event.id);
+                html += `<td>${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}</td>`;
+            });
+            html += '</tr>';
+        });
+        html += '</tbody></table></div>';
+
+        // Add summary per event per section
+        html += '<div style="margin-top:20px;"><h3>Summary by Section</h3>';
+        const sections = ['kitchen', 'floor', 'bar', 'cleaner', 'setup'];
+        sections.forEach(section => {
+            const sectionEmployees = employees.filter(emp => emp.sections.includes(section));
+            if (sectionEmployees.length === 0) return;
+            html += `<h4>${section.charAt(0).toUpperCase() + section.slice(1)}</h4><div class="scrollable-table"><table><thead><tr><th>Event</th><th>Available / Total</th></tr></thead><tbody>`;
+            events.forEach(event => {
+                const availableCount = sectionEmployees.filter(emp => (submissions[emp.id] || []).includes(event.id)).length;
+                const total = sectionEmployees.length;
+                html += `<tr><td>${formatDate(event.date)} – ${event.venue}</td><td>${availableCount} / ${total}</td></tr>`;
+            });
+            html += '</tbody></table></div>';
+        });
+        html += '</div>';
+
+        container.innerHTML = html;
     }
 
-    // Export to CSV
+    // Add employee (admin)
+    function addEmployee() {
+        const nameInput = document.getElementById('new-employee-name');
+        const name = nameInput.value.trim();
+        if (!name) {
+            alert('Please enter a name');
+            return;
+        }
+        // Get selected sections
+        const sectionCheckboxes = document.querySelectorAll('#admin-pane input[type="checkbox"]:checked');
+        const sections = Array.from(sectionCheckboxes).map(cb => cb.value);
+        if (sections.length === 0) {
+            alert('Please assign at least one section');
+            return;
+        }
+        const newId = Date.now();
+        employees.push({ id: newId, name, sections });
+        saveEmployees();
+        // Clear form
+        nameInput.value = '';
+        sectionCheckboxes.forEach(cb => cb.checked = false);
+        renderAdminEmployees();
+        renderEmployeeSelect();
+        renderAvailabilityMatrix(document.querySelector('.filter-btn.active')?.dataset.section || 'all');
+    }
+
+    // Export CSV
     function exportCSV() {
-        let csv = 'Employee,Date,Available\n';
-        const eventMap = {};
-        events.forEach(e => { eventMap[e.id] = e; });
-        for (const employee of employees) {
-            const availableEventIds = submissions[employee] || [];
+        let csv = 'Employee,Section,Event Date,Venue,Available\n';
+        for (const emp of employees) {
+            const empSections = emp.sections.join(';');
+            const availableEvents = submissions[emp.id] || [];
             for (const event of events) {
-                const isAvailable = availableEventIds.includes(event.id);
-                csv += `"${employee}","${formatDate(event.date)} – ${event.venue}",${isAvailable ? 'Yes' : 'No'}\n`;
+                const isAvailable = availableEvents.includes(event.id);
+                csv += `"${emp.name}","${empSections}","${formatDate(event.date)}","${event.venue}",${isAvailable ? 'Yes' : 'No'}\n`;
             }
         }
         const blob = new Blob([csv], { type: 'text/csv' });
@@ -478,54 +576,69 @@
         document.getElementById(`${tabId}-pane`).classList.add('active');
         document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
         if (tabId === 'admin') {
-            renderEmployeeList();
-            renderSubmissionsTable();
-        } else {
+            renderAdminEmployees();
+        } else if (tabId === 'availability') {
+            renderAvailabilityMatrix(document.querySelector('.filter-btn.active')?.dataset.section || 'all');
+        } else if (tabId === 'staff') {
             renderEmployeeSelect();
         }
     }
 
-    // Add new employee
-    function addEmployee() {
-        const input = document.getElementById('new-employee-name');
-        const name = input.value.trim();
-        if (!name) return;
-        if (employees.includes(name)) {
-            alert('Employee already exists.');
-            return;
-        }
-        employees.push(name);
-        saveEmployees();
-        renderEmployeeList();
-        renderEmployeeSelect();
-        renderSubmissionsTable();
-        input.value = '';
+    // Section filter buttons
+    function initFilters() {
+        const filters = document.querySelectorAll('.filter-btn');
+        filters.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filters.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const section = btn.getAttribute('data-section');
+                renderAvailabilityMatrix(section);
+            });
+        });
     }
 
-    // Initialize everything
+    // Escape HTML to prevent injection
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // Initialize
     function init() {
         loadData();
         renderDates();
         renderEmployeeSelect();
+        initFilters();
+
         // Event listeners
         document.getElementById('employee-select').addEventListener('change', (e) => {
-            loadEmployeeAvailability(e.target.value);
+            const empId = parseInt(e.target.value);
+            if (empId) loadEmployeeAvailability(empId);
         });
         document.getElementById('submit-availability').addEventListener('click', submitAvailability);
         document.getElementById('add-employee').addEventListener('click', addEmployee);
         document.getElementById('export-csv').addEventListener('click', exportCSV);
+
         // Tab buttons
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                const tab = btn.getAttribute('data-tab');
-                switchTab(tab);
+                switchTab(btn.getAttribute('data-tab'));
             });
         });
-        // Pre-load the first employee's availability if any
-        if (employees.length) {
-            document.getElementById('employee-select').value = employees[0];
-            loadEmployeeAvailability(employees[0]);
+
+        // Pre-load first employee's availability if any
+        const firstEmp = employees[0];
+        if (firstEmp) {
+            document.getElementById('employee-select').value = firstEmp.id;
+            loadEmployeeAvailability(firstEmp.id);
         }
+
+        // Initial matrix render
+        renderAvailabilityMatrix('all');
     }
 
     init();
