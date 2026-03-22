@@ -188,6 +188,9 @@
             margin-right: 5px;
             width: auto;
         }
+        .employee-card button.edit-btn {
+            background: #2196f3;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -265,6 +268,49 @@
             border-radius: 8px;
             margin-bottom: 20px;
             border: 1px solid #e0e0e0;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-header h3 {
+            margin: 0;
+            color: #D4AF37;
+        }
+        .close-modal {
+            cursor: pointer;
+            font-size: 24px;
+            font-weight: bold;
+            color: #aaa;
+        }
+        .close-modal:hover {
+            color: black;
         }
         @media (max-width: 768px) {
             .date-item {
@@ -377,9 +423,39 @@
     </div>
 </div>
 
+<!-- Edit Employee Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Edit Employee</h3>
+            <span class="close-modal">&times;</span>
+        </div>
+        <div id="edit-error" class="error-msg hidden" style="margin-bottom: 15px;"></div>
+        <div class="form-group">
+            <label>Employee Number</label>
+            <input type="text" id="edit-emp-number">
+        </div>
+        <div class="form-group">
+            <label>Employee Name</label>
+            <input type="text" id="edit-emp-name">
+        </div>
+        <div class="form-group">
+            <label>Sections</label>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <label><input type="checkbox" value="kitchen" class="edit-section"> Kitchen</label>
+                <label><input type="checkbox" value="floor" class="edit-section"> Floor</label>
+                <label><input type="checkbox" value="bar" class="edit-section"> Bar</label>
+                <label><input type="checkbox" value="cleaner" class="edit-section"> Cleaner</label>
+                <label><input type="checkbox" value="setup" class="edit-section"> Setup Crew</label>
+            </div>
+        </div>
+        <button id="save-edit">Save Changes</button>
+    </div>
+</div>
+
 <script>
-    // ---------- ADMIN/MANAGER PASSWORD ----------
-    const MANAGER_PASSWORD = 'ML2026';   // Change this to any password you prefer
+    // ---------- MANAGER PASSWORD ----------
+    const MANAGER_PASSWORD = 'ML2026';
     let managerAuthenticated = sessionStorage.getItem('managerAuthenticated') === 'true';
 
     // ---------- DATA MODELS ----------
@@ -454,7 +530,6 @@
                 for (let i = 1; i <= 45; i++) {
                     const empNumber = (1000 + i).toString();
                     const name = `Employee ${i}`;
-                    // Assign sections: each employee gets the section corresponding to i mod 5 (0: kitchen, 1: floor, etc.)
                     const sectionIndex = (i - 1) % sectionOptions.length;
                     const sections = [sectionOptions[sectionIndex]];
                     employees.push({
@@ -579,6 +654,65 @@
         });
     }
 
+    // Edit employee logic
+    let editingEmployeeId = null;
+
+    function openEditModal(empId) {
+        const employee = employees.find(e => e.id === empId);
+        if (!employee) return;
+
+        editingEmployeeId = empId;
+        document.getElementById('edit-emp-number').value = employee.empNumber;
+        document.getElementById('edit-emp-name').value = employee.name;
+        // Checkboxes
+        const sections = employee.sections;
+        document.querySelectorAll('.edit-section').forEach(cb => {
+            cb.checked = sections.includes(cb.value);
+        });
+        document.getElementById('edit-error').classList.add('hidden');
+        document.getElementById('editModal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
+        editingEmployeeId = null;
+    }
+
+    function saveEdit() {
+        const newNumber = document.getElementById('edit-emp-number').value.trim();
+        const newName = document.getElementById('edit-emp-name').value.trim();
+        if (!newNumber || !newName) {
+            showEditError('Employee number and name are required.');
+            return;
+        }
+        // Check if number already used by another employee (different id)
+        if (employees.some(e => e.id !== editingEmployeeId && e.empNumber === newNumber)) {
+            showEditError('Employee number already exists. Please use a unique number.');
+            return;
+        }
+        const newSections = Array.from(document.querySelectorAll('.edit-section:checked')).map(cb => cb.value);
+        if (newSections.length === 0) {
+            showEditError('Please assign at least one section.');
+            return;
+        }
+        // Update employee
+        const index = employees.findIndex(e => e.id === editingEmployeeId);
+        if (index !== -1) {
+            employees[index].empNumber = newNumber;
+            employees[index].name = newName;
+            employees[index].sections = newSections;
+            saveAllData();
+            closeEditModal();
+            refreshAllViews();
+        }
+    }
+
+    function showEditError(msg) {
+        const errorDiv = document.getElementById('edit-error');
+        errorDiv.textContent = msg;
+        errorDiv.classList.remove('hidden');
+    }
+
     // Render admin employee list
     function renderAdminEmployees() {
         const container = document.getElementById('employee-list');
@@ -590,9 +724,18 @@
             card.innerHTML = `
                 <div class="name">#${emp.empNumber} – ${escapeHtml(emp.name)}</div>
                 <div class="sections">Sections: ${emp.sections.length ? emp.sections.map(s => `<span style="background:#D4AF37; color:white; padding:2px 4px; border-radius:3px; margin-right:4px;">${s}</span>`).join(' ') : 'None'}</div>
-                <button class="remove-emp" data-id="${emp.id}">Remove Employee</button>
+                <div>
+                    <button class="edit-btn" data-id="${emp.id}">Edit</button>
+                    <button class="remove-emp" data-id="${emp.id}">Remove</button>
+                </div>
             `;
             container.appendChild(card);
+        });
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = parseInt(btn.getAttribute('data-id'));
+                openEditModal(id);
+            });
         });
         document.querySelectorAll('.remove-emp').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -690,12 +833,12 @@
         html += ' </thead><tbody>';
 
         events.forEach(event => {
-            html += `<tr><td><strong>${formatDate(event.date)}<br>${event.venue}</strong></td>`;
+            html += ` dp\n<td><strong>${formatDate(event.date)}<br>${event.venue}</strong>`;
             filteredEmployees.forEach(emp => {
                 const available = (submissions[emp.id] || []).includes(event.id);
-                html += `<td>${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}</td>`;
+                html += `<td class="text-center">${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}`;
             });
-            html += '</tr>';
+            html += ';</tr>';
         });
         html += '</tbody></table></div>';
 
@@ -848,6 +991,15 @@
         loadData();
         renderDates();
         initFilters();
+
+        // Modal events
+        const modal = document.getElementById('editModal');
+        const closeBtn = document.querySelector('.close-modal');
+        closeBtn.addEventListener('click', closeEditModal);
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) closeEditModal();
+        });
+        document.getElementById('save-edit').addEventListener('click', saveEdit);
 
         // Event listeners
         document.getElementById('load-employee').addEventListener('click', loadEmployeeByNumber);
