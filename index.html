@@ -282,7 +282,7 @@
 </head>
 <body>
 <div class="container">
-    <!-- Header with Logo -->
+    <!-- Header -->
     <div class="app-header">
         <div class="logo">
             <div class="logo-icon">ML</div>
@@ -322,7 +322,7 @@
         </div>
     </div>
 
-    <!-- Admin Panel -->
+    <!-- Admin Panel (Manager Only) -->
     <div id="admin-pane" class="tab-pane">
         <div class="card">
             <h2>Manage Employees & Sections</h2>
@@ -360,7 +360,7 @@
         </div>
     </div>
 
-    <!-- Availability Matrix Panel -->
+    <!-- Availability Matrix (Manager Only) -->
     <div id="availability-pane" class="tab-pane">
         <div class="card">
             <h2>Availability by Section & Event</h2>
@@ -378,9 +378,9 @@
 </div>
 
 <script>
-    // ---------- ADMIN PASSWORD ----------
-    const ADMIN_PASSWORD = 'ML2026';
-    let adminAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
+    // ---------- ADMIN/MANAGER PASSWORD ----------
+    const MANAGER_PASSWORD = 'ML2026';   // Change this to any password you prefer
+    let managerAuthenticated = sessionStorage.getItem('managerAuthenticated') === 'true';
 
     // ---------- DATA MODELS ----------
     let employees = [];        // { id, empNumber, name, sections[] }
@@ -440,7 +440,7 @@
         return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     }
 
-    // Load/save data from localStorage with error handling
+    // Load/save data from localStorage
     function loadData() {
         try {
             const storedEmployees = localStorage.getItem('ml_employees');
@@ -448,7 +448,22 @@
                 employees = JSON.parse(storedEmployees);
                 if (!Array.isArray(employees)) employees = [];
             } else {
+                // Create 45 default employees with rotating sections
                 employees = [];
+                const sectionOptions = ['kitchen', 'floor', 'bar', 'cleaner', 'setup'];
+                for (let i = 1; i <= 45; i++) {
+                    const empNumber = (1000 + i).toString();
+                    const name = `Employee ${i}`;
+                    // Assign sections: each employee gets the section corresponding to i mod 5 (0: kitchen, 1: floor, etc.)
+                    const sectionIndex = (i - 1) % sectionOptions.length;
+                    const sections = [sectionOptions[sectionIndex]];
+                    employees.push({
+                        id: Date.now() + i,
+                        empNumber,
+                        name,
+                        sections
+                    });
+                }
             }
         } catch(e) { employees = []; console.error(e); }
 
@@ -527,7 +542,7 @@
 
     // Refresh UI after data changes
     function refreshAllViews() {
-        if (adminAuthenticated) {
+        if (managerAuthenticated) {
             renderAdminEmployees();
             renderAdminEventsList();
             renderAvailabilityMatrix(document.querySelector('.filter-btn.active')?.dataset.section || 'all');
@@ -639,7 +654,7 @@
         saveAllData();
         const emp = employees.find(e => e.id === currentEmployeeId);
         showMessage('staff-message', `Availability saved for ${emp.name}. Thank you!`, 'success');
-        if (adminAuthenticated) {
+        if (managerAuthenticated) {
             renderAvailabilityMatrix(document.querySelector('.filter-btn.active')?.dataset.section || 'all');
         }
     }
@@ -653,7 +668,7 @@
         setTimeout(() => container.classList.add('hidden'), 3000);
     }
 
-    // Render availability matrix (admin view)
+    // Render availability matrix (manager view)
     function renderAvailabilityMatrix(sectionFilter = 'all') {
         const container = document.getElementById('availability-matrix');
         if (!container) return;
@@ -668,11 +683,11 @@
             return;
         }
 
-        let html = '<div class="scrollable-table"><table style="min-width:600px;"><thead><tr><th>Event</th>';
+        let html = '<div class="scrollable-table"><table style="min-width:600px;"><thead> <tr><th>Event</th>';
         filteredEmployees.forEach(emp => {
             html += `<th>#${emp.empNumber}<br>${escapeHtml(emp.name)}</th>`;
         });
-        html += '</tr></thead><tbody>';
+        html += ' </thead><tbody>';
 
         events.forEach(event => {
             html += `<tr><td><strong>${formatDate(event.date)}<br>${event.venue}</strong></td>`;
@@ -703,7 +718,7 @@
         container.innerHTML = html;
     }
 
-    // Add employee (admin)
+    // Add employee (manager)
     function addEmployee() {
         const empNumber = document.getElementById('new-employee-number').value.trim();
         const name = document.getElementById('new-employee-name').value.trim();
@@ -752,14 +767,14 @@
         URL.revokeObjectURL(url);
     }
 
-    // Tab switching with password protection
+    // Tab switching with manager password protection
     function switchTab(tabId) {
         if (tabId === 'admin' || tabId === 'availability') {
-            if (!adminAuthenticated) {
-                const pwd = prompt('This area is password protected. Please enter the admin password:');
-                if (pwd === ADMIN_PASSWORD) {
-                    adminAuthenticated = true;
-                    sessionStorage.setItem('adminAuthenticated', 'true');
+            if (!managerAuthenticated) {
+                const pwd = prompt('This area is password protected. Please enter the manager password:');
+                if (pwd === MANAGER_PASSWORD) {
+                    managerAuthenticated = true;
+                    sessionStorage.setItem('managerAuthenticated', 'true');
                 } else {
                     alert('Incorrect password. Access denied.');
                     return;
@@ -814,7 +829,7 @@
         }
         const employee = employees.find(e => e.empNumber === empNumber);
         if (!employee) {
-            alert('Employee number not found. Please contact admin.');
+            alert('Employee number not found. Please contact manager.');
             document.getElementById('staff-details').classList.add('hidden');
             currentEmployeeId = null;
             return;
