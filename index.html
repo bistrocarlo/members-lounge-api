@@ -17,6 +17,43 @@
             max-width: 1400px;
             margin: 0 auto;
         }
+        /* Header */
+        .app-header {
+            background: #000000;
+            border-bottom: 2px solid #D4AF37;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .logo-icon {
+            background: #D4AF37;
+            color: #000000;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 28px;
+        }
+        .logo h1 {
+            color: #D4AF37;
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+        }
+        .tagline {
+            color: #B0B0B0;
+            font-size: 0.9rem;
+        }
         .tabs {
             display: flex;
             gap: 10px;
@@ -201,14 +238,6 @@
         .scrollable-table {
             overflow-x: auto;
         }
-        .private-warning {
-            background: #D4AF37;
-            color: #000;
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
         .staff-info {
             background: #2D2D2D;
             padding: 15px;
@@ -219,11 +248,28 @@
             .date-item {
                 flex-wrap: wrap;
             }
+            .app-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .logo h1 {
+                font-size: 1.4rem;
+            }
         }
     </style>
 </head>
 <body>
 <div class="container">
+    <!-- Header with Logo -->
+    <div class="app-header">
+        <div class="logo">
+            <div class="logo-icon">ML</div>
+            <h1>Member's Lounge</h1>
+        </div>
+        <div class="tagline">Staff Availability System</div>
+    </div>
+
+    <!-- Tabs -->
     <div class="tabs" id="tab-bar">
         <button class="tab-btn" data-tab="staff">Staff Availability</button>
         <button class="tab-btn" data-tab="admin">Admin Panel</button>
@@ -287,6 +333,8 @@
         <div class="card">
             <h2>Export Data</h2>
             <button id="export-csv">Export All Submissions (CSV)</button>
+            <button id="save-data" style="margin-left: 10px;">Save All Data (Manual)</button>
+            <div id="save-status" class="hidden success-msg" style="margin-top: 10px;"></div>
         </div>
     </div>
 
@@ -370,31 +418,39 @@
         return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     }
 
-    // Load/save data from localStorage
+    // Load/save data from localStorage with error handling
     function loadData() {
-        const storedEmployees = localStorage.getItem('ml_employees');
-        if (storedEmployees) {
-            employees = JSON.parse(storedEmployees);
-        } else {
-            employees = [];
-            saveEmployees();
-        }
+        try {
+            const storedEmployees = localStorage.getItem('ml_employees');
+            if (storedEmployees) {
+                employees = JSON.parse(storedEmployees);
+                if (!Array.isArray(employees)) employees = [];
+            } else {
+                employees = [];
+            }
+        } catch(e) { employees = []; console.error(e); }
 
-        const storedSubmissions = localStorage.getItem('ml_submissions');
-        if (storedSubmissions) {
-            submissions = JSON.parse(storedSubmissions);
-        } else {
-            submissions = {};
-            saveSubmissions();
-        }
+        try {
+            const storedSubmissions = localStorage.getItem('ml_submissions');
+            if (storedSubmissions) {
+                submissions = JSON.parse(storedSubmissions);
+                if (typeof submissions !== 'object') submissions = {};
+            } else {
+                submissions = {};
+            }
+        } catch(e) { submissions = {}; console.error(e); }
 
-        const storedEvents = localStorage.getItem('ml_events');
-        if (storedEvents) {
-            events = JSON.parse(storedEvents);
-        } else {
-            events = [...defaultEvents];
-            saveEvents();
-        }
+        try {
+            const storedEvents = localStorage.getItem('ml_events');
+            if (storedEvents) {
+                events = JSON.parse(storedEvents);
+                if (!Array.isArray(events)) events = [];
+            } else {
+                events = [...defaultEvents];
+            }
+        } catch(e) { events = [...defaultEvents]; console.error(e); }
+
+        // Ensure events are sorted
         sortEvents();
     }
 
@@ -402,9 +458,21 @@
         events.sort((a, b) => new Date(a.date) - new Date(b.date));
     }
 
-    function saveEvents() { localStorage.setItem('ml_events', JSON.stringify(events)); }
-    function saveEmployees() { localStorage.setItem('ml_employees', JSON.stringify(employees)); }
-    function saveSubmissions() { localStorage.setItem('ml_submissions', JSON.stringify(submissions)); }
+    function saveAllData() {
+        localStorage.setItem('ml_employees', JSON.stringify(employees));
+        localStorage.setItem('ml_submissions', JSON.stringify(submissions));
+        localStorage.setItem('ml_events', JSON.stringify(events));
+        showTemporaryStatus('All data saved successfully.');
+    }
+
+    function showTemporaryStatus(msg) {
+        const statusDiv = document.getElementById('save-status');
+        if (statusDiv) {
+            statusDiv.textContent = msg;
+            statusDiv.classList.remove('hidden');
+            setTimeout(() => statusDiv.classList.add('hidden'), 2000);
+        }
+    }
 
     // Add a new event
     function addEvent(date, venue) {
@@ -420,7 +488,7 @@
         const newId = Date.now().toString();
         events.push({ id: newId, date, venue });
         sortEvents();
-        saveEvents();
+        saveAllData();
         refreshAllViews();
         return true;
     }
@@ -431,8 +499,7 @@
             for (let empId in submissions) {
                 submissions[empId] = submissions[empId].filter(eid => eid !== eventId);
             }
-            saveEvents();
-            saveSubmissions();
+            saveAllData();
             refreshAllViews();
         }
     }
@@ -497,8 +564,7 @@
                 if (confirm('Remove this employee? All their availability data will be lost.')) {
                     employees = employees.filter(e => e.id !== id);
                     delete submissions[id];
-                    saveEmployees();
-                    saveSubmissions();
+                    saveAllData();
                     renderAdminEmployees();
                     refreshAllViews();
                     if (currentEmployeeId === id) {
@@ -549,7 +615,7 @@
             if (cb.checked) selected.push(cb.getAttribute('data-id'));
         });
         submissions[currentEmployeeId] = selected;
-        saveSubmissions();
+        saveAllData();
         const emp = employees.find(e => e.id === currentEmployeeId);
         showMessage('staff-message', `Availability saved for ${emp.name}. Thank you!`, 'success');
         if (adminAuthenticated) {
@@ -581,17 +647,17 @@
             return;
         }
 
-        let html = '<div class="scrollable-table"><table style="min-width:600px;"><thead><tr><th>Event</th>';
+        let html = '<div class="scrollable-table"><table style="min-width:600px;"><thead> tr><th>Event</th>';
         filteredEmployees.forEach(emp => {
             html += `<th>#${emp.empNumber}<br>${escapeHtml(emp.name)}</th>`;
         });
-        html += '</tr></thead><tbody>';
+        html += ' </thead><tbody>';
 
         events.forEach(event => {
-            html += `<tr><td><strong>${formatDate(event.date)}<br>${event.venue}</strong></td>`;
+            html += ` dp\n<td><strong>${formatDate(event.date)}<br>${event.venue}</strong></td>`;
             filteredEmployees.forEach(emp => {
                 const available = (submissions[emp.id] || []).includes(event.id);
-                html += `<td>${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}</td>`;
+                html += `<td class="text-center">${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}</td>`;
             });
             html += '</tr>';
         });
@@ -636,12 +702,13 @@
         }
         const newId = Date.now();
         employees.push({ id: newId, empNumber, name, sections });
-        saveEmployees();
+        saveAllData();
         document.getElementById('new-employee-number').value = '';
         document.getElementById('new-employee-name').value = '';
         sectionCheckboxes.forEach(cb => cb.checked = false);
         renderAdminEmployees();
         refreshAllViews();
+        showTemporaryStatus(`Employee ${name} (#${empNumber}) added.`);
     }
 
     // Export CSV
@@ -737,7 +804,6 @@
         sectionsSpan.innerHTML = employee.sections.map(s => `<span style="background:#D4AF37;color:#000;padding:4px 8px;border-radius:4px;margin-right:5px;">${s}</span>`).join('') || 'None';
         document.getElementById('staff-details').classList.remove('hidden');
         loadEmployeeAvailability(employee.id);
-        // Clear any previous message
         document.getElementById('staff-message').classList.add('hidden');
     }
 
@@ -760,6 +826,10 @@
                 document.getElementById('new-event-venue').value = '';
             }
         });
+        document.getElementById('save-data')?.addEventListener('click', () => {
+            saveAllData();
+            showTemporaryStatus('Data saved to browser storage.');
+        });
 
         // Tab buttons
         document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -769,10 +839,8 @@
         });
 
         // Ensure staff panel is visible initially
-        if (!window.location.search.includes('employee')) {
-            document.getElementById('staff-pane').classList.add('active');
-            document.querySelector('.tab-btn[data-tab="staff"]').classList.add('active');
-        }
+        document.getElementById('staff-pane').classList.add('active');
+        document.querySelector('.tab-btn[data-tab="staff"]').classList.add('active');
     }
 
     init();
