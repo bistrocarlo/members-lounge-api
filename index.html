@@ -472,6 +472,11 @@
         </div>
         <div class="card">
             <h2>Manage Events & Assignments</h2>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+                <input type="date" id="new-event-date" placeholder="YYYY-MM-DD">
+                <input type="text" id="new-event-venue" placeholder="Venue name" style="flex:2;">
+                <button id="add-event">Add Event</button>
+            </div>
             <div id="event-list" style="margin-top: 10px; max-height: 400px; overflow-y: auto;"></div>
         </div>
         <div class="card">
@@ -578,9 +583,9 @@
 
     // ---------- DATA MODELS ----------
     let employees = [];
-    let submissions = {};      // key: employeeId, value: array of eventIds where available (staff self-selected)
+    let submissions = {};
     let events = [];
-    let eventSettings = {};     // key: eventId, value: { capacities: { kitchen: 2, ... }, preAssignments: [employeeId] }
+    let eventSettings = {};
 
     // Default events (44 from your list)
     const defaultEvents = [
@@ -1154,14 +1159,14 @@
         });
         html += '</thead><tbody>';
         events.forEach(event => {
-            html += `<tr><td><strong>${formatDate(event.date)}<br>${event.venue}</strong></td>`;
+            html += `  <tr><td><strong>${formatDate(event.date)}<br>${event.venue}</strong>`;
             filteredEmployees.forEach(emp => {
                 const available = (submissions[emp.id] || []).includes(event.id) || isEmployeePreAssigned(emp.id, event.id);
-                html += `<td class="text-center">${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}</td>`;
+                html += `<td class="text-center">${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}`;
             });
-            html += '</tr>';
+            html += '  ';
         });
-        html += '</tbody></table></div>';
+        html += '</tbody>  </table></div>';
 
         // Summary with remaining slots per section (taking into account event-specific capacities and pre-assignments)
         const sections = ['kitchen', 'floor', 'bar', 'cleaner', 'setup', 'manager'];
@@ -1169,7 +1174,7 @@
         sections.forEach(section => {
             const sectionEmployees = employees.filter(emp => emp.section === section);
             if (sectionEmployees.length === 0) return;
-            html += `<h4>${section.charAt(0).toUpperCase() + section.slice(1)}</h4><div class="scrollable-table"><table><thead><tr><th>Event</th><th>Assigned / Capacity</th><th>Remaining Slots</th></tr></thead><tbody>`;
+            html += `<h4>${section.charAt(0).toUpperCase() + section.slice(1)}</h4><div class="scrollable-table"> <table><thead><tr><th>Event</th><th>Assigned / Capacity</th><th>Remaining Slots</th></tr></thead><tbody>`;
             events.forEach(event => {
                 const preCount = getPreAssignedCount(event.id, section);
                 const selfCount = getSelfAssignedCount(event.id, section);
