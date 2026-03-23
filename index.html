@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Member's Lounge – Staff Availability</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             background: #f5f5f5;
             color: #1e1e1e;
@@ -13,8 +17,10 @@
             line-height: 1.6;
             padding: 20px;
         }
-        .container { max-width: 1400px; margin: 0 auto; }
-
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
         /* Header */
         .app-header {
             background: white;
@@ -27,7 +33,11 @@
             flex-wrap: wrap;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        .logo { display: flex; align-items: center; gap: 15px; }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
         .logo-icon {
             background: #D4AF37;
             color: white;
@@ -40,9 +50,15 @@
             font-weight: bold;
             font-size: 28px;
         }
-        .logo h1 { color: #1e1e1e; font-size: 1.8rem; letter-spacing: 1px; }
-        .tagline { color: #666; font-size: 0.9rem; }
-
+        .logo h1 {
+            color: #1e1e1e;
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+        }
+        .tagline {
+            color: #666;
+            font-size: 0.9rem;
+        }
         .tabs {
             display: flex;
             gap: 10px;
@@ -60,10 +76,16 @@
             transition: background 0.3s;
             font-weight: 500;
         }
-        .tab-btn.active { background: #D4AF37; color: white; }
-        .tab-pane { display: none; }
-        .tab-pane.active { display: block; }
-
+        .tab-btn.active {
+            background: #D4AF37;
+            color: white;
+        }
+        .tab-pane {
+            display: none;
+        }
+        .tab-pane.active {
+            display: block;
+        }
         .card {
             background: white;
             border-radius: 12px;
@@ -72,10 +94,19 @@
             border: 1px solid #e0e0e0;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        .card h2, .card h3 { color: #D4AF37; margin-bottom: 15px; }
-
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; color: #555; font-weight: 500; }
+        .card h2, .card h3 {
+            color: #D4AF37;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
         input, select, button {
             padding: 10px;
             background: #fff;
@@ -93,8 +124,14 @@
             font-weight: bold;
             width: auto;
         }
-        button:hover { background: #b58f2a; }
-
+        button:hover {
+            background: #b58f2a;
+        }
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 1px solid #ccc;
+        }
         .date-list {
             max-height: 500px;
             overflow-y: auto;
@@ -127,11 +164,6 @@
             transform: scale(1.2);
             width: auto;
         }
-        .date-item label {
-            flex: 1;
-            margin: 0;
-            cursor: pointer;
-        }
         .employee-list {
             display: flex;
             flex-wrap: wrap;
@@ -147,8 +179,15 @@
         }
         .employee-card .name {
             font-weight: bold;
-            color: #1e1e1e;  /* Black */
+            color: #1e1e1e;
             font-size: 1.1em;
+        }
+        .employee-card .code {
+            font-family: monospace;
+            background: #eee;
+            padding: 2px 4px;
+            border-radius: 4px;
+            margin-left: 8px;
         }
         .employee-card .sections {
             font-size: 0.8rem;
@@ -166,6 +205,9 @@
         }
         .employee-card button.edit-btn {
             background: #2196f3;
+        }
+        .employee-card button.generate-code-btn {
+            background: #D4AF37;
         }
         table {
             width: 100%;
@@ -213,16 +255,31 @@
             border: none;
             color: #333;
         }
-        .filter-btn.active { background: #D4AF37; color: white; }
+        .filter-btn.active {
+            background: #D4AF37;
+            color: white;
+        }
         .success-msg, .error-msg {
             padding: 10px;
             border-radius: 6px;
             margin-bottom: 15px;
         }
-        .success-msg { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
-        .error-msg { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
-        .hidden { display: none; }
-        .scrollable-table { overflow-x: auto; }
+        .success-msg {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+        .error-msg {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+        .hidden {
+            display: none;
+        }
+        .scrollable-table {
+            overflow-x: auto;
+        }
         .staff-info {
             background: #fafafa;
             padding: 15px;
@@ -259,13 +316,43 @@
             align-items: center;
             margin-bottom: 20px;
         }
-        .modal-header h3 { margin: 0; color: #D4AF37; }
-        .close-modal { cursor: pointer; font-size: 24px; font-weight: bold; color: #aaa; }
-        .close-modal:hover { color: black; }
+        .modal-header h3 {
+            margin: 0;
+            color: #D4AF37;
+        }
+        .close-modal {
+            cursor: pointer;
+            font-size: 24px;
+            font-weight: bold;
+            color: #aaa;
+        }
+        .close-modal:hover {
+            color: black;
+        }
+        .code-input-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .code-input-group input {
+            flex: 2;
+        }
+        .code-input-group button {
+            flex: 0;
+            white-space: nowrap;
+        }
         @media (max-width: 768px) {
-            .date-item { flex-direction: column; align-items: flex-start; }
-            .app-header { flex-direction: column; gap: 10px; }
-            .logo h1 { font-size: 1.4rem; }
+            .date-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .app-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .logo h1 {
+                font-size: 1.4rem;
+            }
         }
     </style>
 </head>
@@ -288,17 +375,17 @@
     <!-- Staff Panel -->
     <div id="staff-pane" class="tab-pane">
         <div class="card">
-            <h2>Enter Your Employee Number</h2>
+            <h2>Enter Your Employee Code</h2>
             <div id="staff-message" class="hidden"></div>
             <div class="form-group">
-                <label>Employee Number</label>
-                <input type="text" id="employee-number" placeholder="e.g., 1001">
+                <label>Employee Code</label>
+                <input type="text" id="employee-code" placeholder="e.g., 7A3F2B">
                 <button id="load-employee" style="margin-top: 10px;">Load My Details</button>
             </div>
             <div id="staff-details" class="hidden">
                 <div class="staff-info">
                     <div><strong>Name:</strong> <span id="display-name"></span></div>
-                    <div><strong>Sections:</strong> <span id="display-sections"></span></div>
+                    <div><strong>Section:</strong> <span id="display-section"></span></div>
                 </div>
                 <div class="form-group">
                     <label>Select Dates You Can Work</label>
@@ -312,19 +399,28 @@
     <!-- Admin Panel (Manager Only) -->
     <div id="admin-pane" class="tab-pane">
         <div class="card">
-            <h2>Manage Employees & Sections</h2>
+            <h2>Manage Employees</h2>
             <div id="employee-list" class="employee-list"></div>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <input type="text" id="new-employee-number" placeholder="Employee Number (e.g., 1001)" style="flex:1;">
-                <input type="text" id="new-employee-name" placeholder="Employee name" style="flex:1;">
-                <div>
-                    <label>Assign Sections:</label>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 5px;">
-                        <label><input type="checkbox" value="kitchen"> Kitchen</label>
-                        <label><input type="checkbox" value="floor"> Floor</label>
-                        <label><input type="checkbox" value="bar"> Bar</label>
-                        <label><input type="checkbox" value="cleaner"> Cleaner</label>
-                        <label><input type="checkbox" value="setup"> Setup Crew</label>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px;">
+                <div style="flex: 2;">
+                    <label>Employee Name</label>
+                    <input type="text" id="new-employee-name" placeholder="Name">
+                </div>
+                <div style="flex: 1;">
+                    <label>Section</label>
+                    <select id="new-employee-section">
+                        <option value="kitchen">Kitchen</option>
+                        <option value="floor">Floor</option>
+                        <option value="bar">Bar</option>
+                        <option value="cleaner">Cleaner</option>
+                        <option value="setup">Setup Crew</option>
+                    </select>
+                </div>
+                <div style="flex: 2;">
+                    <label>Employee Code (optional, will generate if left blank)</label>
+                    <div class="code-input-group">
+                        <input type="text" id="new-employee-code" placeholder="Auto-generate">
+                        <button id="generate-random-code" type="button">Generate Random</button>
                     </div>
                 </div>
                 <button id="add-employee" style="align-self: flex-end;">Add Employee</button>
@@ -342,6 +438,7 @@
         <div class="card">
             <h2>Export Data</h2>
             <button id="export-csv">Export All Submissions (CSV)</button>
+            <button id="export-codes" style="margin-left: 10px;">Export Employee Codes (CSV)</button>
             <button id="save-data" style="margin-left: 10px;">Save All Data (Manual)</button>
             <div id="save-status" class="hidden success-msg" style="margin-top: 10px;"></div>
         </div>
@@ -373,21 +470,24 @@
         </div>
         <div id="edit-error" class="error-msg hidden" style="margin-bottom: 15px;"></div>
         <div class="form-group">
-            <label>Employee Number</label>
-            <input type="text" id="edit-emp-number">
-        </div>
-        <div class="form-group">
             <label>Employee Name</label>
             <input type="text" id="edit-emp-name">
         </div>
         <div class="form-group">
-            <label>Sections</label>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <label><input type="checkbox" value="kitchen" class="edit-section"> Kitchen</label>
-                <label><input type="checkbox" value="floor" class="edit-section"> Floor</label>
-                <label><input type="checkbox" value="bar" class="edit-section"> Bar</label>
-                <label><input type="checkbox" value="cleaner" class="edit-section"> Cleaner</label>
-                <label><input type="checkbox" value="setup" class="edit-section"> Setup Crew</label>
+            <label>Section</label>
+            <select id="edit-emp-section">
+                <option value="kitchen">Kitchen</option>
+                <option value="floor">Floor</option>
+                <option value="bar">Bar</option>
+                <option value="cleaner">Cleaner</option>
+                <option value="setup">Setup Crew</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Employee Code</label>
+            <div class="code-input-group">
+                <input type="text" id="edit-emp-code">
+                <button id="edit-generate-random" type="button">Generate Random</button>
             </div>
         </div>
         <button id="save-edit">Save Changes</button>
@@ -409,7 +509,7 @@
     };
 
     // ---------- DATA MODELS ----------
-    let employees = [];        // { id, empNumber, name, sections[] }
+    let employees = [];        // { id, empCode, name, section }
     let submissions = {};      // key: employeeId, value: array of eventIds where available
     let events = [];
 
@@ -466,6 +566,16 @@
         return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     }
 
+    // Generate a random 6‑character alphanumeric code (uppercase letters + digits)
+    function generateRandomCode() {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789';
+        let result = '';
+        for (let i = 0; i < 6; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    }
+
     // Load/save data from localStorage
     function loadData() {
         try {
@@ -475,13 +585,13 @@
                 if (!Array.isArray(employees)) employees = [];
             } else {
                 employees = [];
-                const sectionOptions = ['kitchen', 'floor', 'bar', 'cleaner', 'setup'];
+                const sections = ['kitchen', 'floor', 'bar', 'cleaner', 'setup'];
                 for (let i = 1; i <= 45; i++) {
-                    const empNumber = (1000 + i).toString();
+                    const code = generateRandomCode();
                     const name = `Employee ${i}`;
-                    const sectionIndex = (i - 1) % sectionOptions.length;
-                    const sections = [sectionOptions[sectionIndex]];
-                    employees.push({ id: Date.now() + i, empNumber, name, sections });
+                    const sectionIndex = (i - 1) % sections.length;
+                    const section = sections[sectionIndex];
+                    employees.push({ id: Date.now() + i, empCode: code, name, section });
                 }
             }
         } catch(e) { employees = []; console.error(e); }
@@ -530,11 +640,10 @@
 
     // ----- Capacity helpers -----
     function getCountForSection(eventId, section) {
-        // Count how many staff in this section have this event in their availability
         let count = 0;
         for (let empId in submissions) {
             const emp = employees.find(e => e.id == empId);
-            if (emp && emp.sections.includes(section)) {
+            if (emp && emp.section === section) {
                 if (submissions[empId].includes(eventId)) count++;
             }
         }
@@ -555,20 +664,10 @@
         const employee = employees.find(e => e.id === currentEmployeeId);
         if (!employee) return;
 
-        const sections = employee.sections;
-        // For each event, we need to display remaining slots for each of the employee's sections? But an employee may have multiple sections.
-        // To keep UI simple, we show remaining slots for each of their sections, but the checkbox is for "available for all sections"? Actually the employee can work in any of their sections. The capacity limit applies per section, but the employee's availability is just "available" for the event, not tied to a specific section? The original design had employees marking availability for the event overall, not per section. But the capacity should be per section based on which sections the employee belongs to. However, an employee with multiple sections could count toward capacity in both sections? That would be ambiguous.
-        // To resolve, we'll assume each employee is assigned to a single section (the app already allows multiple, but we'll simplify: we'll use the employee's primary section? In the default data, each employee has one section. We'll enforce that in the UI: if an employee has multiple sections, we'll show a note and let them pick? But capacity is per section, so we need to know which section they're working for this event. For simplicity, we'll treat each employee as belonging to one section (the app will limit assignment to one section in admin? But we'll keep the multiple checkboxes but warn the user to select only one? That's complex.
-        // Given the user's requirement (4 kitchen, 8 floor, 1 bar), it's likely each staff belongs to exactly one section. We'll assume that from now on. In admin, when adding/editing, we should enforce single section? Not yet, but we'll add a note. For capacity, we'll use the employee's first section (or all sections) – but if they have multiple, they could fill multiple slots, which is not intended. To keep it simple, we'll use the first section. In the staff panel, we'll show a warning if they have multiple.
-        const primarySection = sections[0];
-        if (sections.length > 1) {
-            // Show warning but still use first section
-            console.warn('Employee has multiple sections – using first:', primarySection);
-        }
-
+        const section = employee.section;
         container.innerHTML = '';
         events.forEach(event => {
-            const remaining = remainingSlots(event.id, primarySection);
+            const remaining = remainingSlots(event.id, section);
             const isCurrentlyAvailable = (submissions[currentEmployeeId] || []).includes(event.id);
             const isFull = remaining <= 0 && !isCurrentlyAvailable;
             const div = document.createElement('div');
@@ -579,7 +678,7 @@
                     ${event.venue}
                 </div>
                 <div class="slots-info">
-                    ${primarySection.charAt(0).toUpperCase() + primarySection.slice(1)} slots left: ${remaining}
+                    ${section.charAt(0).toUpperCase() + section.slice(1)} slots left: ${remaining}
                 </div>
                 <label>
                     <input type="checkbox" data-id="${event.id}" ${isCurrentlyAvailable ? 'checked' : ''} ${isFull ? 'disabled' : ''}>
@@ -589,37 +688,12 @@
             container.appendChild(div);
         });
 
-        // Attach change handlers with capacity check
-        document.querySelectorAll('#dates-container input[type="checkbox"]').forEach(cb => {
-            cb.addEventListener('change', (e) => {
-                const eventId = cb.getAttribute('data-id');
-                const newChecked = cb.checked;
-                const employee = employees.find(e => e.id === currentEmployeeId);
-                if (!employee) return;
-                const section = employee.sections[0]; // use first section
-                const remaining = remainingSlots(eventId, section);
-                const currentlyAvailable = (submissions[currentEmployeeId] || []).includes(eventId);
-                // If trying to check and no slots left, revert and show message
-                if (newChecked && !currentlyAvailable && remaining <= 0) {
-                    cb.checked = false;
-                    showMessage('staff-message', `No slots left for ${section} on this date.`, 'error');
-                    return;
-                }
-                // If unchecking, it's always allowed
-                // We'll handle actual save later; just update UI and let save button submit.
-                // But we need to update the local state? We'll let the submit button handle final saving.
-                // However, to keep the UI consistent, we'll update the checkbox state and the pending changes.
-                // We'll store a temporary "draft" that will be saved on submit.
-                // For simplicity, we'll just rely on submit to read the current checkbox states.
-            });
-        });
+        // We'll handle actual saving on submit; the UI reflects current state.
     }
 
     // Load employee's saved availability (staff view)
-    function loadEmployeeAvailability(employeeId) {
-        // Nothing to pre-load now because renderDates already builds checkboxes based on current submissions.
-        // But we need to ensure the checkboxes reflect current submissions.
-        renderDates(); // re-render to show correct checked state
+    function loadEmployeeAvailability() {
+        renderDates(); // refresh to show checked state based on submissions
     }
 
     // Submit availability for current employee
@@ -634,12 +708,10 @@
             if (cb.checked) selected.push(cb.getAttribute('data-id'));
         });
 
-        // Validate capacity again before saving
         const employee = employees.find(e => e.id === currentEmployeeId);
-        const section = employee.sections[0];
-        const newSelections = selected;
-        // For each event, check if the new selection is allowed
-        for (let eventId of newSelections) {
+        const section = employee.section;
+        // Validate capacity before saving
+        for (let eventId of selected) {
             const currentCount = getCountForSection(eventId, section);
             const isAlreadyIn = (submissions[currentEmployeeId] || []).includes(eventId);
             if (!isAlreadyIn && currentCount >= CAPACITIES[section]) {
@@ -650,13 +722,11 @@
 
         submissions[currentEmployeeId] = selected;
         saveAllData();
-        const emp = employees.find(e => e.id === currentEmployeeId);
-        showMessage('staff-message', `Availability saved for ${emp.name}. Thank you!`, 'success');
+        showMessage('staff-message', `Availability saved for ${employee.name}. Thank you!`, 'success');
         if (managerAuthenticated) {
             renderAvailabilityMatrix(document.querySelector('.filter-btn.active')?.dataset.section || 'all');
         }
-        // Refresh date list to update remaining slots display
-        renderDates();
+        renderDates(); // update remaining slots display
     }
 
     function showMessage(containerId, text, type) {
@@ -668,7 +738,7 @@
         setTimeout(() => container.classList.add('hidden'), 3000);
     }
 
-    // ---------- Admin functions (unchanged except employee name color) ----------
+    // ---------- Admin functions ----------
     function addEvent(date, venue) {
         if (!date || !venue) { alert('Please enter both date and venue'); return false; }
         if (events.some(e => e.date === date && e.venue === venue)) { alert('Event already exists'); return false; }
@@ -729,12 +799,9 @@
         const employee = employees.find(e => e.id === empId);
         if (!employee) return;
         editingEmployeeId = empId;
-        document.getElementById('edit-emp-number').value = employee.empNumber;
         document.getElementById('edit-emp-name').value = employee.name;
-        const sections = employee.sections;
-        document.querySelectorAll('.edit-section').forEach(cb => {
-            cb.checked = sections.includes(cb.value);
-        });
+        document.getElementById('edit-emp-section').value = employee.section;
+        document.getElementById('edit-emp-code').value = employee.empCode;
         document.getElementById('edit-error').classList.add('hidden');
         document.getElementById('editModal').style.display = 'flex';
     }
@@ -743,20 +810,22 @@
         editingEmployeeId = null;
     }
     function saveEdit() {
-        const newNumber = document.getElementById('edit-emp-number').value.trim();
         const newName = document.getElementById('edit-emp-name').value.trim();
-        if (!newNumber || !newName) { showEditError('Employee number and name are required.'); return; }
-        if (employees.some(e => e.id !== editingEmployeeId && e.empNumber === newNumber)) {
-            showEditError('Employee number already exists.');
+        const newSection = document.getElementById('edit-emp-section').value;
+        const newCode = document.getElementById('edit-emp-code').value.trim();
+        if (!newName || !newCode) {
+            showEditError('Name and code are required.');
             return;
         }
-        const newSections = Array.from(document.querySelectorAll('.edit-section:checked')).map(cb => cb.value);
-        if (newSections.length === 0) { showEditError('Please assign at least one section.'); return; }
+        if (employees.some(e => e.id !== editingEmployeeId && e.empCode === newCode)) {
+            showEditError('Employee code already exists. Please use a unique code.');
+            return;
+        }
         const index = employees.findIndex(e => e.id === editingEmployeeId);
         if (index !== -1) {
-            employees[index].empNumber = newNumber;
             employees[index].name = newName;
-            employees[index].sections = newSections;
+            employees[index].section = newSection;
+            employees[index].empCode = newCode;
             saveAllData();
             closeEditModal();
             refreshAllViews();
@@ -776,10 +845,11 @@
             const card = document.createElement('div');
             card.className = 'employee-card';
             card.innerHTML = `
-                <div class="name">#${emp.empNumber} – ${escapeHtml(emp.name)}</div>
-                <div class="sections">Sections: ${emp.sections.length ? emp.sections.map(s => `<span style="background:#D4AF37; color:white; padding:2px 4px; border-radius:3px; margin-right:4px;">${s}</span>`).join(' ') : 'None'}</div>
+                <div class="name">${escapeHtml(emp.name)} <span class="code">${emp.empCode}</span></div>
+                <div class="sections">Section: ${emp.section.charAt(0).toUpperCase() + emp.section.slice(1)}</div>
                 <div>
                     <button class="edit-btn" data-id="${emp.id}">Edit</button>
+                    <button class="generate-code-btn" data-id="${emp.id}">Regenerate Code</button>
                     <button class="remove-emp" data-id="${emp.id}">Remove</button>
                 </div>
             `;
@@ -787,6 +857,19 @@
         });
         document.querySelectorAll('.edit-btn').forEach(btn => {
             btn.addEventListener('click', () => openEditModal(parseInt(btn.getAttribute('data-id'))));
+        });
+        document.querySelectorAll('.generate-code-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = parseInt(btn.getAttribute('data-id'));
+                const emp = employees.find(e => e.id === id);
+                if (emp) {
+                    const newCode = generateRandomCode();
+                    emp.empCode = newCode;
+                    saveAllData();
+                    renderAdminEmployees();
+                    showTemporaryStatus(`New code for ${emp.name}: ${newCode}`);
+                }
+            });
         });
         document.querySelectorAll('.remove-emp').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -800,7 +883,7 @@
                     if (currentEmployeeId === id) {
                         currentEmployeeId = null;
                         document.getElementById('staff-details').classList.add('hidden');
-                        document.getElementById('employee-number').value = '';
+                        document.getElementById('employee-code').value = '';
                     }
                 }
             });
@@ -812,32 +895,32 @@
         if (!container) return;
         let filteredEmployees = employees;
         if (sectionFilter !== 'all') {
-            filteredEmployees = employees.filter(emp => emp.sections.includes(sectionFilter));
+            filteredEmployees = employees.filter(emp => emp.section === sectionFilter);
         }
         if (filteredEmployees.length === 0) {
             container.innerHTML = '<p>No employees in this section.</p>';
             return;
         }
-        let html = '<div class="scrollable-table"><table style="min-width:600px;"><thead> tr<th>Event</th>';
+        let html = '<div class="scrollable-table"><table style="min-width:600px;"><thead> <tr><th>Event</th>';
         filteredEmployees.forEach(emp => {
-            html += `<th class="employee-name">#${emp.empNumber}<br>${escapeHtml(emp.name)}</th>`;
+            html += `<th class="employee-name">${escapeHtml(emp.name)}<br><span style="font-size:10px;">${emp.empCode}</span></th>`;
         });
         html += ' </thead><tbody>';
         events.forEach(event => {
-            html += ` dp\n<td><strong>${formatDate(event.date)}<br>${event.venue}</strong>`;
+            html += ` <tr><td><strong>${formatDate(event.date)}<br>${event.venue}</strong></td>`;
             filteredEmployees.forEach(emp => {
                 const available = (submissions[emp.id] || []).includes(event.id);
-                html += `<td class="text-center">${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}`;
+                html += `<td class="text-center">${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}</td>`;
             });
-            html += '; </tr>';
+            html += '</tr>';
         });
-        html += '</tbody> </table></div>';
+        html += '</tbody></table></div>';
 
         // Summary with remaining slots per section
         const sections = ['kitchen', 'floor', 'bar', 'cleaner', 'setup'];
         html += '<div style="margin-top:20px;"><h3>Summary by Section</h3>';
         sections.forEach(section => {
-            const sectionEmployees = employees.filter(emp => emp.sections.includes(section));
+            const sectionEmployees = employees.filter(emp => emp.section === section);
             if (sectionEmployees.length === 0) return;
             html += `<h4>${section.charAt(0).toUpperCase() + section.slice(1)}</h4><div class="scrollable-table"><table><thead><tr><th>Event</th><th>Available / Total</th><th>Remaining Slots</th></tr></thead><tbody>`;
             events.forEach(event => {
@@ -855,32 +938,37 @@
     }
 
     function addEmployee() {
-        const empNumber = document.getElementById('new-employee-number').value.trim();
         const name = document.getElementById('new-employee-name').value.trim();
-        if (!empNumber || !name) { alert('Please enter both employee number and name'); return; }
-        if (employees.some(e => e.empNumber === empNumber)) { alert('Employee number already exists'); return; }
-        const sectionCheckboxes = document.querySelectorAll('#admin-pane input[type="checkbox"]:checked');
-        const sections = Array.from(sectionCheckboxes).map(cb => cb.value);
-        if (sections.length === 0) { alert('Please assign at least one section'); return; }
+        const section = document.getElementById('new-employee-section').value;
+        let code = document.getElementById('new-employee-code').value.trim();
+        if (!name) {
+            alert('Please enter employee name');
+            return;
+        }
+        if (!code) {
+            code = generateRandomCode();
+        }
+        if (employees.some(e => e.empCode === code)) {
+            alert('Employee code already exists. Please use a different code.');
+            return;
+        }
         const newId = Date.now();
-        employees.push({ id: newId, empNumber, name, sections });
+        employees.push({ id: newId, empCode: code, name, section });
         saveAllData();
-        document.getElementById('new-employee-number').value = '';
         document.getElementById('new-employee-name').value = '';
-        sectionCheckboxes.forEach(cb => cb.checked = false);
+        document.getElementById('new-employee-code').value = '';
         renderAdminEmployees();
         refreshAllViews();
-        showTemporaryStatus(`Employee ${name} (#${empNumber}) added.`);
+        showTemporaryStatus(`Employee ${name} added with code ${code}`);
     }
 
     function exportCSV() {
-        let csv = 'Employee Number,Employee Name,Section,Event Date,Venue,Available\n';
+        let csv = 'Employee Code,Employee Name,Section,Event Date,Venue,Available\n';
         for (const emp of employees) {
-            const empSections = emp.sections.join(';');
             const availableEvents = submissions[emp.id] || [];
             for (const event of events) {
                 const isAvailable = availableEvents.includes(event.id);
-                csv += `"${emp.empNumber}","${emp.name}","${empSections}","${formatDate(event.date)}","${event.venue}",${isAvailable ? 'Yes' : 'No'}\n`;
+                csv += `"${emp.empCode}","${emp.name}","${emp.section}","${formatDate(event.date)}","${event.venue}",${isAvailable ? 'Yes' : 'No'}\n`;
             }
         }
         const blob = new Blob([csv], { type: 'text/csv' });
@@ -888,6 +976,20 @@
         const url = URL.createObjectURL(blob);
         a.href = url;
         a.download = 'staff-availability.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function exportEmployeeCodes() {
+        let csv = 'Employee Name,Employee Code,Section\n';
+        for (const emp of employees) {
+            csv += `"${emp.name}","${emp.empCode}","${emp.section}"\n`;
+        }
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        a.href = url;
+        a.download = 'employee-codes.csv';
         a.click();
         URL.revokeObjectURL(url);
     }
@@ -933,21 +1035,23 @@
     }
 
     let currentEmployeeId = null;
-    function loadEmployeeByNumber() {
-        const numberInput = document.getElementById('employee-number');
-        const empNumber = numberInput.value.trim();
-        if (!empNumber) { alert('Please enter your employee number'); return; }
-        const employee = employees.find(e => e.empNumber === empNumber);
+    function loadEmployeeByCode() {
+        const codeInput = document.getElementById('employee-code');
+        const code = codeInput.value.trim().toUpperCase();
+        if (!code) {
+            alert('Please enter your employee code');
+            return;
+        }
+        const employee = employees.find(e => e.empCode === code);
         if (!employee) {
-            alert('Employee number not found. Please contact manager.');
+            alert('Employee code not found. Please contact manager.');
             document.getElementById('staff-details').classList.add('hidden');
             currentEmployeeId = null;
             return;
         }
         currentEmployeeId = employee.id;
         document.getElementById('display-name').innerText = employee.name;
-        const sectionsSpan = document.getElementById('display-sections');
-        sectionsSpan.innerHTML = employee.sections.map(s => `<span style="background:#D4AF37;color:white;padding:4px 8px;border-radius:4px;margin-right:5px;">${s}</span>`).join('') || 'None';
+        document.getElementById('display-section').innerText = employee.section.charAt(0).toUpperCase() + employee.section.slice(1);
         document.getElementById('staff-details').classList.remove('hidden');
         renderDates();
         document.getElementById('staff-message').classList.add('hidden');
@@ -962,11 +1066,18 @@
         closeBtn.addEventListener('click', closeEditModal);
         window.addEventListener('click', (e) => { if (e.target === modal) closeEditModal(); });
         document.getElementById('save-edit').addEventListener('click', saveEdit);
+        document.getElementById('edit-generate-random').addEventListener('click', () => {
+            document.getElementById('edit-emp-code').value = generateRandomCode();
+        });
+        document.getElementById('generate-random-code').addEventListener('click', () => {
+            document.getElementById('new-employee-code').value = generateRandomCode();
+        });
 
-        document.getElementById('load-employee').addEventListener('click', loadEmployeeByNumber);
+        document.getElementById('load-employee').addEventListener('click', loadEmployeeByCode);
         document.getElementById('submit-availability').addEventListener('click', submitAvailability);
         document.getElementById('add-employee').addEventListener('click', addEmployee);
         document.getElementById('export-csv').addEventListener('click', exportCSV);
+        document.getElementById('export-codes').addEventListener('click', exportEmployeeCodes);
         document.getElementById('add-event').addEventListener('click', () => {
             const date = document.getElementById('new-event-date').value;
             const venue = document.getElementById('new-event-venue').value.trim();
