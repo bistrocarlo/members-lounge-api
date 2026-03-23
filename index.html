@@ -70,6 +70,7 @@
         .capacity-field label { font-size: 0.8rem; }
         .capacity-field input { padding: 6px; }
         .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #2e7d32; color: white; padding: 14px 24px; border-radius: 50px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); font-weight: bold; z-index: 9999; display: none; }
+        .sync-status { font-size: 0.8rem; color: #666; margin-top: 5px; }
         @media (max-width: 768px) {
             .date-item { flex-direction: column; align-items: flex-start; }
             .app-header { flex-direction: column; gap: 10px; }
@@ -84,7 +85,7 @@
             <div class="logo-icon">ML</div>
             <h1>Member's Lounge</h1>
         </div>
-        <div class="tagline">Staff Availability System – Data Saved Forever</div>
+        <div class="tagline">Staff Availability System – Live Cloud Sync</div>
     </div>
 
     <div class="tabs" id="tab-bar">
@@ -166,19 +167,16 @@
             <div id="event-list" style="margin-top: 10px; max-height: 400px; overflow-y: auto;"></div>
         </div>
         <div class="card">
-            <h2>Data Backup & Reset</h2>
-            <button id="export-data">Export All Data (JSON)</button>
-            <button id="import-data" style="margin-left: 10px;">Import Data (JSON)</button>
-            <input type="file" id="import-file" accept=".json" style="display: none;">
-            <button id="clear-all-data" style="margin-left: 10px; background:#ff4444;">Clear All Data (Reset to Default)</button>
-            <div id="import-status" class="success-msg hidden" style="margin-top: 10px;"></div>
+            <h2>Cloud Sync & Export</h2>
+            <button id="sync-now">Sync Now (Refresh from Cloud)</button>
+            <button id="export-csv" style="margin-left: 10px;">Export to Excel (CSV)</button>
+            <button id="export-codes" style="margin-left: 10px;">Export Employee Codes (CSV)</button>
+            <div id="sync-status" class="sync-status"></div>
+            <div id="save-status" class="hidden success-msg" style="margin-top: 10px;"></div>
         </div>
         <div class="card">
-            <h2>Export Data (CSV)</h2>
-            <button id="export-csv">Export All Submissions (CSV)</button>
-            <button id="export-codes" style="margin-left: 10px;">Export Employee Codes (CSV)</button>
-            <button id="save-data" style="margin-left: 10px;">Save All Data (Manual)</button>
-            <div id="save-status" class="hidden success-msg" style="margin-top: 10px;"></div>
+            <h2>Danger Zone</h2>
+            <button id="clear-all-data" style="background:#ff4444;">Reset to Default (Clear All Data)</button>
         </div>
     </div>
 
@@ -196,6 +194,7 @@
                 <button class="filter-btn" data-section="manager">Manager</button>
             </div>
             <div class="scrollable-table" id="availability-matrix"></div>
+            <div class="sync-status" id="matrix-sync-status"></div>
         </div>
     </div>
 </div>
@@ -251,7 +250,14 @@
 <div id="toast" class="toast">✓ Saved permanently!</div>
 
 <script>
-// ================== PERMANENT LOCAL STORAGE (DATA NEVER RESETS) ==================
+// ================== CLOUD CONFIGURATION ==================
+// *** REPLACE THESE WITH YOUR JSONBIN.IO CREDENTIALS ***
+const JSONBIN_BIN_ID = 'YOUR_BIN_ID';      // e.g., '5f9a8e7b1a1b2c3d4e5f6g7h'
+const JSONBIN_API_KEY = 'YOUR_API_KEY';    // your master key
+
+const API_BASE = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+
+// ---------- GLOBAL ----------
 let employees = [];
 let submissions = {};
 let events = [];
@@ -269,7 +275,7 @@ const DEFAULT_CAPACITIES = {
     manager: 9999
 };
 
-// ---------- ALL 44 EVENTS (full list) ----------
+// ---------- DEFAULT DATA (hardcoded) ----------
 const defaultEvents = [
     { id: '1', date: '2026-03-28', venue: 'Sala Reggio Ballroom' },
     { id: '2', date: '2026-04-18', venue: 'Fior Events' },
@@ -317,7 +323,6 @@ const defaultEvents = [
     { id: '44', date: '2027-03-27', venue: 'Fior Events' }
 ];
 
-// ---------- ALL 38 EMPLOYEES ----------
 const defaultEmployeesRaw = [
     { name: "Carlo Pavia", section: "manager", code: "CARLO6" },
     { name: "Michelle Pavia", section: "manager", code: "MICHE0" },
@@ -359,7 +364,7 @@ const defaultEmployeesRaw = [
     { name: "Jacob Doubleday", section: "floor", code: "JACOB0" }
 ];
 
-// ---------- HELPER FUNCTIONS ----------
+// ---------- HELPERS ----------
 function formatDate(dateStr) {
     return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
@@ -367,9 +372,7 @@ function formatDate(dateStr) {
 function generateRandomCode() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789';
     let result = '';
-    for (let i = 0; i < 6; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
+    for (let i = 0; i < 6; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
     return result;
 }
 
@@ -380,42 +383,68 @@ function escapeHtml(str) {
 function showToast() {
     const toast = document.getElementById('toast');
     toast.style.display = 'block';
-    setTimeout(() => { toast.style.display = 'none'; }, 2200);
+    setTimeout(() => toast.style.display = 'none', 2000);
 }
 
 function showMessage(containerId, text, type) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    container.textContent = text;
-    container.className = type === 'success' ? 'success-msg' : 'error-msg';
-    container.classList.remove('hidden');
-    setTimeout(() => container.classList.add('hidden'), 3000);
+    const c = document.getElementById(containerId);
+    if (!c) return;
+    c.textContent = text;
+    c.className = type === 'success' ? 'success-msg' : 'error-msg';
+    c.classList.remove('hidden');
+    setTimeout(() => c.classList.add('hidden'), 3000);
 }
 
-// ---------- PERMANENT LOCAL STORAGE ----------
-function loadFromLocal() {
-    const saved = localStorage.getItem('membersLoungeData2026');
-    if (saved) {
-        const data = JSON.parse(saved);
-        if (data.employees) employees = data.employees;
-        if (data.submissions) submissions = data.submissions;
-        if (data.events) events = data.events;
-        if (data.eventSettings) eventSettings = data.eventSettings;
-        sortEvents();
-        return true;
+// ---------- CLOUD SYNC ----------
+async function loadFromCloud() {
+    if (!JSONBIN_BIN_ID || JSONBIN_BIN_ID === 'YOUR_BIN_ID') {
+        console.warn('JSONBin not configured. Using local storage only.');
+        return false;
     }
-    return false;
+    try {
+        const response = await fetch(API_BASE, {
+            headers: { 'X-Master-Key': JSONBIN_API_KEY }
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        const cloudData = data.record;
+        if (cloudData.employees) employees = cloudData.employees;
+        if (cloudData.submissions) submissions = cloudData.submissions;
+        if (cloudData.events) events = cloudData.events;
+        if (cloudData.eventSettings) eventSettings = cloudData.eventSettings;
+        sortEvents();
+        document.getElementById('sync-status').innerHTML = '✓ Synced with cloud';
+        return true;
+    } catch (err) {
+        console.error('Cloud load failed:', err);
+        document.getElementById('sync-status').innerHTML = '⚠ Cloud sync error';
+        return false;
+    }
 }
 
-function saveToLocal() {
+async function saveToCloud() {
+    if (!JSONBIN_BIN_ID || JSONBIN_BIN_ID === 'YOUR_BIN_ID') return false;
     const data = { employees, submissions, events, eventSettings };
-    localStorage.setItem('membersLoungeData2026', JSON.stringify(data));
+    try {
+        const response = await fetch(API_BASE, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': JSONBIN_API_KEY
+            },
+            body: JSON.stringify(data)
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        document.getElementById('sync-status').innerHTML = '✓ Synced with cloud';
+        return true;
+    } catch (err) {
+        console.error('Cloud save failed:', err);
+        document.getElementById('sync-status').innerHTML = '⚠ Cloud sync error';
+        return false;
+    }
 }
 
-function sortEvents() {
-    events.sort((a, b) => new Date(a.date) - new Date(b.date));
-}
-
+// ---------- LOCAL DATA (defaults) ----------
 function loadLocalDefault() {
     let baseId = 1742740000000;
     employees = [];
@@ -434,33 +463,30 @@ function loadLocalDefault() {
     eventSettings = {};
 }
 
-function initData() {
-    const loaded = loadFromLocal();
-    if (!loaded) {
+async function initData() {
+    const cloudLoaded = await loadFromCloud();
+    if (!cloudLoaded) {
         loadLocalDefault();
-        saveToLocal();
+        await saveToCloud();
     }
+    sortEvents();
 }
 
-// ---------- CAPACITY & PRE-ASSIGNMENT HELPERS (unchanged) ----------
+function sortEvents() {
+    events.sort((a, b) => new Date(a.date) - new Date(b.date));
+}
+
+// ---------- CAPACITY HELPERS ----------
 function getCapacityForEvent(eventId, section) {
-    const settings = eventSettings[eventId];
-    if (settings && settings.capacities && settings.capacities[section] !== undefined) {
-        return settings.capacities[section];
-    }
+    const s = eventSettings[eventId];
+    if (s && s.capacities && s.capacities[section] !== undefined) return s.capacities[section];
     return DEFAULT_CAPACITIES[section];
 }
 
 function getPreAssignedCount(eventId, section) {
-    const settings = eventSettings[eventId];
-    if (!settings || !settings.preAssignments) return 0;
-    const preEmpIds = settings.preAssignments;
-    let count = 0;
-    for (const empId of preEmpIds) {
-        const emp = employees.find(e => e.id == empId);
-        if (emp && emp.section === section) count++;
-    }
-    return count;
+    const s = eventSettings[eventId];
+    if (!s || !s.preAssignments) return 0;
+    return s.preAssignments.filter(pid => employees.find(e => e.id == pid)?.section === section).length;
 }
 
 function getSelfAssignedCount(eventId, section) {
@@ -473,34 +499,33 @@ function getSelfAssignedCount(eventId, section) {
 }
 
 function remainingSlots(eventId, section) {
-    const capacity = getCapacityForEvent(eventId, section);
+    const cap = getCapacityForEvent(eventId, section);
     const pre = getPreAssignedCount(eventId, section);
     const self = getSelfAssignedCount(eventId, section);
-    return capacity - pre - self;
+    return cap - pre - self;
 }
 
-function isEmployeePreAssigned(employeeId, eventId) {
-    const settings = eventSettings[eventId];
-    if (!settings || !settings.preAssignments) return false;
-    return settings.preAssignments.includes(employeeId);
+function isEmployeePreAssigned(empId, eventId) {
+    const s = eventSettings[eventId];
+    return s && s.preAssignments && s.preAssignments.includes(empId);
 }
 
-// ---------- RENDER DATES ----------
+// ---------- RENDER DATES (staff) ----------
 let currentEmployeeId = null;
 async function renderDates() {
     const container = document.getElementById('dates-container');
     if (!container || !currentEmployeeId) return;
-    const employee = employees.find(e => e.id === currentEmployeeId);
-    if (!employee) return;
-    const section = employee.section;
+    const emp = employees.find(e => e.id === currentEmployeeId);
+    if (!emp) return;
+    const section = emp.section;
     container.innerHTML = '';
     for (const event of events) {
         const remaining = remainingSlots(event.id, section);
         const isCurrentlyAvailable = (submissions[currentEmployeeId] || []).includes(event.id);
-        const isPreAssigned = isEmployeePreAssigned(currentEmployeeId, event.id);
-        const isChecked = isPreAssigned || isCurrentlyAvailable;
-        const isDisabled = isPreAssigned || (remaining <= 0 && !isCurrentlyAvailable);
-        const slotsInfo = isPreAssigned ? ' (You are pre-assigned)' : ` slots left: ${remaining}`;
+        const isPre = isEmployeePreAssigned(currentEmployeeId, event.id);
+        const isChecked = isPre || isCurrentlyAvailable;
+        const isDisabled = isPre || (remaining <= 0 && !isCurrentlyAvailable);
+        const slotsInfo = isPre ? ' (You are pre-assigned)' : ` slots left: ${remaining}`;
         const div = document.createElement('div');
         div.className = 'date-item';
         div.innerHTML = `
@@ -520,7 +545,7 @@ async function renderDates() {
     }
 }
 
-// ---------- SUBMIT AVAILABILITY (PERMANENT) ----------
+// ---------- SUBMIT AVAILABILITY (cloud) ----------
 async function submitAvailability() {
     if (!currentEmployeeId) {
         showMessage('staff-message', 'Please load your employee details first.', 'error');
@@ -528,27 +553,25 @@ async function submitAvailability() {
     }
     const checkboxes = document.querySelectorAll('#dates-container input[type="checkbox"]');
     const selected = [];
-    checkboxes.forEach(cb => {
-        if (cb.checked) selected.push(cb.getAttribute('data-id'));
-    });
+    checkboxes.forEach(cb => { if (cb.checked) selected.push(cb.getAttribute('data-id')); });
 
-    const employee = employees.find(e => e.id === currentEmployeeId);
-    const section = employee.section;
+    const emp = employees.find(e => e.id === currentEmployeeId);
+    const section = emp.section;
 
     for (let eventId of selected) {
         if (isEmployeePreAssigned(currentEmployeeId, eventId)) continue;
         const remaining = remainingSlots(eventId, section);
-        const isAlreadyIn = (submissions[currentEmployeeId] || []).includes(eventId);
-        if (!isAlreadyIn && remaining <= 0) {
-            showMessage('staff-message', `Cannot add ${section} for ${events.find(e => e.id === eventId)?.venue}: capacity full.`, 'error');
+        const already = (submissions[currentEmployeeId] || []).includes(eventId);
+        if (!already && remaining <= 0) {
+            showMessage('staff-message', `Cannot add ${section} for ${events.find(e=>e.id===eventId)?.venue}: capacity full.`, 'error');
             return;
         }
     }
 
     submissions[currentEmployeeId] = selected;
-    saveToLocal();
+    await saveToCloud();
     showToast();
-    showMessage('staff-message', `Availability saved for ${employee.name}. Thank you!`, 'success');
+    showMessage('staff-message', `Availability saved for ${emp.name}. Thank you!`, 'success');
     renderDates();
     if (managerAuthenticated) {
         renderAvailabilityMatrix(document.querySelector('.filter-btn.active')?.dataset.section || 'all');
@@ -557,12 +580,12 @@ async function submitAvailability() {
 
 // ---------- ADMIN FUNCTIONS ----------
 async function addEvent(date, venue) {
-    if (!date || !venue) { alert('Please enter both date and venue'); return false; }
-    if (events.some(e => e.date === date && e.venue === venue)) { alert('Event already exists'); return false; }
+    if (!date || !venue) { alert('Enter both'); return false; }
+    if (events.some(e => e.date === date && e.venue === venue)) { alert('Event exists'); return false; }
     const newId = Date.now().toString();
     events.push({ id: newId, date, venue });
     sortEvents();
-    saveToLocal();
+    await saveToCloud();
     refreshAllViews();
     return true;
 }
@@ -570,11 +593,9 @@ async function addEvent(date, venue) {
 async function deleteEvent(eventId) {
     if (confirm('Delete this event?')) {
         events = events.filter(e => e.id !== eventId);
-        for (let empId in submissions) {
-            submissions[empId] = submissions[empId].filter(eid => eid !== eventId);
-        }
+        for (let empId in submissions) submissions[empId] = submissions[empId].filter(eid => eid !== eventId);
         delete eventSettings[eventId];
-        saveToLocal();
+        await saveToCloud();
         refreshAllViews();
     }
 }
@@ -601,21 +622,17 @@ function renderAdminEventsList() {
         div.innerHTML = `
             <span>${formatDate(event.date)} – ${event.venue}</span>
             <div>
-                <button class="edit-event-settings" data-id="${event.id}" style="background:#2196f3; margin-right:5px;">Edit Settings</button>
+                <button class="edit-event-settings" data-id="${event.id}" style="background:#2196f3;">Edit</button>
                 <button class="delete-event" data-id="${event.id}" style="background:#ff4444;">Delete</button>
             </div>
         `;
         container.appendChild(div);
     });
-    document.querySelectorAll('.delete-event').forEach(btn => {
-        btn.addEventListener('click', () => deleteEvent(btn.getAttribute('data-id')));
-    });
-    document.querySelectorAll('.edit-event-settings').forEach(btn => {
-        btn.addEventListener('click', () => openEventSettingsModal(btn.getAttribute('data-id')));
-    });
+    document.querySelectorAll('.delete-event').forEach(btn => btn.addEventListener('click', () => deleteEvent(btn.getAttribute('data-id'))));
+    document.querySelectorAll('.edit-event-settings').forEach(btn => btn.addEventListener('click', () => openEventSettingsModal(btn.getAttribute('data-id'))));
 }
 
-// ---------- EVENT SETTINGS ----------
+// Event settings modal
 let currentEventIdForSettings = null;
 function openEventSettingsModal(eventId) {
     currentEventIdForSettings = eventId;
@@ -624,62 +641,48 @@ function openEventSettingsModal(eventId) {
     const container = document.getElementById('eventSettingsContent');
     const settings = eventSettings[eventId] || { capacities: {}, preAssignments: [] };
 
-    let capacitiesHtml = '<div class="capacity-row">';
-    const sections = ['kitchen', 'floor', 'bar', 'cleaner', 'setup', 'manager'];
+    let capsHtml = '<div class="capacity-row">';
+    const sections = ['kitchen','floor','bar','cleaner','setup','manager'];
     for (const sec of sections) {
-        const currentVal = settings.capacities[sec] !== undefined ? settings.capacities[sec] : DEFAULT_CAPACITIES[sec];
-        capacitiesHtml += `
-            <div class="capacity-field">
-                <label>${sec.charAt(0).toUpperCase() + sec.slice(1)}</label>
-                <input type="number" id="cap-${sec}" value="${currentVal}" min="0" step="1">
-            </div>
-        `;
+        const val = settings.capacities[sec] !== undefined ? settings.capacities[sec] : DEFAULT_CAPACITIES[sec];
+        capsHtml += `<div class="capacity-field"><label>${sec}</label><input type="number" id="cap-${sec}" value="${val}" min="0"></div>`;
     }
-    capacitiesHtml += '</div>';
+    capsHtml += '</div>';
 
-    const preAssignments = settings.preAssignments || [];
     const employeesBySection = {};
-    for (const emp of employees) {
-        if (!employeesBySection[emp.section]) employeesBySection[emp.section] = [];
-        employeesBySection[emp.section].push(emp);
-    }
+    employees.forEach(e => {
+        if (!employeesBySection[e.section]) employeesBySection[e.section] = [];
+        employeesBySection[e.section].push(e);
+    });
 
-    let preHtml = '<h4>Pre-assign Staff</h4><div style="margin-bottom:10px;">Select employees to pre-assign (they cannot unassign themselves).</div>';
+    let preHtml = '<h4>Pre-assign Staff</h4>';
     for (const sec of sections) {
         const emps = employeesBySection[sec] || [];
         if (emps.length === 0) continue;
-        preHtml += `<div style="margin-top:10px;"><strong>${sec.charAt(0).toUpperCase() + sec.slice(1)}</strong></div>`;
-        preHtml += '<div class="preassign-list" id="preassign-list-'+sec+'">';
+        preHtml += `<div><strong>${sec}</strong></div><div class="preassign-list">`;
         for (const emp of emps) {
-            const isChecked = preAssignments.includes(emp.id);
-            preHtml += `
-                <div class="preassign-item">
-                    <label>${emp.name} (${emp.empCode})</label>
-                    <input type="checkbox" class="preassign-checkbox" data-id="${emp.id}" ${isChecked ? 'checked' : ''}>
-                </div>
-            `;
+            const checked = settings.preAssignments?.includes(emp.id);
+            preHtml += `<div class="preassign-item"><label>${emp.name} (${emp.empCode})</label><input type="checkbox" class="preassign-checkbox" data-id="${emp.id}" ${checked ? 'checked' : ''}></div>`;
         }
         preHtml += '</div>';
     }
 
-    container.innerHTML = capacitiesHtml + preHtml;
+    container.innerHTML = capsHtml + preHtml;
     document.getElementById('eventSettingsModal').style.display = 'flex';
 }
 
 async function saveEventSettings() {
     if (!currentEventIdForSettings) return;
     const capacities = {};
-    const sections = ['kitchen', 'floor', 'bar', 'cleaner', 'setup', 'manager'];
+    const sections = ['kitchen','floor','bar','cleaner','setup','manager'];
     for (const sec of sections) {
         const input = document.getElementById(`cap-${sec}`);
-        if (input) capacities[sec] = parseInt(input.value, 10);
+        if (input) capacities[sec] = parseInt(input.value,10);
     }
     const preAssignments = [];
-    document.querySelectorAll('.preassign-checkbox:checked').forEach(cb => {
-        preAssignments.push(parseInt(cb.getAttribute('data-id')));
-    });
+    document.querySelectorAll('.preassign-checkbox:checked').forEach(cb => preAssignments.push(parseInt(cb.getAttribute('data-id'))));
     eventSettings[currentEventIdForSettings] = { capacities, preAssignments };
-    saveToLocal();
+    await saveToCloud();
     showToast();
     closeEventSettingsModal();
     refreshAllViews();
@@ -690,47 +693,39 @@ function closeEventSettingsModal() {
     currentEventIdForSettings = null;
 }
 
-// ---------- EMPLOYEE MANAGEMENT ----------
+// Employee management
 let editingEmployeeId = null;
 function openEditModal(empId) {
-    const employee = employees.find(e => e.id === empId);
-    if (!employee) return;
+    const emp = employees.find(e => e.id === empId);
+    if (!emp) return;
     editingEmployeeId = empId;
-    document.getElementById('edit-emp-name').value = employee.name;
-    document.getElementById('edit-emp-section').value = employee.section;
-    document.getElementById('edit-emp-code').value = employee.empCode;
+    document.getElementById('edit-emp-name').value = emp.name;
+    document.getElementById('edit-emp-section').value = emp.section;
+    document.getElementById('edit-emp-code').value = emp.empCode;
     document.getElementById('edit-error').classList.add('hidden');
     document.getElementById('editModal').style.display = 'flex';
 }
-
-function closeEditModal() {
-    document.getElementById('editModal').style.display = 'none';
-    editingEmployeeId = null;
-}
-
+function closeEditModal() { document.getElementById('editModal').style.display = 'none'; editingEmployeeId = null; }
 async function saveEdit() {
     const newName = document.getElementById('edit-emp-name').value.trim();
     const newSection = document.getElementById('edit-emp-section').value;
     const newCode = document.getElementById('edit-emp-code').value.trim();
-    if (!newName || !newCode) {
-        document.getElementById('edit-error').textContent = 'Name and code are required.';
-        document.getElementById('edit-error').classList.remove('hidden');
-        return;
-    }
-    if (employees.some(e => e.id !== editingEmployeeId && e.empCode === newCode)) {
-        document.getElementById('edit-error').textContent = 'Employee code already exists.';
-        document.getElementById('edit-error').classList.remove('hidden');
-        return;
-    }
-    const index = employees.findIndex(e => e.id === editingEmployeeId);
-    if (index !== -1) {
-        employees[index].name = newName;
-        employees[index].section = newSection;
-        employees[index].empCode = newCode;
-        saveToLocal();
+    if (!newName || !newCode) { showEditError('Name and code required'); return; }
+    if (employees.some(e => e.id !== editingEmployeeId && e.empCode === newCode)) { showEditError('Code already exists'); return; }
+    const idx = employees.findIndex(e => e.id === editingEmployeeId);
+    if (idx !== -1) {
+        employees[idx].name = newName;
+        employees[idx].section = newSection;
+        employees[idx].empCode = newCode;
+        await saveToCloud();
         closeEditModal();
         refreshAllViews();
     }
+}
+function showEditError(msg) {
+    const errDiv = document.getElementById('edit-error');
+    errDiv.textContent = msg;
+    errDiv.classList.remove('hidden');
 }
 
 function renderAdminEmployees() {
@@ -741,7 +736,7 @@ function renderAdminEmployees() {
         card.className = 'employee-card';
         card.innerHTML = `
             <div class="name">${escapeHtml(emp.name)} <span class="code">${emp.empCode}</span></div>
-            <div class="sections">Section: ${emp.section.charAt(0).toUpperCase() + emp.section.slice(1)}</div>
+            <div class="sections">Section: ${emp.section}</div>
             <div>
                 <button class="edit-btn" data-id="${emp.id}">Edit</button>
                 <button class="generate-code-btn" data-id="${emp.id}">Regenerate Code</button>
@@ -751,94 +746,90 @@ function renderAdminEmployees() {
         container.appendChild(card);
     });
     document.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', () => openEditModal(parseInt(btn.getAttribute('data-id')))));
-    document.querySelectorAll('.generate-code-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            const id = parseInt(btn.getAttribute('data-id'));
-            const emp = employees.find(e => e.id === id);
-            if (emp) {
-                emp.empCode = generateRandomCode();
-                saveToLocal();
-                renderAdminEmployees();
+    document.querySelectorAll('.generate-code-btn').forEach(btn => btn.addEventListener('click', async () => {
+        const id = parseInt(btn.getAttribute('data-id'));
+        const emp = employees.find(e => e.id === id);
+        if (emp) { emp.empCode = generateRandomCode(); await saveToCloud(); renderAdminEmployees(); }
+    }));
+    document.querySelectorAll('.remove-emp').forEach(btn => btn.addEventListener('click', async () => {
+        const id = parseInt(btn.getAttribute('data-id'));
+        if (confirm('Remove employee?')) {
+            employees = employees.filter(e => e.id !== id);
+            delete submissions[id];
+            for (let evId in eventSettings) {
+                if (eventSettings[evId].preAssignments) eventSettings[evId].preAssignments = eventSettings[evId].preAssignments.filter(pid => pid !== id);
             }
-        });
-    });
-    document.querySelectorAll('.remove-emp').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            const id = parseInt(btn.getAttribute('data-id'));
-            if (confirm('Remove this employee?')) {
-                employees = employees.filter(e => e.id !== id);
-                delete submissions[id];
-                for (let eventId in eventSettings) {
-                    if (eventSettings[eventId].preAssignments) {
-                        eventSettings[eventId].preAssignments = eventSettings[eventId].preAssignments.filter(pid => pid !== id);
-                    }
-                }
-                saveToLocal();
-                renderAdminEmployees();
-                refreshAllViews();
-            }
-        });
-    });
+            await saveToCloud();
+            renderAdminEmployees();
+            refreshAllViews();
+        }
+    }));
 }
 
-// ---------- AVAILABILITY MATRIX ----------
+// Availability Matrix
 async function renderAvailabilityMatrix(sectionFilter = 'all') {
     const container = document.getElementById('availability-matrix');
-    let filteredEmployees = sectionFilter === 'all' ? employees : employees.filter(emp => emp.section === sectionFilter);
-    let html = '<table style="min-width:600px;"><thead><tr><th>Event</th>';
-    filteredEmployees.forEach(emp => {
-        html += `<th>${escapeHtml(emp.name)}<br><small>${emp.empCode}</small></th>`;
-    });
-    html += '</tr></thead><tbody>';
+    const statusSpan = document.getElementById('matrix-sync-status');
+    if (statusSpan) statusSpan.innerText = 'Loading latest data...';
+    await loadFromCloud();  // force fresh data
+    if (statusSpan) statusSpan.innerText = '';
+
+    let filtered = sectionFilter === 'all' ? employees : employees.filter(e => e.section === sectionFilter);
+    if (filtered.length === 0) { container.innerHTML = '<p>No employees in this section.</p>'; return; }
+
+    let html = '<table style="min-width:600px;"><thead><th>Event</th>';
+    filtered.forEach(emp => html += `<th>${escapeHtml(emp.name)}<br><small>${emp.empCode}</small></th>`);
+    html += '</thead><tbody>';
     for (const event of events) {
-        html += `<tr><td><strong>${formatDate(event.date)}<br>${event.venue}</strong></td>`;
-        for (const emp of filteredEmployees) {
+        html += ` dp\n<td><strong>${formatDate(event.date)}<br>${event.venue}</strong>`;
+        for (const emp of filtered) {
             const available = (submissions[emp.id] || []).includes(event.id) || isEmployeePreAssigned(emp.id, event.id);
-            html += `<td style="text-align:center;">${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}</td>`;
+            html += `<td style="text-align:center;">${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}`;
         }
-        html += '</tr>';
+        html += '  ';
     }
-    html += '</tbody></table>';
+    html += '</tbody>  </div>';
 
     // Summary
-    html += '<div style="margin-top:30px;"><h3>Summary by Section</h3>';
     const sections = ['kitchen','floor','bar','cleaner','setup','manager'];
-    sections.forEach(section => {
-        const sectionEmps = employees.filter(e => e.section === section);
-        if (sectionEmps.length === 0) return;
-        html += `<h4>${section.charAt(0).toUpperCase() + section.slice(1)}</h4><table><thead><tr><th>Event</th><th>Assigned / Capacity</th><th>Remaining</th></tr></thead><tbody>`;
+    html += '<div style="margin-top:30px;"><h3>Summary by Section</h3>';
+    for (const sec of sections) {
+        const secEmps = employees.filter(e => e.section === sec);
+        if (secEmps.length === 0) continue;
+        html += `<h4>${sec}</h4>   <thead><th>Event</th><th>Assigned / Capacity</th><th>Remaining</th>   </thead><tbody>`;
         for (const event of events) {
-            const pre = getPreAssignedCount(event.id, section);
-            const self = getSelfAssignedCount(event.id, section);
+            const pre = getPreAssignedCount(event.id, sec);
+            const self = getSelfAssignedCount(event.id, sec);
             const total = pre + self;
-            const cap = getCapacityForEvent(event.id, section);
+            const cap = getCapacityForEvent(event.id, sec);
             const rem = cap - total;
-            html += `<tr><td>${formatDate(event.date)} – ${event.venue}</td><td>${total} / ${cap}</td><td style="color:#D4AF37;font-weight:bold;">${rem < 0 ? 0 : rem} left</td></tr>`;
+            html += `   <td><strong>${formatDate(event.date)}<br>${event.venue}</strong>   <td>${total} / ${cap}   <td style="color:#D4AF37;">${rem < 0 ? 0 : rem} left  `;
         }
-        html += '</tbody></table>';
-    });
+        html += '</tbody>  ';
+    }
+    html += '</div>';
     container.innerHTML = html;
 }
 
-// ---------- OTHER ADMIN FUNCTIONS ----------
 async function addEmployee() {
     const name = document.getElementById('new-employee-name').value.trim();
     const section = document.getElementById('new-employee-section').value;
     let code = document.getElementById('new-employee-code').value.trim();
-    if (!name) return alert('Please enter name');
+    if (!name) { alert('Enter name'); return; }
     if (!code) code = generateRandomCode();
-    if (employees.some(e => e.empCode === code)) return alert('Code already exists');
+    if (employees.some(e => e.empCode === code)) { alert('Code exists'); return; }
     const newId = Date.now();
     employees.push({ id: newId, empCode: code, name, section });
-    saveToLocal();
+    await saveToCloud();
     document.getElementById('new-employee-name').value = '';
     document.getElementById('new-employee-code').value = '';
     renderAdminEmployees();
     refreshAllViews();
+    showToast();
 }
 
 function exportCSV() {
-    let csv = 'Employee Code,Name,Section,Date,Venue,Available\n';
+    let csv = 'Employee Code,Name,Section,Event Date,Venue,Available\n';
     for (const emp of employees) {
         const av = submissions[emp.id] || [];
         for (const ev of events) {
@@ -851,6 +842,7 @@ function exportCSV() {
     a.href = URL.createObjectURL(blob);
     a.download = 'staff-availability.csv';
     a.click();
+    URL.revokeObjectURL(a.href);
 }
 
 function exportEmployeeCodes() {
@@ -863,40 +855,12 @@ function exportEmployeeCodes() {
     a.click();
 }
 
-function exportData() {
-    const data = { employees, submissions, events, eventSettings };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'members-lounge-data.json';
-    a.click();
-}
-
-async function importData(file) {
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-        try {
-            const data = JSON.parse(e.target.result);
-            if (data.submissions) Object.assign(submissions, data.submissions);
-            if (data.events) events = data.events;
-            if (data.eventSettings) Object.assign(eventSettings, data.eventSettings);
-            saveToLocal();
-            const status = document.getElementById('import-status');
-            status.textContent = 'Import successful!';
-            status.classList.remove('hidden');
-            setTimeout(() => status.classList.add('hidden'), 3000);
-            refreshAllViews();
-        } catch(err) { alert('Invalid file'); }
-    };
-    reader.readAsText(file);
-}
-
 function showCodeList() {
     const container = document.getElementById('code-list-container');
-    const textarea = document.getElementById('code-list-textarea');
+    const ta = document.getElementById('code-list-textarea');
     let text = '';
     employees.forEach(emp => text += `${emp.name} – ${emp.empCode} – ${emp.section}\n`);
-    textarea.value = text;
+    ta.value = text;
     container.classList.remove('hidden');
 }
 
@@ -907,16 +871,27 @@ function copyCodeList() {
     alert('Copied!');
 }
 
+async function clearAllData() {
+    if (confirm('Reset all data? This will delete all employees, events, submissions.')) {
+        loadLocalDefault();
+        await saveToCloud();
+        location.reload();
+    }
+}
+
+async function syncNow() {
+    await loadFromCloud();
+    refreshAllViews();
+    showMessage('save-status', 'Synced from cloud', 'success');
+}
+
 function switchTab(tabId) {
     if ((tabId === 'admin' || tabId === 'availability') && !managerAuthenticated) {
         const pwd = prompt('Manager password:');
         if (pwd === MANAGER_PASSWORD) {
             managerAuthenticated = true;
             sessionStorage.setItem('managerAuthenticated', 'true');
-        } else {
-            alert('Wrong password');
-            return;
-        }
+        } else { alert('Wrong password'); return; }
     }
     document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -942,18 +917,18 @@ function initFilters() {
 
 function loadEmployeeByCode() {
     const code = document.getElementById('employee-code').value.trim().toUpperCase();
-    if (!code) return alert('Enter code');
-    const employee = employees.find(e => e.empCode === code);
-    if (!employee) return alert('Code not found');
-    currentEmployeeId = employee.id;
-    document.getElementById('display-name').innerText = employee.name;
-    document.getElementById('display-section').innerText = employee.section.charAt(0).toUpperCase() + employee.section.slice(1);
+    if (!code) { alert('Enter code'); return; }
+    const emp = employees.find(e => e.empCode === code);
+    if (!emp) { alert('Code not found'); return; }
+    currentEmployeeId = emp.id;
+    document.getElementById('display-name').innerText = emp.name;
+    document.getElementById('display-section').innerText = emp.section;
     document.getElementById('staff-details').classList.remove('hidden');
     renderDates();
 }
 
 async function init() {
-    initData();
+    await initData();
     initFilters();
 
     // Modals
@@ -971,7 +946,6 @@ async function init() {
     });
     document.getElementById('saveEventSettings').addEventListener('click', saveEventSettings);
 
-    // Buttons
     document.getElementById('load-employee').addEventListener('click', loadEmployeeByCode);
     document.getElementById('submit-availability').addEventListener('click', submitAvailability);
     document.getElementById('add-employee').addEventListener('click', addEmployee);
@@ -985,30 +959,16 @@ async function init() {
     });
     document.getElementById('export-csv').addEventListener('click', exportCSV);
     document.getElementById('export-codes').addEventListener('click', exportEmployeeCodes);
-    document.getElementById('export-data').addEventListener('click', exportData);
-    document.getElementById('import-data').addEventListener('click', () => document.getElementById('import-file').click());
-    document.getElementById('import-file').addEventListener('change', e => {
-        if (e.target.files[0]) importData(e.target.files[0]);
-    });
     document.getElementById('show-code-list').addEventListener('click', showCodeList);
     document.getElementById('copy-code-list').addEventListener('click', copyCodeList);
-    document.getElementById('clear-all-data').addEventListener('click', () => {
-        if (confirm('Clear ALL data and reset?')) {
-            localStorage.removeItem('membersLoungeData2026');
-            location.reload();
-        }
-    });
-    document.getElementById('save-data').addEventListener('click', () => {
-        saveToLocal();
-        showMessage('save-status', 'Data saved permanently!', 'success');
-    });
+    document.getElementById('clear-all-data').addEventListener('click', clearAllData);
+    document.getElementById('sync-now').addEventListener('click', syncNow);
 
-    // Tab switching
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
     });
 
-    // Preload if manager already logged in
+    // Preload matrix if manager already logged in
     if (managerAuthenticated) renderAvailabilityMatrix('all');
 }
 
