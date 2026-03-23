@@ -679,12 +679,29 @@
         defaultEmployeesRaw.push({ name: `Extra Employee ${i}`, section: "floor" });
     }
 
+    // Deterministic code generation: given a name, produce a fixed 6-character uppercase string
+    function deterministicCode(name) {
+        // Normalize: remove spaces, convert to uppercase
+        let base = name.toUpperCase().replace(/\s/g, '');
+        // Use a simple algorithm: take the first 5 characters, plus a checksum character
+        let first5 = base.slice(0, 5).padEnd(5, 'X');
+        let sum = 0;
+        for (let i = 0; i < base.length; i++) {
+            sum += base.charCodeAt(i);
+        }
+        let checksum = String.fromCharCode(65 + (sum % 26));
+        let code = (first5 + checksum).slice(0, 6);
+        // Ensure exactly 6 chars
+        while (code.length < 6) code += 'X';
+        return code;
+    }
+
     // Helper: format date
     function formatDate(dateStr) {
         return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     }
 
-    // Generate a random 6‑character alphanumeric code (uppercase letters + digits)
+    // Generate a random 6‑character alphanumeric code (uppercase letters + digits) – used for manual generation
     function generateRandomCode() {
         const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789';
         let result = '';
@@ -706,7 +723,7 @@
                 let baseId = 1742740000000;
                 for (let i = 0; i < defaultEmployeesRaw.length; i++) {
                     const emp = defaultEmployeesRaw[i];
-                    const code = generateRandomCode();
+                    const code = deterministicCode(emp.name);
                     employees.push({
                         id: baseId + i + 1,
                         empCode: code,
@@ -1110,6 +1127,7 @@
                 const id = parseInt(btn.getAttribute('data-id'));
                 const emp = employees.find(e => e.id === id);
                 if (emp) {
+                    // Generate a random code (non-deterministic) for regeneration
                     const newCode = generateRandomCode();
                     emp.empCode = newCode;
                     saveAllData();
@@ -1159,14 +1177,14 @@
         });
         html += '</thead><tbody>';
         events.forEach(event => {
-            html += `  <tr><td><strong>${formatDate(event.date)}<br>${event.venue}</strong>`;
+            html += `   <tr><td><strong>${formatDate(event.date)}<br>${event.venue}</strong></td>`;
             filteredEmployees.forEach(emp => {
                 const available = (submissions[emp.id] || []).includes(event.id) || isEmployeePreAssigned(emp.id, event.id);
-                html += `<td class="text-center">${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}`;
+                html += `<td class="text-center">${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}</td>`;
             });
-            html += '  ';
+            html += '</tr>';
         });
-        html += '</tbody>  </table></div>';
+        html += '</tbody></table></div>';
 
         // Summary with remaining slots per section (taking into account event-specific capacities and pre-assignments)
         const sections = ['kitchen', 'floor', 'bar', 'cleaner', 'setup', 'manager'];
@@ -1174,7 +1192,7 @@
         sections.forEach(section => {
             const sectionEmployees = employees.filter(emp => emp.section === section);
             if (sectionEmployees.length === 0) return;
-            html += `<h4>${section.charAt(0).toUpperCase() + section.slice(1)}</h4><div class="scrollable-table"> <table><thead><tr><th>Event</th><th>Assigned / Capacity</th><th>Remaining Slots</th></tr></thead><tbody>`;
+            html += `<h4>${section.charAt(0).toUpperCase() + section.slice(1)}</h4><div class="scrollable-table"><table><thead><tr><th>Event</th><th>Assigned / Capacity</th><th>Remaining Slots</th></tr></thead><tbody>`;
             events.forEach(event => {
                 const preCount = getPreAssignedCount(event.id, section);
                 const selfCount = getSelfAssignedCount(event.id, section);
