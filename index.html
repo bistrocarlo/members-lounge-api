@@ -823,7 +823,6 @@
             const remaining = remainingSlots(event.id, section);
             const isCurrentlyAvailable = (submissions[currentEmployeeId] || []).includes(event.id);
             const isPreAssigned = isEmployeePreAssigned(currentEmployeeId, event.id);
-            // If pre-assigned, they are automatically available and cannot change
             const isChecked = isPreAssigned || isCurrentlyAvailable;
             const isDisabled = isPreAssigned || (remaining <= 0 && !isCurrentlyAvailable);
             const slotsInfo = isPreAssigned ? ' (You are pre-assigned)' : ` slots left: ${remaining}`;
@@ -862,7 +861,6 @@
         const section = employee.section;
         // Validate capacity before saving (excluding pre-assigned ones which are already counted)
         for (let eventId of selected) {
-            // Skip if already pre-assigned – they can't change anyway
             if (isEmployeePreAssigned(currentEmployeeId, eventId)) continue;
             const remaining = remainingSlots(eventId, section);
             const isAlreadyIn = (submissions[currentEmployeeId] || []).includes(eventId);
@@ -905,7 +903,6 @@
     function deleteEvent(eventId) {
         if (confirm('Delete this event? Staff availability, pre-assignments, and custom capacities will be removed.')) {
             events = events.filter(e => e.id !== eventId);
-            // Remove submissions for this event
             for (let empId in submissions) {
                 submissions[empId] = submissions[empId].filter(eid => eid !== eventId);
             }
@@ -980,7 +977,6 @@
         // Pre-assignments
         const preAssignments = settings.preAssignments || [];
         const allEmployees = employees;
-        // Group employees by section
         const employeesBySection = {};
         for (const emp of allEmployees) {
             if (!employeesBySection[emp.section]) employeesBySection[emp.section] = [];
@@ -1031,7 +1027,7 @@
         };
         saveAllData();
         closeEventSettingsModal();
-        refreshAllViews(); // update matrix and staff views
+        refreshAllViews();
     }
 
     function closeEventSettingsModal() {
@@ -1039,7 +1035,7 @@
         currentEventIdForSettings = null;
     }
 
-    // ---------- Employee management (unchanged from previous) ----------
+    // ---------- Employee management ----------
     let editingEmployeeId = null;
     function openEditModal(empId) {
         const employee = employees.find(e => e.id === empId);
@@ -1123,7 +1119,6 @@
                 if (confirm('Remove this employee? All their availability data will be lost.')) {
                     employees = employees.filter(e => e.id !== id);
                     delete submissions[id];
-                    // Also remove from pre-assignments in event settings
                     for (let eventId in eventSettings) {
                         if (eventSettings[eventId].preAssignments) {
                             eventSettings[eventId].preAssignments = eventSettings[eventId].preAssignments.filter(pid => pid !== id);
@@ -1153,20 +1148,20 @@
             container.innerHTML = '<p>No employees in this section.</p>';
             return;
         }
-        let html = '<div class="scrollable-table"><table style="min-width:600px;"><thead>  <th>Event</th>';
+        let html = '<div class="scrollable-table"><table style="min-width:600px;"><thead><th>Event</th>';
         filteredEmployees.forEach(emp => {
             html += `<th class="employee-name">${escapeHtml(emp.name)}<br><span style="font-size:10px;">${emp.empCode}</span></th>`;
         });
-        html += ' </thead><tbody>';
+        html += '</thead><tbody>';
         events.forEach(event => {
-            html += `   <td><strong>${formatDate(event.date)}<br>${event.venue}</strong>`;
+            html += `<tr><td><strong>${formatDate(event.date)}<br>${event.venue}</strong></td>`;
             filteredEmployees.forEach(emp => {
                 const available = (submissions[emp.id] || []).includes(event.id) || isEmployeePreAssigned(emp.id, event.id);
-                html += `<td class="text-center">${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}`;
+                html += `<td class="text-center">${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}</td>`;
             });
-            html += '  ';
+            html += '</tr>';
         });
-        html += '</tbody> </table></div>';
+        html += '</tbody></table></div>';
 
         // Summary with remaining slots per section (taking into account event-specific capacities and pre-assignments)
         const sections = ['kitchen', 'floor', 'bar', 'cleaner', 'setup', 'manager'];
@@ -1174,7 +1169,7 @@
         sections.forEach(section => {
             const sectionEmployees = employees.filter(emp => emp.section === section);
             if (sectionEmployees.length === 0) return;
-            html += `<h4>${section.charAt(0).toUpperCase() + section.slice(1)}</h4><div class="scrollable-table"> <thead> <th>Event</th><th>Assigned / Capacity</th><th>Remaining Slots</th> </thead><tbody>`;
+            html += `<h4>${section.charAt(0).toUpperCase() + section.slice(1)}</h4><div class="scrollable-table"><table><thead><tr><th>Event</th><th>Assigned / Capacity</th><th>Remaining Slots</th></tr></thead><tbody>`;
             events.forEach(event => {
                 const preCount = getPreAssignedCount(event.id, section);
                 const selfCount = getSelfAssignedCount(event.id, section);
@@ -1182,9 +1177,9 @@
                 const capacity = getCapacityForEvent(event.id, section);
                 const remaining = capacity - totalAssigned;
                 const remainingDisplay = remaining < 0 ? 0 : remaining;
-                html += ` <td>${formatDate(event.date)} – ${event.venue}<td>${totalAssigned} / ${capacity}<td style="color:#D4AF37; font-weight:bold;">${remainingDisplay} slots left`;
+                html += `<tr><td>${formatDate(event.date)} – ${event.venue}</td><td>${totalAssigned} / ${capacity}</td><td style="color:#D4AF37; font-weight:bold;">${remainingDisplay} slots left</td></tr>`;
             });
-            html += '</tbody> </table></div>';
+            html += '</tbody></table></div>';
         });
         html += '</div>';
 
@@ -1296,7 +1291,6 @@
             if (availableEvents.length === 0 && !Object.values(eventSettings).some(es => es.preAssignments?.includes(emp.id))) {
                 text += '  No availability selected.\n';
             } else {
-                // Combine self and pre-assigned
                 const allEvents = new Set(availableEvents);
                 for (let eventId in eventSettings) {
                     if (eventSettings[eventId].preAssignments?.includes(emp.id)) allEvents.add(eventId);
