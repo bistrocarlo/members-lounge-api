@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Member's Lounge – Staff Availability</title>
     <style>
-        /* (same styling as before – you can reuse your existing styles) */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: #f5f5f5;
@@ -26,11 +25,7 @@
             flex-wrap: wrap;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+        .logo { display: flex; align-items: center; gap: 15px; }
         .logo-icon {
             background: #D4AF37;
             color: white;
@@ -43,11 +38,7 @@
             font-weight: bold;
             font-size: 28px;
         }
-        .logo h1 {
-            color: #1e1e1e;
-            font-size: 1.8rem;
-            letter-spacing: 1px;
-        }
+        .logo h1 { color: #1e1e1e; font-size: 1.8rem; letter-spacing: 1px; }
         .tagline { color: #666; font-size: 0.9rem; }
         .tabs {
             display: flex;
@@ -66,10 +57,7 @@
             transition: background 0.3s;
             font-weight: 500;
         }
-        .tab-btn.active {
-            background: #D4AF37;
-            color: white;
-        }
+        .tab-btn.active { background: #D4AF37; color: white; }
         .tab-pane { display: none; }
         .tab-pane.active { display: block; }
         .card {
@@ -420,14 +408,14 @@
 </div>
 
 <script>
-    // Replace this URL with your Google Apps Script web app URL
-    const API_BASE_URL = 'YOUR_WEB_APP_URL'; // e.g., 'https://script.google.com/macros/s/.../exec'
+    // ================== CONFIGURATION ==================
+    // *** REPLACE THIS URL WITH YOUR GOOGLE APPS SCRIPT WEB APP URL ***
+    const API_BASE_URL = 'YOUR_WEB_APP_URL';
 
-    // ---------- MANAGER PASSWORD ----------
+    // ================== GLOBAL DATA ==================
     const MANAGER_PASSWORD = 'ML2026';
     let managerAuthenticated = sessionStorage.getItem('managerAuthenticated') === 'true';
 
-    // ---------- CAPACITY LIMITS ----------
     const DEFAULT_CAPACITIES = {
         kitchen: 4,
         floor: 8,
@@ -437,20 +425,60 @@
         manager: 9999
     };
 
-    // ---------- DATA MODELS ----------
     let employees = [];
-    let submissions = {};      // key: employeeId, value: array of eventIds where available (self-selected)
+    let submissions = {};      // employeeId -> array of eventIds
     let events = [];
-    let eventSettings = {};     // key: eventId, value: { capacities: {...}, preAssignments: [...] }
+    let eventSettings = {};
 
-    // Default events (44 from your list)
+    // Default events (44)
     const defaultEvents = [
         { id: '1', date: '2026-03-28', venue: 'Sala Reggio Ballroom' },
-        // ... (include all 44 events as before)
+        { id: '2', date: '2026-04-18', venue: 'Fior Events' },
+        { id: '3', date: '2026-05-09', venue: 'Fior Events' },
+        { id: '4', date: '2026-05-17', venue: 'Sala Reggio Ballroom' },
+        { id: '5', date: '2026-05-22', venue: 'Sala Reggio Ballroom' },
+        { id: '6', date: '2026-05-23', venue: 'Sala Reggio Ballroom' },
+        { id: '7', date: '2026-05-24', venue: 'Sala Reggio Ballroom' },
+        { id: '8', date: '2026-05-29', venue: 'Sala Reggio Ballroom' },
+        { id: '9', date: '2026-05-30', venue: 'Sala Reggio Ballroom' },
+        { id: '10', date: '2026-05-31', venue: 'Sala Reggio Ballroom' },
+        { id: '11', date: '2026-06-07', venue: 'Sala Reggio Ballroom' },
+        { id: '12', date: '2026-06-07', venue: 'Fior Events' },
+        { id: '13', date: '2026-06-12', venue: 'Sala Reggio Ballroom' },
+        { id: '14', date: '2026-06-13', venue: 'Sala Reggio Ballroom' },
+        { id: '15', date: '2026-06-20', venue: 'Sala Reggio Ballroom' },
+        { id: '16', date: '2026-06-21', venue: 'Sala Reggio Ballroom' },
+        { id: '17', date: '2026-07-19', venue: 'Sala Reggio Ballroom' },
+        { id: '18', date: '2026-07-25', venue: 'Sala Reggio Ballroom' },
+        { id: '19', date: '2026-07-25', venue: 'Fior Events' },
+        { id: '20', date: '2026-07-26', venue: 'Sala Reggio Ballroom' },
+        { id: '21', date: '2026-08-01', venue: 'Sala Reggio Ballroom' },
+        { id: '22', date: '2026-08-02', venue: 'Sala Reggio Ballroom' },
+        { id: '23', date: '2026-08-08', venue: 'Sala Reggio Ballroom' },
+        { id: '24', date: '2026-08-15', venue: 'Sala Reggio Ballroom' },
+        { id: '25', date: '2026-08-16', venue: 'Fior Events' },
+        { id: '26', date: '2026-08-22', venue: 'Sala Reggio Ballroom' },
+        { id: '27', date: '2026-08-23', venue: 'Sala Reggio Ballroom' },
+        { id: '28', date: '2026-08-30', venue: 'Sala Reggio Ballroom' },
+        { id: '29', date: '2026-09-13', venue: 'Sala Reggio Ballroom' },
+        { id: '30', date: '2026-09-13', venue: 'Fior Events' },
+        { id: '31', date: '2026-09-18', venue: 'Sala Reggio Ballroom' },
+        { id: '32', date: '2026-09-20', venue: 'Fior Events' },
+        { id: '33', date: '2026-10-03', venue: 'Fior Events' },
+        { id: '34', date: '2026-10-17', venue: 'Sala Reggio Ballroom' },
+        { id: '35', date: '2026-11-13', venue: 'Sala Reggio Ballroom' },
+        { id: '36', date: '2026-11-21', venue: 'Sala Reggio Ballroom' },
+        { id: '37', date: '2026-12-11', venue: 'Fior Events' },
+        { id: '38', date: '2026-12-12', venue: 'Fior Events' },
+        { id: '39', date: '2026-12-14', venue: 'Sala Reggio Ballroom' },
+        { id: '40', date: '2026-12-15', venue: 'Sala Reggio Ballroom' },
+        { id: '41', date: '2026-12-17', venue: 'Sala Reggio Ballroom' },
+        { id: '42', date: '2027-02-27', venue: 'Fior Events' },
+        { id: '43', date: '2027-02-28', venue: 'Fior Events' },
         { id: '44', date: '2027-03-27', venue: 'Fior Events' }
     ];
 
-    // ----- Your employee list (hardcoded with your exact sections) -----
+    // Fixed employee list with your sections and codes
     const defaultEmployeesRaw = [
         { name: "Carlo Pavia", section: "manager", code: "CARLO6" },
         { name: "Michelle Pavia", section: "manager", code: "MICHE0" },
@@ -492,28 +520,24 @@
         { name: "Jacob Doubleday", section: "floor", code: "JACOB0" }
     ];
 
-    // Helper: format date
+    // Helper functions
     function formatDate(dateStr) {
         return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     }
 
-    // Generate a random 6‑character alphanumeric code (uppercase letters + digits)
     function generateRandomCode() {
         const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789';
         let result = '';
-        for (let i = 0; i < 6; i++) {
-            result += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
+        for (let i = 0; i < 6; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
         return result;
     }
 
-    // Load/save data from localStorage (for employees and events) but submissions from cloud
+    // Load data from localStorage (employees, events, settings)
     function loadData() {
         try {
             const storedEmployees = localStorage.getItem('ml_employees');
             if (storedEmployees) {
                 employees = JSON.parse(storedEmployees);
-                if (!Array.isArray(employees)) employees = [];
             } else {
                 employees = [];
                 let baseId = 1742740000000;
@@ -527,42 +551,28 @@
                     });
                 }
             }
-        } catch(e) { employees = []; console.error(e); }
+        } catch(e) { employees = []; }
 
         try {
             const storedEvents = localStorage.getItem('ml_events');
-            if (storedEvents) {
-                events = JSON.parse(storedEvents);
-                if (!Array.isArray(events)) events = [];
-            } else {
-                events = [...defaultEvents];
-            }
-        } catch(e) { events = [...defaultEvents]; console.error(e); }
+            events = storedEvents ? JSON.parse(storedEvents) : [...defaultEvents];
+        } catch(e) { events = [...defaultEvents]; }
 
         try {
             const storedSettings = localStorage.getItem('ml_eventSettings');
-            if (storedSettings) {
-                eventSettings = JSON.parse(storedSettings);
-                if (typeof eventSettings !== 'object') eventSettings = {};
-            } else {
-                eventSettings = {};
-            }
-        } catch(e) { eventSettings = {}; console.error(e); }
+            eventSettings = storedSettings ? JSON.parse(storedSettings) : {};
+        } catch(e) { eventSettings = {}; }
 
         sortEvents();
     }
 
-    function sortEvents() {
-        events.sort((a, b) => new Date(a.date) - new Date(b.date));
-    }
-
+    function sortEvents() { events.sort((a,b) => new Date(a.date) - new Date(b.date)); }
     function saveAllData() {
         localStorage.setItem('ml_employees', JSON.stringify(employees));
         localStorage.setItem('ml_events', JSON.stringify(events));
         localStorage.setItem('ml_eventSettings', JSON.stringify(eventSettings));
-        showTemporaryStatus('All data saved successfully.');
+        showTemporaryStatus('Local data saved.');
     }
-
     function showTemporaryStatus(msg) {
         const statusDiv = document.getElementById('save-status');
         if (statusDiv) {
@@ -572,14 +582,16 @@
         }
     }
 
-    // ----- Cloud helpers -----
+    // Cloud operations
     async function loadAvailabilityFromCloud() {
+        if (!API_BASE_URL || API_BASE_URL === 'YOUR_WEB_APP_URL') {
+            console.warn('No valid API URL set. Availability will not be synced.');
+            return;
+        }
         try {
             const url = `${API_BASE_URL}?action=getAvailability`;
             const response = await fetch(url);
             const data = await response.json();
-            // data is array of rows: each row is [employeeId, eventId, isAvailable]
-            // We need to rebuild submissions object
             const newSubmissions = {};
             for (let row of data) {
                 const empId = row[0];
@@ -591,41 +603,27 @@
                 }
             }
             submissions = newSubmissions;
-        } catch (err) {
-            console.error('Failed to load availability from cloud:', err);
-        }
+        } catch (err) { console.error('Cloud load failed:', err); }
     }
 
     async function saveAvailabilityToCloud(employeeId, eventId, isAvailable) {
+        if (!API_BASE_URL || API_BASE_URL === 'YOUR_WEB_APP_URL') return;
         const url = `${API_BASE_URL}?action=setAvailability&employeeId=${employeeId}&eventId=${eventId}&isAvailable=${isAvailable}`;
         try {
             await fetch(url);
-        } catch (err) {
-            console.error('Failed to save availability to cloud:', err);
-        }
+        } catch (err) { console.error('Cloud save failed:', err); }
     }
 
-    // ----- Capacity helpers (same as before) -----
+    // Capacity helpers
     function getCapacityForEvent(eventId, section) {
-        const settings = eventSettings[eventId];
-        if (settings && settings.capacities && settings.capacities[section] !== undefined) {
-            return settings.capacities[section];
-        }
-        return DEFAULT_CAPACITIES[section];
+        const s = eventSettings[eventId];
+        return (s && s.capacities && s.capacities[section] !== undefined) ? s.capacities[section] : DEFAULT_CAPACITIES[section];
     }
-
     function getPreAssignedCount(eventId, section) {
-        const settings = eventSettings[eventId];
-        if (!settings || !settings.preAssignments) return 0;
-        const preEmpIds = settings.preAssignments;
-        let count = 0;
-        for (const empId of preEmpIds) {
-            const emp = employees.find(e => e.id == empId);
-            if (emp && emp.section === section) count++;
-        }
-        return count;
+        const s = eventSettings[eventId];
+        if (!s || !s.preAssignments) return 0;
+        return s.preAssignments.filter(pid => employees.find(e => e.id == pid)?.section === section).length;
     }
-
     function getSelfAssignedCount(eventId, section) {
         let count = 0;
         for (let empId in submissions) {
@@ -634,59 +632,44 @@
         }
         return count;
     }
-
     function remainingSlots(eventId, section) {
-        const capacity = getCapacityForEvent(eventId, section);
+        const cap = getCapacityForEvent(eventId, section);
         const pre = getPreAssignedCount(eventId, section);
         const self = getSelfAssignedCount(eventId, section);
-        return capacity - pre - self;
+        return cap - pre - self;
+    }
+    function isEmployeePreAssigned(empId, eventId) {
+        const s = eventSettings[eventId];
+        return s && s.preAssignments && s.preAssignments.includes(empId);
     }
 
-    function isEmployeePreAssigned(employeeId, eventId) {
-        const settings = eventSettings[eventId];
-        if (!settings || !settings.preAssignments) return false;
-        return settings.preAssignments.includes(employeeId);
-    }
-
-    // Render dates for staff panel (now uses cloud submissions)
+    // Render staff dates
     async function renderDates() {
         const container = document.getElementById('dates-container');
         if (!container || !currentEmployeeId) return;
-
-        await loadAvailabilityFromCloud(); // refresh submissions from cloud
-
-        const employee = employees.find(e => e.id === currentEmployeeId);
-        if (!employee) return;
-
-        const section = employee.section;
+        await loadAvailabilityFromCloud();
+        const emp = employees.find(e => e.id === currentEmployeeId);
+        if (!emp) return;
+        const section = emp.section;
         container.innerHTML = '';
         for (const event of events) {
             const remaining = remainingSlots(event.id, section);
             const isCurrentlyAvailable = (submissions[currentEmployeeId] || []).includes(event.id);
-            const isPreAssigned = isEmployeePreAssigned(currentEmployeeId, event.id);
-            const isChecked = isPreAssigned || isCurrentlyAvailable;
-            const isDisabled = isPreAssigned || (remaining <= 0 && !isCurrentlyAvailable);
-            const slotsInfo = isPreAssigned ? ' (You are pre-assigned)' : ` slots left: ${remaining}`;
+            const isPre = isEmployeePreAssigned(currentEmployeeId, event.id);
+            const isChecked = isPre || isCurrentlyAvailable;
+            const isDisabled = isPre || (remaining <= 0 && !isCurrentlyAvailable);
+            const slotsInfo = isPre ? ' (You are pre-assigned)' : ` slots left: ${remaining}`;
             const div = document.createElement('div');
             div.className = 'date-item';
             div.innerHTML = `
-                <div class="event-info">
-                    <strong>${formatDate(event.date)}</strong><br>
-                    ${event.venue}
-                </div>
-                <div class="slots-info">
-                    ${section.charAt(0).toUpperCase() + section.slice(1)}${slotsInfo}
-                </div>
-                <label>
-                    <input type="checkbox" data-id="${event.id}" ${isChecked ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
-                    Available
-                </label>
+                <div class="event-info"><strong>${formatDate(event.date)}</strong><br>${event.venue}</div>
+                <div class="slots-info">${section.charAt(0).toUpperCase() + section.slice(1)}${slotsInfo}</div>
+                <label><input type="checkbox" data-id="${event.id}" ${isChecked ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}> Available</label>
             `;
             container.appendChild(div);
         }
     }
 
-    // Submit availability for current employee (saves to cloud)
     async function submitAvailability() {
         if (!currentEmployeeId) {
             showMessage('staff-message', 'Please load your employee details first.', 'error');
@@ -694,57 +677,48 @@
         }
         const checkboxes = document.querySelectorAll('#dates-container input[type="checkbox"]');
         const selected = [];
-        checkboxes.forEach(cb => {
-            if (cb.checked) selected.push(cb.getAttribute('data-id'));
-        });
+        checkboxes.forEach(cb => { if (cb.checked) selected.push(cb.getAttribute('data-id')); });
+        const emp = employees.find(e => e.id === currentEmployeeId);
+        const section = emp.section;
 
-        const employee = employees.find(e => e.id === currentEmployeeId);
-        const section = employee.section;
-        // Validate capacity before saving
+        // Validate capacity (skip pre-assigned)
         for (let eventId of selected) {
             if (isEmployeePreAssigned(currentEmployeeId, eventId)) continue;
-            const remaining = remainingSlots(eventId, section);
-            const isAlreadyIn = (submissions[currentEmployeeId] || []).includes(eventId);
-            if (!isAlreadyIn && remaining <= 0) {
-                showMessage('staff-message', `Cannot add ${section} for ${events.find(e => e.id === eventId)?.venue}: capacity full.`, 'error');
+            if (remainingSlots(eventId, section) <= 0 && !(submissions[currentEmployeeId] || []).includes(eventId)) {
+                showMessage('staff-message', `Cannot add ${section} for ${events.find(e=>e.id===eventId)?.venue}: capacity full.`, 'error');
                 return;
             }
         }
 
-        // For each event, update cloud
-        const currentSubmissions = submissions[currentEmployeeId] || [];
-        // Add newly selected events
+        // Update cloud
+        const current = submissions[currentEmployeeId] || [];
         for (let eventId of selected) {
-            if (!currentSubmissions.includes(eventId)) {
+            if (!current.includes(eventId)) {
                 await saveAvailabilityToCloud(currentEmployeeId, eventId, true);
             }
         }
-        // Remove deselected events
-        for (let eventId of currentSubmissions) {
+        for (let eventId of current) {
             if (!selected.includes(eventId)) {
                 await saveAvailabilityToCloud(currentEmployeeId, eventId, false);
             }
         }
 
-        // Reload from cloud to ensure consistent state
         await loadAvailabilityFromCloud();
-        showMessage('staff-message', `Availability saved for ${employee.name}. Thank you!`, 'success');
-        if (managerAuthenticated) {
-            renderAvailabilityMatrix(document.querySelector('.filter-btn.active')?.dataset.section || 'all');
-        }
-        renderDates(); // update remaining slots display
+        showMessage('staff-message', `Availability saved for ${emp.name}. Thank you!`, 'success');
+        if (managerAuthenticated) renderAvailabilityMatrix(document.querySelector('.filter-btn.active')?.dataset.section || 'all');
+        renderDates();
     }
 
     function showMessage(containerId, text, type) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        container.textContent = text;
-        container.className = type === 'success' ? 'success-msg' : 'error-msg';
-        container.classList.remove('hidden');
-        setTimeout(() => container.classList.add('hidden'), 3000);
+        const c = document.getElementById(containerId);
+        if (!c) return;
+        c.textContent = text;
+        c.className = type === 'success' ? 'success-msg' : 'error-msg';
+        c.classList.remove('hidden');
+        setTimeout(() => c.classList.add('hidden'), 3000);
     }
 
-    // ---------- Admin functions (unchanged) ----------
+    // Admin functions
     function addEvent(date, venue) {
         if (!date || !venue) { alert('Please enter both date and venue'); return false; }
         if (events.some(e => e.date === date && e.venue === venue)) { alert('Event already exists'); return false; }
@@ -757,11 +731,8 @@
     }
 
     function deleteEvent(eventId) {
-        if (confirm('Delete this event? Staff availability, pre-assignments, and custom capacities will be removed.')) {
+        if (confirm('Delete this event?')) {
             events = events.filter(e => e.id !== eventId);
-            for (let empId in submissions) {
-                // submissions will be overwritten from cloud; we just remove locally for consistency
-            }
             delete eventSettings[eventId];
             saveAllData();
             refreshAllViews();
@@ -774,9 +745,7 @@
             renderAdminEventsList();
             renderAvailabilityMatrix(document.querySelector('.filter-btn.active')?.dataset.section || 'all');
         }
-        if (currentEmployeeId) {
-            renderDates();
-        }
+        if (currentEmployeeId) renderDates();
     }
 
     function renderAdminEventsList() {
@@ -799,15 +768,10 @@
             `;
             container.appendChild(div);
         });
-        document.querySelectorAll('.delete-event').forEach(btn => {
-            btn.addEventListener('click', () => deleteEvent(btn.getAttribute('data-id')));
-        });
-        document.querySelectorAll('.edit-event-settings').forEach(btn => {
-            btn.addEventListener('click', () => openEventSettingsModal(btn.getAttribute('data-id')));
-        });
+        document.querySelectorAll('.delete-event').forEach(btn => btn.addEventListener('click', () => deleteEvent(btn.getAttribute('data-id'))));
+        document.querySelectorAll('.edit-event-settings').forEach(btn => btn.addEventListener('click', () => openEventSettingsModal(btn.getAttribute('data-id'))));
     }
 
-    // Event Settings Modal (unchanged)
     let currentEventIdForSettings = null;
     function openEventSettingsModal(eventId) {
         currentEventIdForSettings = eventId;
@@ -815,49 +779,31 @@
         document.getElementById('eventSettingsTitle').innerText = `Settings for ${formatDate(event.date)} – ${event.venue}`;
         const container = document.getElementById('eventSettingsContent');
         const settings = eventSettings[eventId] || { capacities: {}, preAssignments: [] };
-
-        // Capacities
         let capacitiesHtml = '<div class="capacity-row">';
-        const sections = ['kitchen', 'floor', 'bar', 'cleaner', 'setup', 'manager'];
+        const sections = ['kitchen','floor','bar','cleaner','setup','manager'];
         for (const sec of sections) {
-            const currentVal = settings.capacities[sec] !== undefined ? settings.capacities[sec] : DEFAULT_CAPACITIES[sec];
-            capacitiesHtml += `
-                <div class="capacity-field">
-                    <label>${sec.charAt(0).toUpperCase() + sec.slice(1)}</label>
-                    <input type="number" id="cap-${sec}" value="${currentVal}" min="0" step="1">
-                </div>
-            `;
+            const val = settings.capacities[sec] !== undefined ? settings.capacities[sec] : DEFAULT_CAPACITIES[sec];
+            capacitiesHtml += `<div class="capacity-field"><label>${sec}</label><input type="number" id="cap-${sec}" value="${val}" min="0" step="1"></div>`;
         }
         capacitiesHtml += '</div>';
 
-        // Pre-assignments
         const preAssignments = settings.preAssignments || [];
-        const allEmployees = employees;
         const employeesBySection = {};
-        for (const emp of allEmployees) {
+        for (const emp of employees) {
             if (!employeesBySection[emp.section]) employeesBySection[emp.section] = [];
             employeesBySection[emp.section].push(emp);
         }
-
-        let preHtml = '<h4>Pre-assign Staff</h4>';
-        preHtml += '<div style="margin-bottom:10px;">Select employees to pre-assign to this event (they will be automatically considered available and cannot unassign themselves).</div>';
+        let preHtml = '<h4>Pre-assign Staff</h4><div>Select employees to pre-assign (they cannot unassign themselves).</div>';
         for (const sec of sections) {
             const emps = employeesBySection[sec] || [];
             if (emps.length === 0) continue;
-            preHtml += `<div style="margin-top:10px;"><strong>${sec.charAt(0).toUpperCase() + sec.slice(1)}</strong></div>`;
-            preHtml += '<div class="preassign-list" id="preassign-list-'+sec+'">';
+            preHtml += `<div><strong>${sec}</strong></div><div class="preassign-list" id="preassign-list-${sec}">`;
             for (const emp of emps) {
                 const isChecked = preAssignments.includes(emp.id);
-                preHtml += `
-                    <div class="preassign-item">
-                        <label>${emp.name} (${emp.empCode})</label>
-                        <input type="checkbox" class="preassign-checkbox" data-id="${emp.id}" ${isChecked ? 'checked' : ''}>
-                    </div>
-                `;
+                preHtml += `<div class="preassign-item"><label>${emp.name} (${emp.empCode})</label><input type="checkbox" class="preassign-checkbox" data-id="${emp.id}" ${isChecked ? 'checked' : ''}></div>`;
             }
             preHtml += '</div>';
         }
-
         container.innerHTML = capacitiesHtml + preHtml;
         document.getElementById('eventSettingsModal').style.display = 'flex';
     }
@@ -865,75 +811,50 @@
     function saveEventSettings() {
         if (!currentEventIdForSettings) return;
         const capacities = {};
-        const sections = ['kitchen', 'floor', 'bar', 'cleaner', 'setup', 'manager'];
+        const sections = ['kitchen','floor','bar','cleaner','setup','manager'];
         for (const sec of sections) {
             const input = document.getElementById(`cap-${sec}`);
-            if (input) {
-                const val = parseInt(input.value, 10);
-                if (!isNaN(val)) capacities[sec] = val;
-            }
+            if (input) capacities[sec] = parseInt(input.value,10);
         }
         const preAssignments = [];
-        document.querySelectorAll('.preassign-checkbox:checked').forEach(cb => {
-            preAssignments.push(parseInt(cb.getAttribute('data-id')));
-        });
-        eventSettings[currentEventIdForSettings] = {
-            capacities: capacities,
-            preAssignments: preAssignments
-        };
+        document.querySelectorAll('.preassign-checkbox:checked').forEach(cb => preAssignments.push(parseInt(cb.getAttribute('data-id'))));
+        eventSettings[currentEventIdForSettings] = { capacities, preAssignments };
         saveAllData();
         closeEventSettingsModal();
         refreshAllViews();
     }
+    function closeEventSettingsModal() { document.getElementById('eventSettingsModal').style.display = 'none'; currentEventIdForSettings = null; }
 
-    function closeEventSettingsModal() {
-        document.getElementById('eventSettingsModal').style.display = 'none';
-        currentEventIdForSettings = null;
-    }
-
-    // Employee management (same as before)
+    // Employee management
     let editingEmployeeId = null;
     function openEditModal(empId) {
-        const employee = employees.find(e => e.id === empId);
-        if (!employee) return;
+        const emp = employees.find(e => e.id === empId);
+        if (!emp) return;
         editingEmployeeId = empId;
-        document.getElementById('edit-emp-name').value = employee.name;
-        document.getElementById('edit-emp-section').value = employee.section;
-        document.getElementById('edit-emp-code').value = employee.empCode;
+        document.getElementById('edit-emp-name').value = emp.name;
+        document.getElementById('edit-emp-section').value = emp.section;
+        document.getElementById('edit-emp-code').value = emp.empCode;
         document.getElementById('edit-error').classList.add('hidden');
         document.getElementById('editModal').style.display = 'flex';
     }
-    function closeEditModal() {
-        document.getElementById('editModal').style.display = 'none';
-        editingEmployeeId = null;
-    }
+    function closeEditModal() { document.getElementById('editModal').style.display = 'none'; editingEmployeeId = null; }
     function saveEdit() {
         const newName = document.getElementById('edit-emp-name').value.trim();
         const newSection = document.getElementById('edit-emp-section').value;
         const newCode = document.getElementById('edit-emp-code').value.trim();
-        if (!newName || !newCode) {
-            showEditError('Name and code are required.');
-            return;
-        }
-        if (employees.some(e => e.id !== editingEmployeeId && e.empCode === newCode)) {
-            showEditError('Employee code already exists. Please use a unique code.');
-            return;
-        }
-        const index = employees.findIndex(e => e.id === editingEmployeeId);
-        if (index !== -1) {
-            employees[index].name = newName;
-            employees[index].section = newSection;
-            employees[index].empCode = newCode;
+        if (!newName || !newCode) { showEditError('Name and code required.'); return; }
+        if (employees.some(e => e.id !== editingEmployeeId && e.empCode === newCode)) { showEditError('Code already exists.'); return; }
+        const idx = employees.findIndex(e => e.id === editingEmployeeId);
+        if (idx !== -1) {
+            employees[idx].name = newName;
+            employees[idx].section = newSection;
+            employees[idx].empCode = newCode;
             saveAllData();
             closeEditModal();
             refreshAllViews();
         }
     }
-    function showEditError(msg) {
-        const errorDiv = document.getElementById('edit-error');
-        errorDiv.textContent = msg;
-        errorDiv.classList.remove('hidden');
-    }
+    function showEditError(msg) { const div = document.getElementById('edit-error'); div.textContent = msg; div.classList.remove('hidden'); }
 
     function renderAdminEmployees() {
         const container = document.getElementById('employee-list');
@@ -944,7 +865,7 @@
             card.className = 'employee-card';
             card.innerHTML = `
                 <div class="name">${escapeHtml(emp.name)} <span class="code">${emp.empCode}</span></div>
-                <div class="sections">Section: ${emp.section.charAt(0).toUpperCase() + emp.section.slice(1)}</div>
+                <div class="sections">Section: ${emp.section}</div>
                 <div>
                     <button class="edit-btn" data-id="${emp.id}">Edit</button>
                     <button class="generate-code-btn" data-id="${emp.id}">Regenerate Code</button>
@@ -953,91 +874,62 @@
             `;
             container.appendChild(card);
         });
-        document.querySelectorAll('.edit-btn').forEach(btn => {
-            btn.addEventListener('click', () => openEditModal(parseInt(btn.getAttribute('data-id'))));
-        });
-        document.querySelectorAll('.generate-code-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = parseInt(btn.getAttribute('data-id'));
-                const emp = employees.find(e => e.id === id);
-                if (emp) {
-                    const newCode = generateRandomCode();
-                    emp.empCode = newCode;
-                    saveAllData();
-                    renderAdminEmployees();
-                    showTemporaryStatus(`New code for ${emp.name}: ${newCode}`);
-                }
-            });
-        });
-        document.querySelectorAll('.remove-emp').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = parseInt(btn.getAttribute('data-id'));
-                if (confirm('Remove this employee? All their availability data will be lost.')) {
-                    employees = employees.filter(e => e.id !== id);
-                    // submissions will be loaded from cloud, so we don't need to delete from cloud here
-                    saveAllData();
-                    renderAdminEmployees();
-                    refreshAllViews();
-                    if (currentEmployeeId === id) {
-                        currentEmployeeId = null;
-                        document.getElementById('staff-details').classList.add('hidden');
-                        document.getElementById('employee-code').value = '';
-                    }
-                }
-            });
-        });
+        document.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', () => openEditModal(parseInt(btn.getAttribute('data-id')))));
+        document.querySelectorAll('.generate-code-btn').forEach(btn => btn.addEventListener('click', () => {
+            const id = parseInt(btn.getAttribute('data-id'));
+            const emp = employees.find(e => e.id === id);
+            if (emp) { emp.empCode = generateRandomCode(); saveAllData(); renderAdminEmployees(); showTemporaryStatus(`New code for ${emp.name}: ${emp.empCode}`); }
+        }));
+        document.querySelectorAll('.remove-emp').forEach(btn => btn.addEventListener('click', () => {
+            const id = parseInt(btn.getAttribute('data-id'));
+            if (confirm('Remove employee?')) {
+                employees = employees.filter(e => e.id !== id);
+                delete submissions[id];
+                saveAllData();
+                renderAdminEmployees();
+                refreshAllViews();
+                if (currentEmployeeId === id) { currentEmployeeId = null; document.getElementById('staff-details').classList.add('hidden'); document.getElementById('employee-code').value = ''; }
+            }
+        }));
     }
 
-    // Availability Matrix (reads from cloud)
     async function renderAvailabilityMatrix(sectionFilter = 'all') {
         const container = document.getElementById('availability-matrix');
         if (!container) return;
-
-        await loadAvailabilityFromCloud(); // refresh submissions
-
-        let filteredEmployees = employees;
-        if (sectionFilter !== 'all') {
-            filteredEmployees = employees.filter(emp => emp.section === sectionFilter);
-        }
-        if (filteredEmployees.length === 0) {
-            container.innerHTML = '<p>No employees in this section.</p>';
-            return;
-        }
-        let html = '<div class="scrollable-table"><table style="min-width:600px;"><thead><th>Event</th>';
-        filteredEmployees.forEach(emp => {
-            html += `<th class="employee-name">${escapeHtml(emp.name)}<br><span style="font-size:10px;">${emp.empCode}</span></th>`;
-        });
+        await loadAvailabilityFromCloud();
+        let filtered = employees;
+        if (sectionFilter !== 'all') filtered = employees.filter(e => e.section === sectionFilter);
+        if (filtered.length === 0) { container.innerHTML = '<p>No employees in this section.</p>'; return; }
+        let html = '<div class="scrollable-table"><table><thead><th>Event</th>';
+        filtered.forEach(e => html += `<th>${escapeHtml(e.name)}<br><span style="font-size:10px;">${e.empCode}</span></th>`);
         html += '</thead><tbody>';
         for (const event of events) {
-            html += `   <tr><td><strong>${formatDate(event.date)}<br>${event.venue}</strong></td>`;
-            for (const emp of filteredEmployees) {
-                const available = (submissions[emp.id] || []).includes(event.id) || isEmployeePreAssigned(emp.id, event.id);
-                html += `<td class="text-center">${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}</td>`;
+            html += `<tr><td><strong>${formatDate(event.date)}<br>${event.venue}</strong></td>`;
+            for (const emp of filtered) {
+                const avail = (submissions[emp.id] || []).includes(event.id) || isEmployeePreAssigned(emp.id, event.id);
+                html += `<td class="text-center">${avail ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}</td>`;
             }
             html += '</tr>';
         }
         html += '</tbody></table></div>';
-
-        // Summary with remaining slots per section
-        const sections = ['kitchen', 'floor', 'bar', 'cleaner', 'setup', 'manager'];
+        // summary
+        const sections = ['kitchen','floor','bar','cleaner','setup','manager'];
         html += '<div style="margin-top:20px;"><h3>Summary by Section</h3>';
-        sections.forEach(section => {
-            const sectionEmployees = employees.filter(emp => emp.section === section);
-            if (sectionEmployees.length === 0) return;
-            html += `<h4>${section.charAt(0).toUpperCase() + section.slice(1)}</h4><div class="scrollable-table"><table><thead><tr><th>Event</th><th>Assigned / Capacity</th><th>Remaining Slots</th></tr></thead><tbody>`;
-            events.forEach(event => {
-                const preCount = getPreAssignedCount(event.id, section);
-                const selfCount = getSelfAssignedCount(event.id, section);
-                const totalAssigned = preCount + selfCount;
-                const capacity = getCapacityForEvent(event.id, section);
-                const remaining = capacity - totalAssigned;
-                const remainingDisplay = remaining < 0 ? 0 : remaining;
-                html += `<tr><td>${formatDate(event.date)} – ${event.venue}</td><td>${totalAssigned} / ${capacity}</td><td style="color:#D4AF37; font-weight:bold;">${remainingDisplay} slots left</td></tr>`;
-            });
+        for (const sec of sections) {
+            const secEmps = employees.filter(e => e.section === sec);
+            if (secEmps.length === 0) continue;
+            html += `<h4>${sec}</h4><div class="scrollable-table"><table><thead><th>Event</th><th>Assigned / Capacity</th><th>Remaining Slots</th></thead><tbody>`;
+            for (const event of events) {
+                const pre = getPreAssignedCount(event.id, sec);
+                const self = getSelfAssignedCount(event.id, sec);
+                const assigned = pre + self;
+                const cap = getCapacityForEvent(event.id, sec);
+                const remaining = cap - assigned;
+                html += `<tr><td>${formatDate(event.date)} – ${event.venue}</td><td>${assigned} / ${cap}</td><td style="color:#D4AF37;">${remaining < 0 ? 0 : remaining} slots left</td></tr>`;
+            }
             html += '</tbody></table></div>';
-        });
+        }
         html += '</div>';
-
         container.innerHTML = html;
     }
 
@@ -1045,17 +937,9 @@
         const name = document.getElementById('new-employee-name').value.trim();
         const section = document.getElementById('new-employee-section').value;
         let code = document.getElementById('new-employee-code').value.trim();
-        if (!name) {
-            alert('Please enter employee name');
-            return;
-        }
-        if (!code) {
-            code = generateRandomCode();
-        }
-        if (employees.some(e => e.empCode === code)) {
-            alert('Employee code already exists. Please use a different code.');
-            return;
-        }
+        if (!name) { alert('Enter name'); return; }
+        if (!code) code = generateRandomCode();
+        if (employees.some(e => e.empCode === code)) { alert('Code already exists'); return; }
         const newId = Date.now();
         employees.push({ id: newId, empCode: code, name, section });
         saveAllData();
@@ -1069,10 +953,10 @@
     function exportCSV() {
         let csv = 'Employee Code,Employee Name,Section,Event Date,Venue,Available\n';
         for (const emp of employees) {
-            const availableEvents = submissions[emp.id] || [];
+            const avail = submissions[emp.id] || [];
             for (const event of events) {
-                const isAvailable = availableEvents.includes(event.id) || isEmployeePreAssigned(emp.id, event.id);
-                csv += `"${emp.empCode}","${emp.name}","${emp.section}","${formatDate(event.date)}","${event.venue}",${isAvailable ? 'Yes' : 'No'}\n`;
+                const isAvail = avail.includes(event.id) || isEmployeePreAssigned(emp.id, event.id);
+                csv += `"${emp.empCode}","${emp.name}","${emp.section}","${formatDate(event.date)}","${event.venue}",${isAvail ? 'Yes' : 'No'}\n`;
             }
         }
         const blob = new Blob([csv], { type: 'text/csv' });
@@ -1086,9 +970,7 @@
 
     function exportEmployeeCodes() {
         let csv = 'Employee Name,Employee Code,Section\n';
-        for (const emp of employees) {
-            csv += `"${emp.name}","${emp.empCode}","${emp.section}"\n`;
-        }
+        employees.forEach(e => csv += `"${e.name}","${e.empCode}","${e.section}"\n`);
         const blob = new Blob([csv], { type: 'text/csv' });
         const a = document.createElement('a');
         const url = URL.createObjectURL(blob);
@@ -1102,78 +984,52 @@
         const container = document.getElementById('code-list-container');
         const textarea = document.getElementById('code-list-textarea');
         let text = '';
-        employees.forEach(emp => {
-            text += `${emp.name} – Code: ${emp.empCode} – Section: ${emp.section}\n`;
-        });
+        employees.forEach(e => text += `${e.name} – Code: ${e.empCode} – Section: ${e.section}\n`);
         textarea.value = text;
         container.classList.remove('hidden');
     }
-
     function copyCodeList() {
-        const textarea = document.getElementById('code-list-textarea');
-        textarea.select();
+        const ta = document.getElementById('code-list-textarea');
+        ta.select();
         document.execCommand('copy');
-        alert('Code list copied to clipboard!');
+        alert('Copied!');
     }
 
     function switchTab(tabId) {
-        if (tabId === 'admin' || tabId === 'availability') {
-            if (!managerAuthenticated) {
-                const pwd = prompt('This area is password protected. Please enter the manager password:');
-                if (pwd === MANAGER_PASSWORD) {
-                    managerAuthenticated = true;
-                    sessionStorage.setItem('managerAuthenticated', 'true');
-                } else {
-                    alert('Incorrect password. Access denied.');
-                    return;
-                }
-            }
+        if ((tabId === 'admin' || tabId === 'availability') && !managerAuthenticated) {
+            const pwd = prompt('Manager password:');
+            if (pwd === MANAGER_PASSWORD) {
+                managerAuthenticated = true;
+                sessionStorage.setItem('managerAuthenticated', 'true');
+            } else { alert('Incorrect'); return; }
         }
-        document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(`${tabId}-pane`).classList.add('active');
         document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
-        if (tabId === 'admin') {
-            renderAdminEmployees();
-            renderAdminEventsList();
-        } else if (tabId === 'availability') {
-            renderAvailabilityMatrix(document.querySelector('.filter-btn.active')?.dataset.section || 'all');
-        }
+        if (tabId === 'admin') { renderAdminEmployees(); renderAdminEventsList(); }
+        else if (tabId === 'availability') renderAvailabilityMatrix(document.querySelector('.filter-btn.active')?.dataset.section || 'all');
     }
 
     function initFilters() {
-        const filters = document.querySelectorAll('.filter-btn');
-        filters.forEach(btn => {
-            btn.addEventListener('click', () => {
-                filters.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                renderAvailabilityMatrix(btn.getAttribute('data-section'));
-            });
-        });
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderAvailabilityMatrix(btn.getAttribute('data-section'));
+        }));
     }
 
-    function escapeHtml(str) {
-        return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m] || m));
-    }
+    function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
 
     let currentEmployeeId = null;
     async function loadEmployeeByCode() {
-        const codeInput = document.getElementById('employee-code');
-        const code = codeInput.value.trim().toUpperCase();
-        if (!code) {
-            alert('Please enter your employee code');
-            return;
-        }
-        const employee = employees.find(e => e.empCode === code);
-        if (!employee) {
-            alert('Employee code not found. Please contact manager.');
-            document.getElementById('staff-details').classList.add('hidden');
-            currentEmployeeId = null;
-            return;
-        }
-        currentEmployeeId = employee.id;
-        document.getElementById('display-name').innerText = employee.name;
-        document.getElementById('display-section').innerText = employee.section.charAt(0).toUpperCase() + employee.section.slice(1);
+        const code = document.getElementById('employee-code').value.trim().toUpperCase();
+        if (!code) { alert('Enter code'); return; }
+        const emp = employees.find(e => e.empCode === code);
+        if (!emp) { alert('Code not found.'); document.getElementById('staff-details').classList.add('hidden'); currentEmployeeId = null; return; }
+        currentEmployeeId = emp.id;
+        document.getElementById('display-name').innerText = emp.name;
+        document.getElementById('display-section').innerText = emp.section;
         document.getElementById('staff-details').classList.remove('hidden');
         await renderDates();
         document.getElementById('staff-message').classList.add('hidden');
@@ -1188,17 +1044,11 @@
         closeBtn.addEventListener('click', closeEditModal);
         window.addEventListener('click', (e) => { if (e.target === modal) closeEditModal(); });
         document.getElementById('save-edit').addEventListener('click', saveEdit);
-        document.getElementById('edit-generate-random').addEventListener('click', () => {
-            document.getElementById('edit-emp-code').value = generateRandomCode();
-        });
-        document.getElementById('generate-random-code').addEventListener('click', () => {
-            document.getElementById('new-employee-code').value = generateRandomCode();
-        });
+        document.getElementById('edit-generate-random').addEventListener('click', () => document.getElementById('edit-emp-code').value = generateRandomCode());
+        document.getElementById('generate-random-code').addEventListener('click', () => document.getElementById('new-employee-code').value = generateRandomCode());
 
-        // Event Settings Modal
         const settingsModal = document.getElementById('eventSettingsModal');
-        const closeSettings = document.getElementById('closeEventSettings');
-        closeSettings.addEventListener('click', closeEventSettingsModal);
+        document.getElementById('closeEventSettings').addEventListener('click', closeEventSettingsModal);
         window.addEventListener('click', (e) => { if (e.target === settingsModal) closeEventSettingsModal(); });
         document.getElementById('saveEventSettings').addEventListener('click', saveEventSettings);
 
@@ -1215,20 +1065,12 @@
                 document.getElementById('new-event-venue').value = '';
             }
         });
-        document.getElementById('save-data')?.addEventListener('click', () => {
-            saveAllData();
-            showTemporaryStatus('Data saved to browser storage.');
-        });
-        document.getElementById('refresh-matrix').addEventListener('click', () => {
-            renderAvailabilityMatrix(document.querySelector('.filter-btn.active')?.dataset.section || 'all');
-        });
-
+        document.getElementById('save-data')?.addEventListener('click', () => { saveAllData(); showTemporaryStatus('Data saved.'); });
+        document.getElementById('refresh-matrix').addEventListener('click', () => renderAvailabilityMatrix(document.querySelector('.filter-btn.active')?.dataset.section || 'all'));
         document.getElementById('show-code-list').addEventListener('click', showCodeList);
         document.getElementById('copy-code-list').addEventListener('click', copyCodeList);
 
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
-        });
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab'))));
 
         document.getElementById('staff-pane').classList.add('active');
         document.querySelector('.tab-btn[data-tab="staff"]').classList.add('active');
