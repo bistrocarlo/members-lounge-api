@@ -21,7 +21,6 @@
             max-width: 1400px;
             margin: 0 auto;
         }
-        /* Header */
         .app-header {
             background: white;
             border-bottom: 3px solid #D4AF37;
@@ -126,11 +125,6 @@
         }
         button:hover {
             background: #b58f2a;
-        }
-        .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
-            border: 1px solid #ccc;
         }
         .date-list {
             max-height: 500px;
@@ -287,7 +281,6 @@
             margin-bottom: 20px;
             border: 1px solid #e0e0e0;
         }
-        /* Modal styles */
         .modal {
             display: none;
             position: fixed;
@@ -687,13 +680,6 @@
             `;
             container.appendChild(div);
         });
-
-        // We'll handle actual saving on submit; the UI reflects current state.
-    }
-
-    // Load employee's saved availability (staff view)
-    function loadEmployeeAvailability() {
-        renderDates(); // refresh to show checked state based on submissions
     }
 
     // Submit availability for current employee
@@ -866,7 +852,7 @@
                     const newCode = generateRandomCode();
                     emp.empCode = newCode;
                     saveAllData();
-                    renderAdminEmployees();
+                    renderAdminEmployees();  // refresh list to show new code
                     showTemporaryStatus(`New code for ${emp.name}: ${newCode}`);
                 }
             });
@@ -901,13 +887,13 @@
             container.innerHTML = '<p>No employees in this section.</p>';
             return;
         }
-        let html = '<div class="scrollable-table"><table style="min-width:600px;"><thead> <tr><th>Event</th>';
+        let html = '<div class="scrollable-table"><table style="min-width:600px;"><thead><tr><th>Event</th>';
         filteredEmployees.forEach(emp => {
             html += `<th class="employee-name">${escapeHtml(emp.name)}<br><span style="font-size:10px;">${emp.empCode}</span></th>`;
         });
-        html += ' </thead><tbody>';
+        html += '</tr></thead><tbody>';
         events.forEach(event => {
-            html += ` <tr><td><strong>${formatDate(event.date)}<br>${event.venue}</strong></td>`;
+            html += `<tr><td><strong>${formatDate(event.date)}<br>${event.venue}</strong></td>`;
             filteredEmployees.forEach(emp => {
                 const available = (submissions[emp.id] || []).includes(event.id);
                 html += `<td class="text-center">${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}</td>`;
@@ -957,8 +943,8 @@
         saveAllData();
         document.getElementById('new-employee-name').value = '';
         document.getElementById('new-employee-code').value = '';
-        renderAdminEmployees();
-        refreshAllViews();
+        renderAdminEmployees();   // immediately update list
+        refreshAllViews();        // update matrix and any other views
         showTemporaryStatus(`Employee ${name} added with code ${code}`);
     }
 
