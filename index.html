@@ -418,7 +418,8 @@
                         <option value="floor">Floor</option>
                         <option value="bar">Bar</option>
                         <option value="cleaner">Cleaner</option>
-                        <option value="setup">Setup Crew</option>
+                        <option value="setup">Setup</option>
+                        <option value="manager">Manager (unlimited)</option>
                     </select>
                 </div>
                 <div style="flex: 2;">
@@ -479,7 +480,8 @@
                 <button class="filter-btn" data-section="floor">Floor</button>
                 <button class="filter-btn" data-section="bar">Bar</button>
                 <button class="filter-btn" data-section="cleaner">Cleaner</button>
-                <button class="filter-btn" data-section="setup">Setup Crew</button>
+                <button class="filter-btn" data-section="setup">Setup</button>
+                <button class="filter-btn" data-section="manager">Manager</button>
             </div>
             <div class="scrollable-table" id="availability-matrix"></div>
         </div>
@@ -505,7 +507,8 @@
                 <option value="floor">Floor</option>
                 <option value="bar">Bar</option>
                 <option value="cleaner">Cleaner</option>
-                <option value="setup">Setup Crew</option>
+                <option value="setup">Setup</option>
+                <option value="manager">Manager (unlimited)</option>
             </select>
         </div>
         <div class="form-group">
@@ -530,7 +533,8 @@
         floor: 8,
         bar: 1,
         cleaner: 9999,
-        setup: 9999
+        setup: 9999,
+        manager: 9999
     };
 
     // ---------- DATA MODELS ----------
@@ -586,54 +590,51 @@
         { id: '44', date: '2027-03-27', venue: 'Fior Events' }
     ];
 
-    // Hardcoded default employees (45 employees with random codes and sections)
-    const defaultEmployees = [
-        { id: 1742740000001, empCode: "7A3F2B", name: "Employee 1", section: "kitchen" },
-        { id: 1742740000002, empCode: "9K4H1D", name: "Employee 2", section: "floor" },
-        { id: 1742740000003, empCode: "2L8J5M", name: "Employee 3", section: "bar" },
-        { id: 1742740000004, empCode: "4C7R9X", name: "Employee 4", section: "cleaner" },
-        { id: 1742740000005, empCode: "6B2Q3W", name: "Employee 5", section: "setup" },
-        { id: 1742740000006, empCode: "1Z5T7Y", name: "Employee 6", section: "kitchen" },
-        { id: 1742740000007, empCode: "8E6U9I", name: "Employee 7", section: "floor" },
-        { id: 1742740000008, empCode: "3P0O2L", name: "Employee 8", section: "bar" },
-        { id: 1742740000009, empCode: "5V9N3M", name: "Employee 9", section: "cleaner" },
-        { id: 1742740000010, empCode: "0K7J8H", name: "Employee 10", section: "setup" },
-        { id: 1742740000011, empCode: "9F2D4S", name: "Employee 11", section: "kitchen" },
-        { id: 1742740000012, empCode: "1G6H7J", name: "Employee 12", section: "floor" },
-        { id: 1742740000013, empCode: "4R5T6Y", name: "Employee 13", section: "bar" },
-        { id: 1742740000014, empCode: "7U8I9O", name: "Employee 14", section: "cleaner" },
-        { id: 1742740000015, empCode: "2W3E4R", name: "Employee 15", section: "setup" },
-        { id: 1742740000016, empCode: "5T6Y7U", name: "Employee 16", section: "kitchen" },
-        { id: 1742740000017, empCode: "8I9O0P", name: "Employee 17", section: "floor" },
-        { id: 1742740000018, empCode: "3E4R5T", name: "Employee 18", section: "bar" },
-        { id: 1742740000019, empCode: "6Y7U8I", name: "Employee 19", section: "cleaner" },
-        { id: 1742740000020, empCode: "9O0P1Q", name: "Employee 20", section: "setup" },
-        { id: 1742740000021, empCode: "4R5T6Y", name: "Employee 21", section: "kitchen" },
-        { id: 1742740000022, empCode: "7U8I9O", name: "Employee 22", section: "floor" },
-        { id: 1742740000023, empCode: "2W3E4R", name: "Employee 23", section: "bar" },
-        { id: 1742740000024, empCode: "5T6Y7U", name: "Employee 24", section: "cleaner" },
-        { id: 1742740000025, empCode: "8I9O0P", name: "Employee 25", section: "setup" },
-        { id: 1742740000026, empCode: "3E4R5T", name: "Employee 26", section: "kitchen" },
-        { id: 1742740000027, empCode: "6Y7U8I", name: "Employee 27", section: "floor" },
-        { id: 1742740000028, empCode: "9O0P1Q", name: "Employee 28", section: "bar" },
-        { id: 1742740000029, empCode: "1A2S3D", name: "Employee 29", section: "cleaner" },
-        { id: 1742740000030, empCode: "4F5G6H", name: "Employee 30", section: "setup" },
-        { id: 1742740000031, empCode: "7J8K9L", name: "Employee 31", section: "kitchen" },
-        { id: 1742740000032, empCode: "0Z1X2C", name: "Employee 32", section: "floor" },
-        { id: 1742740000033, empCode: "3V4B5N", name: "Employee 33", section: "bar" },
-        { id: 1742740000034, empCode: "6M7Q8W", name: "Employee 34", section: "cleaner" },
-        { id: 1742740000035, empCode: "9E1R2T", name: "Employee 35", section: "setup" },
-        { id: 1742740000036, empCode: "2Y3U4I", name: "Employee 36", section: "kitchen" },
-        { id: 1742740000037, empCode: "5O6P7A", name: "Employee 37", section: "floor" },
-        { id: 1742740000038, empCode: "8S9D0F", name: "Employee 38", section: "bar" },
-        { id: 1742740000039, empCode: "1G2H3J", name: "Employee 39", section: "cleaner" },
-        { id: 1742740000040, empCode: "4K5L6Z", name: "Employee 40", section: "setup" },
-        { id: 1742740000041, empCode: "7X8C9V", name: "Employee 41", section: "kitchen" },
-        { id: 1742740000042, empCode: "0B1N2M", name: "Employee 42", section: "floor" },
-        { id: 1742740000043, empCode: "3Q4W5E", name: "Employee 43", section: "bar" },
-        { id: 1742740000044, empCode: "6R7T8Y", name: "Employee 44", section: "cleaner" },
-        { id: 1742740000045, empCode: "9U1I2O", name: "Employee 45", section: "setup" }
+    // ----- Your employee list (with sections where known) -----
+    const defaultEmployeesRaw = [
+        { name: "Carlo Pavia", section: "manager" },      // Manager (unlimited)
+        { name: "Michelle Pavia", section: "bar" },
+        { name: "Rohitha Rawan", section: "kitchen" },
+        { name: "Nam Lai", section: "kitchen" },
+        { name: "Franco Schiavo", section: "kitchen" },
+        { name: "Stevan Brankovic", section: "kitchen" },
+        { name: "Peter Tricarico", section: "floor" },
+        { name: "Claudio Bottigliero", section: "floor" },
+        { name: "Remzi Asllanaj", section: "floor" },
+        { name: "Gerry Gupip", section: "floor" },
+        { name: "Costa Vlahos", section: "floor" },
+        { name: "Raffaele Martino", section: "floor" },
+        { name: "Cathy Pelli", section: "floor" },
+        { name: "David Pasqualone", section: "floor" },
+        { name: "Louis Pasqualone", section: "floor" },
+        { name: "Giulia Montorro", section: "floor" },
+        { name: "Rocco Cirelli", section: "floor" },
+        { name: "Kim Lai", section: "floor" },
+        { name: "Bianca Pavia", section: "floor" },
+        { name: "Julian Poloni", section: "floor" },
+        { name: "Vin Lai", section: "floor" },
+        { name: "Nathan Trimboli", section: "floor" },
+        { name: "Dean Margellis", section: "floor" },
+        { name: "Aidan Trimboli", section: "floor" },
+        { name: "Jaimee Lidell", section: "floor" },
+        { name: "Monique Elasmar", section: "floor" },
+        { name: "Luka Tigani", section: "floor" },
+        { name: "Walter Testa", section: "floor" },
+        { name: "Carl Testa", section: "floor" },
+        { name: "Jack Testa", section: "floor" },
+        { name: "Massimo Interlandi", section: "floor" },
+        { name: "Olivier Leone", section: "floor" },
+        { name: "Laura Pavia", section: "floor" },
+        { name: "Isabella Pavia", section: "floor" },
+        { name: "Alessio Interlandi", section: "floor" },
+        { name: "Charlie Pavia", section: "floor" },
+        { name: "Luccio Tonno", section: "floor" }
     ];
+
+    // Add 12 extra placeholder employees
+    for (let i = 1; i <= 12; i++) {
+        defaultEmployeesRaw.push({ name: `Extra Employee ${i}`, section: "floor" });
+    }
 
     // Helper: format date
     function formatDate(dateStr) {
@@ -658,7 +659,19 @@
                 employees = JSON.parse(storedEmployees);
                 if (!Array.isArray(employees)) employees = [];
             } else {
-                employees = JSON.parse(JSON.stringify(defaultEmployees));
+                // Build default employees with unique codes
+                employees = [];
+                let baseId = 1742740000000;
+                for (let i = 0; i < defaultEmployeesRaw.length; i++) {
+                    const emp = defaultEmployeesRaw[i];
+                    const code = generateRandomCode();
+                    employees.push({
+                        id: baseId + i + 1,
+                        empCode: code,
+                        name: emp.name,
+                        section: emp.section
+                    });
+                }
             }
         } catch(e) { employees = []; console.error(e); }
 
@@ -960,13 +973,13 @@
             container.innerHTML = '<p>No employees in this section.</p>';
             return;
         }
-        let html = '<div class="scrollable-table"><table style="min-width:600px;"><thead>   <th>Event</th>';
+        let html = '<div class="scrollable-table"><table style="min-width:600px;"><thead><tr><th>Event</th>';
         filteredEmployees.forEach(emp => {
             html += `<th class="employee-name">${escapeHtml(emp.name)}<br><span style="font-size:10px;">${emp.empCode}</span></th>`;
         });
-        html += ' </thead><tbody>';
+        html += '</tr></thead><tbody>';
         events.forEach(event => {
-            html += `    <tr><td><strong>${formatDate(event.date)}<br>${event.venue}</strong></td>`;
+            html += `<tr><td><strong>${formatDate(event.date)}<br>${event.venue}</strong></td>`;
             filteredEmployees.forEach(emp => {
                 const available = (submissions[emp.id] || []).includes(event.id);
                 html += `<td class="text-center">${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}</td>`;
@@ -976,7 +989,7 @@
         html += '</tbody></table></div>';
 
         // Summary with remaining slots per section
-        const sections = ['kitchen', 'floor', 'bar', 'cleaner', 'setup'];
+        const sections = ['kitchen', 'floor', 'bar', 'cleaner', 'setup', 'manager'];
         html += '<div style="margin-top:20px;"><h3>Summary by Section</h3>';
         sections.forEach(section => {
             const sectionEmployees = employees.filter(emp => emp.section === section);
