@@ -334,6 +334,18 @@
             flex: 0;
             white-space: nowrap;
         }
+        .employee-code-list {
+            margin-top: 20px;
+        }
+        .employee-code-list textarea {
+            width: 100%;
+            height: 200px;
+            font-family: monospace;
+            background: #fafafa;
+            border: 1px solid #ccc;
+            padding: 8px;
+            border-radius: 6px;
+        }
         @media (max-width: 768px) {
             .date-item {
                 flex-direction: column;
@@ -417,6 +429,14 @@
                     </div>
                 </div>
                 <button id="add-employee" style="align-self: flex-end;">Add Employee</button>
+            </div>
+        </div>
+        <div class="card">
+            <h2>Employee Code List</h2>
+            <button id="show-code-list">Show Employee Code List</button>
+            <div id="code-list-container" class="hidden employee-code-list">
+                <textarea id="code-list-textarea" readonly></textarea>
+                <button id="copy-code-list" style="margin-top: 10px;">Copy to Clipboard</button>
             </div>
         </div>
         <div class="card">
@@ -893,7 +913,7 @@
         });
         html += ' </thead><tbody>';
         events.forEach(event => {
-            html += ` <tr><td><strong>${formatDate(event.date)}<br>${event.venue}</strong></td>`;
+            html += `  <tr><td><strong>${formatDate(event.date)}<br>${event.venue}</strong></td>`;
             filteredEmployees.forEach(emp => {
                 const available = (submissions[emp.id] || []).includes(event.id);
                 html += `<td class="text-center">${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}</td>`;
@@ -978,6 +998,24 @@
         a.download = 'employee-codes.csv';
         a.click();
         URL.revokeObjectURL(url);
+    }
+
+    function showCodeList() {
+        const container = document.getElementById('code-list-container');
+        const textarea = document.getElementById('code-list-textarea');
+        let text = '';
+        employees.forEach(emp => {
+            text += `${emp.name} – Code: ${emp.empCode} – Section: ${emp.section}\n`;
+        });
+        textarea.value = text;
+        container.classList.remove('hidden');
+    }
+
+    function copyCodeList() {
+        const textarea = document.getElementById('code-list-textarea');
+        textarea.select();
+        document.execCommand('copy');
+        alert('Code list copied to clipboard!');
     }
 
     function switchTab(tabId) {
@@ -1076,6 +1114,9 @@
             saveAllData();
             showTemporaryStatus('Data saved to browser storage.');
         });
+
+        document.getElementById('show-code-list').addEventListener('click', showCodeList);
+        document.getElementById('copy-code-list').addEventListener('click', copyCodeList);
 
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
