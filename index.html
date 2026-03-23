@@ -46,8 +46,8 @@
         .section-filter { margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap; }
         .filter-btn { background: #f0f0f0; padding: 5px 12px; border-radius: 20px; cursor: pointer; border: none; color: #333; }
         .filter-btn.active { background: #D4AF37; color: white; }
-        .success-msg, .error-msg, .toast { padding: 10px; border-radius: 6px; margin-bottom: 15px; }
-        .success-msg, .toast { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        .success-msg, .error-msg { padding: 10px; border-radius: 6px; margin-bottom: 15px; }
+        .success-msg { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
         .error-msg { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
         .hidden { display: none; }
         .scrollable-table { overflow-x: auto; }
@@ -58,8 +58,23 @@
         .modal-header h3 { margin: 0; color: #D4AF37; }
         .close-modal { cursor: pointer; font-size: 24px; font-weight: bold; color: #aaa; }
         .close-modal:hover { color: black; }
-        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; font-weight: bold; }
-        @media (max-width: 768px) { .date-item { flex-direction: column; align-items: flex-start; } .app-header { flex-direction: column; gap: 10px; } .logo h1 { font-size: 1.4rem; } }
+        .code-input-group { display: flex; gap: 8px; align-items: center; }
+        .code-input-group input { flex: 2; }
+        .code-input-group button { flex: 0; white-space: nowrap; }
+        .employee-code-list { margin-top: 20px; }
+        .employee-code-list textarea { width: 100%; height: 200px; font-family: monospace; background: #fafafa; border: 1px solid #ccc; padding: 8px; border-radius: 6px; }
+        .preassign-list { margin-top: 15px; border: 1px solid #eee; border-radius: 8px; max-height: 200px; overflow-y: auto; }
+        .preassign-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-bottom: 1px solid #eee; }
+        .capacity-row { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px; }
+        .capacity-field { flex: 1; min-width: 80px; }
+        .capacity-field label { font-size: 0.8rem; }
+        .capacity-field input { padding: 6px; }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #2e7d32; color: white; padding: 14px 24px; border-radius: 50px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); font-weight: bold; z-index: 9999; display: none; }
+        @media (max-width: 768px) {
+            .date-item { flex-direction: column; align-items: flex-start; }
+            .app-header { flex-direction: column; gap: 10px; }
+            .logo h1 { font-size: 1.4rem; }
+        }
     </style>
 </head>
 <body>
@@ -69,7 +84,7 @@
             <div class="logo-icon">ML</div>
             <h1>Member's Lounge</h1>
         </div>
-        <div class="tagline">Staff Availability System – Permanent Saving</div>
+        <div class="tagline">Staff Availability System – Data Saved Forever</div>
     </div>
 
     <div class="tabs" id="tab-bar">
@@ -107,49 +122,136 @@
         <div class="card">
             <h2>Manage Employees</h2>
             <div id="employee-list" class="employee-list"></div>
-            <!-- (add employee form same as original) -->
             <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px;">
-                <div style="flex: 2;"><label>Employee Name</label><input type="text" id="new-employee-name" placeholder="Name"></div>
-                <div style="flex: 1;"><label>Section</label><select id="new-employee-section">
-                    <option value="kitchen">Kitchen</option><option value="floor">Floor</option><option value="bar">Bar</option>
-                    <option value="cleaner">Cleaner</option><option value="setup">Setup</option><option value="manager">Manager (unlimited)</option>
-                </select></div>
-                <div style="flex: 2;"><label>Employee Code (optional)</label>
-                    <div class="code-input-group"><input type="text" id="new-employee-code" placeholder="Auto-generate"><button id="generate-random-code" type="button">Generate Random</button></div>
+                <div style="flex: 2;">
+                    <label>Employee Name</label>
+                    <input type="text" id="new-employee-name" placeholder="Name">
+                </div>
+                <div style="flex: 1;">
+                    <label>Section</label>
+                    <select id="new-employee-section">
+                        <option value="kitchen">Kitchen</option>
+                        <option value="floor">Floor</option>
+                        <option value="bar">Bar</option>
+                        <option value="cleaner">Cleaner</option>
+                        <option value="setup">Setup</option>
+                        <option value="manager">Manager (unlimited)</option>
+                    </select>
+                </div>
+                <div style="flex: 2;">
+                    <label>Employee Code (optional)</label>
+                    <div class="code-input-group">
+                        <input type="text" id="new-employee-code" placeholder="Auto-generate">
+                        <button id="generate-random-code" type="button">Generate Random</button>
+                    </div>
                 </div>
                 <button id="add-employee" style="align-self: flex-end;">Add Employee</button>
             </div>
         </div>
-
-        <!-- Other admin cards (code list, events, export, etc.) same as original -->
-
+        <div class="card">
+            <h2>Employee Code List</h2>
+            <button id="show-code-list">Show Employee Code List</button>
+            <div id="code-list-container" class="hidden employee-code-list">
+                <textarea id="code-list-textarea" readonly></textarea>
+                <button id="copy-code-list" style="margin-top: 10px;">Copy to Clipboard</button>
+            </div>
+        </div>
+        <div class="card">
+            <h2>Manage Events</h2>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+                <input type="date" id="new-event-date" placeholder="YYYY-MM-DD">
+                <input type="text" id="new-event-venue" placeholder="Venue name" style="flex:2;">
+                <button id="add-event">Add Event</button>
+            </div>
+            <div id="event-list" style="margin-top: 10px; max-height: 400px; overflow-y: auto;"></div>
+        </div>
         <div class="card">
             <h2>Data Backup & Reset</h2>
             <button id="export-data">Export All Data (JSON)</button>
-            <button id="import-data" style="margin-left:10px;">Import Data (JSON)</button>
-            <input type="file" id="import-file" accept=".json" style="display:none;">
-            <button id="clear-all-data" style="margin-left:10px; background:#ff4444;">Clear All Data (Reset)</button>
-            <div id="import-status" class="success-msg hidden" style="margin-top:10px;"></div>
+            <button id="import-data" style="margin-left: 10px;">Import Data (JSON)</button>
+            <input type="file" id="import-file" accept=".json" style="display: none;">
+            <button id="clear-all-data" style="margin-left: 10px; background:#ff4444;">Clear All Data (Reset to Default)</button>
+            <div id="import-status" class="success-msg hidden" style="margin-top: 10px;"></div>
+        </div>
+        <div class="card">
+            <h2>Export Data (CSV)</h2>
+            <button id="export-csv">Export All Submissions (CSV)</button>
+            <button id="export-codes" style="margin-left: 10px;">Export Employee Codes (CSV)</button>
+            <button id="save-data" style="margin-left: 10px;">Save All Data (Manual)</button>
+            <div id="save-status" class="hidden success-msg" style="margin-top: 10px;"></div>
         </div>
     </div>
 
-    <!-- Availability Matrix (same as original) -->
+    <!-- Availability Matrix -->
     <div id="availability-pane" class="tab-pane">
         <div class="card">
             <h2>Availability by Section & Event</h2>
             <div class="section-filter" id="section-filters">
                 <button class="filter-btn active" data-section="all">All Sections</button>
-                <!-- other filter buttons same -->
+                <button class="filter-btn" data-section="kitchen">Kitchen</button>
+                <button class="filter-btn" data-section="floor">Floor</button>
+                <button class="filter-btn" data-section="bar">Bar</button>
+                <button class="filter-btn" data-section="cleaner">Cleaner</button>
+                <button class="filter-btn" data-section="setup">Setup</button>
+                <button class="filter-btn" data-section="manager">Manager</button>
             </div>
             <div class="scrollable-table" id="availability-matrix"></div>
         </div>
     </div>
 </div>
 
-<!-- Modals (edit employee, event settings) – exactly as original -->
+<!-- Edit Employee Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Edit Employee</h3>
+            <span class="close-modal">&times;</span>
+        </div>
+        <div id="edit-error" class="error-msg hidden" style="margin-bottom: 15px;"></div>
+        <div class="form-group">
+            <label>Employee Name</label>
+            <input type="text" id="edit-emp-name">
+        </div>
+        <div class="form-group">
+            <label>Section</label>
+            <select id="edit-emp-section">
+                <option value="kitchen">Kitchen</option>
+                <option value="floor">Floor</option>
+                <option value="bar">Bar</option>
+                <option value="cleaner">Cleaner</option>
+                <option value="setup">Setup</option>
+                <option value="manager">Manager (unlimited)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Employee Code</label>
+            <div class="code-input-group">
+                <input type="text" id="edit-emp-code">
+                <button id="edit-generate-random" type="button">Generate Random</button>
+            </div>
+        </div>
+        <button id="save-edit">Save Changes</button>
+    </div>
+</div>
+
+<!-- Event Settings Modal -->
+<div id="eventSettingsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="eventSettingsTitle">Event Settings</h3>
+            <span class="close-modal" id="closeEventSettings">&times;</span>
+        </div>
+        <div id="eventSettingsContent"></div>
+        <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+            <button id="saveEventSettings">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast">✓ Saved permanently!</div>
 
 <script>
-// ================== PERMANENT LOCAL STORAGE (BEST VERSION) ==================
+// ================== PERMANENT LOCAL STORAGE (DATA NEVER RESETS) ==================
 let employees = [];
 let submissions = {};
 let events = [];
@@ -158,30 +260,147 @@ let eventSettings = {};
 const MANAGER_PASSWORD = 'ML2026';
 let managerAuthenticated = sessionStorage.getItem('managerAuthenticated') === 'true';
 
-const DEFAULT_CAPACITIES = { kitchen: 4, floor: 8, bar: 1, cleaner: 9999, setup: 9999, manager: 9999 };
+const DEFAULT_CAPACITIES = {
+    kitchen: 4,
+    floor: 8,
+    bar: 1,
+    cleaner: 9999,
+    setup: 9999,
+    manager: 9999
+};
 
-// Your exact original default data (44 events + 38 employees)
-const defaultEvents = [ /* ALL 44 events exactly as you had */ ];
-const defaultEmployeesRaw = [ /* ALL 38 employees exactly as you had */ ];
+// ---------- ALL 44 EVENTS (full list) ----------
+const defaultEvents = [
+    { id: '1', date: '2026-03-28', venue: 'Sala Reggio Ballroom' },
+    { id: '2', date: '2026-04-18', venue: 'Fior Events' },
+    { id: '3', date: '2026-05-09', venue: 'Fior Events' },
+    { id: '4', date: '2026-05-17', venue: 'Sala Reggio Ballroom' },
+    { id: '5', date: '2026-05-22', venue: 'Sala Reggio Ballroom' },
+    { id: '6', date: '2026-05-23', venue: 'Sala Reggio Ballroom' },
+    { id: '7', date: '2026-05-24', venue: 'Sala Reggio Ballroom' },
+    { id: '8', date: '2026-05-29', venue: 'Sala Reggio Ballroom' },
+    { id: '9', date: '2026-05-30', venue: 'Sala Reggio Ballroom' },
+    { id: '10', date: '2026-05-31', venue: 'Sala Reggio Ballroom' },
+    { id: '11', date: '2026-06-07', venue: 'Sala Reggio Ballroom' },
+    { id: '12', date: '2026-06-07', venue: 'Fior Events' },
+    { id: '13', date: '2026-06-12', venue: 'Sala Reggio Ballroom' },
+    { id: '14', date: '2026-06-13', venue: 'Sala Reggio Ballroom' },
+    { id: '15', date: '2026-06-20', venue: 'Sala Reggio Ballroom' },
+    { id: '16', date: '2026-06-21', venue: 'Sala Reggio Ballroom' },
+    { id: '17', date: '2026-07-19', venue: 'Sala Reggio Ballroom' },
+    { id: '18', date: '2026-07-25', venue: 'Sala Reggio Ballroom' },
+    { id: '19', date: '2026-07-25', venue: 'Fior Events' },
+    { id: '20', date: '2026-07-26', venue: 'Sala Reggio Ballroom' },
+    { id: '21', date: '2026-08-01', venue: 'Sala Reggio Ballroom' },
+    { id: '22', date: '2026-08-02', venue: 'Sala Reggio Ballroom' },
+    { id: '23', date: '2026-08-08', venue: 'Sala Reggio Ballroom' },
+    { id: '24', date: '2026-08-15', venue: 'Sala Reggio Ballroom' },
+    { id: '25', date: '2026-08-16', venue: 'Fior Events' },
+    { id: '26', date: '2026-08-22', venue: 'Sala Reggio Ballroom' },
+    { id: '27', date: '2026-08-23', venue: 'Sala Reggio Ballroom' },
+    { id: '28', date: '2026-08-30', venue: 'Sala Reggio Ballroom' },
+    { id: '29', date: '2026-09-13', venue: 'Sala Reggio Ballroom' },
+    { id: '30', date: '2026-09-13', venue: 'Fior Events' },
+    { id: '31', date: '2026-09-18', venue: 'Sala Reggio Ballroom' },
+    { id: '32', date: '2026-09-20', venue: 'Fior Events' },
+    { id: '33', date: '2026-10-03', venue: 'Fior Events' },
+    { id: '34', date: '2026-10-17', venue: 'Sala Reggio Ballroom' },
+    { id: '35', date: '2026-11-13', venue: 'Sala Reggio Ballroom' },
+    { id: '36', date: '2026-11-21', venue: 'Sala Reggio Ballroom' },
+    { id: '37', date: '2026-12-11', venue: 'Fior Events' },
+    { id: '38', date: '2026-12-12', venue: 'Fior Events' },
+    { id: '39', date: '2026-12-14', venue: 'Sala Reggio Ballroom' },
+    { id: '40', date: '2026-12-15', venue: 'Sala Reggio Ballroom' },
+    { id: '41', date: '2026-12-17', venue: 'Sala Reggio Ballroom' },
+    { id: '42', date: '2027-02-27', venue: 'Fior Events' },
+    { id: '43', date: '2027-02-28', venue: 'Fior Events' },
+    { id: '44', date: '2027-03-27', venue: 'Fior Events' }
+];
 
-// Toast notification
-function showToast(msg) {
-    const toast = document.createElement('div');
-    toast.className = 'toast success-msg';
-    toast.textContent = '✓ ' + msg;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 2500);
+// ---------- ALL 38 EMPLOYEES ----------
+const defaultEmployeesRaw = [
+    { name: "Carlo Pavia", section: "manager", code: "CARLO6" },
+    { name: "Michelle Pavia", section: "manager", code: "MICHE0" },
+    { name: "Rohitha Rawan", section: "kitchen", code: "ROHIT9" },
+    { name: "Nam Lai", section: "kitchen", code: "NAMLA7" },
+    { name: "Franco Schiavo", section: "kitchen", code: "FRANC3" },
+    { name: "Stevan Brankovic", section: "kitchen", code: "STEVAN" },
+    { name: "Peter Tricarico", section: "floor", code: "PETER8" },
+    { name: "Claudio Bottigliero", section: "bar", code: "CLAUDI" },
+    { name: "Remzi Asllanaj", section: "bar", code: "REMZIA" },
+    { name: "Gerry Gupip", section: "kitchen", code: "GERRY9" },
+    { name: "Costa Vlahos", section: "floor", code: "COSTA1" },
+    { name: "Raffaele Martino", section: "bar", code: "RAFFAE" },
+    { name: "Cathy Pelli", section: "kitchen", code: "CATHY3" },
+    { name: "David Pasqualone", section: "floor", code: "DAVID4" },
+    { name: "Louis Pasqualone", section: "floor", code: "LOUIS6" },
+    { name: "Giulia Montorro", section: "kitchen", code: "GIULIA" },
+    { name: "Rocco Cirelli", section: "floor", code: "ROCCO2" },
+    { name: "Kim Lai", section: "kitchen", code: "KIMLAI" },
+    { name: "Bianca Pavia", section: "manager", code: "BIANCA" },
+    { name: "Julian Poloni", section: "floor", code: "JULIAN" },
+    { name: "Vin Lai", section: "floor", code: "VINLAI" },
+    { name: "Nathan Trimboli", section: "floor", code: "NATHAN" },
+    { name: "Dean Margellis", section: "floor", code: "DEANMA" },
+    { name: "Aidan Trimboli", section: "floor", code: "AIDANT" },
+    { name: "Jaimee Lidell", section: "floor", code: "JAIMEE" },
+    { name: "Monique Elasmar", section: "floor", code: "MONIQU" },
+    { name: "Luka Tigani", section: "floor", code: "LUKATI" },
+    { name: "Walter Testa", section: "setup", code: "WALTER" },
+    { name: "Carl Testa", section: "setup", code: "CARLTE" },
+    { name: "Jack Testa", section: "floor", code: "JACKTE" },
+    { name: "Massimo Interlandi", section: "floor", code: "MASSIM" },
+    { name: "Olivier Leone", section: "floor", code: "OLIVIE" },
+    { name: "Laura Pavia", section: "manager", code: "LAURAP" },
+    { name: "Isabella Pavia", section: "manager", code: "ISABEL" },
+    { name: "Alessio Interlandi", section: "floor", code: "ALESSI" },
+    { name: "Charlie Pavia", section: "floor", code: "CHARLI" },
+    { name: "Luccio Tonno", section: "kitchen", code: "LUCCIO" },
+    { name: "Jacob Doubleday", section: "floor", code: "JACOB0" }
+];
+
+// ---------- HELPER FUNCTIONS ----------
+function formatDate(dateStr) {
+    return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-// Load / Save permanently
+function generateRandomCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 6; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+
+function escapeHtml(str) {
+    return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m] || m));
+}
+
+function showToast() {
+    const toast = document.getElementById('toast');
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 2200);
+}
+
+function showMessage(containerId, text, type) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.textContent = text;
+    container.className = type === 'success' ? 'success-msg' : 'error-msg';
+    container.classList.remove('hidden');
+    setTimeout(() => container.classList.add('hidden'), 3000);
+}
+
+// ---------- PERMANENT LOCAL STORAGE ----------
 function loadFromLocal() {
     const saved = localStorage.getItem('membersLoungeData2026');
     if (saved) {
         const data = JSON.parse(saved);
-        employees = data.employees || [];
-        submissions = data.submissions || {};
-        events = data.events || [];
-        eventSettings = data.eventSettings || {};
+        if (data.employees) employees = data.employees;
+        if (data.submissions) submissions = data.submissions;
+        if (data.events) events = data.events;
+        if (data.eventSettings) eventSettings = data.eventSettings;
         sortEvents();
         return true;
     }
@@ -193,16 +412,22 @@ function saveToLocal() {
     localStorage.setItem('membersLoungeData2026', JSON.stringify(data));
 }
 
-function sortEvents() { events.sort((a, b) => new Date(a.date) - new Date(b.date)); }
+function sortEvents() {
+    events.sort((a, b) => new Date(a.date) - new Date(b.date));
+}
 
 function loadLocalDefault() {
     let baseId = 1742740000000;
-    employees = defaultEmployeesRaw.map((emp, i) => ({
-        id: baseId + i + 1,
-        empCode: emp.code,
-        name: emp.name,
-        section: emp.section
-    }));
+    employees = [];
+    for (let i = 0; i < defaultEmployeesRaw.length; i++) {
+        const emp = defaultEmployeesRaw[i];
+        employees.push({
+            id: baseId + i + 1,
+            empCode: emp.code,
+            name: emp.name,
+            section: emp.section
+        });
+    }
     submissions = {};
     events = [...defaultEvents];
     sortEvents();
@@ -210,43 +435,581 @@ function loadLocalDefault() {
 }
 
 function initData() {
-    if (!loadFromLocal()) {
+    const loaded = loadFromLocal();
+    if (!loaded) {
         loadLocalDefault();
         saveToLocal();
     }
 }
 
-// All your original functions (renderDates, submitAvailability, renderAvailabilityMatrix, addEmployee, etc.) 
-// are kept exactly the same — I only changed every "saveToCloud" to "saveToLocal" and added showToast.
-
-async function submitAvailability() {
-    if (!currentEmployeeId) return;
-    // ... original validation logic ...
-    submissions[currentEmployeeId] = selected;
-    saveToLocal();
-    showToast('Availability saved permanently!');
-    showMessage('staff-message', `Availability saved for ${employee.name}. Thank you!`, 'success');
-    renderDates();
-    if (managerAuthenticated) renderAvailabilityMatrix();
+// ---------- CAPACITY & PRE-ASSIGNMENT HELPERS (unchanged) ----------
+function getCapacityForEvent(eventId, section) {
+    const settings = eventSettings[eventId];
+    if (settings && settings.capacities && settings.capacities[section] !== undefined) {
+        return settings.capacities[section];
+    }
+    return DEFAULT_CAPACITIES[section];
 }
 
-// (All other save functions updated the same way: addEmployee, saveEdit, saveEventSettings, deleteEvent, etc.)
-
-// Clear all data button
-document.getElementById('clear-all-data').addEventListener('click', () => {
-    if (confirm('Delete ALL data and reset to defaults?')) {
-        localStorage.removeItem('membersLoungeData2026');
-        location.reload();
+function getPreAssignedCount(eventId, section) {
+    const settings = eventSettings[eventId];
+    if (!settings || !settings.preAssignments) return 0;
+    const preEmpIds = settings.preAssignments;
+    let count = 0;
+    for (const empId of preEmpIds) {
+        const emp = employees.find(e => e.id == empId);
+        if (emp && emp.section === section) count++;
     }
-});
+    return count;
+}
 
-// Your original init() with permanent storage
+function getSelfAssignedCount(eventId, section) {
+    let count = 0;
+    for (let empId in submissions) {
+        const emp = employees.find(e => e.id == empId);
+        if (emp && emp.section === section && submissions[empId].includes(eventId)) count++;
+    }
+    return count;
+}
+
+function remainingSlots(eventId, section) {
+    const capacity = getCapacityForEvent(eventId, section);
+    const pre = getPreAssignedCount(eventId, section);
+    const self = getSelfAssignedCount(eventId, section);
+    return capacity - pre - self;
+}
+
+function isEmployeePreAssigned(employeeId, eventId) {
+    const settings = eventSettings[eventId];
+    if (!settings || !settings.preAssignments) return false;
+    return settings.preAssignments.includes(employeeId);
+}
+
+// ---------- RENDER DATES ----------
+let currentEmployeeId = null;
+async function renderDates() {
+    const container = document.getElementById('dates-container');
+    if (!container || !currentEmployeeId) return;
+    const employee = employees.find(e => e.id === currentEmployeeId);
+    if (!employee) return;
+    const section = employee.section;
+    container.innerHTML = '';
+    for (const event of events) {
+        const remaining = remainingSlots(event.id, section);
+        const isCurrentlyAvailable = (submissions[currentEmployeeId] || []).includes(event.id);
+        const isPreAssigned = isEmployeePreAssigned(currentEmployeeId, event.id);
+        const isChecked = isPreAssigned || isCurrentlyAvailable;
+        const isDisabled = isPreAssigned || (remaining <= 0 && !isCurrentlyAvailable);
+        const slotsInfo = isPreAssigned ? ' (You are pre-assigned)' : ` slots left: ${remaining}`;
+        const div = document.createElement('div');
+        div.className = 'date-item';
+        div.innerHTML = `
+            <div class="event-info">
+                <strong>${formatDate(event.date)}</strong><br>
+                ${event.venue}
+            </div>
+            <div class="slots-info">
+                ${section.charAt(0).toUpperCase() + section.slice(1)}${slotsInfo}
+            </div>
+            <label>
+                <input type="checkbox" data-id="${event.id}" ${isChecked ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
+                Available
+            </label>
+        `;
+        container.appendChild(div);
+    }
+}
+
+// ---------- SUBMIT AVAILABILITY (PERMANENT) ----------
+async function submitAvailability() {
+    if (!currentEmployeeId) {
+        showMessage('staff-message', 'Please load your employee details first.', 'error');
+        return;
+    }
+    const checkboxes = document.querySelectorAll('#dates-container input[type="checkbox"]');
+    const selected = [];
+    checkboxes.forEach(cb => {
+        if (cb.checked) selected.push(cb.getAttribute('data-id'));
+    });
+
+    const employee = employees.find(e => e.id === currentEmployeeId);
+    const section = employee.section;
+
+    for (let eventId of selected) {
+        if (isEmployeePreAssigned(currentEmployeeId, eventId)) continue;
+        const remaining = remainingSlots(eventId, section);
+        const isAlreadyIn = (submissions[currentEmployeeId] || []).includes(eventId);
+        if (!isAlreadyIn && remaining <= 0) {
+            showMessage('staff-message', `Cannot add ${section} for ${events.find(e => e.id === eventId)?.venue}: capacity full.`, 'error');
+            return;
+        }
+    }
+
+    submissions[currentEmployeeId] = selected;
+    saveToLocal();
+    showToast();
+    showMessage('staff-message', `Availability saved for ${employee.name}. Thank you!`, 'success');
+    renderDates();
+    if (managerAuthenticated) {
+        renderAvailabilityMatrix(document.querySelector('.filter-btn.active')?.dataset.section || 'all');
+    }
+}
+
+// ---------- ADMIN FUNCTIONS ----------
+async function addEvent(date, venue) {
+    if (!date || !venue) { alert('Please enter both date and venue'); return false; }
+    if (events.some(e => e.date === date && e.venue === venue)) { alert('Event already exists'); return false; }
+    const newId = Date.now().toString();
+    events.push({ id: newId, date, venue });
+    sortEvents();
+    saveToLocal();
+    refreshAllViews();
+    return true;
+}
+
+async function deleteEvent(eventId) {
+    if (confirm('Delete this event?')) {
+        events = events.filter(e => e.id !== eventId);
+        for (let empId in submissions) {
+            submissions[empId] = submissions[empId].filter(eid => eid !== eventId);
+        }
+        delete eventSettings[eventId];
+        saveToLocal();
+        refreshAllViews();
+    }
+}
+
+function refreshAllViews() {
+    if (managerAuthenticated) {
+        renderAdminEmployees();
+        renderAdminEventsList();
+        renderAvailabilityMatrix(document.querySelector('.filter-btn.active')?.dataset.section || 'all');
+    }
+    if (currentEmployeeId) renderDates();
+}
+
+function renderAdminEventsList() {
+    const container = document.getElementById('event-list');
+    container.innerHTML = '';
+    events.forEach(event => {
+        const div = document.createElement('div');
+        div.style.display = 'flex';
+        div.style.justifyContent = 'space-between';
+        div.style.alignItems = 'center';
+        div.style.padding = '8px';
+        div.style.borderBottom = '1px solid #eee';
+        div.innerHTML = `
+            <span>${formatDate(event.date)} – ${event.venue}</span>
+            <div>
+                <button class="edit-event-settings" data-id="${event.id}" style="background:#2196f3; margin-right:5px;">Edit Settings</button>
+                <button class="delete-event" data-id="${event.id}" style="background:#ff4444;">Delete</button>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+    document.querySelectorAll('.delete-event').forEach(btn => {
+        btn.addEventListener('click', () => deleteEvent(btn.getAttribute('data-id')));
+    });
+    document.querySelectorAll('.edit-event-settings').forEach(btn => {
+        btn.addEventListener('click', () => openEventSettingsModal(btn.getAttribute('data-id')));
+    });
+}
+
+// ---------- EVENT SETTINGS ----------
+let currentEventIdForSettings = null;
+function openEventSettingsModal(eventId) {
+    currentEventIdForSettings = eventId;
+    const event = events.find(e => e.id === eventId);
+    document.getElementById('eventSettingsTitle').innerText = `Settings for ${formatDate(event.date)} – ${event.venue}`;
+    const container = document.getElementById('eventSettingsContent');
+    const settings = eventSettings[eventId] || { capacities: {}, preAssignments: [] };
+
+    let capacitiesHtml = '<div class="capacity-row">';
+    const sections = ['kitchen', 'floor', 'bar', 'cleaner', 'setup', 'manager'];
+    for (const sec of sections) {
+        const currentVal = settings.capacities[sec] !== undefined ? settings.capacities[sec] : DEFAULT_CAPACITIES[sec];
+        capacitiesHtml += `
+            <div class="capacity-field">
+                <label>${sec.charAt(0).toUpperCase() + sec.slice(1)}</label>
+                <input type="number" id="cap-${sec}" value="${currentVal}" min="0" step="1">
+            </div>
+        `;
+    }
+    capacitiesHtml += '</div>';
+
+    const preAssignments = settings.preAssignments || [];
+    const employeesBySection = {};
+    for (const emp of employees) {
+        if (!employeesBySection[emp.section]) employeesBySection[emp.section] = [];
+        employeesBySection[emp.section].push(emp);
+    }
+
+    let preHtml = '<h4>Pre-assign Staff</h4><div style="margin-bottom:10px;">Select employees to pre-assign (they cannot unassign themselves).</div>';
+    for (const sec of sections) {
+        const emps = employeesBySection[sec] || [];
+        if (emps.length === 0) continue;
+        preHtml += `<div style="margin-top:10px;"><strong>${sec.charAt(0).toUpperCase() + sec.slice(1)}</strong></div>`;
+        preHtml += '<div class="preassign-list" id="preassign-list-'+sec+'">';
+        for (const emp of emps) {
+            const isChecked = preAssignments.includes(emp.id);
+            preHtml += `
+                <div class="preassign-item">
+                    <label>${emp.name} (${emp.empCode})</label>
+                    <input type="checkbox" class="preassign-checkbox" data-id="${emp.id}" ${isChecked ? 'checked' : ''}>
+                </div>
+            `;
+        }
+        preHtml += '</div>';
+    }
+
+    container.innerHTML = capacitiesHtml + preHtml;
+    document.getElementById('eventSettingsModal').style.display = 'flex';
+}
+
+async function saveEventSettings() {
+    if (!currentEventIdForSettings) return;
+    const capacities = {};
+    const sections = ['kitchen', 'floor', 'bar', 'cleaner', 'setup', 'manager'];
+    for (const sec of sections) {
+        const input = document.getElementById(`cap-${sec}`);
+        if (input) capacities[sec] = parseInt(input.value, 10);
+    }
+    const preAssignments = [];
+    document.querySelectorAll('.preassign-checkbox:checked').forEach(cb => {
+        preAssignments.push(parseInt(cb.getAttribute('data-id')));
+    });
+    eventSettings[currentEventIdForSettings] = { capacities, preAssignments };
+    saveToLocal();
+    showToast();
+    closeEventSettingsModal();
+    refreshAllViews();
+}
+
+function closeEventSettingsModal() {
+    document.getElementById('eventSettingsModal').style.display = 'none';
+    currentEventIdForSettings = null;
+}
+
+// ---------- EMPLOYEE MANAGEMENT ----------
+let editingEmployeeId = null;
+function openEditModal(empId) {
+    const employee = employees.find(e => e.id === empId);
+    if (!employee) return;
+    editingEmployeeId = empId;
+    document.getElementById('edit-emp-name').value = employee.name;
+    document.getElementById('edit-emp-section').value = employee.section;
+    document.getElementById('edit-emp-code').value = employee.empCode;
+    document.getElementById('edit-error').classList.add('hidden');
+    document.getElementById('editModal').style.display = 'flex';
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+    editingEmployeeId = null;
+}
+
+async function saveEdit() {
+    const newName = document.getElementById('edit-emp-name').value.trim();
+    const newSection = document.getElementById('edit-emp-section').value;
+    const newCode = document.getElementById('edit-emp-code').value.trim();
+    if (!newName || !newCode) {
+        document.getElementById('edit-error').textContent = 'Name and code are required.';
+        document.getElementById('edit-error').classList.remove('hidden');
+        return;
+    }
+    if (employees.some(e => e.id !== editingEmployeeId && e.empCode === newCode)) {
+        document.getElementById('edit-error').textContent = 'Employee code already exists.';
+        document.getElementById('edit-error').classList.remove('hidden');
+        return;
+    }
+    const index = employees.findIndex(e => e.id === editingEmployeeId);
+    if (index !== -1) {
+        employees[index].name = newName;
+        employees[index].section = newSection;
+        employees[index].empCode = newCode;
+        saveToLocal();
+        closeEditModal();
+        refreshAllViews();
+    }
+}
+
+function renderAdminEmployees() {
+    const container = document.getElementById('employee-list');
+    container.innerHTML = '';
+    employees.forEach(emp => {
+        const card = document.createElement('div');
+        card.className = 'employee-card';
+        card.innerHTML = `
+            <div class="name">${escapeHtml(emp.name)} <span class="code">${emp.empCode}</span></div>
+            <div class="sections">Section: ${emp.section.charAt(0).toUpperCase() + emp.section.slice(1)}</div>
+            <div>
+                <button class="edit-btn" data-id="${emp.id}">Edit</button>
+                <button class="generate-code-btn" data-id="${emp.id}">Regenerate Code</button>
+                <button class="remove-emp" data-id="${emp.id}">Remove</button>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+    document.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', () => openEditModal(parseInt(btn.getAttribute('data-id')))));
+    document.querySelectorAll('.generate-code-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const id = parseInt(btn.getAttribute('data-id'));
+            const emp = employees.find(e => e.id === id);
+            if (emp) {
+                emp.empCode = generateRandomCode();
+                saveToLocal();
+                renderAdminEmployees();
+            }
+        });
+    });
+    document.querySelectorAll('.remove-emp').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const id = parseInt(btn.getAttribute('data-id'));
+            if (confirm('Remove this employee?')) {
+                employees = employees.filter(e => e.id !== id);
+                delete submissions[id];
+                for (let eventId in eventSettings) {
+                    if (eventSettings[eventId].preAssignments) {
+                        eventSettings[eventId].preAssignments = eventSettings[eventId].preAssignments.filter(pid => pid !== id);
+                    }
+                }
+                saveToLocal();
+                renderAdminEmployees();
+                refreshAllViews();
+            }
+        });
+    });
+}
+
+// ---------- AVAILABILITY MATRIX ----------
+async function renderAvailabilityMatrix(sectionFilter = 'all') {
+    const container = document.getElementById('availability-matrix');
+    let filteredEmployees = sectionFilter === 'all' ? employees : employees.filter(emp => emp.section === sectionFilter);
+    let html = '<table style="min-width:600px;"><thead><tr><th>Event</th>';
+    filteredEmployees.forEach(emp => {
+        html += `<th>${escapeHtml(emp.name)}<br><small>${emp.empCode}</small></th>`;
+    });
+    html += '</tr></thead><tbody>';
+    for (const event of events) {
+        html += `<tr><td><strong>${formatDate(event.date)}<br>${event.venue}</strong></td>`;
+        for (const emp of filteredEmployees) {
+            const available = (submissions[emp.id] || []).includes(event.id) || isEmployeePreAssigned(emp.id, event.id);
+            html += `<td style="text-align:center;">${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}</td>`;
+        }
+        html += '</tr>';
+    }
+    html += '</tbody></table>';
+
+    // Summary
+    html += '<div style="margin-top:30px;"><h3>Summary by Section</h3>';
+    const sections = ['kitchen','floor','bar','cleaner','setup','manager'];
+    sections.forEach(section => {
+        const sectionEmps = employees.filter(e => e.section === section);
+        if (sectionEmps.length === 0) return;
+        html += `<h4>${section.charAt(0).toUpperCase() + section.slice(1)}</h4><table><thead><tr><th>Event</th><th>Assigned / Capacity</th><th>Remaining</th></tr></thead><tbody>`;
+        for (const event of events) {
+            const pre = getPreAssignedCount(event.id, section);
+            const self = getSelfAssignedCount(event.id, section);
+            const total = pre + self;
+            const cap = getCapacityForEvent(event.id, section);
+            const rem = cap - total;
+            html += `<tr><td>${formatDate(event.date)} – ${event.venue}</td><td>${total} / ${cap}</td><td style="color:#D4AF37;font-weight:bold;">${rem < 0 ? 0 : rem} left</td></tr>`;
+        }
+        html += '</tbody></table>';
+    });
+    container.innerHTML = html;
+}
+
+// ---------- OTHER ADMIN FUNCTIONS ----------
+async function addEmployee() {
+    const name = document.getElementById('new-employee-name').value.trim();
+    const section = document.getElementById('new-employee-section').value;
+    let code = document.getElementById('new-employee-code').value.trim();
+    if (!name) return alert('Please enter name');
+    if (!code) code = generateRandomCode();
+    if (employees.some(e => e.empCode === code)) return alert('Code already exists');
+    const newId = Date.now();
+    employees.push({ id: newId, empCode: code, name, section });
+    saveToLocal();
+    document.getElementById('new-employee-name').value = '';
+    document.getElementById('new-employee-code').value = '';
+    renderAdminEmployees();
+    refreshAllViews();
+}
+
+function exportCSV() {
+    let csv = 'Employee Code,Name,Section,Date,Venue,Available\n';
+    for (const emp of employees) {
+        const av = submissions[emp.id] || [];
+        for (const ev of events) {
+            const yes = av.includes(ev.id) || isEmployeePreAssigned(emp.id, ev.id);
+            csv += `"${emp.empCode}","${emp.name}","${emp.section}","${formatDate(ev.date)}","${ev.venue}",${yes ? 'Yes' : 'No'}\n`;
+        }
+    }
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'staff-availability.csv';
+    a.click();
+}
+
+function exportEmployeeCodes() {
+    let csv = 'Name,Code,Section\n';
+    employees.forEach(emp => csv += `"${emp.name}","${emp.empCode}","${emp.section}"\n`);
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'employee-codes.csv';
+    a.click();
+}
+
+function exportData() {
+    const data = { employees, submissions, events, eventSettings };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'members-lounge-data.json';
+    a.click();
+}
+
+async function importData(file) {
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (data.submissions) Object.assign(submissions, data.submissions);
+            if (data.events) events = data.events;
+            if (data.eventSettings) Object.assign(eventSettings, data.eventSettings);
+            saveToLocal();
+            const status = document.getElementById('import-status');
+            status.textContent = 'Import successful!';
+            status.classList.remove('hidden');
+            setTimeout(() => status.classList.add('hidden'), 3000);
+            refreshAllViews();
+        } catch(err) { alert('Invalid file'); }
+    };
+    reader.readAsText(file);
+}
+
+function showCodeList() {
+    const container = document.getElementById('code-list-container');
+    const textarea = document.getElementById('code-list-textarea');
+    let text = '';
+    employees.forEach(emp => text += `${emp.name} – ${emp.empCode} – ${emp.section}\n`);
+    textarea.value = text;
+    container.classList.remove('hidden');
+}
+
+function copyCodeList() {
+    const ta = document.getElementById('code-list-textarea');
+    ta.select();
+    document.execCommand('copy');
+    alert('Copied!');
+}
+
+function switchTab(tabId) {
+    if ((tabId === 'admin' || tabId === 'availability') && !managerAuthenticated) {
+        const pwd = prompt('Manager password:');
+        if (pwd === MANAGER_PASSWORD) {
+            managerAuthenticated = true;
+            sessionStorage.setItem('managerAuthenticated', 'true');
+        } else {
+            alert('Wrong password');
+            return;
+        }
+    }
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabId + '-pane').classList.add('active');
+    document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+    if (tabId === 'admin') {
+        renderAdminEmployees();
+        renderAdminEventsList();
+    } else if (tabId === 'availability') {
+        renderAvailabilityMatrix('all');
+    }
+}
+
+function initFilters() {
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderAvailabilityMatrix(btn.dataset.section);
+        });
+    });
+}
+
+function loadEmployeeByCode() {
+    const code = document.getElementById('employee-code').value.trim().toUpperCase();
+    if (!code) return alert('Enter code');
+    const employee = employees.find(e => e.empCode === code);
+    if (!employee) return alert('Code not found');
+    currentEmployeeId = employee.id;
+    document.getElementById('display-name').innerText = employee.name;
+    document.getElementById('display-section').innerText = employee.section.charAt(0).toUpperCase() + employee.section.slice(1);
+    document.getElementById('staff-details').classList.remove('hidden');
+    renderDates();
+}
+
 async function init() {
     initData();
     initFilters();
-    // ... all event listeners exactly as original ...
+
+    // Modals
+    document.querySelectorAll('.close-modal').forEach(c => c.addEventListener('click', () => {
+        document.getElementById('editModal').style.display = 'none';
+        document.getElementById('eventSettingsModal').style.display = 'none';
+    }));
+
+    document.getElementById('save-edit').addEventListener('click', saveEdit);
+    document.getElementById('edit-generate-random').addEventListener('click', () => {
+        document.getElementById('edit-emp-code').value = generateRandomCode();
+    });
+    document.getElementById('generate-random-code').addEventListener('click', () => {
+        document.getElementById('new-employee-code').value = generateRandomCode();
+    });
+    document.getElementById('saveEventSettings').addEventListener('click', saveEventSettings);
+
+    // Buttons
+    document.getElementById('load-employee').addEventListener('click', loadEmployeeByCode);
     document.getElementById('submit-availability').addEventListener('click', submitAvailability);
-    // ... rest of your listeners ...
+    document.getElementById('add-employee').addEventListener('click', addEmployee);
+    document.getElementById('add-event').addEventListener('click', async () => {
+        const date = document.getElementById('new-event-date').value;
+        const venue = document.getElementById('new-event-venue').value.trim();
+        if (await addEvent(date, venue)) {
+            document.getElementById('new-event-date').value = '';
+            document.getElementById('new-event-venue').value = '';
+        }
+    });
+    document.getElementById('export-csv').addEventListener('click', exportCSV);
+    document.getElementById('export-codes').addEventListener('click', exportEmployeeCodes);
+    document.getElementById('export-data').addEventListener('click', exportData);
+    document.getElementById('import-data').addEventListener('click', () => document.getElementById('import-file').click());
+    document.getElementById('import-file').addEventListener('change', e => {
+        if (e.target.files[0]) importData(e.target.files[0]);
+    });
+    document.getElementById('show-code-list').addEventListener('click', showCodeList);
+    document.getElementById('copy-code-list').addEventListener('click', copyCodeList);
+    document.getElementById('clear-all-data').addEventListener('click', () => {
+        if (confirm('Clear ALL data and reset?')) {
+            localStorage.removeItem('membersLoungeData2026');
+            location.reload();
+        }
+    });
+    document.getElementById('save-data').addEventListener('click', () => {
+        saveToLocal();
+        showMessage('save-status', 'Data saved permanently!', 'success');
+    });
+
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
+    });
+
+    // Preload if manager already logged in
+    if (managerAuthenticated) renderAvailabilityMatrix('all');
 }
 
 init();
