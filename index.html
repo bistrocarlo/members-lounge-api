@@ -298,7 +298,7 @@
             border-radius: 12px;
             padding: 25px;
             width: 90%;
-            max-width: 500px;
+            max-width: 700px;
             max-height: 90vh;
             overflow-y: auto;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
@@ -345,6 +345,36 @@
             border: 1px solid #ccc;
             padding: 8px;
             border-radius: 6px;
+        }
+        .preassign-list {
+            margin-top: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .preassign-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .capacity-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .capacity-field {
+            flex: 1;
+            min-width: 80px;
+        }
+        .capacity-field label {
+            font-size: 0.8rem;
+        }
+        .capacity-field input {
+            padding: 6px;
         }
         @media (max-width: 768px) {
             .date-item {
@@ -441,13 +471,8 @@
             </div>
         </div>
         <div class="card">
-            <h2>Manage Events</h2>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
-                <input type="date" id="new-event-date" placeholder="YYYY-MM-DD">
-                <input type="text" id="new-event-venue" placeholder="Venue name" style="flex:2;">
-                <button id="add-event">Add Event</button>
-            </div>
-            <div id="event-list" style="margin-top: 10px; max-height: 300px; overflow-y: auto;"></div>
+            <h2>Manage Events & Assignments</h2>
+            <div id="event-list" style="margin-top: 10px; max-height: 400px; overflow-y: auto;"></div>
         </div>
         <div class="card">
             <h2>Data Sync</h2>
@@ -522,13 +547,27 @@
     </div>
 </div>
 
+<!-- Event Settings Modal -->
+<div id="eventSettingsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="eventSettingsTitle">Event Settings</h3>
+            <span class="close-modal" id="closeEventSettings">&times;</span>
+        </div>
+        <div id="eventSettingsContent"></div>
+        <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+            <button id="saveEventSettings">Save Changes</button>
+        </div>
+    </div>
+</div>
+
 <script>
     // ---------- MANAGER PASSWORD ----------
     const MANAGER_PASSWORD = 'ML2026';
     let managerAuthenticated = sessionStorage.getItem('managerAuthenticated') === 'true';
 
     // ---------- CAPACITY LIMITS ----------
-    const CAPACITIES = {
+    const DEFAULT_CAPACITIES = {
         kitchen: 4,
         floor: 8,
         bar: 1,
@@ -539,8 +578,9 @@
 
     // ---------- DATA MODELS ----------
     let employees = [];
-    let submissions = {};
+    let submissions = {};      // key: employeeId, value: array of eventIds where available (staff self-selected)
     let events = [];
+    let eventSettings = {};     // key: eventId, value: { capacities: { kitchen: 2, ... }, preAssignments: [employeeId] }
 
     // Default events (44 from your list)
     const defaultEvents = [
@@ -592,7 +632,7 @@
 
     // ----- Your employee list (with sections where known) -----
     const defaultEmployeesRaw = [
-        { name: "Carlo Pavia", section: "manager" },      // Manager (unlimited)
+        { name: "Carlo Pavia", section: "manager" },
         { name: "Michelle Pavia", section: "bar" },
         { name: "Rohitha Rawan", section: "kitchen" },
         { name: "Nam Lai", section: "kitchen" },
@@ -618,7 +658,7 @@
         { name: "Aidan Trimboli", section: "floor" },
         { name: "Jaimee Lidell", section: "floor" },
         { name: "Monique Elasmar", section: "floor" },
-        { name: "Jacob Doubleday", section: "floor" },
+        { name: "Luka Tigani", section: "floor" },
         { name: "Walter Testa", section: "floor" },
         { name: "Carl Testa", section: "floor" },
         { name: "Jack Testa", section: "floor" },
@@ -630,8 +670,6 @@
         { name: "Charlie Pavia", section: "floor" },
         { name: "Luccio Tonno", section: "floor" }
     ];
-
-    // Add 12 extra placeholder employees
     for (let i = 1; i <= 12; i++) {
         defaultEmployeesRaw.push({ name: `Extra Employee ${i}`, section: "floor" });
     }
@@ -659,7 +697,6 @@
                 employees = JSON.parse(storedEmployees);
                 if (!Array.isArray(employees)) employees = [];
             } else {
-                // Build default employees with unique codes
                 employees = [];
                 let baseId = 1742740000000;
                 for (let i = 0; i < defaultEmployeesRaw.length; i++) {
@@ -694,6 +731,17 @@
                 events = [...defaultEvents];
             }
         } catch(e) { events = [...defaultEvents]; console.error(e); }
+
+        try {
+            const storedSettings = localStorage.getItem('ml_eventSettings');
+            if (storedSettings) {
+                eventSettings = JSON.parse(storedSettings);
+                if (typeof eventSettings !== 'object') eventSettings = {};
+            } else {
+                eventSettings = {};
+            }
+        } catch(e) { eventSettings = {}; console.error(e); }
+
         sortEvents();
     }
 
@@ -705,6 +753,7 @@
         localStorage.setItem('ml_employees', JSON.stringify(employees));
         localStorage.setItem('ml_submissions', JSON.stringify(submissions));
         localStorage.setItem('ml_events', JSON.stringify(events));
+        localStorage.setItem('ml_eventSettings', JSON.stringify(eventSettings));
         showTemporaryStatus('All data saved successfully.');
     }
 
@@ -717,22 +766,47 @@
         }
     }
 
-    // ----- Capacity helpers -----
-    function getCountForSection(eventId, section) {
+    // ----- Capacity helpers with event-specific overrides and pre-assignments -----
+    function getCapacityForEvent(eventId, section) {
+        const settings = eventSettings[eventId];
+        if (settings && settings.capacities && settings.capacities[section] !== undefined) {
+            return settings.capacities[section];
+        }
+        return DEFAULT_CAPACITIES[section];
+    }
+
+    function getPreAssignedCount(eventId, section) {
+        const settings = eventSettings[eventId];
+        if (!settings || !settings.preAssignments) return 0;
+        const preEmpIds = settings.preAssignments;
+        let count = 0;
+        for (const empId of preEmpIds) {
+            const emp = employees.find(e => e.id == empId);
+            if (emp && emp.section === section) count++;
+        }
+        return count;
+    }
+
+    function getSelfAssignedCount(eventId, section) {
         let count = 0;
         for (let empId in submissions) {
             const emp = employees.find(e => e.id == empId);
-            if (emp && emp.section === section) {
-                if (submissions[empId].includes(eventId)) count++;
-            }
+            if (emp && emp.section === section && submissions[empId].includes(eventId)) count++;
         }
         return count;
     }
 
     function remainingSlots(eventId, section) {
-        const capacity = CAPACITIES[section] || 9999;
-        const current = getCountForSection(eventId, section);
-        return capacity - current;
+        const capacity = getCapacityForEvent(eventId, section);
+        const pre = getPreAssignedCount(eventId, section);
+        const self = getSelfAssignedCount(eventId, section);
+        return capacity - pre - self;
+    }
+
+    function isEmployeePreAssigned(employeeId, eventId) {
+        const settings = eventSettings[eventId];
+        if (!settings || !settings.preAssignments) return false;
+        return settings.preAssignments.includes(employeeId);
     }
 
     // Render dates for staff panel with capacity info and disabled checkboxes
@@ -748,7 +822,11 @@
         events.forEach(event => {
             const remaining = remainingSlots(event.id, section);
             const isCurrentlyAvailable = (submissions[currentEmployeeId] || []).includes(event.id);
-            const isFull = remaining <= 0 && !isCurrentlyAvailable;
+            const isPreAssigned = isEmployeePreAssigned(currentEmployeeId, event.id);
+            // If pre-assigned, they are automatically available and cannot change
+            const isChecked = isPreAssigned || isCurrentlyAvailable;
+            const isDisabled = isPreAssigned || (remaining <= 0 && !isCurrentlyAvailable);
+            const slotsInfo = isPreAssigned ? ' (You are pre-assigned)' : ` slots left: ${remaining}`;
             const div = document.createElement('div');
             div.className = 'date-item';
             div.innerHTML = `
@@ -757,10 +835,10 @@
                     ${event.venue}
                 </div>
                 <div class="slots-info">
-                    ${section.charAt(0).toUpperCase() + section.slice(1)} slots left: ${remaining}
+                    ${section.charAt(0).toUpperCase() + section.slice(1)}${slotsInfo}
                 </div>
                 <label>
-                    <input type="checkbox" data-id="${event.id}" ${isCurrentlyAvailable ? 'checked' : ''} ${isFull ? 'disabled' : ''}>
+                    <input type="checkbox" data-id="${event.id}" ${isChecked ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
                     Available
                 </label>
             `;
@@ -782,11 +860,13 @@
 
         const employee = employees.find(e => e.id === currentEmployeeId);
         const section = employee.section;
-        // Validate capacity before saving
+        // Validate capacity before saving (excluding pre-assigned ones which are already counted)
         for (let eventId of selected) {
-            const currentCount = getCountForSection(eventId, section);
+            // Skip if already pre-assigned – they can't change anyway
+            if (isEmployeePreAssigned(currentEmployeeId, eventId)) continue;
+            const remaining = remainingSlots(eventId, section);
             const isAlreadyIn = (submissions[currentEmployeeId] || []).includes(eventId);
-            if (!isAlreadyIn && currentCount >= CAPACITIES[section]) {
+            if (!isAlreadyIn && remaining <= 0) {
                 showMessage('staff-message', `Cannot add ${section} for ${events.find(e => e.id === eventId)?.venue}: capacity full.`, 'error');
                 return;
             }
@@ -823,11 +903,13 @@
     }
 
     function deleteEvent(eventId) {
-        if (confirm('Delete this event? Staff availability for this event will also be removed.')) {
+        if (confirm('Delete this event? Staff availability, pre-assignments, and custom capacities will be removed.')) {
             events = events.filter(e => e.id !== eventId);
+            // Remove submissions for this event
             for (let empId in submissions) {
                 submissions[empId] = submissions[empId].filter(eid => eid !== eventId);
             }
+            delete eventSettings[eventId];
             saveAllData();
             refreshAllViews();
         }
@@ -857,15 +939,107 @@
             div.style.borderBottom = '1px solid #eee';
             div.innerHTML = `
                 <span>${formatDate(event.date)} – ${event.venue}</span>
-                <button class="delete-event" data-id="${event.id}" style="background:#ff4444; color:white; padding:2px 8px;">Delete</button>
+                <div>
+                    <button class="edit-event-settings" data-id="${event.id}" style="background:#2196f3; margin-right:5px;">Edit Settings</button>
+                    <button class="delete-event" data-id="${event.id}" style="background:#ff4444;">Delete</button>
+                </div>
             `;
             container.appendChild(div);
         });
         document.querySelectorAll('.delete-event').forEach(btn => {
             btn.addEventListener('click', () => deleteEvent(btn.getAttribute('data-id')));
         });
+        document.querySelectorAll('.edit-event-settings').forEach(btn => {
+            btn.addEventListener('click', () => openEventSettingsModal(btn.getAttribute('data-id')));
+        });
     }
 
+    // Event Settings Modal
+    let currentEventIdForSettings = null;
+    function openEventSettingsModal(eventId) {
+        currentEventIdForSettings = eventId;
+        const event = events.find(e => e.id === eventId);
+        document.getElementById('eventSettingsTitle').innerText = `Settings for ${formatDate(event.date)} – ${event.venue}`;
+        const container = document.getElementById('eventSettingsContent');
+        const settings = eventSettings[eventId] || { capacities: {}, preAssignments: [] };
+
+        // Capacities
+        let capacitiesHtml = '<div class="capacity-row">';
+        const sections = ['kitchen', 'floor', 'bar', 'cleaner', 'setup', 'manager'];
+        for (const sec of sections) {
+            const currentVal = settings.capacities[sec] !== undefined ? settings.capacities[sec] : DEFAULT_CAPACITIES[sec];
+            capacitiesHtml += `
+                <div class="capacity-field">
+                    <label>${sec.charAt(0).toUpperCase() + sec.slice(1)}</label>
+                    <input type="number" id="cap-${sec}" value="${currentVal}" min="0" step="1">
+                </div>
+            `;
+        }
+        capacitiesHtml += '</div>';
+
+        // Pre-assignments
+        const preAssignments = settings.preAssignments || [];
+        const allEmployees = employees;
+        // Group employees by section
+        const employeesBySection = {};
+        for (const emp of allEmployees) {
+            if (!employeesBySection[emp.section]) employeesBySection[emp.section] = [];
+            employeesBySection[emp.section].push(emp);
+        }
+
+        let preHtml = '<h4>Pre-assign Staff</h4>';
+        preHtml += '<div style="margin-bottom:10px;">Select employees to pre-assign to this event (they will be automatically considered available and cannot unassign themselves).</div>';
+        for (const sec of sections) {
+            const emps = employeesBySection[sec] || [];
+            if (emps.length === 0) continue;
+            preHtml += `<div style="margin-top:10px;"><strong>${sec.charAt(0).toUpperCase() + sec.slice(1)}</strong></div>`;
+            preHtml += '<div class="preassign-list" id="preassign-list-'+sec+'">';
+            for (const emp of emps) {
+                const isChecked = preAssignments.includes(emp.id);
+                preHtml += `
+                    <div class="preassign-item">
+                        <label>${emp.name} (${emp.empCode})</label>
+                        <input type="checkbox" class="preassign-checkbox" data-id="${emp.id}" ${isChecked ? 'checked' : ''}>
+                    </div>
+                `;
+            }
+            preHtml += '</div>';
+        }
+
+        container.innerHTML = capacitiesHtml + preHtml;
+        document.getElementById('eventSettingsModal').style.display = 'flex';
+    }
+
+    function saveEventSettings() {
+        if (!currentEventIdForSettings) return;
+        const capacities = {};
+        const sections = ['kitchen', 'floor', 'bar', 'cleaner', 'setup', 'manager'];
+        for (const sec of sections) {
+            const input = document.getElementById(`cap-${sec}`);
+            if (input) {
+                const val = parseInt(input.value, 10);
+                if (!isNaN(val)) capacities[sec] = val;
+            }
+        }
+        const preAssignments = [];
+        document.querySelectorAll('.preassign-checkbox:checked').forEach(cb => {
+            preAssignments.push(parseInt(cb.getAttribute('data-id')));
+        });
+        eventSettings[currentEventIdForSettings] = {
+            capacities: capacities,
+            preAssignments: preAssignments
+        };
+        saveAllData();
+        closeEventSettingsModal();
+        refreshAllViews(); // update matrix and staff views
+    }
+
+    function closeEventSettingsModal() {
+        document.getElementById('eventSettingsModal').style.display = 'none';
+        currentEventIdForSettings = null;
+    }
+
+    // ---------- Employee management (unchanged from previous) ----------
     let editingEmployeeId = null;
     function openEditModal(empId) {
         const employee = employees.find(e => e.id === empId);
@@ -949,6 +1123,12 @@
                 if (confirm('Remove this employee? All their availability data will be lost.')) {
                     employees = employees.filter(e => e.id !== id);
                     delete submissions[id];
+                    // Also remove from pre-assignments in event settings
+                    for (let eventId in eventSettings) {
+                        if (eventSettings[eventId].preAssignments) {
+                            eventSettings[eventId].preAssignments = eventSettings[eventId].preAssignments.filter(pid => pid !== id);
+                        }
+                    }
                     saveAllData();
                     renderAdminEmployees();
                     refreshAllViews();
@@ -973,36 +1153,38 @@
             container.innerHTML = '<p>No employees in this section.</p>';
             return;
         }
-        let html = '<div class="scrollable-table"><table style="min-width:600px;"><thead><tr><th>Event</th>';
+        let html = '<div class="scrollable-table"><table style="min-width:600px;"><thead>  <th>Event</th>';
         filteredEmployees.forEach(emp => {
             html += `<th class="employee-name">${escapeHtml(emp.name)}<br><span style="font-size:10px;">${emp.empCode}</span></th>`;
         });
-        html += '</tr></thead><tbody>';
+        html += ' </thead><tbody>';
         events.forEach(event => {
-            html += `<tr><td><strong>${formatDate(event.date)}<br>${event.venue}</strong></td>`;
+            html += `   <td><strong>${formatDate(event.date)}<br>${event.venue}</strong>`;
             filteredEmployees.forEach(emp => {
-                const available = (submissions[emp.id] || []).includes(event.id);
-                html += `<td class="text-center">${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}</td>`;
+                const available = (submissions[emp.id] || []).includes(event.id) || isEmployeePreAssigned(emp.id, event.id);
+                html += `<td class="text-center">${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}`;
             });
-            html += '</tr>';
+            html += '  ';
         });
-        html += '</tbody></table></div>';
+        html += '</tbody> </table></div>';
 
-        // Summary with remaining slots per section
+        // Summary with remaining slots per section (taking into account event-specific capacities and pre-assignments)
         const sections = ['kitchen', 'floor', 'bar', 'cleaner', 'setup', 'manager'];
         html += '<div style="margin-top:20px;"><h3>Summary by Section</h3>';
         sections.forEach(section => {
             const sectionEmployees = employees.filter(emp => emp.section === section);
             if (sectionEmployees.length === 0) return;
-            html += `<h4>${section.charAt(0).toUpperCase() + section.slice(1)}</h4><div class="scrollable-table"><table><thead><tr><th>Event</th><th>Available / Total</th><th>Remaining Slots</th></tr></thead><tbody>`;
+            html += `<h4>${section.charAt(0).toUpperCase() + section.slice(1)}</h4><div class="scrollable-table"> <thead> <th>Event</th><th>Assigned / Capacity</th><th>Remaining Slots</th> </thead><tbody>`;
             events.forEach(event => {
-                const availableCount = sectionEmployees.filter(emp => (submissions[emp.id] || []).includes(event.id)).length;
-                const total = sectionEmployees.length;
-                const remaining = CAPACITIES[section] - availableCount;
+                const preCount = getPreAssignedCount(event.id, section);
+                const selfCount = getSelfAssignedCount(event.id, section);
+                const totalAssigned = preCount + selfCount;
+                const capacity = getCapacityForEvent(event.id, section);
+                const remaining = capacity - totalAssigned;
                 const remainingDisplay = remaining < 0 ? 0 : remaining;
-                html += `<tr><td>${formatDate(event.date)} – ${event.venue}</td><td>${availableCount} / ${total}</td><td style="color:#D4AF37; font-weight:bold;">${remainingDisplay} slots left</td></tr>`;
+                html += ` <td>${formatDate(event.date)} – ${event.venue}<td>${totalAssigned} / ${capacity}<td style="color:#D4AF37; font-weight:bold;">${remainingDisplay} slots left`;
             });
-            html += '</tbody></table></div>';
+            html += '</tbody> </table></div>';
         });
         html += '</div>';
 
@@ -1039,7 +1221,7 @@
         for (const emp of employees) {
             const availableEvents = submissions[emp.id] || [];
             for (const event of events) {
-                const isAvailable = availableEvents.includes(event.id);
+                const isAvailable = availableEvents.includes(event.id) || isEmployeePreAssigned(emp.id, event.id);
                 csv += `"${emp.empCode}","${emp.name}","${emp.section}","${formatDate(event.date)}","${event.venue}",${isAvailable ? 'Yes' : 'No'}\n`;
             }
         }
@@ -1066,12 +1248,12 @@
         URL.revokeObjectURL(url);
     }
 
-    // Export all data to JSON (for backup)
     function exportData() {
         const data = {
             employees: employees,
             submissions: submissions,
-            events: events
+            events: events,
+            eventSettings: eventSettings
         };
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const a = document.createElement('a');
@@ -1083,7 +1265,6 @@
         showTemporaryStatus('Data exported to JSON file.');
     }
 
-    // Import data from JSON file
     function importData(file) {
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -1092,6 +1273,7 @@
                 if (data.employees) employees = data.employees;
                 if (data.submissions) submissions = data.submissions;
                 if (data.events) events = data.events;
+                if (data.eventSettings) eventSettings = data.eventSettings;
                 sortEvents();
                 saveAllData();
                 refreshAllViews();
@@ -1106,17 +1288,21 @@
         reader.readAsText(file);
     }
 
-    // Generate live summary text
     function generateLiveSummary() {
         let text = 'Member\'s Lounge – Staff Availability Summary\n\n';
         for (const emp of employees) {
             const availableEvents = submissions[emp.id] || [];
             text += `${emp.name} (${emp.empCode}) – ${emp.section}\n`;
-            if (availableEvents.length === 0) {
+            if (availableEvents.length === 0 && !Object.values(eventSettings).some(es => es.preAssignments?.includes(emp.id))) {
                 text += '  No availability selected.\n';
             } else {
+                // Combine self and pre-assigned
+                const allEvents = new Set(availableEvents);
+                for (let eventId in eventSettings) {
+                    if (eventSettings[eventId].preAssignments?.includes(emp.id)) allEvents.add(eventId);
+                }
                 for (const event of events) {
-                    if (availableEvents.includes(event.id)) {
+                    if (allEvents.has(event.id)) {
                         text += `  ✓ ${formatDate(event.date)} – ${event.venue}\n`;
                     }
                 }
@@ -1232,6 +1418,13 @@
         document.getElementById('generate-random-code').addEventListener('click', () => {
             document.getElementById('new-employee-code').value = generateRandomCode();
         });
+
+        // Event Settings Modal
+        const settingsModal = document.getElementById('eventSettingsModal');
+        const closeSettings = document.getElementById('closeEventSettings');
+        closeSettings.addEventListener('click', closeEventSettingsModal);
+        window.addEventListener('click', (e) => { if (e.target === settingsModal) closeEventSettingsModal(); });
+        document.getElementById('saveEventSettings').addEventListener('click', saveEventSettings);
 
         document.getElementById('load-employee').addEventListener('click', loadEmployeeByCode);
         document.getElementById('submit-availability').addEventListener('click', submitAvailability);
