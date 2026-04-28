@@ -220,7 +220,17 @@
         .checkbox-label input {
             width: 20px;
             height: 20px;
-            width: auto;
+        }
+
+        .checkbox-label.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .full-notice {
+            font-size: 0.8rem;
+            color: #e74c3c;
+            font-weight: 600;
         }
 
         .employee-grid {
@@ -419,6 +429,51 @@
             color: #666;
         }
 
+        .summary-event {
+            margin-bottom: 30px;
+            border: 1px solid #eef2f7;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .summary-header {
+            background: #1a1a2e;
+            color: white;
+            padding: 15px 20px;
+            font-weight: 700;
+        }
+
+        .summary-section {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eef2f7;
+        }
+
+        .summary-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #D4AF37;
+        }
+
+        .staff-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .staff-pill {
+            background: #f0f2f5;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
         @media (max-width: 768px) {
             .form-row { grid-template-columns: 1fr; }
             .date-item { flex-direction: column; align-items: flex-start; }
@@ -440,6 +495,7 @@
         <button class="tab-btn active" data-tab="staff">👤 Staff Availability</button>
         <button class="tab-btn" data-tab="admin">⚙️ Admin Panel</button>
         <button class="tab-btn" data-tab="matrix">📊 Availability Matrix</button>
+        <button class="tab-btn" data-tab="summary">📋 Event Summary</button>
     </div>
 
     <!-- STAFF PANEL -->
@@ -526,6 +582,14 @@
             <div class="matrix-wrapper" id="matrixContainer">Loading...</div>
         </div>
     </div>
+
+    <!-- NEW SUMMARY PANEL -->
+    <div id="summary-pane" class="tab-pane">
+        <div class="card">
+            <h2>📋 Event Staffing Summary</h2>
+            <div id="summaryContainer">Loading summaries...</div>
+        </div>
+    </div>
 </div>
 
 <div id="toast" class="toast">✓ Saved!</div>
@@ -552,7 +616,17 @@
     let currentEmployee = null;
     let currentFilter = "all";
 
-    // Default data
+    // SECTION CAPACITIES (per event / per function)
+    const SECTION_CAPACITIES = {
+        floor: 8,
+        kitchen: 4,
+        bar: 2,
+        manager: 1,
+        cleaner: 999,   // no limit
+        setup: 999      // no limit
+    };
+
+    // Default data (only future events – past one removed)
     const DEFAULT_EMPLOYEES = [
         { name: "Carlo Pavia", section: "manager", code: "CARLO6" },
         { name: "Michelle Pavia", section: "manager", code: "MICHE0" },
@@ -565,7 +639,6 @@
     ];
 
     const DEFAULT_EVENTS = [
-        { date: "2026-04-18", venue: "Fior Events" },
         { date: "2026-05-09", venue: "Fior Events" },
         { date: "2026-05-17", venue: "Sala Reggio Ballroom" },
         { date: "2026-05-22", venue: "Sala Reggio Ballroom" },
@@ -579,6 +652,12 @@
         } catch(e) {
             return dateStr;
         }
+    }
+
+    function isPast(dateStr) {
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        return new Date(dateStr) < today;
     }
 
     function showToast() {
@@ -608,6 +687,22 @@
         return result;
     }
 
+    async function cleanPastEvents() {
+        const snap = await db.collection("events").get();
+        const batch = db.batch();
+        let deleted = 0;
+        snap.forEach(doc => {
+            if (isPast(doc.data().date)) {
+                batch.delete(doc.ref);
+                deleted++;
+            }
+        });
+        if (deleted > 0) {
+            await batch.commit();
+            console.log(`Deleted ${deleted} past events`);
+        }
+    }
+
     async function seedDatabase() {
         try {
             const employeesSnap = await db.collection("employees").get();
@@ -625,6 +720,9 @@
                 }
                 console.log("Events seeded");
             }
+
+            // Always clean past events
+            await cleanPastEvents();
         } catch (err) {
             console.error("Seed error:", err);
         }
@@ -638,7 +736,12 @@
             
             const eventsSnap = await db.collection("events").get();
             events = [];
-            eventsSnap.forEach(doc => events.push({ id: doc.id, ...doc.data() }));
+            eventsSnap.forEach(doc => {
+                const data = doc.data();
+                if (!isPast(data.date)) {
+                    events.push({ id: doc.id, ...data });
+                }
+            });
             events.sort((a, b) => new Date(a.date) - new Date(b.date));
             
             const subsSnap = await db.collection("submissions").get();
@@ -654,7 +757,7 @@
             document.getElementById("debugInfo").innerHTML = `
                 ✅ Firebase connected!<br>
                 📋 Employees loaded: ${employees.length}<br>
-                📅 Events loaded: ${events.length}<br>
+                📅 Future events: ${events.length}<br>
                 💾 Submissions loaded: ${Object.keys(submissions).length}
             `;
             
@@ -662,7 +765,7 @@
         } catch (err) {
             console.error("Load error:", err);
             document.getElementById("statusBadge").innerHTML = "● Firebase connection error";
-            document.getElementById("debugInfo").innerHTML = `❌ Error: ${err.message}<br>Check Firebase console for security rules.`;
+            document.getElementById("debugInfo").innerHTML = `❌ Error: ${err.message}`;
             return false;
         }
     }
@@ -673,6 +776,7 @@
             renderStaffSelector();
             renderEmployeeGrid();
             renderMatrix();
+            renderSummary();
         });
         
         db.collection("events").onSnapshot(async () => {
@@ -680,12 +784,14 @@
             renderEventList();
             if (currentEmployee) renderDatesList();
             renderMatrix();
+            renderSummary();
         });
         
         db.collection("submissions").onSnapshot(async () => {
             await loadData();
             if (currentEmployee) renderDatesList();
             renderMatrix();
+            renderSummary();
         });
     }
 
@@ -719,10 +825,16 @@
         const code = document.getElementById("manualCode").value.trim().toUpperCase();
         const emp = employees.find(e => e.code === code);
         if (!emp) {
-            showMessage("staffMessage", `Code "${code}" not found. Valid codes: ${employees.map(e => e.code).join(", ")}`, "error");
+            showMessage("staffMessage", `Code "${code}" not found.`, "error");
             return;
         }
         selectEmployee(emp);
+    }
+
+    function getCurrentCountForEvent(eventId, section) {
+        return employees
+            .filter(e => e.section === section && (submissions[e.id] || []).includes(eventId))
+            .length;
     }
 
     async function renderDatesList() {
@@ -730,9 +842,14 @@
         if (!container || !currentEmployee) return;
         container.innerHTML = "";
         const mySubs = submissions[currentEmployee.id] || [];
+        const mySection = currentEmployee.section;
+        const capacity = SECTION_CAPACITIES[mySection] || 999;
         
         for (const ev of events) {
             const isChecked = mySubs.includes(ev.id);
+            const currentCount = getCurrentCountForEvent(ev.id, mySection);
+            const isFull = currentCount >= capacity && !isChecked;
+            
             const div = document.createElement("div");
             div.className = "date-item";
             div.innerHTML = `
@@ -740,16 +857,17 @@
                     <div class="event-date">${formatDate(ev.date)}</div>
                     <div class="event-venue">${ev.venue}</div>
                 </div>
-                <label class="checkbox-label">
-                    <input type="checkbox" data-id="${ev.id}" ${isChecked ? "checked" : ""}>
+                <label class="checkbox-label ${isFull ? 'disabled' : ''}">
+                    <input type="checkbox" data-id="${ev.id}" ${isChecked ? "checked" : ""} ${isFull ? "disabled" : ""}>
                     <span>Available to work</span>
+                    ${isFull ? `<span class="full-notice">FULL (${currentCount}/${capacity})</span>` : `<span style="font-size:0.8rem;color:#666;">${currentCount}/${capacity}</span>`}
                 </label>
             `;
             container.appendChild(div);
         }
         
         if (events.length === 0) {
-            container.innerHTML = '<div style="padding: 20px; text-align: center;">No events scheduled yet. Admin can add events.</div>';
+            container.innerHTML = '<div style="padding: 20px; text-align: center;">No future events scheduled.</div>';
         }
     }
 
@@ -762,7 +880,7 @@
         });
         await db.collection("submissions").doc(currentEmployee.id).set({ eventIds: selected });
         showToast();
-        showMessage("staffMessage", `Saved! ${currentEmployee.name} availability updated.`, "success");
+        showMessage("staffMessage", `✅ ${currentEmployee.name} availability saved!`, "success");
     }
 
     async function renderEmployeeGrid() {
@@ -861,7 +979,7 @@
         }
         
         if (events.length === 0) {
-            container.innerHTML = '<div class="loading">No events scheduled. Add events in Admin Panel.</div>';
+            container.innerHTML = '<div class="loading">No future events.</div>';
             return;
         }
         
@@ -895,16 +1013,71 @@
         });
     }
 
+    // NEW: Render Event Summary tab
+    function renderSummary() {
+        const container = document.getElementById("summaryContainer");
+        if (!container) return;
+        container.innerHTML = "";
+
+        if (events.length === 0) {
+            container.innerHTML = '<p style="text-align:center; padding:40px; color:#999;">No future events yet.</p>';
+            return;
+        }
+
+        events.forEach(ev => {
+            const div = document.createElement("div");
+            div.className = "summary-event";
+            let html = `
+                <div class="summary-header">
+                    ${formatDate(ev.date)} – ${ev.venue}
+                </div>
+            `;
+
+            // Group by section
+            const sections = ["manager", "kitchen", "floor", "bar", "cleaner", "setup"];
+            sections.forEach(section => {
+                const availStaff = employees.filter(e => 
+                    e.section === section && (submissions[e.id] || []).includes(ev.id)
+                );
+                const capacity = SECTION_CAPACITIES[section] || 999;
+                const count = availStaff.length;
+
+                html += `
+                <div class="summary-section">
+                    <div class="section-header">
+                        <span>${section.toUpperCase()}</span>
+                        <span>${count}/${capacity}</span>
+                    </div>
+                    <div class="staff-list">
+                `;
+                if (availStaff.length === 0) {
+                    html += `<span style="color:#999; font-style:italic;">None yet</span>`;
+                } else {
+                    availStaff.forEach(staff => {
+                        html += `<span class="staff-pill">${staff.name} (${staff.code})</span>`;
+                    });
+                }
+                html += `</div></div>`;
+            });
+
+            div.innerHTML = html;
+            container.appendChild(div);
+        });
+    }
+
     function switchTab(tabId) {
         document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
         document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
         document.getElementById(`${tabId}-pane`).classList.add("active");
         document.querySelector(`[data-tab="${tabId}"]`).classList.add("active");
+
         if (tabId === "admin") {
             renderEmployeeGrid();
             renderEventList();
         } else if (tabId === "matrix") {
             renderMatrix();
+        } else if (tabId === "summary") {
+            renderSummary();
         }
     }
 
@@ -953,6 +1126,7 @@
         renderEmployeeGrid();
         renderEventList();
         renderMatrix();
+        renderSummary();
         initFilters();
         
         document.getElementById("loadManualBtn").onclick = manualLoad;
