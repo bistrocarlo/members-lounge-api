@@ -15,7 +15,7 @@
         .logo-icon { background: white; width: 50px; height: 50px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; font-size: 24px; margin-right: 10px; }
         .card { background: white; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .login-box { max-width: 450px; margin: 0 auto; text-align: center; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+        input, select { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
         button { background: #D4AF37; color: #1e1e1e; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 10px; width: auto; }
         button:hover { background: #b58f2a; color: white; }
         .error-msg { color: #c62828; background: #ffebee; padding: 12px; border-radius: 8px; margin: 10px 0; }
@@ -37,8 +37,7 @@
         .section-filter { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
         .filter-btn { background: #e0e0e0; padding: 8px 20px; border-radius: 30px; cursor: pointer; border: none; font-size: 14px; }
         .filter-btn.active { background: #D4AF37; color: white; }
-        .loading { text-align: center; padding: 40px; color: #666; }
-        .forgot-link { background: none; border: none; color: #666; cursor: pointer; font-size: 14px; text-decoration: underline; margin-top: 15px; }
+        .code-badge { font-family: monospace; background: #D4AF37; color: white; padding: 10px 20px; border-radius: 8px; display: inline-block; font-size: 18px; letter-spacing: 2px; }
         @media (max-width: 768px) {
             .date-item { flex-direction: column; align-items: flex-start; }
             .logout-bar { flex-direction: column; gap: 10px; }
@@ -50,25 +49,19 @@
     <div class="header">
         <div class="logo-icon">ML</div>
         <h1>Member's Lounge</h1>
-        <p>Staff Availability Portal – Live Firebase</p>
+        <p>Staff Availability Portal – Enter Your Employee Code</p>
     </div>
 
-    <!-- LOGIN SCREEN -->
+    <!-- LOGIN SCREEN (CODE ONLY - NO PASSWORD) -->
     <div id="loginScreen">
         <div class="card login-box">
-            <h2>🔐 Staff Login</h2>
-            <p>Enter your email and password</p>
-            <input type="email" id="loginEmail" placeholder="Staff Email">
-            <input type="password" id="loginPassword" placeholder="Password">
-            <button onclick="login()">Login</button>
-            <div>
-                <button class="forgot-link" onclick="showResetForm()">Forgot password?</button>
-            </div>
+            <h2>🔐 Staff Access</h2>
+            <p>Enter your employee code to log in</p>
+            <input type="text" id="employeeCode" placeholder="Employee Code (e.g., CARLO6, MICHE0)" style="text-align: center; font-size: 20px; letter-spacing: 2px;">
+            <button onclick="loginWithCode()">Login</button>
             <div id="loginError" class="error-msg hidden"></div>
-            <div id="resetForm" class="hidden" style="margin-top: 15px; padding: 15px; background: #faf0e0; border-radius: 8px;">
-                <input type="email" id="resetEmail" placeholder="Enter your email">
-                <button onclick="sendReset()">Send Reset Link</button>
-                <button onclick="hideResetForm()">Cancel</button>
+            <div style="margin-top: 20px; font-size: 12px; color: #666;">
+                <p>Need your code? Ask your manager.</p>
             </div>
         </div>
     </div>
@@ -77,6 +70,7 @@
     <div id="mainApp" style="display: none;">
         <div class="logout-bar">
             <span>✅ Logged in as: <strong id="userName"></strong> (<span id="userSection"></span>)</span>
+            <span class="code-badge" id="userCode"></span>
             <button onclick="logout()">Logout</button>
         </div>
 
@@ -109,7 +103,7 @@
 </div>
 
 <script>
-    // ==================== FIREBASE CONFIG (YOURS) ====================
+    // ==================== FIREBASE CONFIG ====================
     const firebaseConfig = {
         apiKey: "AIzaSyA0rDZ8NMo0cirWEPlIzt_Uq12qnOSBtPk",
         authDomain: "staff-roster-e0940.firebaseapp.com",
@@ -143,7 +137,12 @@
     const DEFAULT_EMPLOYEES = [
         { id: 'emp1', name: "Carlo Pavia", section: "manager", code: "CARLO6", email: "carlo@memberslounge.com" },
         { id: 'emp2', name: "Michelle Pavia", section: "manager", code: "MICHE0", email: "michelle@memberslounge.com" },
-        { id: 'emp3', name: "Rohitha Rawan", section: "kitchen", code: "ROHIT9", email: "rohitha@memberslounge.com" }
+        { id: 'emp3', name: "Rohitha Rawan", section: "kitchen", code: "ROHIT9", email: "rohitha@memberslounge.com" },
+        { id: 'emp4', name: "Nam Lai", section: "kitchen", code: "NAMLA7", email: "nam@memberslounge.com" },
+        { id: 'emp5', name: "Franco Schiavo", section: "kitchen", code: "FRANC3", email: "franco@memberslounge.com" },
+        { id: 'emp6', name: "Peter Tricarico", section: "floor", code: "PETER8", email: "peter@memberslounge.com" },
+        { id: 'emp7', name: "Claudio Bottigliero", section: "bar", code: "CLAUDI", email: "claudio@memberslounge.com" },
+        { id: 'emp8', name: "Remzi Asllanaj", section: "bar", code: "REMZIA", email: "remzi@memberslounge.com" }
     ];
 
     function formatDate(dateStr) {
@@ -251,60 +250,64 @@
         });
     }
 
-    async function login() {
-        const email = document.getElementById('loginEmail').value.trim();
-        const password = document.getElementById('loginPassword').value;
+    // CODE-ONLY LOGIN - NO PASSWORD REQUIRED
+    async function loginWithCode() {
+        const code = document.getElementById('employeeCode').value.trim().toUpperCase();
         const errorDiv = document.getElementById('loginError');
-        try {
-            await auth.signInWithEmailAndPassword(email, password);
-            errorDiv.classList.add('hidden');
-        } catch (err) {
-            errorDiv.textContent = err.message;
+        
+        if (!code) {
+            errorDiv.textContent = 'Please enter your employee code';
             errorDiv.classList.remove('hidden');
+            return;
         }
+        
+        await loadData();
+        
+        // Find employee by code
+        const employee = employees.find(e => e.code === code);
+        
+        if (!employee) {
+            errorDiv.textContent = `Code "${code}" not found. Please check with your manager.`;
+            errorDiv.classList.remove('hidden');
+            return;
+        }
+        
+        currentEmployee = employee;
+        
+        // Update UI
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'block';
+        document.getElementById('userName').innerText = employee.name;
+        document.getElementById('userSection').innerText = employee.section;
+        document.getElementById('userCode').innerText = employee.code;
+        document.getElementById('displayName').innerText = employee.name;
+        document.getElementById('displaySection').innerText = employee.section;
+        document.getElementById('displayCode').innerText = employee.code;
+        
+        await renderDates();
+        await renderAvailabilityMatrix('all');
+        initFilters();
     }
 
-    function logout() { auth.signOut(); }
-
-    function showResetForm() { document.getElementById('resetForm').classList.remove('hidden'); }
-    function hideResetForm() { document.getElementById('resetForm').classList.add('hidden'); }
-
-    async function sendReset() {
-        const email = document.getElementById('resetEmail').value.trim();
-        if (!email) { alert('Enter email'); return; }
-        try {
-            await auth.sendPasswordResetEmail(email);
-            alert(`Reset link sent to ${email}`);
-            hideResetForm();
-        } catch (err) { alert(err.message); }
+    function logout() {
+        currentEmployee = null;
+        document.getElementById('loginScreen').style.display = 'block';
+        document.getElementById('mainApp').style.display = 'none';
+        document.getElementById('employeeCode').value = '';
     }
 
-    auth.onAuthStateChanged(async (user) => {
-        if (user) {
-            await loadData();
-            currentEmployee = employees.find(e => e.email === user.email);
-            if (!currentEmployee) {
-                alert('Email not registered. Contact admin.');
-                auth.signOut();
-                return;
-            }
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'block';
-            document.getElementById('userName').innerText = currentEmployee.name;
-            document.getElementById('userSection').innerText = currentEmployee.section;
-            document.getElementById('displayName').innerText = currentEmployee.name;
-            document.getElementById('displaySection').innerText = currentEmployee.section;
-            document.getElementById('displayCode').innerText = currentEmployee.code;
-            await renderDates();
-            await renderAvailabilityMatrix('all');
-            initFilters();
-        } else {
-            document.getElementById('loginScreen').style.display = 'block';
-            document.getElementById('mainApp').style.display = 'none';
-        }
-    });
-
+    // Initialize data on page load
+    async function init() {
+        await loadData();
+    }
+    
+    init();
     document.getElementById('saveBtn').addEventListener('click', saveAvailability);
+    
+    // Allow Enter key to submit
+    document.getElementById('employeeCode').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') loginWithCode();
+    });
 </script>
 </body>
 </html>
