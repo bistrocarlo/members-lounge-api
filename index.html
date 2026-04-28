@@ -4,121 +4,98 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Member's Lounge – Staff Availability Portal</title>
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #f5f5f5; color: #1e1e1e; font-family: 'Segoe UI', 'Roboto', sans-serif; line-height: 1.6; padding: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 20px; }
         .container { max-width: 1400px; margin: 0 auto; }
-        .app-header { background: white; border-bottom: 3px solid #D4AF37; padding: 15px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .logo { display: flex; align-items: center; gap: 15px; }
-        .logo-icon { background: #D4AF37; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 28px; }
-        .logo h1 { color: #1e1e1e; font-size: 1.8rem; }
-        .tagline { color: #666; font-size: 0.9rem; }
-        .login-box, .logout-bar { background: #f8f9fa; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; text-align: center; }
-        .login-box input { width: 280px; padding: 0.6rem; margin: 0.5rem; border: 1px solid #ced4da; border-radius: 8px; font-size: 14px; }
-        button { background: #D4AF37; color: #1e1e1e; border: none; padding: 0.6rem 1.5rem; font-size: 0.9rem; border-radius: 40px; cursor: pointer; font-weight: 600; margin: 0.5rem; transition: background 0.2s; }
+        .header { background: #D4AF37; color: #1e1e1e; padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center; }
+        .logo-icon { background: white; width: 50px; height: 50px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; font-size: 24px; margin-right: 10px; }
+        .card { background: white; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .login-box { max-width: 450px; margin: 0 auto; text-align: center; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+        button { background: #D4AF37; color: #1e1e1e; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 10px; width: auto; }
         button:hover { background: #b58f2a; color: white; }
-        .logout-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
-        .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .card h2, .card h3 { color: #D4AF37; margin-bottom: 15px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; color: #555; font-weight: 500; }
-        input, select { padding: 10px; border: 1px solid #ccc; border-radius: 6px; width: 100%; font-size: 14px; }
-        .date-list { max-height: 500px; overflow-y: auto; margin-top: 15px; border: 1px solid #e0e0e0; border-radius: 8px; }
-        .date-item { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #eee; flex-wrap: wrap; gap: 8px; }
-        .date-item .event-info { flex: 2; min-width: 180px; }
-        .date-item .slots-info { font-size: 0.8rem; color: #D4AF37; background: #faf0e0; padding: 2px 8px; border-radius: 12px; display: inline-block; }
-        .date-item input { margin-right: 10px; transform: scale(1.2); width: auto; }
-        .staff-info { background: #fafafa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e0e0e0; }
-        .success-msg, .error-msg { padding: 12px; border-radius: 8px; margin-bottom: 15px; }
-        .success-msg { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
-        .error-msg { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+        .error-msg { color: #c62828; background: #ffebee; padding: 12px; border-radius: 8px; margin: 10px 0; }
+        .success-msg { color: #2e7d32; background: #e8f5e9; padding: 12px; border-radius: 8px; margin: 10px 0; }
         .hidden { display: none; }
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #2e7d32; color: white; padding: 14px 24px; border-radius: 50px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); font-weight: bold; z-index: 9999; display: none; }
-        .available-yes { background: #D4AF37; color: white; padding: 2px 8px; border-radius: 4px; display: inline-block; font-weight: bold; }
-        .available-no { background: #f0f0f0; color: #999; padding: 2px 8px; border-radius: 4px; display: inline-block; }
-        .scrollable-table { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; background: white; }
-        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background: #fafafa; position: sticky; top: 0; color: #D4AF37; }
-        .section-filter { margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap; }
-        .filter-btn { background: #f0f0f0; padding: 5px 12px; border-radius: 20px; cursor: pointer; border: none; color: #333; }
+        .logout-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: white; border-radius: 12px; margin-bottom: 20px; }
+        .date-list { max-height: 500px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; }
+        .date-item { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .date-item:hover { background: #fafafa; }
+        .event-info { flex: 2; }
+        .slots-info { font-size: 12px; color: #D4AF37; background: #faf0e0; padding: 4px 12px; border-radius: 20px; display: inline-block; }
+        .staff-info { background: #fafafa; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f5f5f5; color: #D4AF37; position: sticky; top: 0; }
+        .available-yes { background: #D4AF37; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; display: inline-block; }
+        .available-no { background: #e0e0e0; color: #999; padding: 4px 12px; border-radius: 20px; font-size: 12px; display: inline-block; }
+        .scrollable-table { overflow-x: auto; max-height: 400px; overflow-y: auto; }
+        .section-filter { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+        .filter-btn { background: #e0e0e0; padding: 8px 20px; border-radius: 30px; cursor: pointer; border: none; font-size: 14px; }
         .filter-btn.active { background: #D4AF37; color: white; }
-        .forgot-link { background: none; border: none; color: #D4AF37; cursor: pointer; font-size: 0.85rem; text-decoration: underline; margin-top: 10px; display: inline-block; }
-        .forgot-link:hover { color: #b58f2a; }
-        .reset-form { margin-top: 15px; padding: 15px; background: #faf0e0; border-radius: 8px; }
+        .loading { text-align: center; padding: 40px; color: #666; }
+        .forgot-link { background: none; border: none; color: #666; cursor: pointer; font-size: 14px; text-decoration: underline; margin-top: 15px; }
         @media (max-width: 768px) {
             .date-item { flex-direction: column; align-items: flex-start; }
-            .app-header { flex-direction: column; gap: 10px; }
-            .login-box input { width: 90%; }
+            .logout-bar { flex-direction: column; gap: 10px; }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="app-header">
-        <div class="logo">
-            <div class="logo-icon">ML</div>
-            <h1>Member's Lounge</h1>
-        </div>
-        <div class="tagline">Staff Availability Portal – Secure Access</div>
+    <div class="header">
+        <div class="logo-icon">ML</div>
+        <h1>Member's Lounge</h1>
+        <p>Staff Availability Portal – Live Firebase</p>
     </div>
 
     <!-- LOGIN SCREEN -->
     <div id="loginScreen">
-        <div class="login-box">
+        <div class="card login-box">
             <h2>🔐 Staff Login</h2>
-            <p>Enter your employee credentials to access the system</p>
+            <p>Enter your email and password</p>
             <input type="email" id="loginEmail" placeholder="Staff Email">
             <input type="password" id="loginPassword" placeholder="Password">
+            <button onclick="login()">Login</button>
             <div>
-                <button onclick="login()">Login</button>
+                <button class="forgot-link" onclick="showResetForm()">Forgot password?</button>
             </div>
-            <button class="forgot-link" onclick="showForgotPassword()">Forgot password?</button>
             <div id="loginError" class="error-msg hidden"></div>
-            <div id="resetMessage" class="success-msg hidden"></div>
-            <div id="resetForm" class="reset-form hidden">
-                <p>Enter your email to receive a password reset link:</p>
-                <input type="email" id="resetEmail" placeholder="Your email address" style="width: 100%; margin-bottom: 10px;">
-                <button onclick="sendPasswordReset()">Send Reset Email</button>
-                <button onclick="hideForgotPassword()">Cancel</button>
+            <div id="resetForm" class="hidden" style="margin-top: 15px; padding: 15px; background: #faf0e0; border-radius: 8px;">
+                <input type="email" id="resetEmail" placeholder="Enter your email">
+                <button onclick="sendReset()">Send Reset Link</button>
+                <button onclick="hideResetForm()">Cancel</button>
             </div>
         </div>
     </div>
 
-    <!-- MAIN APP (visible after login) -->
+    <!-- MAIN APP -->
     <div id="mainApp" style="display: none;">
         <div class="logout-bar">
             <span>✅ Logged in as: <strong id="userName"></strong> (<span id="userSection"></span>)</span>
             <button onclick="logout()">Logout</button>
         </div>
 
-        <!-- Staff Panel -->
         <div class="card">
-            <h2>My Availability</h2>
-            <div id="staffMessage" class="error-msg hidden"></div>
-            <div id="staffDetails">
-                <div class="staff-info">
-                    <div><strong>Name:</strong> <span id="displayName"></span></div>
-                    <div><strong>Section:</strong> <span id="displaySection"></span></div>
-                    <div><strong>Employee Code:</strong> <span id="displayCode"></span></div>
-                </div>
-                <div class="form-group">
-                    <label>Select Dates You Can Work</label>
-                    <div id="datesContainer" class="date-list"></div>
-                </div>
-                <button id="submitAvailability">💾 Save My Availability</button>
+            <h2>📅 My Availability</h2>
+            <div id="staffInfo" class="staff-info">
+                <p><strong>Name:</strong> <span id="displayName"></span></p>
+                <p><strong>Section:</strong> <span id="displaySection"></span></p>
+                <p><strong>Employee Code:</strong> <span id="displayCode"></span></p>
             </div>
+            <div id="staffMessage" class="error-msg hidden"></div>
+            <div id="datesContainer" class="date-list"></div>
+            <button id="saveBtn" style="margin-top: 20px;">💾 Save My Availability</button>
         </div>
 
-        <!-- Availability Matrix (staff can see but not edit) -->
         <div class="card">
-            <h2>Team Availability Overview</h2>
+            <h2>👥 Team Availability Overview</h2>
             <div class="section-filter" id="sectionFilters">
-                <button class="filter-btn active" data-section="all">All Sections</button>
+                <button class="filter-btn active" data-section="all">All</button>
                 <button class="filter-btn" data-section="kitchen">Kitchen</button>
                 <button class="filter-btn" data-section="floor">Floor</button>
                 <button class="filter-btn" data-section="bar">Bar</button>
@@ -126,17 +103,13 @@
                 <button class="filter-btn" data-section="setup">Setup</button>
                 <button class="filter-btn" data-section="manager">Manager</button>
             </div>
-            <div class="scrollable-table" id="availabilityMatrix"></div>
-            <div id="matrixStatus" class="sync-status"></div>
+            <div id="availabilityMatrix">Loading...</div>
         </div>
     </div>
 </div>
 
-<div id="toast" class="toast">✓ Saved successfully!</div>
-
 <script>
-    // ==================== FIREBASE CONFIGURATION ====================
-    // YOUR FIREBASE CONFIGURATION - EMBEDDED
+    // ==================== FIREBASE CONFIG (YOURS) ====================
     const firebaseConfig = {
         apiKey: "AIzaSyA0rDZ8NMo0cirWEPlIzt_Uq12qnOSBtPk",
         authDomain: "staff-roster-e0940.firebaseapp.com",
@@ -146,182 +119,81 @@
         appId: "1:176909786012:web:be5a85f39c943915a00659"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // Global variables
-    let currentUser = null;
     let currentEmployee = null;
     let employees = [];
     let events = [];
     let submissions = {};
-    let eventSettings = {};
-
-    // Default data
-    const DEFAULT_CAPACITIES = {
-        kitchen: 4,
-        floor: 8,
-        bar: 1,
-        cleaner: 9999,
-        setup: 9999,
-        manager: 9999
-    };
 
     const DEFAULT_EVENTS = [
-        { id: '1', date: '2026-03-28', venue: 'Sala Reggio Ballroom' },
-        { id: '2', date: '2026-04-18', venue: 'Fior Events' },
-        { id: '3', date: '2026-05-09', venue: 'Fior Events' },
-        { id: '4', date: '2026-05-17', venue: 'Sala Reggio Ballroom' },
-        { id: '5', date: '2026-05-22', venue: 'Sala Reggio Ballroom' },
-        { id: '6', date: '2026-05-23', venue: 'Sala Reggio Ballroom' },
-        { id: '7', date: '2026-05-24', venue: 'Sala Reggio Ballroom' },
-        { id: '8', date: '2026-05-29', venue: 'Sala Reggio Ballroom' },
-        { id: '9', date: '2026-05-30', venue: 'Sala Reggio Ballroom' },
-        { id: '10', date: '2026-05-31', venue: 'Sala Reggio Ballroom' }
+        { id: 'ev1', date: '2026-04-18', venue: 'Fior Events' },
+        { id: 'ev2', date: '2026-05-09', venue: 'Fior Events' },
+        { id: 'ev3', date: '2026-05-17', venue: 'Sala Reggio Ballroom' },
+        { id: 'ev4', date: '2026-05-22', venue: 'Sala Reggio Ballroom' },
+        { id: 'ev5', date: '2026-05-23', venue: 'Sala Reggio Ballroom' },
+        { id: 'ev6', date: '2026-05-24', venue: 'Sala Reggio Ballroom' },
+        { id: 'ev7', date: '2026-05-29', venue: 'Sala Reggio Ballroom' },
+        { id: 'ev8', date: '2026-05-30', venue: 'Sala Reggio Ballroom' },
+        { id: 'ev9', date: '2026-05-31', venue: 'Sala Reggio Ballroom' }
     ];
 
     const DEFAULT_EMPLOYEES = [
         { id: 'emp1', name: "Carlo Pavia", section: "manager", code: "CARLO6", email: "carlo@memberslounge.com" },
         { id: 'emp2', name: "Michelle Pavia", section: "manager", code: "MICHE0", email: "michelle@memberslounge.com" },
-        { id: 'emp3', name: "Rohitha Rawan", section: "kitchen", code: "ROHIT9", email: "rohitha@memberslounge.com" },
-        { id: 'emp4', name: "Nam Lai", section: "kitchen", code: "NAMLA7", email: "nam@memberslounge.com" },
-        { id: 'emp5', name: "Franco Schiavo", section: "kitchen", code: "FRANC3", email: "franco@memberslounge.com" },
-        { id: 'emp6', name: "Peter Tricarico", section: "floor", code: "PETER8", email: "peter@memberslounge.com" },
-        { id: 'emp7', name: "Claudio Bottigliero", section: "bar", code: "CLAUDI", email: "claudio@memberslounge.com" },
-        { id: 'emp8', name: "Remzi Asllanaj", section: "bar", code: "REMZIA", email: "remzi@memberslounge.com" }
+        { id: 'emp3', name: "Rohitha Rawan", section: "kitchen", code: "ROHIT9", email: "rohitha@memberslounge.com" }
     ];
 
-    // Helper functions
     function formatDate(dateStr) {
         return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     }
 
-    function showToast() {
-        const toast = document.getElementById('toast');
-        toast.style.display = 'block';
-        setTimeout(() => toast.style.display = 'none', 2000);
-    }
-
-    function showMessage(elementId, text, type) {
-        const el = document.getElementById(elementId);
-        if (!el) return;
-        el.textContent = text;
-        el.className = type === 'success' ? 'success-msg' : 'error-msg';
-        el.classList.remove('hidden');
-        setTimeout(() => el.classList.add('hidden'), 3000);
-    }
-
-    // Load data from Firestore
     async function loadData() {
         try {
-            const employeesSnapshot = await db.collection('employees').get();
-            if (!employeesSnapshot.empty) {
+            const empSnap = await db.collection('employees').get();
+            if (!empSnap.empty) {
                 employees = [];
-                employeesSnapshot.forEach(doc => employees.push({ id: doc.id, ...doc.data() }));
+                empSnap.forEach(doc => employees.push({ id: doc.id, ...doc.data() }));
             } else {
-                for (const emp of DEFAULT_EMPLOYEES) {
-                    await db.collection('employees').doc(emp.id).set(emp);
-                    employees.push(emp);
-                }
+                for (const emp of DEFAULT_EMPLOYEES) await db.collection('employees').doc(emp.id).set(emp);
+                employees = [...DEFAULT_EMPLOYEES];
             }
 
-            const eventsSnapshot = await db.collection('events').get();
-            if (!eventsSnapshot.empty) {
+            const evSnap = await db.collection('events').get();
+            if (!evSnap.empty) {
                 events = [];
-                eventsSnapshot.forEach(doc => events.push({ id: doc.id, ...doc.data() }));
+                evSnap.forEach(doc => events.push({ id: doc.id, ...doc.data() }));
             } else {
-                for (const ev of DEFAULT_EVENTS) {
-                    await db.collection('events').doc(ev.id).set(ev);
-                    events.push(ev);
-                }
+                for (const ev of DEFAULT_EVENTS) await db.collection('events').doc(ev.id).set(ev);
+                events = [...DEFAULT_EVENTS];
             }
 
-            const submissionsSnapshot = await db.collection('submissions').get();
+            const subSnap = await db.collection('submissions').get();
             submissions = {};
-            submissionsSnapshot.forEach(doc => {
-                submissions[doc.id] = doc.data().eventIds || [];
-            });
-
-            const settingsSnapshot = await db.collection('eventSettings').get();
-            eventSettings = {};
-            settingsSnapshot.forEach(doc => {
-                eventSettings[doc.id] = doc.data();
-            });
+            subSnap.forEach(doc => submissions[doc.id] = doc.data().eventIds || []);
 
             events.sort((a, b) => new Date(a.date) - new Date(b.date));
-        } catch (error) {
-            console.error('Error loading data:', error);
+        } catch (err) {
+            console.error(err);
         }
-    }
-
-    function getCapacityForEvent(eventId, section) {
-        const settings = eventSettings[eventId];
-        if (settings && settings.capacities && settings.capacities[section] !== undefined) {
-            return settings.capacities[section];
-        }
-        return DEFAULT_CAPACITIES[section];
-    }
-
-    function getPreAssignedCount(eventId, section) {
-        const settings = eventSettings[eventId];
-        if (!settings || !settings.preAssignments) return 0;
-        return settings.preAssignments.filter(empId => {
-            const emp = employees.find(e => e.id === empId);
-            return emp && emp.section === section;
-        }).length;
-    }
-
-    function getSelfAssignedCount(eventId, section) {
-        let count = 0;
-        for (let empId in submissions) {
-            const emp = employees.find(e => e.id === empId);
-            if (emp && emp.section === section && submissions[empId].includes(eventId)) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    function remainingSlots(eventId, section) {
-        const cap = getCapacityForEvent(eventId, section);
-        const pre = getPreAssignedCount(eventId, section);
-        const self = getSelfAssignedCount(eventId, section);
-        return cap - pre - self;
-    }
-
-    function isEmployeePreAssigned(empId, eventId) {
-        const settings = eventSettings[eventId];
-        return settings && settings.preAssignments && settings.preAssignments.includes(empId);
     }
 
     async function renderDates() {
         const container = document.getElementById('datesContainer');
         if (!container || !currentEmployee) return;
-        const section = currentEmployee.section;
         container.innerHTML = '';
-        
-        for (const event of events) {
-            const remaining = remainingSlots(event.id, section);
-            const isCurrentlyAvailable = (submissions[currentEmployee.id] || []).includes(event.id);
-            const isPre = isEmployeePreAssigned(currentEmployee.id, event.id);
-            const isChecked = isPre || isCurrentlyAvailable;
-            const isDisabled = isPre || (remaining <= 0 && !isCurrentlyAvailable);
-            const slotsInfo = isPre ? ' (Pre-assigned - required)' : ` (${remaining} slots left)`;
-            
+        for (const ev of events) {
+            const isChecked = (submissions[currentEmployee.id] || []).includes(ev.id);
             const div = document.createElement('div');
             div.className = 'date-item';
             div.innerHTML = `
                 <div class="event-info">
-                    <strong>${formatDate(event.date)}</strong><br>
-                    ${event.venue}
-                </div>
-                <div class="slots-info">
-                    ${section.charAt(0).toUpperCase() + section.slice(1)}${slotsInfo}
+                    <strong>${formatDate(ev.date)}</strong><br>${ev.venue}
                 </div>
                 <label>
-                    <input type="checkbox" data-id="${event.id}" ${isChecked ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
+                    <input type="checkbox" data-id="${ev.id}" ${isChecked ? 'checked' : ''}>
                     Available to work
                 </label>
             `;
@@ -329,36 +201,21 @@
         }
     }
 
-    async function submitAvailability() {
-        if (!currentEmployee) {
-            showMessage('staffMessage', 'Please log in first.', 'error');
-            return;
-        }
-        
+    async function saveAvailability() {
         const checkboxes = document.querySelectorAll('#datesContainer input[type="checkbox"]');
         const selected = [];
         checkboxes.forEach(cb => { if (cb.checked) selected.push(cb.getAttribute('data-id')); });
         
-        const section = currentEmployee.section;
-        
-        for (let eventId of selected) {
-            if (isEmployeePreAssigned(currentEmployee.id, eventId)) continue;
-            const remaining = remainingSlots(eventId, section);
-            const already = (submissions[currentEmployee.id] || []).includes(eventId);
-            if (!already && remaining <= 0) {
-                const event = events.find(e => e.id === eventId);
-                showMessage('staffMessage', `Cannot add ${section} for ${event?.venue}: capacity full.`, 'error');
-                return;
-            }
-        }
-        
         await db.collection('submissions').doc(currentEmployee.id).set({ eventIds: selected });
         submissions[currentEmployee.id] = selected;
         
-        showToast();
-        showMessage('staffMessage', `Availability saved for ${currentEmployee.name}. Thank you!`, 'success');
-        await renderDates();
-        await renderAvailabilityMatrix('all');
+        const msg = document.getElementById('staffMessage');
+        msg.textContent = '✓ Availability saved!';
+        msg.className = 'success-msg';
+        msg.classList.remove('hidden');
+        setTimeout(() => msg.classList.add('hidden'), 3000);
+        
+        renderAvailabilityMatrix('all');
     }
 
     async function renderAvailabilityMatrix(sectionFilter = 'all') {
@@ -366,57 +223,31 @@
         if (!container) return;
         
         let filtered = sectionFilter === 'all' ? employees : employees.filter(e => e.section === sectionFilter);
-        if (filtered.length === 0) {
-            container.innerHTML = '<p>No employees in this section.</p>';
-            return;
-        }
+        if (filtered.length === 0) { container.innerHTML = '<p>No employees in this section.</p>'; return; }
         
-        let html = '<div class="scrollable-table"><table style="min-width:600px;"><thead><tr><th>Event Date / Venue</th>';
-        filtered.forEach(emp => html += `<th>${escapeHtml(emp.name)}<br><small>${emp.code}</small></th>`);
+        let html = '<div class="scrollable-table"><table><thead><tr><th>Event</th>';
+        filtered.forEach(e => html += `<th>${e.name}<br><small>${e.code}</small></th>`);
         html += '</tr></thead><tbody>';
         
-        for (const event of events) {
-            html += `<tr><td><strong>${formatDate(event.date)}<br>${event.venue}</strong></td>`;
+        for (const ev of events) {
+            html += `<tr><td><strong>${formatDate(ev.date)}<br>${ev.venue}</strong></td>`;
             for (const emp of filtered) {
-                const available = (submissions[emp.id] || []).includes(event.id) || isEmployeePreAssigned(emp.id, event.id);
-                html += `<td style="text-align:center;">${available ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}</td>`;
+                const avail = (submissions[emp.id] || []).includes(ev.id);
+                html += `<td style="text-align:center;">${avail ? '<span class="available-yes">✓ Available</span>' : '<span class="available-no">✗</span>'}</td>`;
             }
             html += '</tr>';
         }
         html += '</tbody></table></div>';
-        
-        html += '<div style="margin-top:30px;"><h3>Section Capacity Summary</h3>';
-        const sections = ['kitchen', 'floor', 'bar', 'cleaner', 'setup', 'manager'];
-        for (const sec of sections) {
-            const secEmps = employees.filter(e => e.section === sec);
-            if (secEmps.length === 0) continue;
-            html += `<h4>${sec.toUpperCase()}</h4><div class="scrollable-table"><table><thead><tr><th>Event</th><th>Assigned / Capacity</th><th>Remaining</th></tr></thead><tbody>`;
-            for (const event of events) {
-                const pre = getPreAssignedCount(event.id, sec);
-                const self = getSelfAssignedCount(event.id, sec);
-                const total = pre + self;
-                const cap = getCapacityForEvent(event.id, sec);
-                const rem = Math.max(0, cap - total);
-                html += `<tr><td><strong>${formatDate(event.date)}<br>${event.venue}</strong></td><td>${total} / ${cap}</td><td style="color:#D4AF37;">${rem} left</td></tr>`;
-            }
-            html += '</tbody></table></div>';
-        }
-        html += '</div>';
         container.innerHTML = html;
-    }
-
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m] || m));
     }
 
     function initFilters() {
         document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.onclick = () => {
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 renderAvailabilityMatrix(btn.dataset.section);
-            });
+            };
         });
     }
 
@@ -424,66 +255,39 @@
         const email = document.getElementById('loginEmail').value.trim();
         const password = document.getElementById('loginPassword').value;
         const errorDiv = document.getElementById('loginError');
-        
         try {
             await auth.signInWithEmailAndPassword(email, password);
             errorDiv.classList.add('hidden');
-        } catch (error) {
-            errorDiv.textContent = error.message;
+        } catch (err) {
+            errorDiv.textContent = err.message;
             errorDiv.classList.remove('hidden');
         }
     }
 
-    function logout() {
-        auth.signOut();
-    }
+    function logout() { auth.signOut(); }
 
-    function showForgotPassword() {
-        document.getElementById('resetForm').classList.remove('hidden');
-        document.getElementById('loginError').classList.add('hidden');
-    }
+    function showResetForm() { document.getElementById('resetForm').classList.remove('hidden'); }
+    function hideResetForm() { document.getElementById('resetForm').classList.add('hidden'); }
 
-    function hideForgotPassword() {
-        document.getElementById('resetForm').classList.add('hidden');
-        document.getElementById('resetEmail').value = '';
-    }
-
-    async function sendPasswordReset() {
+    async function sendReset() {
         const email = document.getElementById('resetEmail').value.trim();
-        const messageDiv = document.getElementById('resetMessage');
-        
-        if (!email) {
-            messageDiv.textContent = 'Please enter your email address.';
-            messageDiv.className = 'error-msg';
-            messageDiv.classList.remove('hidden');
-            return;
-        }
-        
+        if (!email) { alert('Enter email'); return; }
         try {
             await auth.sendPasswordResetEmail(email);
-            messageDiv.textContent = `Password reset email sent to ${email}. Check your inbox.`;
-            messageDiv.className = 'success-msg';
-            messageDiv.classList.remove('hidden');
-            hideForgotPassword();
-        } catch (error) {
-            messageDiv.textContent = error.message;
-            messageDiv.className = 'error-msg';
-            messageDiv.classList.remove('hidden');
-        }
+            alert(`Reset link sent to ${email}`);
+            hideResetForm();
+        } catch (err) { alert(err.message); }
     }
 
     auth.onAuthStateChanged(async (user) => {
         if (user) {
-            currentUser = user;
             await loadData();
-            
             currentEmployee = employees.find(e => e.email === user.email);
             if (!currentEmployee) {
-                alert('Your email is not registered as staff. Please contact admin.');
+                alert('Email not registered. Contact admin.');
                 auth.signOut();
                 return;
             }
-            
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('mainApp').style.display = 'block';
             document.getElementById('userName').innerText = currentEmployee.name;
@@ -491,19 +295,16 @@
             document.getElementById('displayName').innerText = currentEmployee.name;
             document.getElementById('displaySection').innerText = currentEmployee.section;
             document.getElementById('displayCode').innerText = currentEmployee.code;
-            
             await renderDates();
             await renderAvailabilityMatrix('all');
             initFilters();
         } else {
             document.getElementById('loginScreen').style.display = 'block';
             document.getElementById('mainApp').style.display = 'none';
-            currentUser = null;
-            currentEmployee = null;
         }
     });
 
-    document.getElementById('submitAvailability').addEventListener('click', submitAvailability);
+    document.getElementById('saveBtn').addEventListener('click', saveAvailability);
 </script>
 </body>
 </html>
