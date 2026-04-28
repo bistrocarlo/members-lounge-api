@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Member's Lounge – Staff Availability System</title>
-    <!-- Firebase SDKs -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member's Lounge – Staff Availability</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -16,9 +15,8 @@
 
         body {
             background: #f0f2f5;
-            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            font-family: 'Segoe UI', Roboto, sans-serif;
             padding: 20px;
-            color: #1a1a2e;
         }
 
         .container {
@@ -26,7 +24,6 @@
             margin: 0 auto;
         }
 
-        /* Header */
         .header {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             color: white;
@@ -37,37 +34,25 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 15px;
         }
 
         .logo-icon {
             background: #D4AF37;
             color: #1a1a2e;
-            width: 55px;
-            height: 55px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
+            font-size: 24px;
             font-weight: bold;
-            font-size: 28px;
+            margin-right: 15px;
         }
 
         .logo h1 {
+            display: inline-block;
             font-size: 1.8rem;
-            letter-spacing: 1px;
-        }
-
-        .logo p {
-            font-size: 0.8rem;
-            opacity: 0.8;
         }
 
         .status-badge {
@@ -78,7 +63,6 @@
             border: 1px solid #D4AF37;
         }
 
-        /* Tabs */
         .tabs {
             display: flex;
             gap: 12px;
@@ -94,62 +78,37 @@
             border-radius: 40px;
             font-weight: 600;
             font-size: 15px;
-            color: #1a1a2e;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-
-        .tab-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s;
         }
 
         .tab-btn.active {
             background: #D4AF37;
             color: #1a1a2e;
-            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
         }
 
-        /* Panes */
         .tab-pane {
             display: none;
-            animation: fadeIn 0.3s ease;
         }
 
         .tab-pane.active {
             display: block;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Cards */
         .card {
             background: white;
             border-radius: 20px;
             padding: 25px;
             margin-bottom: 25px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            border: 1px solid #eef2f7;
         }
 
         .card h2 {
             color: #D4AF37;
             margin-bottom: 20px;
-            font-size: 1.5rem;
             border-left: 4px solid #D4AF37;
             padding-left: 15px;
         }
 
-        .card h3 {
-            color: #1a1a2e;
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-        }
-
-        /* Forms */
         .form-group {
             margin-bottom: 20px;
         }
@@ -157,22 +116,19 @@
         label {
             display: block;
             margin-bottom: 8px;
-            color: #555;
             font-weight: 500;
-            font-size: 14px;
+            color: #555;
         }
 
-        input, select, textarea {
+        input, select {
             width: 100%;
             padding: 12px 15px;
             border: 1px solid #ddd;
             border-radius: 12px;
             font-size: 14px;
-            transition: border 0.3s;
-            background: white;
         }
 
-        input:focus, select:focus {
+        input:focus {
             outline: none;
             border-color: #D4AF37;
         }
@@ -185,8 +141,7 @@
             border-radius: 40px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 14px;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
         }
 
         button:hover {
@@ -194,56 +149,37 @@
             transform: translateY(-2px);
         }
 
-        button.danger {
-            background: #dc3545;
-            color: white;
-        }
-
-        button.danger:hover {
-            background: #c82333;
-        }
-
-        button.secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        /* Staff Selector */
         .staff-selector {
             display: flex;
             gap: 12px;
             flex-wrap: wrap;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
-        .staff-code-btn {
+        .staff-btn {
             background: #f8f9fa;
             border: 2px solid #e9ecef;
-            padding: 12px 20px;
+            padding: 10px 18px;
             border-radius: 50px;
             cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
+            font-weight: 500;
         }
 
-        .staff-code-btn:hover {
+        .staff-btn:hover {
             border-color: #D4AF37;
-            transform: translateY(-2px);
         }
 
-        .staff-code-btn.active {
+        .staff-btn.active {
             background: #D4AF37;
             border-color: #D4AF37;
             color: white;
         }
 
-        /* Date List */
         .date-list {
             max-height: 500px;
             overflow-y: auto;
             border: 1px solid #eef2f7;
             border-radius: 16px;
-            margin-top: 15px;
         }
 
         .date-item {
@@ -253,12 +189,7 @@
             padding: 15px 20px;
             border-bottom: 1px solid #eef2f7;
             flex-wrap: wrap;
-            gap: 15px;
-            transition: background 0.2s;
-        }
-
-        .date-item:hover {
-            background: #faf9ff;
+            gap: 10px;
         }
 
         .date-item:last-child {
@@ -271,22 +202,12 @@
 
         .event-date {
             font-weight: 700;
-            font-size: 1rem;
-            color: #1a1a2e;
         }
 
         .event-venue {
             font-size: 0.85rem;
             color: #666;
             margin-top: 4px;
-        }
-
-        .slots-info {
-            background: #f0f0f0;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            color: #666;
         }
 
         .checkbox-label {
@@ -299,27 +220,21 @@
         .checkbox-label input {
             width: 20px;
             height: 20px;
-            cursor: pointer;
+            width: auto;
         }
 
-        /* Employee Cards */
         .employee-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 15px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .employee-card {
             background: #faf9ff;
             border-radius: 16px;
-            padding: 16px;
+            padding: 15px;
             border: 1px solid #eef2f7;
-            transition: all 0.2s;
-        }
-
-        .employee-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
 
         .employee-name {
@@ -327,13 +242,12 @@
             font-size: 1.1rem;
             display: flex;
             justify-content: space-between;
-            align-items: center;
         }
 
         .employee-code {
             font-family: monospace;
             background: #e9ecef;
-            padding: 4px 10px;
+            padding: 2px 8px;
             border-radius: 20px;
             font-size: 0.8rem;
         }
@@ -348,7 +262,7 @@
         .employee-actions {
             display: flex;
             gap: 8px;
-            margin-top: 12px;
+            margin-top: 10px;
         }
 
         .employee-actions button {
@@ -356,7 +270,6 @@
             font-size: 12px;
         }
 
-        /* Event List */
         .event-list {
             max-height: 400px;
             overflow-y: auto;
@@ -370,12 +283,6 @@
             border-bottom: 1px solid #eef2f7;
         }
 
-        .event-date-small {
-            font-weight: 600;
-            min-width: 100px;
-        }
-
-        /* Availability Table */
         .matrix-wrapper {
             overflow-x: auto;
             border-radius: 16px;
@@ -391,13 +298,10 @@
 
         .availability-table th {
             background: #f8f9fa;
-            padding: 12px 10px;
+            padding: 12px;
             text-align: center;
-            font-weight: 600;
             color: #D4AF37;
             border-bottom: 2px solid #eef2f7;
-            position: sticky;
-            top: 0;
         }
 
         .availability-table td {
@@ -409,9 +313,6 @@
         .availability-table td:first-child {
             text-align: left;
             font-weight: 500;
-            background: #faf9ff;
-            position: sticky;
-            left: 0;
         }
 
         .available-yes {
@@ -420,7 +321,6 @@
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 11px;
-            font-weight: bold;
             display: inline-block;
         }
 
@@ -433,7 +333,6 @@
             display: inline-block;
         }
 
-        /* Section Filters */
         .section-filters {
             display: flex;
             gap: 10px;
@@ -447,51 +346,14 @@
             border-radius: 30px;
             cursor: pointer;
             font-size: 13px;
-            font-weight: 500;
-            transition: all 0.2s;
             border: 1px solid #eef2f7;
-        }
-
-        .filter-chip:hover {
-            border-color: #D4AF37;
         }
 
         .filter-chip.active {
             background: #D4AF37;
             color: white;
-            border-color: #D4AF37;
         }
 
-        /* Summary Section */
-        .summary-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #eef2f7;
-        }
-
-        .stat-card {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #D4AF37;
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        /* Messages */
         .message {
             padding: 15px;
             border-radius: 12px;
@@ -502,21 +364,18 @@
         .message.success {
             background: #d4edda;
             color: #155724;
-            border: 1px solid #c3e6cb;
             display: block;
         }
 
         .message.error {
             background: #f8d7da;
             color: #721c24;
-            border: 1px solid #f5c6cb;
             display: block;
         }
 
         .message.info {
             background: #d1ecf1;
             color: #0c5460;
-            border: 1px solid #bee5eb;
             display: block;
         }
 
@@ -524,67 +383,12 @@
             display: none;
         }
 
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 24px;
-            padding: 30px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-header h3 {
-            color: #D4AF37;
-            margin: 0;
-        }
-
-        .close-modal {
-            font-size: 28px;
-            cursor: pointer;
-            color: #999;
-        }
-
-        .close-modal:hover {
-            color: #333;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        /* Loading */
         .loading {
             text-align: center;
             padding: 40px;
             color: #999;
         }
 
-        /* Toast */
         .toast {
             position: fixed;
             bottom: 30px;
@@ -594,90 +398,88 @@
             color: white;
             padding: 12px 24px;
             border-radius: 50px;
-            font-weight: bold;
-            z-index: 2000;
             display: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
         }
 
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 20px;
-            color: #999;
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 15px;
             font-size: 12px;
-            margin-top: 20px;
+            color: #666;
         }
 
         @media (max-width: 768px) {
-            body { padding: 10px; }
-            .card { padding: 18px; }
-            .date-item { flex-direction: column; align-items: flex-start; }
-            .employee-grid { grid-template-columns: 1fr; }
             .form-row { grid-template-columns: 1fr; }
-            .header { flex-direction: column; text-align: center; }
+            .date-item { flex-direction: column; align-items: flex-start; }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <!-- Header -->
     <div class="header">
-        <div class="logo">
-            <div class="logo-icon">ML</div>
-            <div>
-                <h1>Member's Lounge</h1>
-                <p>Staff Availability Management System</p>
-            </div>
+        <div>
+            <span class="logo-icon">ML</span>
+            <h1>Member's Lounge</h1>
+            <p style="margin-top: 5px;">Staff Availability Management</p>
         </div>
-        <div class="status-badge" id="liveStatus">● Live - Firebase</div>
+        <div class="status-badge" id="statusBadge">● Connecting to Firebase...</div>
     </div>
 
-    <!-- Tabs -->
     <div class="tabs">
         <button class="tab-btn active" data-tab="staff">👤 Staff Availability</button>
         <button class="tab-btn" data-tab="admin">⚙️ Admin Panel</button>
         <button class="tab-btn" data-tab="matrix">📊 Availability Matrix</button>
     </div>
 
-    <!-- ==================== STAFF PANEL ==================== -->
+    <!-- STAFF PANEL -->
     <div id="staff-pane" class="tab-pane active">
         <div class="card">
             <h2>Enter Your Employee Code</h2>
             <div id="staffMessage" class="message"></div>
-            <div class="staff-selector" id="staffSelector"></div>
+            <div id="staffSelector" class="staff-selector"></div>
             <div class="form-group">
-                <label>Or type your code manually:</label>
-                <input type="text" id="manualCode" placeholder="e.g., CARLO6" style="text-transform: uppercase; text-align: center; font-size: 18px; letter-spacing: 2px;">
+                <label>Or enter code manually:</label>
+                <input type="text" id="manualCode" placeholder="e.g., CARLO6" style="text-transform: uppercase; text-align: center; font-size: 18px;">
                 <button id="loadManualBtn" style="margin-top: 10px; width: 100%;">Load My Details</button>
             </div>
+            <div id="debugInfo" class="debug-info"></div>
         </div>
 
         <div id="staffDetails" class="hidden">
             <div class="card">
-                <h2>👋 Welcome, <span id="displayName"></span></h2>
-                <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px;">
-                    <div><strong>Section:</strong> <span id="displaySection"></span></div>
-                    <div><strong>Employee Code:</strong> <code id="displayCode"></code></div>
+                <h2>Welcome, <span id="displayName"></span></h2>
+                <div style="margin-bottom: 20px;">
+                    <strong>Section:</strong> <span id="displaySection"></span><br>
+                    <strong>Code:</strong> <code id="displayCode"></code>
                 </div>
-                <h3>📅 Select Your Available Dates</h3>
+                <h3>Select Dates You Can Work</h3>
                 <div id="datesList" class="date-list"></div>
-                <button id="saveAvailabilityBtn" style="margin-top: 20px; width: 100%;">💾 Save My Availability</button>
+                <button id="saveBtn" style="margin-top: 20px; width: 100%;">💾 Save My Availability</button>
             </div>
         </div>
     </div>
 
-    <!-- ==================== ADMIN PANEL ==================== -->
+    <!-- ADMIN PANEL -->
     <div id="admin-pane" class="tab-pane">
         <div class="card">
-            <h2>👥 Manage Employees</h2>
+            <h2>Manage Employees</h2>
             <div id="adminMessage" class="message"></div>
             <div id="employeeGrid" class="employee-grid"></div>
-            
-            <h3 style="margin-top: 20px;">➕ Add New Employee</h3>
+            <h3>Add New Employee</h3>
             <div class="form-row">
-                <input type="text" id="newEmpName" placeholder="Full Name">
-                <select id="newEmpSection">
+                <input type="text" id="newName" placeholder="Full Name">
+                <select id="newSection">
                     <option value="kitchen">Kitchen</option>
                     <option value="floor">Floor</option>
                     <option value="bar">Bar</option>
@@ -687,14 +489,14 @@
                 </select>
             </div>
             <div class="form-row">
-                <input type="text" id="newEmpCode" placeholder="Employee Code (leave blank for auto-generate)" style="text-transform: uppercase;">
-                <button id="generateCodeBtn" class="secondary">🎲 Generate Random Code</button>
+                <input type="text" id="newCode" placeholder="Code (auto-generated if blank)" style="text-transform: uppercase;">
+                <button id="genCodeBtn" style="background: #6c757d;">Generate Random Code</button>
             </div>
-            <button id="addEmployeeBtn" style="width: 100%; margin-top: 10px;">Add Employee</button>
+            <button id="addEmpBtn" style="width: 100%;">Add Employee</button>
         </div>
 
         <div class="card">
-            <h2>📅 Manage Events</h2>
+            <h2>Manage Events</h2>
             <div class="form-row">
                 <input type="date" id="newEventDate">
                 <input type="text" id="newEventVenue" placeholder="Venue Name">
@@ -704,58 +506,32 @@
         </div>
 
         <div class="card">
-            <h2>📊 Export Data</h2>
-            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                <button id="exportCSVBtn">📄 Export Availability to CSV</button>
-                <button id="exportCodesBtn">📋 Export Employee Codes</button>
-            </div>
+            <h2>Export Data</h2>
+            <button id="exportCSV">Export Availability to CSV</button>
+            <button id="exportCodes" style="margin-left: 10px;">Export Employee Codes</button>
         </div>
     </div>
 
-    <!-- ==================== MATRIX PANEL ==================== -->
+    <!-- MATRIX PANEL -->
     <div id="matrix-pane" class="tab-pane">
         <div class="card">
-            <h2>📊 Staff Availability Matrix</h2>
+            <h2>Team Availability Matrix</h2>
             <div class="section-filters" id="matrixFilters">
-                <button class="filter-chip active" data-section="all">All Sections</button>
-                <button class="filter-chip" data-section="kitchen">🍳 Kitchen</button>
-                <button class="filter-chip" data-section="floor">🪑 Floor</button>
-                <button class="filter-chip" data-section="bar">🍸 Bar</button>
-                <button class="filter-chip" data-section="cleaner">🧹 Cleaner</button>
-                <button class="filter-chip" data-section="setup">🔧 Setup</button>
-                <button class="filter-chip" data-section="manager">📋 Manager</button>
+                <button class="filter-chip active" data-section="all">All</button>
+                <button class="filter-chip" data-section="kitchen">Kitchen</button>
+                <button class="filter-chip" data-section="floor">Floor</button>
+                <button class="filter-chip" data-section="bar">Bar</button>
+                <button class="filter-chip" data-section="manager">Manager</button>
             </div>
-            <div class="matrix-wrapper" id="matrixContainer">
-                <div class="loading">Loading availability data...</div>
-            </div>
-            <div class="summary-stats" id="summaryStats"></div>
+            <div class="matrix-wrapper" id="matrixContainer">Loading...</div>
         </div>
     </div>
 </div>
 
-<div id="toast" class="toast">✓ Saved successfully!</div>
-<div id="editModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Edit Employee</h3>
-            <span class="close-modal">&times;</span>
-        </div>
-        <input type="text" id="editEmpName" placeholder="Name" style="margin-bottom: 15px;">
-        <select id="editEmpSection" style="margin-bottom: 15px;">
-            <option value="kitchen">Kitchen</option>
-            <option value="floor">Floor</option>
-            <option value="bar">Bar</option>
-            <option value="cleaner">Cleaner</option>
-            <option value="setup">Setup</option>
-            <option value="manager">Manager</option>
-        </select>
-        <input type="text" id="editEmpCode" placeholder="Code" style="margin-bottom: 15px; text-transform: uppercase;">
-        <button id="saveEditBtn" style="width: 100%;">Save Changes</button>
-    </div>
-</div>
+<div id="toast" class="toast">✓ Saved!</div>
 
 <script>
-    // ==================== FIREBASE CONFIGURATION ====================
+    // Firebase Configuration
     const firebaseConfig = {
         apiKey: "AIzaSyA0rDZ8NMo0cirWEPlIzt_Uq12qnOSBtPk",
         authDomain: "staff-roster-e0940.firebaseapp.com",
@@ -765,17 +541,18 @@
         appId: "1:176909786012:web:be5a85f39c943915a00659"
     };
 
+    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // ==================== GLOBAL VARIABLES ====================
+    // Global variables
     let employees = [];
     let events = [];
     let submissions = {};
     let currentEmployee = null;
     let currentFilter = "all";
 
-    // Default data for seeding
+    // Default data
     const DEFAULT_EMPLOYEES = [
         { name: "Carlo Pavia", section: "manager", code: "CARLO6" },
         { name: "Michelle Pavia", section: "manager", code: "MICHE0" },
@@ -792,29 +569,22 @@
         { date: "2026-05-09", venue: "Fior Events" },
         { date: "2026-05-17", venue: "Sala Reggio Ballroom" },
         { date: "2026-05-22", venue: "Sala Reggio Ballroom" },
-        { date: "2026-05-23", venue: "Sala Reggio Ballroom" },
-        { date: "2026-05-24", venue: "Sala Reggio Ballroom" },
-        { date: "2026-05-29", venue: "Sala Reggio Ballroom" },
-        { date: "2026-05-30", venue: "Sala Reggio Ballroom" },
-        { date: "2026-05-31", venue: "Sala Reggio Ballroom" },
-        { date: "2026-06-07", venue: "Sala Reggio Ballroom" },
-        { date: "2026-06-13", venue: "Sala Reggio Ballroom" },
-        { date: "2026-06-20", venue: "Sala Reggio Ballroom" },
-        { date: "2026-06-21", venue: "Sala Reggio Ballroom" },
-        { date: "2026-07-19", venue: "Sala Reggio Ballroom" },
-        { date: "2026-07-25", venue: "Sala Reggio Ballroom" }
+        { date: "2026-05-23", venue: "Sala Reggio Ballroom" }
     ];
 
-    // ==================== HELPER FUNCTIONS ====================
+    // Helper functions
     function formatDate(dateStr) {
-        const d = new Date(dateStr);
-        return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+        try {
+            return new Date(dateStr).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+        } catch(e) {
+            return dateStr;
+        }
     }
 
     function showToast() {
         const toast = document.getElementById("toast");
         toast.style.display = "block";
-        setTimeout(() => { toast.style.display = "none"; }, 2500);
+        setTimeout(() => toast.style.display = "none", 2000);
     }
 
     function showMessage(elementId, text, type) {
@@ -829,7 +599,7 @@
         }
     }
 
-    function generateRandomCode() {
+    function generateCode() {
         const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789";
         let result = "";
         for (let i = 0; i < 6; i++) {
@@ -838,54 +608,66 @@
         return result;
     }
 
-    // ==================== SEED DATABASE ====================
     async function seedDatabase() {
-        const employeesSnap = await db.collection("employees").get();
-        if (employeesSnap.empty) {
-            for (const emp of DEFAULT_EMPLOYEES) {
-                await db.collection("employees").add(emp);
+        try {
+            const employeesSnap = await db.collection("employees").get();
+            if (employeesSnap.empty) {
+                for (const emp of DEFAULT_EMPLOYEES) {
+                    await db.collection("employees").add(emp);
+                }
+                console.log("Employees seeded");
             }
-            console.log("Employees seeded");
-        }
 
-        const eventsSnap = await db.collection("events").get();
-        if (eventsSnap.empty) {
-            for (const ev of DEFAULT_EVENTS) {
-                await db.collection("events").add(ev);
+            const eventsSnap = await db.collection("events").get();
+            if (eventsSnap.empty) {
+                for (const ev of DEFAULT_EVENTS) {
+                    await db.collection("events").add(ev);
+                }
+                console.log("Events seeded");
             }
-            console.log("Events seeded");
+        } catch (err) {
+            console.error("Seed error:", err);
         }
     }
 
-    // ==================== LOAD DATA ====================
     async function loadData() {
-        const employeesSnap = await db.collection("employees").get();
-        employees = [];
-        employeesSnap.forEach(doc => employees.push({ id: doc.id, ...doc.data() }));
-
-        const eventsSnap = await db.collection("events").get();
-        events = [];
-        eventsSnap.forEach(doc => events.push({ id: doc.id, ...doc.data() }));
-        events.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-        const submissionsSnap = await db.collection("submissions").get();
-        submissions = {};
-        submissionsSnap.forEach(doc => {
-            submissions[doc.id] = doc.data().eventIds || [];
-        });
+        try {
+            const employeesSnap = await db.collection("employees").get();
+            employees = [];
+            employeesSnap.forEach(doc => employees.push({ id: doc.id, ...doc.data() }));
+            
+            const eventsSnap = await db.collection("events").get();
+            events = [];
+            eventsSnap.forEach(doc => events.push({ id: doc.id, ...doc.data() }));
+            events.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            const subsSnap = await db.collection("submissions").get();
+            submissions = {};
+            subsSnap.forEach(doc => {
+                submissions[doc.id] = doc.data().eventIds || [];
+            });
+            
+            document.getElementById("statusBadge").innerHTML = "● Connected to Firebase";
+            document.getElementById("statusBadge").style.background = "rgba(40, 167, 69, 0.2)";
+            
+            // Debug info
+            document.getElementById("debugInfo").innerHTML = `
+                ✅ Firebase connected!<br>
+                📋 Employees loaded: ${employees.length}<br>
+                📅 Events loaded: ${events.length}<br>
+                💾 Submissions loaded: ${Object.keys(submissions).length}
+            `;
+            
+            return true;
+        } catch (err) {
+            console.error("Load error:", err);
+            document.getElementById("statusBadge").innerHTML = "● Firebase connection error";
+            document.getElementById("debugInfo").innerHTML = `❌ Error: ${err.message}<br>Check Firebase console for security rules.`;
+            return false;
+        }
     }
 
-    // ==================== REAL-TIME LISTENER ====================
-    function setupRealtimeListener() {
-        db.collection("submissions").onSnapshot(async () => {
-            await loadData();
-            if (currentEmployee) {
-                renderDatesList();
-            }
-            renderMatrix();
-            renderEmployeeGrid();
-        });
-        
+    function setupListeners() {
         db.collection("employees").onSnapshot(async () => {
             await loadData();
             renderStaffSelector();
@@ -896,24 +678,30 @@
         db.collection("events").onSnapshot(async () => {
             await loadData();
             renderEventList();
-            if (currentEmployee) {
-                renderDatesList();
-            }
+            if (currentEmployee) renderDatesList();
+            renderMatrix();
+        });
+        
+        db.collection("submissions").onSnapshot(async () => {
+            await loadData();
+            if (currentEmployee) renderDatesList();
             renderMatrix();
         });
     }
 
-    // ==================== RENDER STAFF SELECTOR ====================
     function renderStaffSelector() {
         const container = document.getElementById("staffSelector");
         if (!container) return;
         container.innerHTML = "";
         for (const emp of employees) {
             const btn = document.createElement("button");
-            btn.className = "staff-code-btn";
+            btn.className = "staff-btn";
             btn.textContent = `${emp.name} (${emp.code})`;
             btn.onclick = () => selectEmployee(emp);
             container.appendChild(btn);
+        }
+        if (employees.length === 0) {
+            container.innerHTML = '<p style="color: #999;">Loading employees...</p>';
         }
     }
 
@@ -927,7 +715,7 @@
         renderDatesList();
     }
 
-    function loadManualEmployee() {
+    function manualLoad() {
         const code = document.getElementById("manualCode").value.trim().toUpperCase();
         const emp = employees.find(e => e.code === code);
         if (!emp) {
@@ -937,16 +725,14 @@
         selectEmployee(emp);
     }
 
-    // ==================== RENDER DATES FOR STAFF ====================
     async function renderDatesList() {
         const container = document.getElementById("datesList");
         if (!container || !currentEmployee) return;
         container.innerHTML = "";
-        
-        const mySubmissions = submissions[currentEmployee.id] || [];
+        const mySubs = submissions[currentEmployee.id] || [];
         
         for (const ev of events) {
-            const isChecked = mySubmissions.includes(ev.id);
+            const isChecked = mySubs.includes(ev.id);
             const div = document.createElement("div");
             div.className = "date-item";
             div.innerHTML = `
@@ -956,65 +742,50 @@
                 </div>
                 <label class="checkbox-label">
                     <input type="checkbox" data-id="${ev.id}" ${isChecked ? "checked" : ""}>
-                    <span>✓ Available to work</span>
+                    <span>Available to work</span>
                 </label>
             `;
             container.appendChild(div);
         }
+        
+        if (events.length === 0) {
+            container.innerHTML = '<div style="padding: 20px; text-align: center;">No events scheduled yet. Admin can add events.</div>';
+        }
     }
 
     async function saveAvailability() {
-        if (!currentEmployee) {
-            showMessage("staffMessage", "Please select an employee first", "error");
-            return;
-        }
-        
+        if (!currentEmployee) return;
         const checkboxes = document.querySelectorAll("#datesList input[type='checkbox']");
         const selected = [];
         checkboxes.forEach(cb => {
             if (cb.checked) selected.push(cb.getAttribute("data-id"));
         });
-        
         await db.collection("submissions").doc(currentEmployee.id).set({ eventIds: selected });
         showToast();
-        showMessage("staffMessage", `✓ Availability saved for ${currentEmployee.name}!`, "success");
-        renderMatrix();
+        showMessage("staffMessage", `Saved! ${currentEmployee.name} availability updated.`, "success");
     }
 
-    // ==================== ADMIN: EMPLOYEE GRID ====================
     async function renderEmployeeGrid() {
         const container = document.getElementById("employeeGrid");
         if (!container) return;
         container.innerHTML = "";
-        
         for (const emp of employees) {
             const card = document.createElement("div");
             card.className = "employee-card";
             card.innerHTML = `
                 <div class="employee-name">
-                    ${escapeHtml(emp.name)}
+                    ${emp.name}
                     <span class="employee-code">${emp.code}</span>
                 </div>
                 <div class="employee-section">${emp.section}</div>
                 <div class="employee-actions">
-                    <button class="edit-employee" data-id="${emp.id}" data-name="${emp.name}" data-section="${emp.section}" data-code="${emp.code}">✏️ Edit</button>
-                    <button class="delete-employee" data-id="${emp.id}" class="danger">🗑️ Delete</button>
+                    <button class="deleteEmp" data-id="${emp.id}" style="background:#dc3545;">Delete</button>
                 </div>
             `;
             container.appendChild(card);
         }
         
-        document.querySelectorAll(".edit-employee").forEach(btn => {
-            btn.addEventListener("click", () => {
-                document.getElementById("editEmpName").value = btn.dataset.name;
-                document.getElementById("editEmpSection").value = btn.dataset.section;
-                document.getElementById("editEmpCode").value = btn.dataset.code;
-                document.getElementById("editModal").style.display = "flex";
-                document.getElementById("saveEditBtn").onclick = () => saveEditEmployee(btn.dataset.id);
-            });
-        });
-        
-        document.querySelectorAll(".delete-employee").forEach(btn => {
+        document.querySelectorAll(".deleteEmp").forEach(btn => {
             btn.addEventListener("click", async () => {
                 if (confirm("Delete this employee?")) {
                     await db.collection("employees").doc(btn.dataset.id).delete();
@@ -1025,75 +796,37 @@
         });
     }
 
-    async function saveEditEmployee(empId) {
-        const name = document.getElementById("editEmpName").value.trim();
-        const section = document.getElementById("editEmpSection").value;
-        const code = document.getElementById("editEmpCode").value.trim().toUpperCase();
-        
-        if (!name || !code) {
-            alert("Name and code are required");
-            return;
-        }
-        
-        await db.collection("employees").doc(empId).update({ name, section, code });
-        document.getElementById("editModal").style.display = "none";
-        showToast();
-        await loadData();
-        renderEmployeeGrid();
-        renderStaffSelector();
-        renderMatrix();
-        if (currentEmployee && currentEmployee.id === empId) {
-            currentEmployee = { id: empId, name, section, code };
-            document.getElementById("displayName").innerText = name;
-            document.getElementById("displaySection").innerText = section;
-            document.getElementById("displayCode").innerText = code;
-        }
-    }
-
     async function addEmployee() {
-        const name = document.getElementById("newEmpName").value.trim();
-        const section = document.getElementById("newEmpSection").value;
-        let code = document.getElementById("newEmpCode").value.trim().toUpperCase();
-        
+        const name = document.getElementById("newName").value.trim();
+        const section = document.getElementById("newSection").value;
+        let code = document.getElementById("newCode").value.trim().toUpperCase();
         if (!name) {
-            showMessage("adminMessage", "Please enter employee name", "error");
+            showMessage("adminMessage", "Enter name", "error");
             return;
         }
-        if (!code) code = generateRandomCode();
-        
-        const existing = employees.find(e => e.code === code);
-        if (existing) {
-            showMessage("adminMessage", `Code ${code} already exists`, "error");
-            return;
-        }
-        
+        if (!code) code = generateCode();
         await db.collection("employees").add({ name, section, code });
-        document.getElementById("newEmpName").value = "";
-        document.getElementById("newEmpCode").value = "";
+        document.getElementById("newName").value = "";
+        document.getElementById("newCode").value = "";
         showToast();
         showMessage("adminMessage", `Added ${name} with code ${code}`, "success");
     }
 
-    // ==================== ADMIN: EVENT LIST ====================
     async function renderEventList() {
         const container = document.getElementById("eventList");
         if (!container) return;
         container.innerHTML = "";
-        
         for (const ev of events) {
             const div = document.createElement("div");
             div.className = "event-item";
             div.innerHTML = `
-                <div>
-                    <span class="event-date-small">${formatDate(ev.date)}</span>
-                    <span style="margin-left: 15px;">${ev.venue}</span>
-                </div>
-                <button class="delete-event" data-id="${ev.id}" style="background: #dc3545; color: white; padding: 5px 12px;">Delete</button>
+                <div><strong>${formatDate(ev.date)}</strong> – ${ev.venue}</div>
+                <button class="deleteEvent" data-id="${ev.id}" style="background:#dc3545; padding: 5px 12px;">Delete</button>
             `;
             container.appendChild(div);
         }
         
-        document.querySelectorAll(".delete-event").forEach(btn => {
+        document.querySelectorAll(".deleteEvent").forEach(btn => {
             btn.addEventListener("click", async () => {
                 if (confirm("Delete this event?")) {
                     await db.collection("events").doc(btn.dataset.id).delete();
@@ -1106,12 +839,10 @@
     async function addEvent() {
         const date = document.getElementById("newEventDate").value;
         const venue = document.getElementById("newEventVenue").value.trim();
-        
         if (!date || !venue) {
-            showMessage("adminMessage", "Please enter both date and venue", "error");
+            showMessage("adminMessage", "Enter date and venue", "error");
             return;
         }
-        
         await db.collection("events").add({ date, venue });
         document.getElementById("newEventDate").value = "";
         document.getElementById("newEventVenue").value = "";
@@ -1119,96 +850,76 @@
         showMessage("adminMessage", `Added event: ${formatDate(date)} - ${venue}`, "success");
     }
 
-    // ==================== MATRIX RENDER ====================
     async function renderMatrix() {
         const container = document.getElementById("matrixContainer");
         if (!container) return;
         
-        let filteredEmployees = currentFilter === "all" ? employees : employees.filter(e => e.section === currentFilter);
-        
-        if (filteredEmployees.length === 0) {
+        let filtered = currentFilter === "all" ? employees : employees.filter(e => e.section === currentFilter);
+        if (filtered.length === 0) {
             container.innerHTML = '<div class="loading">No employees in this section</div>';
             return;
         }
         
         if (events.length === 0) {
-            container.innerHTML = '<div class="loading">No events scheduled yet</div>';
+            container.innerHTML = '<div class="loading">No events scheduled. Add events in Admin Panel.</div>';
             return;
         }
         
         let html = `<table class="availability-table">
-            <thead>
-                <tr>
-                    <th>Event Date / Venue</th>`;
-        for (const emp of filteredEmployees) {
-            html += `<th>${escapeHtml(emp.name)}<br><small>${emp.code}</small></th>`;
+            <thead><tr><th>Event</th>`;
+        for (const emp of filtered) {
+            html += `<th>${emp.name}<br><small>${emp.code}</small></th>`;
         }
-        html += `</tr>
-            </thead>
-            <tbody>`;
+        html += `</tr></thead><tbody>`;
         
         for (const ev of events) {
-            html += `<tr>
-                <td><strong>${formatDate(ev.date)}</strong><br>${ev.venue}</td>`;
-            for (const emp of filteredEmployees) {
+            html += `<tr><td><strong>${formatDate(ev.date)}</strong><br>${ev.venue}</td>`;
+            for (const emp of filtered) {
                 const isAvail = (submissions[emp.id] || []).includes(ev.id);
-                html += `<td>${isAvail ? '<span class="available-yes">✓ Available</span>' : '<span class="available-no">✗</span>'}</td>`;
+                html += `<td style="text-align:center;">${isAvail ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}</td>`;
             }
             html += `</tr>`;
         }
-        
-        html += `</tbody>
-        </table>`;
+        html += `</tbody></table>`;
         container.innerHTML = html;
-        
-        // Render summary stats
-        const statsContainer = document.getElementById("summaryStats");
-        if (statsContainer) {
-            const totalEmployees = filteredEmployees.length;
-            let totalAssignments = 0;
-            for (const emp of filteredEmployees) {
-                totalAssignments += (submissions[emp.id] || []).length;
-            }
-            statsContainer.innerHTML = `
-                <div class="stat-card">
-                    <div class="stat-number">${totalEmployees}</div>
-                    <div class="stat-label">Staff in this section</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">${Object.keys(events).length}</div>
-                    <div class="stat-label">Upcoming Events</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">${totalAssignments}</div>
-                    <div class="stat-label">Total Availability Submissions</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">${employees.length}</div>
-                    <div class="stat-label">Total Staff</div>
-                </div>
-            `;
+    }
+
+    function initFilters() {
+        document.querySelectorAll(".filter-chip").forEach(chip => {
+            chip.addEventListener("click", () => {
+                document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+                chip.classList.add("active");
+                currentFilter = chip.dataset.section;
+                renderMatrix();
+            });
+        });
+    }
+
+    function switchTab(tabId) {
+        document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        document.getElementById(`${tabId}-pane`).classList.add("active");
+        document.querySelector(`[data-tab="${tabId}"]`).classList.add("active");
+        if (tabId === "admin") {
+            renderEmployeeGrid();
+            renderEventList();
+        } else if (tabId === "matrix") {
+            renderMatrix();
         }
     }
 
-    // ==================== EXPORT FUNCTIONS ====================
-    function exportToCSV() {
+    function exportCSV() {
         let csv = "Event Date,Event Venue,";
-        for (const emp of employees) {
-            csv += `"${emp.name} (${emp.code})",`;
-        }
-        csv = csv.slice(0, -1);
-        csv += "\n";
-        
+        for (const emp of employees) csv += `"${emp.name} (${emp.code})",`;
+        csv = csv.slice(0, -1) + "\n";
         for (const ev of events) {
             csv += `"${formatDate(ev.date)}","${ev.venue}",`;
             for (const emp of employees) {
                 const isAvail = (submissions[emp.id] || []).includes(ev.id);
                 csv += isAvail ? "Yes," : "No,";
             }
-            csv = csv.slice(0, -1);
-            csv += "\n";
+            csv = csv.slice(0, -1) + "\n";
         }
-        
         const blob = new Blob([csv], { type: "text/csv" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -1218,8 +929,8 @@
         URL.revokeObjectURL(url);
         showToast();
     }
-    
-    function exportCodesToCSV() {
+
+    function exportCodes() {
         let csv = "Name,Code,Section\n";
         for (const emp of employees) {
             csv += `"${emp.name}","${emp.code}","${emp.section}"\n`;
@@ -1234,86 +945,32 @@
         showToast();
     }
 
-    function escapeHtml(str) {
-        if (!str) return "";
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === "&") return "&amp;";
-            if (m === "<") return "&lt;";
-            if (m === ">") return "&gt;";
-            return m;
-        });
-    }
-
-    // ==================== TAB SWITCHING ====================
-    function switchTab(tabId) {
-        document.querySelectorAll(".tab-pane").forEach(pane => {
-            pane.classList.remove("active");
-        });
-        document.querySelectorAll(".tab-btn").forEach(btn => {
-            btn.classList.remove("active");
-        });
-        document.getElementById(`${tabId}-pane`).classList.add("active");
-        document.querySelector(`[data-tab="${tabId}"]`).classList.add("active");
-        
-        if (tabId === "admin") {
-            renderEmployeeGrid();
-            renderEventList();
-        } else if (tabId === "matrix") {
-            renderMatrix();
-        }
-    }
-
-    function initFilters() {
-        document.querySelectorAll(".filter-chip").forEach(chip => {
-            chip.addEventListener("click", () => {
-                document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
-                chip.classList.add("active");
-                currentFilter = chip.dataset.section;
-                renderMatrix();
-            });
-        });
-    }
-
-    // ==================== INITIALIZATION ====================
     async function init() {
         await seedDatabase();
         await loadData();
-        setupRealtimeListener();
+        setupListeners();
         renderStaffSelector();
         renderEmployeeGrid();
         renderEventList();
         renderMatrix();
         initFilters();
         
-        // Event listeners
-        document.getElementById("loadManualBtn").addEventListener("click", loadManualEmployee);
-        document.getElementById("saveAvailabilityBtn").addEventListener("click", saveAvailability);
-        document.getElementById("addEmployeeBtn").addEventListener("click", addEmployee);
-        document.getElementById("addEventBtn").addEventListener("click", addEvent);
-        document.getElementById("exportCSVBtn").addEventListener("click", exportToCSV);
-        document.getElementById("exportCodesBtn").addEventListener("click", exportCodesToCSV);
-        document.getElementById("generateCodeBtn").addEventListener("click", () => {
-            document.getElementById("newEmpCode").value = generateRandomCode();
-        });
-        
-        document.querySelectorAll(".tab-btn").forEach(btn => {
-            btn.addEventListener("click", () => switchTab(btn.dataset.tab));
-        });
-        
-        document.querySelectorAll(".close-modal").forEach(el => {
-            el.addEventListener("click", () => {
-                document.getElementById("editModal").style.display = "none";
-            });
-        });
-        
-        window.onclick = (e) => {
-            if (e.target === document.getElementById("editModal")) {
-                document.getElementById("editModal").style.display = "none";
-            }
+        document.getElementById("loadManualBtn").onclick = manualLoad;
+        document.getElementById("saveBtn").onclick = saveAvailability;
+        document.getElementById("addEmpBtn").onclick = addEmployee;
+        document.getElementById("addEventBtn").onclick = addEvent;
+        document.getElementById("exportCSV").onclick = exportCSV;
+        document.getElementById("exportCodes").onclick = exportCodes;
+        document.getElementById("genCodeBtn").onclick = () => {
+            document.getElementById("newCode").value = generateCode();
         };
         
+        document.querySelectorAll(".tab-btn").forEach(btn => {
+            btn.onclick = () => switchTab(btn.dataset.tab);
+        });
+        
         document.getElementById("manualCode").addEventListener("keypress", (e) => {
-            if (e.key === "Enter") loadManualEmployee();
+            if (e.key === "Enter") manualLoad();
         });
     }
     
