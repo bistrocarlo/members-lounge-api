@@ -3,36 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Member's Lounge – Staff Portal</title>
+    <title>Member's Lounge - Staff Availability</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .header { background: #D4AF37; padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center; }
-        .card { background: white; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .login-box { max-width: 400px; margin: 50px auto; text-align: center; }
-        input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; text-align: center; }
-        button { background: #D4AF37; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 10px; }
-        button:hover { background: #b58f2a; color: white; }
-        .error { color: #c62828; background: #ffebee; padding: 12px; border-radius: 8px; margin: 10px 0; }
-        .success { color: #2e7d32; background: #e8f5e9; padding: 12px; border-radius: 8px; margin: 10px 0; }
-        .hidden { display: none; }
-        .logout-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: white; border-radius: 12px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-        .date-item { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        .staff-info { background: #fafafa; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background: #f5f5f5; }
-        .available-yes { background: #D4AF37; padding: 4px 12px; border-radius: 20px; font-size: 12px; display: inline-block; }
-        .available-no { background: #e0e0e0; color: #999; padding: 4px 12px; border-radius: 20px; font-size: 12px; display: inline-block; }
-        .filter-btn { background: #e0e0e0; padding: 8px 20px; border-radius: 30px; cursor: pointer; border: none; margin: 5px; }
-        .filter-btn.active { background: #D4AF37; color: white; }
-        .code-badge { font-family: monospace; background: #D4AF37; padding: 8px 16px; border-radius: 8px; font-weight: bold; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 1300px; margin: 0 auto; }
+        .header { background: #D4AF37; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: center; }
+        .header h1 { color: #1a1a1a; }
+        .card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .staff-selector { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+        .staff-btn { background: #e0e0e0; border: none; padding: 12px 20px; border-radius: 30px; cursor: pointer; font-size: 14px; font-weight: bold; }
+        .staff-btn.active { background: #D4AF37; color: white; }
+        .dates-grid { display: grid; gap: 10px; margin-top: 20px; }
+        .date-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #fafafa; border-radius: 8px; flex-wrap: wrap; gap: 10px; }
+        .date-info { flex: 2; }
+        .date-info strong { font-size: 16px; }
+        .date-info small { color: #666; }
+        .checkbox-label { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .checkbox-label input { width: 20px; height: 20px; cursor: pointer; }
+        .save-btn { background: #D4AF37; border: none; padding: 14px 30px; border-radius: 30px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 20px; width: 100%; }
+        .save-btn:hover { background: #b58f2a; color: white; }
+        .team-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .team-table th, .team-table td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        .team-table th { background: #f5f5f5; position: sticky; top: 0; }
+        .available { background: #D4AF37; color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; display: inline-block; }
+        .not-available { background: #e0e0e0; color: #999; padding: 4px 10px; border-radius: 20px; font-size: 12px; display: inline-block; }
+        .loading { text-align: center; padding: 40px; color: #666; }
+        .message { padding: 15px; border-radius: 8px; margin: 10px 0; display: none; }
+        .message.success { background: #e8f5e9; color: #2e7d32; display: block; }
+        .table-wrapper { overflow-x: auto; max-height: 500px; overflow-y: auto; }
         @media (max-width: 768px) {
-            .date-item { flex-direction: column; align-items: flex-start; }
-            .logout-bar { flex-direction: column; }
+            .date-row { flex-direction: column; align-items: flex-start; }
+            .staff-btn { padding: 8px 15px; font-size: 12px; }
         }
     </style>
 </head>
@@ -40,59 +44,37 @@
 <div class="container">
     <div class="header">
         <h1>🏢 Member's Lounge</h1>
-        <p>Staff Availability Portal</p>
+        <p>Staff Availability Sheet - Live Updates</p>
     </div>
 
-    <!-- LOGIN SECTION -->
-    <div id="loginSection" class="card login-box">
-        <h2>🔐 Staff Login</h2>
-        <p>Enter your employee code</p>
-        <input type="text" id="codeInput" placeholder="Enter code (e.g., CARLO6)" style="text-transform: uppercase;">
-        <button onclick="loginWithCode()">Login</button>
-        <div id="loginError" class="error hidden"></div>
-        <div style="margin-top: 20px; font-size: 12px; color: #666;">
-            <p>Codes: CARLO6, MICHE0, ROHIT9, NAMLA7, FRANC3, PETER8, CLAUDI, REMZIA</p>
+    <!-- Staff Selection -->
+    <div class="card">
+        <h3>1. Select Your Name</h3>
+        <div id="staffButtons" class="staff-selector"></div>
+        <div id="loginError" style="color: red; margin-top: 10px;"></div>
+    </div>
+
+    <!-- Availability Selection (shown after staff selected) -->
+    <div id="availabilitySection" style="display: none;">
+        <div class="card">
+            <h3>2. Mark Your Available Dates</h3>
+            <div id="datesList" class="dates-grid"></div>
+            <button id="saveBtn" class="save-btn">💾 Save My Availability</button>
+            <div id="saveMessage" class="message"></div>
         </div>
     </div>
 
-    <!-- MAIN APP -->
-    <div id="mainApp" style="display: none;">
-        <div class="logout-bar">
-            <span>✅ Logged in as: <strong id="userName"></strong> (<span id="userSection"></span>)</span>
-            <span class="code-badge" id="userCode"></span>
-            <button onclick="logout()">Logout</button>
-        </div>
-
-        <div class="card">
-            <h2>📅 My Availability</h2>
-            <div class="staff-info">
-                <p><strong>Name:</strong> <span id="displayName"></span></p>
-                <p><strong>Section:</strong> <span id="displaySection"></span></p>
-                <p><strong>Code:</strong> <span id="displayCode"></span></p>
-            </div>
-            <div id="messageArea"></div>
-            <div id="datesList"></div>
-            <button onclick="saveAvailability()" style="margin-top: 20px;">💾 Save My Availability</button>
-        </div>
-
-        <div class="card">
-            <h2>👥 Team Availability</h2>
-            <div id="filterButtons">
-                <button class="filter-btn active" onclick="filterSection('all')">All</button>
-                <button class="filter-btn" onclick="filterSection('kitchen')">Kitchen</button>
-                <button class="filter-btn" onclick="filterSection('floor')">Floor</button>
-                <button class="filter-btn" onclick="filterSection('bar')">Bar</button>
-                <button class="filter-btn" onclick="filterSection('cleaner')">Cleaner</button>
-                <button class="filter-btn" onclick="filterSection('setup')">Setup</button>
-                <button class="filter-btn" onclick="filterSection('manager')">Manager</button>
-            </div>
-            <div id="teamTable">Loading...</div>
+    <!-- Team View - Live Updates -->
+    <div class="card">
+        <h3>3. Team Availability (Live View)</h3>
+        <div class="table-wrapper" id="teamView">
+            <div class="loading">Loading team data...</div>
         </div>
     </div>
 </div>
 
 <script>
-    // Firebase Configuration
+    // FIREBASE CONFIGURATION - Your provided config
     const firebaseConfig = {
         apiKey: "AIzaSyA0rDZ8NMo0cirWEPlIzt_Uq12qnOSBtPk",
         authDomain: "staff-roster-e0940.firebaseapp.com",
@@ -102,31 +84,23 @@
         appId: "1:176909786012:web:be5a85f39c943915a00659"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // Global variables
-    let currentEmployee = null;
-    let employeesList = [];
-    let eventsList = [];
-    let submissionsData = {};
-    let currentFilter = 'all';
-
-    // Employee data
-    const EMPLOYEES = [
-        { id: "emp1", name: "Carlo Pavia", section: "manager", code: "CARLO6" },
-        { id: "emp2", name: "Michelle Pavia", section: "manager", code: "MICHE0" },
-        { id: "emp3", name: "Rohitha Rawan", section: "kitchen", code: "ROHIT9" },
-        { id: "emp4", name: "Nam Lai", section: "kitchen", code: "NAMLA7" },
-        { id: "emp5", name: "Franco Schiavo", section: "kitchen", code: "FRANC3" },
-        { id: "emp6", name: "Peter Tricarico", section: "floor", code: "PETER8" },
-        { id: "emp7", name: "Claudio Bottigliero", section: "bar", code: "CLAUDI" },
-        { id: "emp8", name: "Remzi Asllanaj", section: "bar", code: "REMZIA" }
+    // Staff list - Add all your staff here
+    const STAFF_LIST = [
+        { id: "staff1", name: "Carlo Pavia", code: "CARLO6", section: "Manager" },
+        { id: "staff2", name: "Michelle Pavia", code: "MICHE0", section: "Manager" },
+        { id: "staff3", name: "Rohitha Rawan", code: "ROHIT9", section: "Kitchen" },
+        { id: "staff4", name: "Nam Lai", code: "NAMLA7", section: "Kitchen" },
+        { id: "staff5", name: "Franco Schiavo", code: "FRANC3", section: "Kitchen" },
+        { id: "staff6", name: "Peter Tricarico", code: "PETER8", section: "Floor" },
+        { id: "staff7", name: "Claudio Bottigliero", code: "CLAUDI", section: "Bar" },
+        { id: "staff8", name: "Remzi Asllanaj", code: "REMZIA", section: "Bar" }
     ];
 
-    // Event data
-    const EVENTS = [
+    // Upcoming events
+    const EVENTS_LIST = [
         { id: "ev1", date: "2026-04-18", venue: "Fior Events" },
         { id: "ev2", date: "2026-05-09", venue: "Fior Events" },
         { id: "ev3", date: "2026-05-17", venue: "Sala Reggio Ballroom" },
@@ -135,23 +109,29 @@
         { id: "ev6", date: "2026-05-24", venue: "Sala Reggio Ballroom" },
         { id: "ev7", date: "2026-05-29", venue: "Sala Reggio Ballroom" },
         { id: "ev8", date: "2026-05-30", venue: "Sala Reggio Ballroom" },
-        { id: "ev9", date: "2026-05-31", venue: "Sala Reggio Ballroom" }
+        { id: "ev9", date: "2026-05-31", venue: "Sala Reggio Ballroom" },
+        { id: "ev10", date: "2026-06-07", venue: "Sala Reggio Ballroom" },
+        { id: "ev11", date: "2026-06-13", venue: "Sala Reggio Ballroom" },
+        { id: "ev12", date: "2026-06-20", venue: "Sala Reggio Ballroom" }
     ];
+
+    let currentStaff = null;
+    let allSubmissions = {};
 
     // Initialize database with default data
     async function initDatabase() {
         try {
-            // Add employees if not exist
-            for (const emp of EMPLOYEES) {
-                const docRef = db.collection('employees').doc(emp.id);
+            // Add staff to Firestore if not exists
+            for (const staff of STAFF_LIST) {
+                const docRef = db.collection('staff').doc(staff.id);
                 const doc = await docRef.get();
                 if (!doc.exists) {
-                    await docRef.set(emp);
+                    await docRef.set(staff);
                 }
             }
             
-            // Add events if not exist
-            for (const ev of EVENTS) {
+            // Add events to Firestore if not exists
+            for (const ev of EVENTS_LIST) {
                 const docRef = db.collection('events').doc(ev.id);
                 const doc = await docRef.get();
                 if (!doc.exists) {
@@ -161,35 +141,69 @@
             
             // Load all data
             await loadData();
+            await renderStaffButtons();
+            await renderTeamView();
         } catch (err) {
             console.error("Init error:", err);
-            showMessage('loginError', 'Database error: ' + err.message, 'error');
         }
     }
 
-    // Load all data from Firestore
+    // Load all submissions from Firestore
     async function loadData() {
         try {
-            // Load employees
-            const empSnap = await db.collection('employees').get();
-            employeesList = [];
-            empSnap.forEach(doc => employeesList.push({ id: doc.id, ...doc.data() }));
-            
-            // Load events
-            const evSnap = await db.collection('events').get();
-            eventsList = [];
-            evSnap.forEach(doc => eventsList.push({ id: doc.id, ...doc.data() }));
-            eventsList.sort((a, b) => new Date(a.date) - new Date(b.date));
-            
-            // Load submissions
-            const subSnap = await db.collection('submissions').get();
-            submissionsData = {};
-            subSnap.forEach(doc => {
-                submissionsData[doc.id] = doc.data().eventIds || [];
+            const submissionsSnap = await db.collection('submissions').get();
+            allSubmissions = {};
+            submissionsSnap.forEach(doc => {
+                allSubmissions[doc.id] = doc.data().eventIds || [];
             });
         } catch (err) {
             console.error("Load error:", err);
         }
+    }
+
+    // Listen for real-time updates from Firestore
+    function listenForUpdates() {
+        db.collection('submissions').onSnapshot(async (snapshot) => {
+            allSubmissions = {};
+            snapshot.forEach(doc => {
+                allSubmissions[doc.id] = doc.data().eventIds || [];
+            });
+            await renderTeamView();
+            if (currentStaff) {
+                await renderDates();
+            }
+        });
+    }
+
+    // Render staff selection buttons
+    async function renderStaffButtons() {
+        const container = document.getElementById('staffButtons');
+        container.innerHTML = '';
+        
+        for (const staff of STAFF_LIST) {
+            const btn = document.createElement('button');
+            btn.textContent = `${staff.name} (${staff.code})`;
+            btn.className = 'staff-btn';
+            btn.onclick = () => selectStaff(staff);
+            container.appendChild(btn);
+        }
+    }
+
+    // Select a staff member
+    async function selectStaff(staff) {
+        currentStaff = staff;
+        
+        // Update button styles
+        document.querySelectorAll('.staff-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        
+        // Show availability section
+        document.getElementById('availabilitySection').style.display = 'block';
+        document.getElementById('loginError').innerHTML = '';
+        
+        await renderDates();
     }
 
     // Format date for display
@@ -198,100 +212,38 @@
         return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     }
 
-    // Show message to user
-    function showMessage(elementId, text, type) {
-        const el = document.getElementById(elementId);
-        if (el) {
-            el.textContent = text;
-            el.className = type === 'success' ? 'success' : 'error';
-            el.classList.remove('hidden');
-            setTimeout(() => el.classList.add('hidden'), 3000);
-        }
-    }
-
-    // Show success message
-    function showSuccess(message) {
-        const msgDiv = document.getElementById('messageArea');
-        if (msgDiv) {
-            msgDiv.innerHTML = `<div class="success">${message}</div>`;
-            setTimeout(() => msgDiv.innerHTML = '', 3000);
-        }
-    }
-
-    // Login with employee code
-    async function loginWithCode() {
-        const code = document.getElementById('codeInput').value.trim().toUpperCase();
-        const errorDiv = document.getElementById('loginError');
-        
-        if (!code) {
-            errorDiv.textContent = 'Please enter your employee code';
-            errorDiv.classList.remove('hidden');
-            return;
-        }
-        
-        await loadData();
-        
-        const employee = employeesList.find(e => e.code === code);
-        
-        if (!employee) {
-            errorDiv.textContent = `Code "${code}" not found. Valid codes: CARLO6, MICHE0, ROHIT9, NAMLA7, FRANC3, PETER8, CLAUDI, REMZIA`;
-            errorDiv.classList.remove('hidden');
-            return;
-        }
-        
-        currentEmployee = employee;
-        
-        // Update UI
-        document.getElementById('loginSection').style.display = 'none';
-        document.getElementById('mainApp').style.display = 'block';
-        document.getElementById('userName').innerText = employee.name;
-        document.getElementById('userSection').innerText = employee.section;
-        document.getElementById('userCode').innerText = employee.code;
-        document.getElementById('displayName').innerText = employee.name;
-        document.getElementById('displaySection').innerText = employee.section;
-        document.getElementById('displayCode').innerText = employee.code;
-        
-        await renderDates();
-        await renderTeamTable();
-    }
-
-    // Logout
-    function logout() {
-        currentEmployee = null;
-        document.getElementById('loginSection').style.display = 'block';
-        document.getElementById('mainApp').style.display = 'none';
-        document.getElementById('codeInput').value = '';
-    }
-
-    // Render date checkboxes for staff
+    // Render date checkboxes for current staff
     async function renderDates() {
         const container = document.getElementById('datesList');
-        if (!container || !currentEmployee) return;
+        if (!container || !currentStaff) return;
         
         container.innerHTML = '';
-        const mySubmissions = submissionsData[currentEmployee.id] || [];
+        const mySubmissions = allSubmissions[currentStaff.id] || [];
         
-        for (const ev of eventsList) {
+        for (const ev of EVENTS_LIST) {
             const isChecked = mySubmissions.includes(ev.id);
             const div = document.createElement('div');
-            div.className = 'date-item';
+            div.className = 'date-row';
             div.innerHTML = `
-                <div>
+                <div class="date-info">
                     <strong>${formatDate(ev.date)}</strong><br>
-                    <span style="font-size: 14px; color: #666;">${ev.venue}</span>
+                    <small>${ev.venue}</small>
                 </div>
-                <label style="display: flex; align-items: center; gap: 10px;">
+                <label class="checkbox-label">
                     <input type="checkbox" data-id="${ev.id}" ${isChecked ? 'checked' : ''}>
-                    Available to work
+                    I am available to work
                 </label>
             `;
             container.appendChild(div);
         }
     }
 
-    // Save staff availability
+    // Save availability to Firestore
     async function saveAvailability() {
-        if (!currentEmployee) return;
+        if (!currentStaff) {
+            alert('Please select your name first');
+            return;
+        }
         
         const checkboxes = document.querySelectorAll('#datesList input[type="checkbox"]');
         const selected = [];
@@ -300,62 +252,60 @@
         });
         
         try {
-            await db.collection('submissions').doc(currentEmployee.id).set({ eventIds: selected });
-            submissionsData[currentEmployee.id] = selected;
-            showSuccess('✓ Availability saved successfully!');
-            await renderTeamTable();
+            await db.collection('submissions').doc(currentStaff.id).set({ eventIds: selected });
+            allSubmissions[currentStaff.id] = selected;
+            
+            const msgDiv = document.getElementById('saveMessage');
+            msgDiv.textContent = '✓ Availability saved successfully! Live view updated.';
+            msgDiv.className = 'message success';
+            setTimeout(() => {
+                msgDiv.className = 'message';
+            }, 3000);
+            
+            await renderTeamView();
         } catch (err) {
-            showMessage('messageArea', 'Error saving: ' + err.message, 'error');
+            alert('Error saving: ' + err.message);
         }
     }
 
-    // Filter team table by section
-    function filterSection(section) {
-        currentFilter = section;
-        
-        // Update button styles
-        document.querySelectorAll('#filterButtons .filter-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        event.target.classList.add('active');
-        
-        renderTeamTable();
-    }
-
-    // Render team availability table
-    async function renderTeamTable() {
-        const container = document.getElementById('teamTable');
+    // Render team availability table (live view)
+    async function renderTeamView() {
+        const container = document.getElementById('teamView');
         if (!container) return;
         
-        let filtered = currentFilter === 'all' ? employeesList : employeesList.filter(e => e.section === currentFilter);
-        
-        if (filtered.length === 0) {
-            container.innerHTML = '<p>No employees in this section.</p>';
+        if (STAFF_LIST.length === 0) {
+            container.innerHTML = '<div class="loading">No staff found</div>';
             return;
         }
         
-        let html = '<div style="overflow-x: auto;"><table style="min-width: 600px;">';
-        html += '<thead><tr><th>Event</th>';
-        filtered.forEach(emp => {
-            html += `<th>${emp.name}<br><small>${emp.code}</small></th>`;
-        });
+        let html = '<table class="team-table">';
+        html += '<thead>';
+        html += '<tr><th>Event Date / Venue</th>';
+        
+        for (const staff of STAFF_LIST) {
+            html += `<th>${staff.name}<br><small>${staff.section}</small></th>`;
+        }
         html += '</tr></thead><tbody>';
         
-        for (const ev of eventsList) {
-            html += `<tr><td><strong>${formatDate(ev.date)}</strong><br>${ev.venue}</td>`;
-            for (const emp of filtered) {
-                const isAvailable = (submissionsData[emp.id] || []).includes(ev.id);
-                html += `<td style="text-align: center;">${isAvailable ? '<span class="available-yes">✓ Available</span>' : '<span class="available-no">✗</span>'}</td>`;
+        for (const ev of EVENTS_LIST) {
+            html += `<tr><td><strong>${formatDate(ev.date)}</strong><br><small>${ev.venue}</small></td>`;
+            for (const staff of STAFF_LIST) {
+                const isAvailable = (allSubmissions[staff.id] || []).includes(ev.id);
+                html += `<td style="text-align: center;">${isAvailable ? '<span class="available">✓ Available</span>' : '<span class="not-available">✗</span>'}</td>`;
             }
             html += '</tr>';
         }
         
-        html += '</tbody></table></div>';
+        html += '</tbody></table>';
         container.innerHTML = html;
     }
 
+    // Save button event
+    document.getElementById('saveBtn').addEventListener('click', saveAvailability);
+    
     // Start the app
     initDatabase();
+    listenForUpdates();
 </script>
 </body>
 </html>
