@@ -3,78 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Member's Lounge - Staff Availability</title>
+    <title>Member's Lounge – Staff Availability</title>
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
-        .container { max-width: 1300px; margin: 0 auto; }
-        .header { background: #D4AF37; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: center; }
-        .header h1 { color: #1a1a1a; }
-        .card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .staff-selector { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
-        .staff-btn { background: #e0e0e0; border: none; padding: 12px 20px; border-radius: 30px; cursor: pointer; font-size: 14px; font-weight: bold; }
-        .staff-btn.active { background: #D4AF37; color: white; }
-        .dates-grid { display: grid; gap: 10px; margin-top: 20px; }
-        .date-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #fafafa; border-radius: 8px; flex-wrap: wrap; gap: 10px; }
-        .date-info { flex: 2; }
-        .date-info strong { font-size: 16px; }
-        .date-info small { color: #666; }
-        .checkbox-label { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-        .checkbox-label input { width: 20px; height: 20px; cursor: pointer; }
-        .save-btn { background: #D4AF37; border: none; padding: 14px 30px; border-radius: 30px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 20px; width: 100%; }
-        .save-btn:hover { background: #b58f2a; color: white; }
-        .team-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        .team-table th, .team-table td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
-        .team-table th { background: #f5f5f5; position: sticky; top: 0; }
-        .available { background: #D4AF37; color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; display: inline-block; }
-        .not-available { background: #e0e0e0; color: #999; padding: 4px 10px; border-radius: 20px; font-size: 12px; display: inline-block; }
-        .loading { text-align: center; padding: 40px; color: #666; }
-        .message { padding: 15px; border-radius: 8px; margin: 10px 0; display: none; }
-        .message.success { background: #e8f5e9; color: #2e7d32; display: block; }
-        .table-wrapper { overflow-x: auto; max-height: 500px; overflow-y: auto; }
+        body { background: #f5f5f5; color: #1e1e1e; font-family: 'Segoe UI', 'Roboto', sans-serif; line-height: 1.6; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .app-header { background: white; border-bottom: 3px solid #D4AF37; padding: 15px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .logo { display: flex; align-items: center; gap: 15px; }
+        .logo-icon { background: #D4AF37; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 28px; }
+        .logo h1 { color: #1e1e1e; font-size: 1.8rem; }
+        .tagline { color: #666; font-size: 0.9rem; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+        .tab-btn { background: #f0f0f0; border: none; padding: 10px 20px; cursor: pointer; border-radius: 8px 8px 0 0; font-weight: 500; }
+        .tab-btn.active { background: #D4AF37; color: white; }
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; }
+        .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .card h2, .card h3 { color: #D4AF37; margin-bottom: 15px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #555; font-weight: 500; }
+        input, select, button { padding: 10px; background: #fff; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+        button { background: #D4AF37; color: white; border: none; cursor: pointer; font-weight: bold; width: auto; }
+        button:hover { background: #b58f2a; }
+        .date-list { max-height: 500px; overflow-y: auto; margin-top: 15px; border: 1px solid #e0e0e0; border-radius: 8px; }
+        .date-item { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #eee; flex-wrap: wrap; gap: 8px; }
+        .date-item .event-info { flex: 2; min-width: 180px; }
+        .date-item .slots-info { font-size: 0.8rem; color: #D4AF37; background: #faf0e0; padding: 2px 8px; border-radius: 12px; display: inline-block; }
+        .date-item input { margin-right: 10px; transform: scale(1.2); width: auto; }
+        .employee-list { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
+        .employee-card { background: #fafafa; padding: 12px; border-radius: 8px; border: 1px solid #e0e0e0; min-width: 280px; }
+        .employee-card .name { font-weight: bold; font-size: 1.1em; }
+        .employee-card .code { font-family: monospace; background: #eee; padding: 2px 4px; border-radius: 4px; margin-left: 8px; }
+        .employee-card button { background: #ff4444; color: white; padding: 4px 8px; font-size: 12px; margin-top: 5px; margin-right: 5px; width: auto; }
+        .employee-card button.edit-btn { background: #2196f3; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; background: white; }
+        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #fafafa; position: sticky; top: 0; color: #D4AF37; }
+        .available-yes { background: #D4AF37; color: white; padding: 2px 6px; border-radius: 4px; display: inline-block; font-weight: bold; }
+        .available-no { background: #f0f0f0; color: #999; padding: 2px 6px; border-radius: 4px; display: inline-block; }
+        .section-filter { margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .filter-btn { background: #f0f0f0; padding: 5px 12px; border-radius: 20px; cursor: pointer; border: none; }
+        .filter-btn.active { background: #D4AF37; color: white; }
+        .success-msg, .error-msg { padding: 10px; border-radius: 6px; margin-bottom: 15px; }
+        .success-msg { background: #e8f5e9; color: #2e7d32; }
+        .error-msg { background: #ffebee; color: #c62828; }
+        .hidden { display: none; }
+        .scrollable-table { overflow-x: auto; }
+        .staff-info { background: #fafafa; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; border-radius: 12px; padding: 25px; width: 90%; max-width: 500px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .close-modal { cursor: pointer; font-size: 24px; }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #2e7d32; color: white; padding: 12px 24px; border-radius: 50px; display: none; z-index: 9999; }
         @media (max-width: 768px) {
-            .date-row { flex-direction: column; align-items: flex-start; }
-            .staff-btn { padding: 8px 15px; font-size: 12px; }
+            .date-item { flex-direction: column; align-items: flex-start; }
+            .app-header { flex-direction: column; gap: 10px; }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="header">
-        <h1>🏢 Member's Lounge</h1>
-        <p>Staff Availability Sheet - Live Updates</p>
+    <div class="app-header">
+        <div class="logo">
+            <div class="logo-icon">ML</div>
+            <h1>Member's Lounge</h1>
+        </div>
+        <div class="tagline">Staff Availability – Live Firebase</div>
     </div>
 
-    <!-- Staff Selection -->
-    <div class="card">
-        <h3>1. Select Your Name</h3>
-        <div id="staffButtons" class="staff-selector"></div>
-        <div id="loginError" style="color: red; margin-top: 10px;"></div>
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="staff">Staff Availability</button>
+        <button class="tab-btn" data-tab="admin">Admin Panel</button>
+        <button class="tab-btn" data-tab="availability">Availability Matrix</button>
     </div>
 
-    <!-- Availability Selection (shown after staff selected) -->
-    <div id="availabilitySection" style="display: none;">
+    <!-- Staff Panel -->
+    <div id="staff-pane" class="tab-pane active">
         <div class="card">
-            <h3>2. Mark Your Available Dates</h3>
-            <div id="datesList" class="dates-grid"></div>
-            <button id="saveBtn" class="save-btn">💾 Save My Availability</button>
-            <div id="saveMessage" class="message"></div>
+            <h2>Enter Your Employee Code</h2>
+            <div id="staff-message" class="hidden"></div>
+            <div class="form-group">
+                <label>Employee Code</label>
+                <input type="text" id="employee-code" placeholder="e.g., CARLO6">
+                <button id="load-employee" style="margin-top: 10px;">Load My Details</button>
+            </div>
+            <div id="staff-details" class="hidden">
+                <div class="staff-info">
+                    <div><strong>Name:</strong> <span id="display-name"></span></div>
+                    <div><strong>Section:</strong> <span id="display-section"></span></div>
+                </div>
+                <div class="form-group">
+                    <label>Select Dates You Can Work</label>
+                    <div id="dates-container" class="date-list"></div>
+                </div>
+                <button id="submit-availability">Save My Availability</button>
+            </div>
         </div>
     </div>
 
-    <!-- Team View - Live Updates -->
-    <div class="card">
-        <h3>3. Team Availability (Live View)</h3>
-        <div class="table-wrapper" id="teamView">
-            <div class="loading">Loading team data...</div>
+    <!-- Admin Panel -->
+    <div id="admin-pane" class="tab-pane">
+        <div class="card">
+            <h2>Manage Employees</h2>
+            <div id="employee-list" class="employee-list"></div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px;">
+                <input type="text" id="new-employee-name" placeholder="Name" style="flex:2;">
+                <select id="new-employee-section" style="flex:1;">
+                    <option value="kitchen">Kitchen</option>
+                    <option value="floor">Floor</option>
+                    <option value="bar">Bar</option>
+                    <option value="cleaner">Cleaner</option>
+                    <option value="setup">Setup</option>
+                    <option value="manager">Manager</option>
+                </select>
+                <input type="text" id="new-employee-code" placeholder="Code (auto)" style="flex:1;">
+                <button id="add-employee">Add</button>
+            </div>
+        </div>
+        <div class="card">
+            <h2>Manage Events</h2>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+                <input type="date" id="new-event-date">
+                <input type="text" id="new-event-venue" placeholder="Venue name" style="flex:2;">
+                <button id="add-event">Add Event</button>
+            </div>
+            <div id="event-list" style="max-height: 300px; overflow-y: auto;"></div>
+        </div>
+        <div class="card">
+            <h2>Export Data</h2>
+            <button id="export-csv">Export to CSV</button>
+            <button id="export-codes">Export Employee Codes</button>
+        </div>
+    </div>
+
+    <!-- Availability Matrix -->
+    <div id="availability-pane" class="tab-pane">
+        <div class="card">
+            <h2>Availability by Section</h2>
+            <div class="section-filter" id="section-filters">
+                <button class="filter-btn active" data-section="all">All</button>
+                <button class="filter-btn" data-section="kitchen">Kitchen</button>
+                <button class="filter-btn" data-section="floor">Floor</button>
+                <button class="filter-btn" data-section="bar">Bar</button>
+                <button class="filter-btn" data-section="manager">Manager</button>
+            </div>
+            <div class="scrollable-table" id="availability-matrix">Loading...</div>
         </div>
     </div>
 </div>
 
+<div id="toast" class="toast">✓ Saved!</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Edit Employee</h3>
+            <span class="close-modal">&times;</span>
+        </div>
+        <input type="text" id="edit-name" placeholder="Name">
+        <select id="edit-section">
+            <option value="kitchen">Kitchen</option>
+            <option value="floor">Floor</option>
+            <option value="bar">Bar</option>
+            <option value="manager">Manager</option>
+        </select>
+        <input type="text" id="edit-code" placeholder="Code">
+        <button id="save-edit" style="margin-top: 15px;">Save</button>
+    </div>
+</div>
+
 <script>
-    // FIREBASE CONFIGURATION - Your provided config
+    // ========== FIREBASE CONFIGURATION ==========
     const firebaseConfig = {
         apiKey: "AIzaSyA0rDZ8NMo0cirWEPlIzt_Uq12qnOSBtPk",
         authDomain: "staff-roster-e0940.firebaseapp.com",
@@ -87,225 +190,375 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // Staff list - Add all your staff here
-    const STAFF_LIST = [
-        { id: "staff1", name: "Carlo Pavia", code: "CARLO6", section: "Manager" },
-        { id: "staff2", name: "Michelle Pavia", code: "MICHE0", section: "Manager" },
-        { id: "staff3", name: "Rohitha Rawan", code: "ROHIT9", section: "Kitchen" },
-        { id: "staff4", name: "Nam Lai", code: "NAMLA7", section: "Kitchen" },
-        { id: "staff5", name: "Franco Schiavo", code: "FRANC3", section: "Kitchen" },
-        { id: "staff6", name: "Peter Tricarico", code: "PETER8", section: "Floor" },
-        { id: "staff7", name: "Claudio Bottigliero", code: "CLAUDI", section: "Bar" },
-        { id: "staff8", name: "Remzi Asllanaj", code: "REMZIA", section: "Bar" }
+    // ========== GLOBAL VARIABLES ==========
+    let employees = [];
+    let events = [];
+    let submissions = {};
+    let currentEmployeeId = null;
+    let editingEmployeeId = null;
+    let currentFilter = 'all';
+
+    // ========== DEFAULT DATA ==========
+    const DEFAULT_EMPLOYEES = [
+        { id: "emp1", name: "Carlo Pavia", section: "manager", code: "CARLO6" },
+        { id: "emp2", name: "Michelle Pavia", section: "manager", code: "MICHE0" },
+        { id: "emp3", name: "Rohitha Rawan", section: "kitchen", code: "ROHIT9" },
+        { id: "emp4", name: "Nam Lai", section: "kitchen", code: "NAMLA7" },
+        { id: "emp5", name: "Franco Schiavo", section: "kitchen", code: "FRANC3" },
+        { id: "emp6", name: "Peter Tricarico", section: "floor", code: "PETER8" },
+        { id: "emp7", name: "Claudio Bottigliero", section: "bar", code: "CLAUDI" },
+        { id: "emp8", name: "Remzi Asllanaj", section: "bar", code: "REMZIA" }
     ];
 
-    // Upcoming events
-    const EVENTS_LIST = [
+    const DEFAULT_EVENTS = [
         { id: "ev1", date: "2026-04-18", venue: "Fior Events" },
         { id: "ev2", date: "2026-05-09", venue: "Fior Events" },
         { id: "ev3", date: "2026-05-17", venue: "Sala Reggio Ballroom" },
         { id: "ev4", date: "2026-05-22", venue: "Sala Reggio Ballroom" },
         { id: "ev5", date: "2026-05-23", venue: "Sala Reggio Ballroom" },
-        { id: "ev6", date: "2026-05-24", venue: "Sala Reggio Ballroom" },
-        { id: "ev7", date: "2026-05-29", venue: "Sala Reggio Ballroom" },
-        { id: "ev8", date: "2026-05-30", venue: "Sala Reggio Ballroom" },
-        { id: "ev9", date: "2026-05-31", venue: "Sala Reggio Ballroom" },
-        { id: "ev10", date: "2026-06-07", venue: "Sala Reggio Ballroom" },
-        { id: "ev11", date: "2026-06-13", venue: "Sala Reggio Ballroom" },
-        { id: "ev12", date: "2026-06-20", venue: "Sala Reggio Ballroom" }
+        { id: "ev6", date: "2026-05-24", venue: "Sala Reggio Ballroom" }
     ];
 
-    let currentStaff = null;
-    let allSubmissions = {};
+    // ========== HELPER FUNCTIONS ==========
+    function formatDate(dateStr) {
+        return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
 
-    // Initialize database with default data
-    async function initDatabase() {
-        try {
-            // Add staff to Firestore if not exists
-            for (const staff of STAFF_LIST) {
-                const docRef = db.collection('staff').doc(staff.id);
-                const doc = await docRef.get();
-                if (!doc.exists) {
-                    await docRef.set(staff);
-                }
-            }
-            
-            // Add events to Firestore if not exists
-            for (const ev of EVENTS_LIST) {
-                const docRef = db.collection('events').doc(ev.id);
-                const doc = await docRef.get();
-                if (!doc.exists) {
-                    await docRef.set(ev);
-                }
-            }
-            
-            // Load all data
-            await loadData();
-            await renderStaffButtons();
-            await renderTeamView();
-        } catch (err) {
-            console.error("Init error:", err);
+    function showToast() {
+        const toast = document.getElementById('toast');
+        toast.style.display = 'block';
+        setTimeout(() => toast.style.display = 'none', 2000);
+    }
+
+    function showMessage(elementId, text, type) {
+        const el = document.getElementById(elementId);
+        if (el) {
+            el.textContent = text;
+            el.className = type === 'success' ? 'success-msg' : 'error-msg';
+            el.classList.remove('hidden');
+            setTimeout(() => el.classList.add('hidden'), 3000);
         }
     }
 
-    // Load all submissions from Firestore
+    // ========== LOAD DATA FROM FIRESTORE ==========
     async function loadData() {
         try {
+            const employeesSnap = await db.collection('employees').get();
+            if (!employeesSnap.empty) {
+                employees = [];
+                employeesSnap.forEach(doc => employees.push({ id: doc.id, ...doc.data() }));
+            } else {
+                for (const emp of DEFAULT_EMPLOYEES) {
+                    await db.collection('employees').doc(emp.id).set(emp);
+                    employees.push(emp);
+                }
+            }
+
+            const eventsSnap = await db.collection('events').get();
+            if (!eventsSnap.empty) {
+                events = [];
+                eventsSnap.forEach(doc => events.push({ id: doc.id, ...doc.data() }));
+            } else {
+                for (const ev of DEFAULT_EVENTS) {
+                    await db.collection('events').doc(ev.id).set(ev);
+                    events.push(ev);
+                }
+            }
+            events.sort((a, b) => new Date(a.date) - new Date(b.date));
+
             const submissionsSnap = await db.collection('submissions').get();
-            allSubmissions = {};
+            submissions = {};
             submissionsSnap.forEach(doc => {
-                allSubmissions[doc.id] = doc.data().eventIds || [];
+                submissions[doc.id] = doc.data().eventIds || [];
             });
         } catch (err) {
-            console.error("Load error:", err);
+            console.error('Load error:', err);
         }
     }
 
-    // Listen for real-time updates from Firestore
+    // ========== REAL-TIME LISTENER ==========
     function listenForUpdates() {
         db.collection('submissions').onSnapshot(async (snapshot) => {
-            allSubmissions = {};
+            submissions = {};
             snapshot.forEach(doc => {
-                allSubmissions[doc.id] = doc.data().eventIds || [];
+                submissions[doc.id] = doc.data().eventIds || [];
             });
-            await renderTeamView();
-            if (currentStaff) {
-                await renderDates();
-            }
+            if (currentEmployeeId) await renderDates();
+            await renderAvailabilityMatrix();
+            if (document.querySelector('#admin-pane.active')) renderAdminEmployees();
         });
     }
 
-    // Render staff selection buttons
-    async function renderStaffButtons() {
-        const container = document.getElementById('staffButtons');
-        container.innerHTML = '';
-        
-        for (const staff of STAFF_LIST) {
-            const btn = document.createElement('button');
-            btn.textContent = `${staff.name} (${staff.code})`;
-            btn.className = 'staff-btn';
-            btn.onclick = () => selectStaff(staff);
-            container.appendChild(btn);
-        }
-    }
-
-    // Select a staff member
-    async function selectStaff(staff) {
-        currentStaff = staff;
-        
-        // Update button styles
-        document.querySelectorAll('.staff-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        event.target.classList.add('active');
-        
-        // Show availability section
-        document.getElementById('availabilitySection').style.display = 'block';
-        document.getElementById('loginError').innerHTML = '';
-        
-        await renderDates();
-    }
-
-    // Format date for display
-    function formatDate(dateStr) {
-        const d = new Date(dateStr);
-        return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-    }
-
-    // Render date checkboxes for current staff
+    // ========== RENDER DATES FOR STAFF ==========
     async function renderDates() {
-        const container = document.getElementById('datesList');
-        if (!container || !currentStaff) return;
-        
+        const container = document.getElementById('dates-container');
+        if (!container || !currentEmployeeId) return;
+        const emp = employees.find(e => e.id === currentEmployeeId);
+        if (!emp) return;
         container.innerHTML = '';
-        const mySubmissions = allSubmissions[currentStaff.id] || [];
-        
-        for (const ev of EVENTS_LIST) {
+        const mySubmissions = submissions[currentEmployeeId] || [];
+        for (const ev of events) {
             const isChecked = mySubmissions.includes(ev.id);
             const div = document.createElement('div');
-            div.className = 'date-row';
+            div.className = 'date-item';
             div.innerHTML = `
-                <div class="date-info">
-                    <strong>${formatDate(ev.date)}</strong><br>
-                    <small>${ev.venue}</small>
+                <div class="event-info">
+                    <strong>${formatDate(ev.date)}</strong><br>${ev.venue}
                 </div>
-                <label class="checkbox-label">
+                <label>
                     <input type="checkbox" data-id="${ev.id}" ${isChecked ? 'checked' : ''}>
-                    I am available to work
+                    I am available
                 </label>
             `;
             container.appendChild(div);
         }
     }
 
-    // Save availability to Firestore
-    async function saveAvailability() {
-        if (!currentStaff) {
-            alert('Please select your name first');
+    // ========== SAVE AVAILABILITY ==========
+    async function submitAvailability() {
+        if (!currentEmployeeId) {
+            showMessage('staff-message', 'Please load your employee details first.', 'error');
             return;
         }
-        
-        const checkboxes = document.querySelectorAll('#datesList input[type="checkbox"]');
+        const checkboxes = document.querySelectorAll('#dates-container input[type="checkbox"]');
         const selected = [];
-        checkboxes.forEach(cb => {
-            if (cb.checked) selected.push(cb.getAttribute('data-id'));
-        });
+        checkboxes.forEach(cb => { if (cb.checked) selected.push(cb.getAttribute('data-id')); });
         
-        try {
-            await db.collection('submissions').doc(currentStaff.id).set({ eventIds: selected });
-            allSubmissions[currentStaff.id] = selected;
-            
-            const msgDiv = document.getElementById('saveMessage');
-            msgDiv.textContent = '✓ Availability saved successfully! Live view updated.';
-            msgDiv.className = 'message success';
-            setTimeout(() => {
-                msgDiv.className = 'message';
-            }, 3000);
-            
-            await renderTeamView();
-        } catch (err) {
-            alert('Error saving: ' + err.message);
-        }
+        await db.collection('submissions').doc(currentEmployeeId).set({ eventIds: selected });
+        submissions[currentEmployeeId] = selected;
+        showToast();
+        const emp = employees.find(e => e.id === currentEmployeeId);
+        showMessage('staff-message', `Saved for ${emp.name}!`, 'success');
+        await renderAvailabilityMatrix();
     }
 
-    // Render team availability table (live view)
-    async function renderTeamView() {
-        const container = document.getElementById('teamView');
+    // ========== RENDER AVAILABILITY MATRIX ==========
+    async function renderAvailabilityMatrix() {
+        const container = document.getElementById('availability-matrix');
         if (!container) return;
-        
-        if (STAFF_LIST.length === 0) {
-            container.innerHTML = '<div class="loading">No staff found</div>';
+        let filtered = currentFilter === 'all' ? employees : employees.filter(e => e.section === currentFilter);
+        if (filtered.length === 0) {
+            container.innerHTML = '<p>No employees in this section.</p>';
             return;
         }
-        
-        let html = '<table class="team-table">';
-        html += '<thead>';
-        html += '<tr><th>Event Date / Venue</th>';
-        
-        for (const staff of STAFF_LIST) {
-            html += `<th>${staff.name}<br><small>${staff.section}</small></th>`;
-        }
+        let html = '<div class="scrollable-table"><table><thead><tr><th>Event</th>';
+        filtered.forEach(emp => html += `<th>${emp.name}<br><small>${emp.code}</small></th>`);
         html += '</tr></thead><tbody>';
-        
-        for (const ev of EVENTS_LIST) {
-            html += `<tr><td><strong>${formatDate(ev.date)}</strong><br><small>${ev.venue}</small></td>`;
-            for (const staff of STAFF_LIST) {
-                const isAvailable = (allSubmissions[staff.id] || []).includes(ev.id);
-                html += `<td style="text-align: center;">${isAvailable ? '<span class="available">✓ Available</span>' : '<span class="not-available">✗</span>'}</td>`;
+        for (const ev of events) {
+            html += `<tr><td><strong>${formatDate(ev.date)}</strong><br>${ev.venue}</td>`;
+            for (const emp of filtered) {
+                const isAvail = (submissions[emp.id] || []).includes(ev.id);
+                html += `<td style="text-align:center;">${isAvail ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}</td>`;
             }
             html += '</tr>';
         }
-        
-        html += '</tbody></table>';
+        html += '</tbody></table></div>';
         container.innerHTML = html;
     }
 
-    // Save button event
-    document.getElementById('saveBtn').addEventListener('click', saveAvailability);
+    // ========== ADMIN FUNCTIONS ==========
+    async function renderAdminEmployees() {
+        const container = document.getElementById('employee-list');
+        container.innerHTML = '';
+        for (const emp of employees) {
+            const card = document.createElement('div');
+            card.className = 'employee-card';
+            card.innerHTML = `
+                <div class="name">${emp.name} <span class="code">${emp.code}</span></div>
+                <div class="sections">${emp.section}</div>
+                <div>
+                    <button class="edit-btn" data-id="${emp.id}">Edit</button>
+                    <button class="delete-btn" data-id="${emp.id}">Delete</button>
+                </div>
+            `;
+            container.appendChild(card);
+        }
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', () => openEditModal(btn.dataset.id));
+        });
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (confirm('Delete employee?')) {
+                    await db.collection('employees').doc(btn.dataset.id).delete();
+                    await loadData();
+                    await renderAdminEmployees();
+                    await renderAvailabilityMatrix();
+                }
+            });
+        });
+    }
+
+    async function renderAdminEvents() {
+        const container = document.getElementById('event-list');
+        container.innerHTML = '';
+        for (const ev of events) {
+            const div = document.createElement('div');
+            div.style.display = 'flex';
+            div.style.justifyContent = 'space-between';
+            div.style.padding = '8px';
+            div.style.borderBottom = '1px solid #eee';
+            div.innerHTML = `
+                <span>${formatDate(ev.date)} – ${ev.venue}</span>
+                <button class="delete-event" data-id="${ev.id}" style="background:#ff4444; padding:4px 12px;">Delete</button>
+            `;
+            container.appendChild(div);
+        }
+        document.querySelectorAll('.delete-event').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (confirm('Delete event?')) {
+                    await db.collection('events').doc(btn.dataset.id).delete();
+                    await loadData();
+                    await renderAdminEvents();
+                    await renderAvailabilityMatrix();
+                    if (currentEmployeeId) await renderDates();
+                }
+            });
+        });
+    }
+
+    async function addEmployee() {
+        const name = document.getElementById('new-employee-name').value.trim();
+        const section = document.getElementById('new-employee-section').value;
+        let code = document.getElementById('new-employee-code').value.trim().toUpperCase();
+        if (!name) { alert('Enter name'); return; }
+        if (!code) code = Math.random().toString(36).substring(2, 8).toUpperCase();
+        const newId = Date.now().toString();
+        await db.collection('employees').doc(newId).set({ name, section, code });
+        await loadData();
+        renderAdminEmployees();
+        renderAvailabilityMatrix();
+        document.getElementById('new-employee-name').value = '';
+        document.getElementById('new-employee-code').value = '';
+        showToast();
+    }
+
+    async function addEvent() {
+        const date = document.getElementById('new-event-date').value;
+        const venue = document.getElementById('new-event-venue').value.trim();
+        if (!date || !venue) { alert('Enter date and venue'); return; }
+        const newId = Date.now().toString();
+        await db.collection('events').doc(newId).set({ date, venue });
+        await loadData();
+        renderAdminEvents();
+        renderAvailabilityMatrix();
+        if (currentEmployeeId) await renderDates();
+        document.getElementById('new-event-date').value = '';
+        document.getElementById('new-event-venue').value = '';
+        showToast();
+    }
+
+    function openEditModal(empId) {
+        const emp = employees.find(e => e.id === empId);
+        if (!emp) return;
+        editingEmployeeId = empId;
+        document.getElementById('edit-name').value = emp.name;
+        document.getElementById('edit-section').value = emp.section;
+        document.getElementById('edit-code').value = emp.code;
+        document.getElementById('editModal').style.display = 'flex';
+    }
+
+    async function saveEdit() {
+        const newName = document.getElementById('edit-name').value.trim();
+        const newSection = document.getElementById('edit-section').value;
+        const newCode = document.getElementById('edit-code').value.trim().toUpperCase();
+        if (!newName || !newCode) { alert('Name and code required'); return; }
+        await db.collection('employees').doc(editingEmployeeId).update({ name: newName, section: newSection, code: newCode });
+        await loadData();
+        renderAdminEmployees();
+        renderAvailabilityMatrix();
+        document.getElementById('editModal').style.display = 'none';
+        showToast();
+    }
+
+    function exportCSV() {
+        let csv = 'Employee,Code,Section,Event,Available\n';
+        for (const emp of employees) {
+            for (const ev of events) {
+                const isAvail = (submissions[emp.id] || []).includes(ev.id);
+                csv += `"${emp.name}","${emp.code}","${emp.section}","${formatDate(ev.date)} - ${ev.venue}",${isAvail ? 'Yes' : 'No'}\n`;
+            }
+        }
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'staff-availability.csv';
+        a.click();
+    }
+
+    function exportCodes() {
+        let csv = 'Name,Code,Section\n';
+        employees.forEach(emp => csv += `"${emp.name}","${emp.code}","${emp.section}"\n`);
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'employee-codes.csv';
+        a.click();
+    }
+
+    // ========== STAFF LOGIN ==========
+    function loadEmployeeByCode() {
+        const code = document.getElementById('employee-code').value.trim().toUpperCase();
+        const emp = employees.find(e => e.code === code);
+        if (!emp) {
+            alert('Code not found. Valid codes: CARLO6, MICHE0, ROHIT9, NAMLA7, FRANC3, PETER8, CLAUDI, REMZIA');
+            return;
+        }
+        currentEmployeeId = emp.id;
+        document.getElementById('display-name').innerText = emp.name;
+        document.getElementById('display-section').innerText = emp.section;
+        document.getElementById('staff-details').classList.remove('hidden');
+        renderDates();
+    }
+
+    // ========== TAB SWITCHING ==========
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId + '-pane').classList.add('active');
+        document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+        if (tabId === 'admin') {
+            renderAdminEmployees();
+            renderAdminEvents();
+        } else if (tabId === 'availability') {
+            renderAvailabilityMatrix();
+        }
+    }
+
+    function initFilters() {
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.section;
+                renderAvailabilityMatrix();
+            });
+        });
+    }
+
+    // ========== INITIALIZATION ==========
+    async function init() {
+        await loadData();
+        initFilters();
+        listenForUpdates();
+        
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+        });
+        document.getElementById('load-employee').addEventListener('click', loadEmployeeByCode);
+        document.getElementById('submit-availability').addEventListener('click', submitAvailability);
+        document.getElementById('add-employee').addEventListener('click', addEmployee);
+        document.getElementById('add-event').addEventListener('click', addEvent);
+        document.getElementById('export-csv').addEventListener('click', exportCSV);
+        document.getElementById('export-codes').addEventListener('click', exportCodes);
+        document.getElementById('save-edit').addEventListener('click', saveEdit);
+        
+        document.querySelectorAll('.close-modal').forEach(el => {
+            el.addEventListener('click', () => document.getElementById('editModal').style.display = 'none');
+        });
+        window.onclick = (e) => { if (e.target === document.getElementById('editModal')) document.getElementById('editModal').style.display = 'none'; };
+    }
     
-    // Start the app
-    initDatabase();
-    listenForUpdates();
+    init();
 </script>
 </body>
 </html>
