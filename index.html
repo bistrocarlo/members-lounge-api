@@ -3,1044 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Member's Lounge – Staff Availability System</title>
+    <title>Member's Lounge – Staff Availability System | Full Admin Controls</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
-        /* ============================================ */
-        /* GLOBAL STYLES - RESET & BASE */
-        /* ============================================ */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
-            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            padding: 20px;
-            color: #1a1a2e;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        /* ============================================ */
-        /* HEADER STYLES */
-        /* ============================================ */
-        .header {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: white;
-            padding: 25px 30px;
-            border-radius: 20px;
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        }
-
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 18px;
-        }
-
-        .logo-icon {
-            background: #D4AF37;
-            color: #1a1a2e;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 32px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-
-        .logo-section h1 {
-            font-size: 1.8rem;
-            letter-spacing: 1px;
-        }
-
-        .logo-section p {
-            font-size: 0.8rem;
-            opacity: 0.8;
-            margin-top: 5px;
-        }
-
-        .status-badge {
-            background: rgba(212, 175, 55, 0.2);
-            padding: 10px 20px;
-            border-radius: 40px;
-            font-size: 0.85rem;
-            border: 1px solid #D4AF37;
-            font-weight: 500;
-            backdrop-filter: blur(5px);
-        }
-
-        /* ============================================ */
-        /* TAB NAVIGATION */
-        /* ============================================ */
-        .tabs {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        .tab-btn {
-            background: white;
-            border: none;
-            padding: 12px 30px;
-            cursor: pointer;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 15px;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            color: #1a1a2e;
-        }
-
-        .tab-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-        }
-
-        .tab-btn.active {
-            background: #D4AF37;
-            color: #1a1a2e;
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
-        }
-
-        /* ============================================ */
-        /* PANELS */
-        /* ============================================ */
-        .tab-pane {
-            display: none;
-            animation: fadeIn 0.4s ease;
-        }
-
-        .tab-pane.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ============================================ */
-        /* CARD STYLES */
-        /* ============================================ */
-        .card {
-            background: white;
-            border-radius: 24px;
-            padding: 28px;
-            margin-bottom: 28px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-            border: 1px solid rgba(0,0,0,0.05);
-            transition: transform 0.2s;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-        }
-
-        .card h2 {
-            color: #D4AF37;
-            margin-bottom: 22px;
-            font-size: 1.5rem;
-            border-left: 4px solid #D4AF37;
-            padding-left: 18px;
-        }
-
-        .card h3 {
-            color: #1a1a2e;
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-            margin-top: 20px;
-        }
-
-        /* ============================================ */
-        /* FORM STYLES */
-        /* ============================================ */
-        .form-group {
-            margin-bottom: 22px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 14px 16px;
-            border: 1px solid #e0e0e0;
-            border-radius: 14px;
-            font-size: 14px;
-            transition: all 0.3s;
-            background: white;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: #D4AF37;
-            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
-        }
-
-        button {
-            background: #D4AF37;
-            color: #1a1a2e;
-            border: none;
-            padding: 12px 28px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-
-        button:hover {
-            background: #c4a22e;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
-        }
-
-        button.danger {
-            background: #dc3545;
-            color: white;
-        }
-
-        button.danger:hover {
-            background: #c82333;
-        }
-
-        button.secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        /* ============================================ */
-        /* STAFF SELECTOR / LOGIN SECTION */
-        /* ============================================ */
-        .staff-selector {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 25px;
-            max-height: 280px;
-            overflow-y: auto;
-            padding: 15px;
-            background: #faf9ff;
-            border-radius: 20px;
-            border: 1px solid #eef2f7;
-        }
-
-        .staff-btn {
-            background: #f8f9fa;
-            border: 2px solid #e9ecef;
-            padding: 12px 22px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
-            font-size: 14px;
-        }
-
-        .staff-btn:hover {
-            border-color: #D4AF37;
-            transform: translateY(-2px);
-        }
-
-        .staff-btn.active {
-            background: #D4AF37;
-            border-color: #D4AF37;
-            color: white;
-        }
-
-        /* ============================================ */
-        /* DATE LIST - AVAILABILITY SELECTION */
-        /* ============================================ */
-        .date-list {
-            max-height: 550px;
-            overflow-y: auto;
-            border: 1px solid #eef2f7;
-            border-radius: 20px;
-        }
-
-        .date-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 22px;
-            border-bottom: 1px solid #eef2f7;
-            flex-wrap: wrap;
-            gap: 15px;
-            transition: background 0.2s;
-        }
-
-        .date-item:hover {
-            background: #faf9ff;
-        }
-
-        .date-item:last-child {
-            border-bottom: none;
-        }
-
-        .event-info {
-            flex: 2;
-            min-width: 180px;
-        }
-
-        .event-date {
-            font-weight: 700;
-            font-size: 1rem;
-            color: #1a1a2e;
-        }
-
-        .event-venue {
-            font-size: 0.85rem;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .capacity-info {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            font-size: 0.75rem;
-        }
-
-        .capacity-badge {
-            background: #f0f0f0;
-            padding: 5px 14px;
-            border-radius: 20px;
-            font-weight: 500;
-        }
-
-        .capacity-badge.full {
-            background: #ffebee;
-            color: #c62828;
-        }
-
-        .capacity-badge.available {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            padding: 8px 15px;
-            border-radius: 40px;
-            transition: background 0.2s;
-        }
-
-        .checkbox-label:hover {
-            background: #f0f0f0;
-        }
-
-        .checkbox-label input {
-            width: 22px;
-            height: 22px;
-            cursor: pointer;
-        }
-
-        .checkbox-label.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .checkbox-label.disabled:hover {
-            background: transparent;
-        }
-
-        .full-notice {
-            font-size: 0.7rem;
-            color: #e74c3c;
-            font-weight: 600;
-            margin-left: 10px;
-        }
-
-        /* ============================================ */
-        /* EMPLOYEE GRID (ADMIN VIEW) */
-        /* ============================================ */
-        .employee-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 18px;
-            margin-bottom: 25px;
-            max-height: 500px;
-            overflow-y: auto;
-            padding: 5px;
-        }
-
-        .employee-card {
-            background: #faf9ff;
-            border-radius: 18px;
-            padding: 18px;
-            border: 1px solid #eef2f7;
-            transition: all 0.2s;
-        }
-
-        .employee-card:hover {
-            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-            transform: translateY(-2px);
-        }
-
-        .employee-name {
-            font-weight: 700;
-            font-size: 1.1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .employee-code {
-            font-family: monospace;
-            background: #e9ecef;
-            padding: 4px 12px;
-            border-radius: 30px;
-            font-size: 0.75rem;
-            font-weight: normal;
-        }
-
-        .employee-section {
-            font-size: 0.8rem;
-            color: #D4AF37;
-            margin: 10px 0;
-            text-transform: capitalize;
-            font-weight: 600;
-        }
-
-        .employee-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 14px;
-        }
-
-        .employee-actions button {
-            padding: 6px 14px;
-            font-size: 12px;
-        }
-
-        /* ============================================ */
-        /* EVENT LIST (ADMIN VIEW) */
-        /* ============================================ */
-        .event-list {
-            max-height: 400px;
-            overflow-y: auto;
-            margin-top: 20px;
-        }
-
-        .event-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 18px;
-            border-bottom: 1px solid #eef2f7;
-            transition: background 0.2s;
-        }
-
-        .event-item:hover {
-            background: #faf9ff;
-        }
-
-        .event-date-small {
-            font-weight: 600;
-            min-width: 110px;
-        }
-
-        /* ============================================ */
-        /* ADMIN STATS & SUMMARY */
-        /* ============================================ */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 18px;
-            margin-top: 25px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #f8f9fa, #fff);
-            border-radius: 18px;
-            padding: 20px;
-            text-align: center;
-            border: 1px solid #eef2f7;
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 800;
-            color: #D4AF37;
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-            color: #666;
-            margin-top: 8px;
-        }
-
-        /* ============================================ */
-        /* EVENT SUMMARY CARDS (STAFF VIEW) */
-        /* ============================================ */
-        .event-summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-            gap: 20px;
-        }
-
-        .event-summary-card {
-            background: #faf9ff;
-            border-radius: 20px;
-            padding: 20px;
-            border: 1px solid #eef2f7;
-            transition: all 0.2s;
-        }
-
-        .event-summary-card:hover {
-            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-        }
-
-        .event-summary-card h3 {
-            color: #D4AF37;
-            margin-bottom: 10px;
-            font-size: 1.2rem;
-        }
-
-        .event-summary-date {
-            font-size: 0.85rem;
-            color: #666;
-            margin-bottom: 18px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eef2f7;
-        }
-
-        .section-staff-list {
-            margin: 12px 0;
-            padding: 12px;
-            background: white;
-            border-radius: 14px;
-        }
-
-        .section-title {
-            font-weight: 700;
-            color: #1a1a2e;
-            margin-bottom: 8px;
-            border-left: 3px solid #D4AF37;
-            padding-left: 12px;
-            font-size: 0.9rem;
-        }
-
-        .staff-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 8px;
-        }
-
-        .staff-tag {
-            background: #e9ecef;
-            padding: 4px 14px;
-            border-radius: 30px;
-            font-size: 11px;
-            font-weight: 500;
-        }
-
-        .staff-tag.manager {
-            background: #D4AF37;
-            color: white;
-        }
-
-        .count-badge {
-            font-size: 11px;
-            color: #666;
-            margin-top: 10px;
-            font-weight: 500;
-        }
-
-        .capacity-status {
-            font-size: 11px;
-            margin-top: 8px;
-            padding: 6px 12px;
-            border-radius: 12px;
-            font-weight: 600;
-        }
-
-        .capacity-status.full {
-            background: #ffebee;
-            color: #c62828;
-        }
-
-        .capacity-status.open {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        /* ============================================ */
-        /* AVAILABILITY MATRIX (ADMIN ONLY) */
-        /* ============================================ */
-        .matrix-wrapper {
-            overflow-x: auto;
-            border-radius: 20px;
-            border: 1px solid #eef2f7;
-        }
-
-        .availability-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 12px;
-            min-width: 800px;
-        }
-
-        .availability-table th {
-            background: #f8f9fa;
-            padding: 14px 8px;
-            text-align: center;
-            font-weight: 700;
-            color: #D4AF37;
-            border-bottom: 2px solid #eef2f7;
-            position: sticky;
-            top: 0;
-        }
-
-        .availability-table td {
-            padding: 12px 8px;
-            text-align: center;
-            border-bottom: 1px solid #eef2f7;
-        }
-
-        .availability-table td:first-child {
-            text-align: left;
-            font-weight: 500;
-            background: #faf9ff;
-            position: sticky;
-            left: 0;
-        }
-
-        .available-yes {
-            background: #D4AF37;
-            color: white;
-            padding: 5px 14px;
-            border-radius: 30px;
-            font-size: 11px;
-            font-weight: bold;
-            display: inline-block;
-        }
-
-        .available-no {
-            background: #e9ecef;
-            color: #999;
-            padding: 5px 14px;
-            border-radius: 30px;
-            font-size: 11px;
-            display: inline-block;
-        }
-
-        /* ============================================ */
-        /* SECTION FILTERS */
-        /* ============================================ */
-        .section-filters {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 25px;
-        }
-
-        .filter-chip {
-            background: #f8f9fa;
-            padding: 8px 24px;
-            border-radius: 40px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            transition: all 0.2s;
-            border: 1px solid #eef2f7;
-        }
-
-        .filter-chip:hover {
-            border-color: #D4AF37;
-        }
-
-        .filter-chip.active {
-            background: #D4AF37;
-            color: white;
-            border-color: #D4AF37;
-        }
-
-        /* ============================================ */
-        /* MESSAGES & TOASTS */
-        /* ============================================ */
-        .message {
-            padding: 16px;
-            border-radius: 14px;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        .message.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-            display: block;
-        }
-
-        .message.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-            display: block;
-        }
-
-        .message.info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-            display: block;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #28a745;
-            color: white;
-            padding: 14px 28px;
-            border-radius: 60px;
-            font-weight: bold;
-            z-index: 2000;
-            display: none;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-            font-size: 14px;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 50px;
-            color: #999;
-        }
-
-        .debug-info {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 12px;
-            padding: 14px;
-            margin-top: 18px;
-            font-size: 12px;
-            color: #666;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 18px;
-            margin-bottom: 18px;
-        }
-
-        /* ============================================ */
-        /* MODAL STYLES */
-        /* ============================================ */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-            justify-content: center;
-            align-items: center;
-            z-index: 1100;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 28px;
-            padding: 32px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 85vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-
-        .modal-header h3 {
-            color: #D4AF37;
-            margin: 0;
-            font-size: 1.3rem;
-        }
-
-        .close-modal {
-            font-size: 30px;
-            cursor: pointer;
-            color: #999;
-            transition: color 0.2s;
-        }
-
-        .close-modal:hover {
-            color: #333;
-        }
-
-        /* ============================================ */
-        /* RESPONSIVE STYLES */
-        /* ============================================ */
-        @media (max-width: 768px) {
-            body { padding: 12px; }
-            .card { padding: 18px; }
-            .date-item { flex-direction: column; align-items: flex-start; }
-            .employee-grid { grid-template-columns: 1fr; }
-            .form-row { grid-template-columns: 1fr; }
-            .header { flex-direction: column; text-align: center; }
-            .event-summary-grid { grid-template-columns: 1fr; }
-            .tabs { justify-content: center; }
-            .staff-selector { max-height: 350px; }
-            .staff-btn { padding: 8px 16px; font-size: 12px; }
-        }
-
-        @media print {
-            .tabs, .tab-btn, .staff-selector, button, .toast { display: none; }
-            .card { box-shadow: none; border: 1px solid #ddd; }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0a0a0a; font-family: 'Segoe UI', Roboto, sans-serif; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        .header { background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%); color: #D4AF37; padding: 25px 30px; border-radius: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; border: 1px solid rgba(212, 175, 55, 0.3); }
+        .logo-section { display: flex; align-items: center; gap: 18px; }
+        .logo-icon { background: #D4AF37; color: #000000; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 32px; }
+        .logo-section h1 { font-size: 1.8rem; color: #D4AF37; }
+        .logo-section p { font-size: 0.8rem; opacity: 0.7; color: #cccccc; }
+        .status-badge { background: rgba(212, 175, 55, 0.15); padding: 10px 20px; border-radius: 40px; font-size: 0.85rem; border: 1px solid #D4AF37; color: #D4AF37; }
+        
+        .card { background: #111111; border-radius: 24px; padding: 28px; margin-bottom: 28px; border: 1px solid rgba(212, 175, 55, 0.2); }
+        .card h2 { color: #D4AF37; margin-bottom: 22px; font-size: 1.5rem; border-left: 4px solid #D4AF37; padding-left: 18px; }
+        .card h3 { color: #D4AF37; margin-bottom: 15px; font-size: 1.2rem; margin-top: 20px; }
+        
+        .login-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
+        @media (max-width: 768px) { .login-container { grid-template-columns: 1fr; } }
+        .login-box { background: #111111; border-radius: 24px; padding: 30px; border: 1px solid rgba(212, 175, 55, 0.2); }
+        .login-box h2 { color: #D4AF37; margin-bottom: 20px; text-align: center; }
+        .login-box select, .login-box input { width: 100%; padding: 14px 16px; border: 1px solid #333; border-radius: 14px; font-size: 14px; margin-bottom: 15px; background: #1a1a1a; color: white; }
+        .login-box select:focus, .login-box input:focus { outline: none; border-color: #D4AF37; }
+        .login-box button { width: 100%; padding: 14px; background: #D4AF37; border: none; border-radius: 14px; font-weight: bold; cursor: pointer; font-size: 16px; color: #000000; }
+        .login-box button:hover { background: #c4a22e; transform: translateY(-2px); }
+        
+        .tabs { display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; border-bottom: 2px solid #222; padding-bottom: 10px; }
+        .tab-btn { background: transparent; border: none; padding: 12px 30px; cursor: pointer; font-weight: 600; font-size: 15px; color: #aaa; border-radius: 30px; }
+        .tab-btn:hover { color: #D4AF37; }
+        .tab-btn.active { background: #D4AF37; color: #000000; }
+        .tab-pane { display: none; animation: fadeIn 0.3s ease; }
+        .tab-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .form-row { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 20px; }
+        .form-group { flex: 1; min-width: 180px; }
+        .form-group label { display: block; margin-bottom: 8px; color: #D4AF37; font-size: 13px; }
+        .form-group input, .form-group select { width: 100%; padding: 12px 14px; border: 1px solid #333; border-radius: 14px; background: #1a1a1a; color: white; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #D4AF37; }
+        input[type="date"] { color-scheme: dark; cursor: pointer; }
+        
+        .employee-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; max-height: 500px; overflow-y: auto; margin-bottom: 25px; }
+        .employee-card { background: #1a1a1a; border-radius: 18px; padding: 18px; border: 1px solid #333; transition: all 0.2s; }
+        .employee-card:hover { border-color: #D4AF37; }
+        .employee-name { font-weight: 700; font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; color: white; }
+        .employee-code { font-family: monospace; background: #000; padding: 4px 12px; border-radius: 30px; font-size: 0.75rem; color: #D4AF37; border: 1px solid #D4AF37; }
+        .employee-section { font-size: 0.8rem; color: #D4AF37; margin: 8px 0; }
+        .employee-pwd { font-size: 11px; color: #888; font-family: monospace; margin: 5px 0; }
+        .employee-actions { display: flex; gap: 10px; margin-top: 12px; }
+        .employee-actions button { padding: 6px 14px; font-size: 12px; border-radius: 30px; cursor: pointer; }
+        .edit-employee { background: #D4AF37; color: #000000; border: none; }
+        .delete-employee { background: #dc3545; color: white; border: none; }
+        
+        .date-list { max-height: 550px; overflow-y: auto; border: 1px solid #222; border-radius: 20px; }
+        .date-item { display: flex; justify-content: space-between; align-items: center; padding: 16px 22px; border-bottom: 1px solid #222; flex-wrap: wrap; gap: 15px; }
+        .date-item:hover { background: #1a1a1a; }
+        .event-date { font-weight: 700; font-size: 1rem; color: white; }
+        .event-venue-name { font-size: 0.8rem; color: #D4AF37; margin-top: 4px; }
+        .capacity-badge { background: #1a1a1a; padding: 5px 14px; border-radius: 20px; color: #ccc; border: 1px solid #333; }
+        .checkbox-label { display: flex; align-items: center; gap: 12px; cursor: pointer; color: white; }
+        .checkbox-label input { width: 20px; height: 20px; accent-color: #D4AF37; }
+        
+        .event-list { max-height: 400px; overflow-y: auto; margin-top: 20px; }
+        .event-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid #222; flex-wrap: wrap; gap: 10px; }
+        .event-item:hover { background: #1a1a1a; }
+        
+        .matrix-wrapper { overflow-x: auto; border-radius: 20px; border: 1px solid #222; }
+        .availability-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 800px; }
+        .availability-table th { background: #0a0a0a; padding: 14px 8px; color: #D4AF37; border-bottom: 2px solid #D4AF37; }
+        .availability-table td { padding: 12px 8px; text-align: center; border-bottom: 1px solid #222; color: white; }
+        .available-yes { background: #D4AF37; color: #000000; padding: 5px 14px; border-radius: 30px; display: inline-block; }
+        .available-no { background: #222; color: #666; padding: 5px 14px; border-radius: 30px; display: inline-block; }
+        
+        .section-filters { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 25px; }
+        .filter-chip { background: #1a1a1a; padding: 8px 24px; border-radius: 40px; cursor: pointer; font-size: 13px; border: 1px solid #333; color: #ccc; }
+        .filter-chip.active { background: #D4AF37; color: #000000; }
+        
+        .event-summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 20px; }
+        .event-summary-card { background: #1a1a1a; border-radius: 20px; padding: 20px; border: 1px solid #333; }
+        .event-summary-card h3 { color: #D4AF37; }
+        .section-staff-list { margin: 12px 0; padding: 12px; background: #0a0a0a; border-radius: 14px; }
+        .section-title { font-weight: 700; margin-bottom: 8px; border-left: 3px solid #D4AF37; padding-left: 12px; color: #D4AF37; }
+        .staff-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        .staff-tag { background: #222; padding: 4px 14px; border-radius: 30px; font-size: 11px; color: #ccc; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; margin-top: 25px; }
+        .stat-card { background: #0a0a0a; border-radius: 18px; padding: 20px; text-align: center; border: 1px solid #333; }
+        .stat-number { font-size: 2rem; font-weight: 800; color: #D4AF37; }
+        .stat-label { font-size: 0.75rem; color: #aaa; }
+        
+        .message { padding: 16px; border-radius: 14px; margin-bottom: 20px; display: none; }
+        .message.success { background: #1a3a1a; color: #D4AF37; display: block; border: 1px solid #D4AF37; }
+        .message.error { background: #3a1a1a; color: #ff6b6b; display: block; }
+        .hidden { display: none; }
+        .toast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: #D4AF37; color: #000000; padding: 14px 28px; border-radius: 60px; font-weight: bold; z-index: 2000; display: none; }
+        .welcome-user { text-align: center; padding: 15px; background: #1a1a1a; border-radius: 16px; margin-bottom: 20px; color: #D4AF37; border: 1px solid #D4AF37; }
+        
+        button { cursor: pointer; border: none; border-radius: 50px; font-weight: 600; padding: 12px 24px; }
+        .btn-primary { background: #D4AF37; color: #000000; }
+        .btn-primary:hover { background: #c4a22e; transform: translateY(-2px); }
+        .btn-danger { background: #dc3545; color: white; padding: 6px 14px; }
+        .btn-secondary { background: #333; color: #ccc; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: #111; border-radius: 24px; padding: 30px; width: 90%; max-width: 500px; border: 1px solid #D4AF37; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h3 { color: #D4AF37; }
+        .close-modal { font-size: 28px; cursor: pointer; color: #aaa; }
+        .close-modal:hover { color: #D4AF37; }
+        
+        .credentials-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 15px; }
+        .credentials-table th, .credentials-table td { padding: 8px; text-align: left; border-bottom: 1px solid #333; color: white; }
+        .credentials-table th { color: #D4AF37; }
+        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1a1a1a; }
+        ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
     </style>
 </head>
 <body>
 <div class="container">
-    <!-- ============================================ -->
-    <!-- HEADER SECTION -->
-    <!-- ============================================ -->
     <div class="header">
         <div class="logo-section">
             <div class="logo-icon">ML</div>
-            <div>
-                <h1>Member's Lounge</h1>
-                <p>Staff Availability & Capacity Management System</p>
-            </div>
+            <div><h1>Member's Lounge</h1><p>Staff Availability & Capacity System</p></div>
         </div>
-        <div class="status-badge" id="statusBadge">● Connecting to Firebase...</div>
+        <div class="status-badge" id="statusBadge">● Connecting...</div>
     </div>
 
-    <!-- ============================================ -->
-    <!-- MAIN TABS -->
-    <!-- ============================================ -->
-    <div class="tabs">
-        <button class="tab-btn active" data-tab="staff">👤 Staff Login</button>
-        <button class="tab-btn" data-tab="admin">⚙️ Admin Panel</button>
-        <button class="tab-btn" data-tab="matrix">📊 Admin Matrix</button>
-        <button class="tab-btn" data-tab="summary">📋 Admin Event Summary</button>
+    <div class="login-container" id="loginContainer">
+        <div class="login-box">
+            <h2>👤 Employee Login</h2>
+            <select id="employeeSelect"><option value="">-- Select Employee --</option></select>
+            <input type="password" id="employeePassword" placeholder="Enter Password">
+            <button id="employeeLoginBtn">Login</button>
+            <div id="employeeLoginError" class="message error" style="display: none;"></div>
+        </div>
+        <div class="login-box">
+            <h2>🔐 Admin Login</h2>
+            <input type="password" id="adminPassword" placeholder="Admin Password">
+            <button id="adminLoginBtn">Admin Panel</button>
+            <div id="adminLoginError" class="message error" style="display: none;"></div>
+        </div>
     </div>
 
-    <!-- ============================================ -->
-    <!-- STAFF PANEL (EMPLOYEE LOGIN) -->
-    <!-- ============================================ -->
-    <div id="staff-pane" class="tab-pane active">
+    <div id="staffPanel" class="hidden">
+        <div class="welcome-user" id="staffWelcomeMsg"></div>
         <div class="card">
-            <h2>🔐 Employee Login</h2>
-            <p>Select your name from the list below or enter your employee code.</p>
+            <h2>📅 Select Your Available Dates</h2>
             <div id="staffMessage" class="message"></div>
-            
-            <!-- Staff List for Selection -->
-            <label>Select Your Name:</label>
-            <div id="staffSelector" class="staff-selector">
-                <div class="loading">Loading employees...</div>
-            </div>
-            
-            <!-- Manual Code Entry -->
-            <div class="form-group" style="margin-top: 20px;">
-                <label>Or enter your employee code manually:</label>
-                <input type="text" id="manualCode" placeholder="e.g., CARLO6, PETER8" style="text-transform: uppercase; text-align: center; font-size: 18px; letter-spacing: 2px;">
-                <button id="loadManualBtn" style="margin-top: 12px; width: 100%;">Login with Code</button>
-            </div>
-            
-            <!-- Debug / Status Info -->
-            <div id="debugInfo" class="debug-info">Initializing system...</div>
+            <div id="staffDatesList" class="date-list"></div>
+            <button id="staffSaveBtn" class="btn-primary" style="margin-top: 25px; width: 100%;">💾 Save My Availability</button>
         </div>
+        <div class="card"><button id="staffLogoutBtn" class="btn-secondary">Logout</button></div>
+    </div>
 
-        <!-- Staff Details & Availability Section (Hidden until login) -->
-        <div id="staffDetails" class="hidden">
+    <div id="adminPanel" class="hidden">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="dashboard">📊 Dashboard</button>
+            <button class="tab-btn" data-tab="employees">👥 Manage Staff (38)</button>
+            <button class="tab-btn" data-tab="events">📅 Events</button>
+            <button class="tab-btn" data-tab="matrix">📊 Matrix</button>
+            <button class="tab-btn" data-tab="summary">📋 Summary</button>
+        </div>
+        
+        <div id="dashboard-pane" class="tab-pane active">
+            <div class="card"><h2>Dashboard</h2><div class="stats-grid" id="adminStats"></div><button id="adminLogoutBtn" class="btn-secondary" style="margin-top:20px;">Logout</button></div>
+        </div>
+        
+        <div id="employees-pane" class="tab-pane">
             <div class="card">
-                <h2>👋 Welcome, <span id="displayName"></span></h2>
-                <div style="display: flex; gap: 25px; flex-wrap: wrap; margin-bottom: 25px; padding: 18px; background: #faf9ff; border-radius: 18px;">
-                    <div><strong>📌 Section:</strong> <span id="displaySection"></span></div>
-                    <div><strong>🆔 Employee Code:</strong> <code id="displayCode" style="font-size: 1.1rem;"></code></div>
+                <h2>👥 Employee Management</h2>
+                <div id="adminMsg" class="message"></div>
+                
+                <h3>➕ Add New Employee</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Full Name</label><input type="text" id="newName" placeholder="Full Name"></div>
+                    <div class="form-group"><label>Section</label><select id="newSection"><option value="manager">Manager</option><option value="floor">Floor</option><option value="kitchen">Kitchen</option><option value="bar">Bar</option><option value="setup">Setup</option></select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Employee Code</label><input type="text" id="newCode" placeholder="Auto-generated"></div>
+                    <div class="form-group"><label>Password</label><input type="text" id="newPassword" placeholder="Enter password"></div>
+                    <div class="form-group"><label>&nbsp;</label><button id="genCodeBtn" class="btn-secondary" style="width:100%;padding:12px;">🎲 Generate Code</button></div>
+                </div>
+                <button id="addEmployeeBtn" class="btn-primary" style="width:100%; margin-bottom:25px;">➕ Add Employee</button>
+                
+                <h3>📋 All Employees (<span id="empCount">0</span>) - Click Edit to modify</h3>
+                <div id="employeeGrid" class="employee-grid"></div>
+                
+                <h3>🔑 Employee Credentials (Username/Password List)</h3>
+                <div style="background:#0a0a0a; border-radius:16px; padding:15px; max-height:300px; overflow-y:auto;">
+                    <table class="credentials-table" id="credentialsTable">
+                        <thead><tr><th>Name</th><th>Code (Username)</th><th>Password</th><th>Section</th></tr></thead>
+                        <tbody id="credentialsBody"></tbody>
+                    </table>
                 </div>
                 
-                <h3>📅 Select Your Available Dates</h3>
-                <p style="margin-bottom: 15px; font-size: 14px; color: #666;">Check the boxes for events you can work. You will only see availability for your section (Floor/Kitchen/Bar/Manager). Spots are limited by capacity.</p>
-                <div id="datesList" class="date-list">
-                    <div class="loading">Loading events...</div>
-                </div>
-                <button id="saveBtn" style="margin-top: 25px; width: 100%; padding: 14px;">💾 Save My Availability</button>
-            </div>
-            
-            <!-- Message for staff (no matrix visible - they cannot see others) -->
-            <div class="card" style="background: #f8f9fa; text-align: center;">
-                <p style="color: #666;">✅ Your availability has been saved. Thank you for updating your schedule!</p>
-                <p style="font-size: 12px; color: #999; margin-top: 10px;">Note: Only administrators can see the full team schedule.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- ============================================ -->
-    <!-- ADMIN PANEL (MANAGE EMPLOYEES & EVENTS) -->
-    <!-- ============================================ -->
-    <div id="admin-pane" class="tab-pane">
-        <div class="card">
-            <h2>👥 Manage Employees</h2>
-            <div id="adminMessage" class="message"></div>
-            
-            <!-- Seed Button -->
-            <button id="seedEmployeesBtn" style="margin-bottom: 20px; background: #28a745; color: white;">🌱 Seed All 38 Employees</button>
-            
-            <!-- Employee List -->
-            <h3>All Employees (<span id="empCount">0</span>)</h3>
-            <div id="employeeGrid" class="employee-grid">
-                <div class="loading">Loading employees...</div>
-            </div>
-            
-            <!-- Add New Employee Form -->
-            <h3 style="margin-top: 25px;">➕ Add New Employee</h3>
-            <div class="form-row">
-                <input type="text" id="newEmpName" placeholder="Full Name">
-                <select id="newEmpSection">
-                    <option value="manager">Manager (max 1 per event)</option>
-                    <option value="floor">Floor (max 8 per event)</option>
-                    <option value="kitchen">Kitchen (max 4 per event)</option>
-                    <option value="bar">Bar (max 2 per event)</option>
-                    <option value="setup">Setup Crew</option>
-                    <option value="cleaner">Cleaner</option>
-                </select>
-            </div>
-            <div class="form-row">
-                <input type="text" id="newEmpCode" placeholder="Employee Code (auto if blank)" style="text-transform: uppercase;">
-                <button id="genCodeBtn" class="secondary" type="button">🎲 Generate Random Code</button>
-            </div>
-            <button id="addEmpBtn" style="width: 100%; margin-top: 10px;">Add Employee</button>
-        </div>
-
-        <div class="card">
-            <h2>📅 Manage Events</h2>
-            <div class="form-row">
-                <input type="date" id="newEventDate">
-                <input type="text" id="newEventVenue" placeholder="Venue Name (e.g., Sala Reggio Ballroom)">
-            </div>
-            <button id="addEventBtn" style="width: 100%;">Add Event</button>
-            
-            <h3 style="margin-top: 25px;">Upcoming Events</h3>
-            <div id="eventList" class="event-list">
-                <div class="loading">Loading events...</div>
-            </div>
-            <p class="debug-info" style="margin-top: 18px;">⚠️ Past events are automatically deleted from the system.</p>
-        </div>
-
-        <div class="card">
-            <h2>📊 Export Data</h2>
-            <div style="display: flex; gap: 18px; flex-wrap: wrap;">
-                <button id="exportCSVBtn">📄 Export Availability to CSV</button>
-                <button id="exportCodesBtn">📋 Export Employee Codes to CSV</button>
+                <button id="resetEmployeesBtn" class="btn-secondary" style="margin-top:20px; width:100%;">🔄 Reset to Original 38 Employees</button>
             </div>
         </div>
         
-        <!-- Admin Stats -->
-        <div class="stats-grid" id="adminStats"></div>
-    </div>
-
-    <!-- ============================================ -->
-    <!-- ADMIN MATRIX PANEL (FULL TEAM VIEW) -->
-    <!-- ============================================ -->
-    <div id="matrix-pane" class="tab-pane">
-        <div class="card">
-            <h2>📊 Staff Availability Matrix (Admin View)</h2>
-            <p>Complete overview of which staff are available for each event. Green ✓ = Available, Gray ✗ = Not Available.</p>
-            <div class="section-filters" id="matrixFilters">
-                <button class="filter-chip active" data-section="all">All Sections</button>
-                <button class="filter-chip" data-section="manager">📋 Manager</button>
-                <button class="filter-chip" data-section="floor">🪑 Floor</button>
-                <button class="filter-chip" data-section="kitchen">🍳 Kitchen</button>
-                <button class="filter-chip" data-section="bar">🍸 Bar</button>
-                <button class="filter-chip" data-section="setup">🔧 Setup</button>
-                <button class="filter-chip" data-section="cleaner">🧹 Cleaner</button>
+        <div id="events-pane" class="tab-pane">
+            <div class="card">
+                <h2>Manage Events</h2>
+                <div class="form-row">
+                    <div class="form-group"><label>📅 Date</label><input type="date" id="newEventDate"></div>
+                    <div class="form-group"><label>📍 Venue</label><select id="newEventVenue"><option value="Sala Reggio Ballroom">Sala Reggio Ballroom</option><option value="Fior Parkville">Fior Parkville</option><option value="Alora Macedon">Alora Macedon</option></select></div>
+                    <div class="form-group"><label>&nbsp;</label><button id="addEventBtn" class="btn-primary" style="width:100%;">➕ Add Event</button></div>
+                </div>
+                <button id="seedEventsBtn" class="btn-primary" style="width:100%; margin-bottom:20px;">🌱 Seed All 22 Events</button>
+                <h3>Current Events (<span id="eventCount">0</span>)</h3>
+                <div id="eventList" class="event-list"></div>
             </div>
-            <div class="matrix-wrapper" id="matrixContainer">
-                <div class="loading">Loading availability data...</div>
-            </div>
-            <div class="stats-grid" id="matrixStats"></div>
         </div>
-    </div>
-
-    <!-- ============================================ -->
-    <!-- ADMIN EVENT SUMMARY PANEL (STAFF LISTS PER EVENT) -->
-    <!-- ============================================ -->
-    <div id="summary-pane" class="tab-pane">
-        <div class="card">
-            <h2>📋 Staff Assigned Per Event (Admin View)</h2>
-            <p>Shows exactly which staff are working each event with capacity tracking.</p>
-            <div id="eventSummaryContainer" class="event-summary-grid">
-                <div class="loading">Loading event data...</div>
-            </div>
+        
+        <div id="matrix-pane" class="tab-pane">
+            <div class="card"><h2>Staff Availability Matrix</h2><div class="section-filters" id="matrixFilters"></div><div class="matrix-wrapper" id="matrixContainer"></div></div>
+        </div>
+        
+        <div id="summary-pane" class="tab-pane">
+            <div class="card"><h2>Staff Per Event</h2><div id="summaryContainer" class="event-summary-grid"></div></div>
         </div>
     </div>
 </div>
+<div id="toast" class="toast">✓ Saved!</div>
 
-<!-- ============================================ -->
-<!-- TOAST NOTIFICATION -->
-<!-- ============================================ -->
-<div id="toast" class="toast">✓ Saved successfully!</div>
-
-<!-- ============================================ -->
-<!-- EDIT EMPLOYEE MODAL -->
-<!-- ============================================ -->
+<!-- Edit Employee Modal -->
 <div id="editModal" class="modal">
     <div class="modal-content">
-        <div class="modal-header">
-            <h3>✏️ Edit Employee</h3>
-            <span class="close-modal">&times;</span>
-        </div>
-        <input type="text" id="editEmpName" placeholder="Name" style="margin-bottom: 18px;">
-        <select id="editEmpSection" style="margin-bottom: 18px;">
-            <option value="manager">Manager</option>
-            <option value="floor">Floor</option>
-            <option value="kitchen">Kitchen</option>
-            <option value="bar">Bar</option>
-            <option value="setup">Setup</option>
-            <option value="cleaner">Cleaner</option>
-        </select>
-        <input type="text" id="editEmpCode" placeholder="Code" style="margin-bottom: 18px; text-transform: uppercase;">
-        <button id="saveEditBtn" style="width: 100%;">Save Changes</button>
+        <div class="modal-header"><h3>✏️ Edit Employee</h3><span class="close-modal">&times;</span></div>
+        <div class="form-group"><label>Full Name</label><input type="text" id="editName" style="width:100%;"></div>
+        <div class="form-group"><label>Section</label><select id="editSection" style="width:100%;"><option value="manager">Manager</option><option value="floor">Floor</option><option value="kitchen">Kitchen</option><option value="bar">Bar</option><option value="setup">Setup</option></select></div>
+        <div class="form-group"><label>Employee Code</label><input type="text" id="editCode" style="width:100%;"></div>
+        <div class="form-group"><label>Password</label><input type="text" id="editPassword" style="width:100%;"></div>
+        <button id="saveEditBtn" class="btn-primary" style="width:100%; margin-top:15px;">💾 Save Changes</button>
     </div>
 </div>
 
 <script>
-    // ============================================
-    // FIREBASE CONFIGURATION
-    // ============================================
     const firebaseConfig = {
         apiKey: "AIzaSyA0rDZ8NMo0cirWEPlIzt_Uq12qnOSBtPk",
         authDomain: "staff-roster-e0940.firebaseapp.com",
@@ -1049,889 +252,395 @@
         messagingSenderId: "176909786012",
         appId: "1:176909786012:web:be5a85f39c943915a00659"
     };
-
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // ============================================
-    // CAPACITY LIMITS PER SECTION
-    // ============================================
-    const CAPACITY_LIMITS = {
-        floor: 8,
-        kitchen: 4,
-        bar: 2,
-        manager: 1,
-        cleaner: 999,
-        setup: 999
-    };
+    const ADMIN_PW = "ML2026";
+    const CAPACITY = { floor: 8, kitchen: 4, bar: 2, manager: 1, setup: 999 };
+    
+    const ORIGINAL_EMPLOYEES = [
+        { name: "Carlo Pavia", section: "manager", code: "CARLO6", password: "carlo123" },
+        { name: "Michelle Pavia", section: "manager", code: "MICHE0", password: "michelle123" },
+        { name: "Bianca Pavia", section: "manager", code: "BIANCA", password: "bianca123" },
+        { name: "Laura Pavia", section: "manager", code: "LAURAP", password: "laura123" },
+        { name: "Isabella Pavia", section: "manager", code: "ISABEL", password: "isabella123" },
+        { name: "Rohitha Rawan", section: "kitchen", code: "ROHIT9", password: "rohitha123" },
+        { name: "Nam Lai", section: "kitchen", code: "NAMLA7", password: "nam123" },
+        { name: "Franco Schiavo", section: "kitchen", code: "FRANC3", password: "franco123" },
+        { name: "Stevan Brankovic", section: "kitchen", code: "STEVAN", password: "stevan123" },
+        { name: "Gerry Gupip", section: "kitchen", code: "GERRY9", password: "gerry123" },
+        { name: "Cathy Pelli", section: "kitchen", code: "CATHY3", password: "cathy123" },
+        { name: "Giulia Montorro", section: "kitchen", code: "GIULIA", password: "giulia123" },
+        { name: "Kim Lai", section: "kitchen", code: "KIMLAI", password: "kim123" },
+        { name: "Luccio Tonno", section: "kitchen", code: "LUCCIO", password: "luccio123" },
+        { name: "Peter Tricarico", section: "floor", code: "PETER8", password: "peter123" },
+        { name: "David Pasqualone", section: "floor", code: "DAVID4", password: "david123" },
+        { name: "Louis Pasqualone", section: "floor", code: "LOUIS6", password: "louis123" },
+        { name: "Rocco Cirelli", section: "floor", code: "ROCCO2", password: "rocco123" },
+        { name: "Julian Poloni", section: "floor", code: "JULIAN", password: "julian123" },
+        { name: "Nathan Trimboli", section: "floor", code: "NATHAN", password: "nathan123" },
+        { name: "Costa Vlahos", section: "floor", code: "COSTA1", password: "costa123" },
+        { name: "Vin Lai", section: "floor", code: "VINLAI", password: "vin123" },
+        { name: "Dean Margellis", section: "floor", code: "DEANMA", password: "dean123" },
+        { name: "Aidan Trimboli", section: "floor", code: "AIDANT", password: "aidan123" },
+        { name: "Jaimee Lidell", section: "floor", code: "JAIMEE", password: "jaimee123" },
+        { name: "Monique Elasmar", section: "floor", code: "MONIQU", password: "monique123" },
+        { name: "Luka Tigani", section: "floor", code: "LUKATI", password: "luka123" },
+        { name: "Jack Testa", section: "floor", code: "JACKTE", password: "jack123" },
+        { name: "Massimo Interlandi", section: "floor", code: "MASSIM", password: "massimo123" },
+        { name: "Olivier Leone", section: "floor", code: "OLIVIE", password: "olivier123" },
+        { name: "Alessio Interlandi", section: "floor", code: "ALESSI", password: "alessio123" },
+        { name: "Charlie Pavia", section: "floor", code: "CHARLI", password: "charlie123" },
+        { name: "Jacob Doubleday", section: "floor", code: "JACOB0", password: "jacob123" },
+        { name: "Claudio Bottigliero", section: "bar", code: "CLAUDI", password: "claudio123" },
+        { name: "Remzi Asllanaj", section: "bar", code: "REMZIA", password: "remzi123" },
+        { name: "Raffaele Martino", section: "bar", code: "RAFFAE", password: "raffaele123" },
+        { name: "Walter Testa", section: "setup", code: "WALTER", password: "walter123" },
+        { name: "Carl Testa", section: "setup", code: "CARLTE", password: "carl123" }
+    ];
 
-    // ============================================
-    // GLOBAL VARIABLES
-    // ============================================
-    let employees = [];
-    let events = [];
-    let submissions = {};
-    let currentEmployee = null;
-    let currentFilter = "all";
+    const ALL_DATES = ["2026-05-03","2026-05-09","2026-05-22","2026-05-23","2026-05-24","2026-05-29","2026-05-30","2026-06-07","2026-06-13","2026-06-20","2026-07-25","2026-08-01","2026-08-08","2026-08-15","2026-08-16","2026-08-22","2026-08-29","2026-09-13","2026-11-16","2026-11-21","2026-12-11","2026-12-12"];
+
+    let employees = [], events = [], submissions = {};
+    let currentEmployee = null, currentFilter = "all", isAdmin = false;
     let editingEmployeeId = null;
 
-    // ============================================
-    // COMPLETE EMPLOYEE LIST (38 EMPLOYEES)
-    // ============================================
-    const ALL_EMPLOYEES = [
-        // Managers (5)
-        { name: "Carlo Pavia", section: "manager", code: "CARLO6" },
-        { name: "Michelle Pavia", section: "manager", code: "MICHE0" },
-        { name: "Bianca Pavia", section: "manager", code: "BIANCA" },
-        { name: "Laura Pavia", section: "manager", code: "LAURAP" },
-        { name: "Isabella Pavia", section: "manager", code: "ISABEL" },
-        // Kitchen (9)
-        { name: "Rohitha Rawan", section: "kitchen", code: "ROHIT9" },
-        { name: "Nam Lai", section: "kitchen", code: "NAMLA7" },
-        { name: "Franco Schiavo", section: "kitchen", code: "FRANC3" },
-        { name: "Stevan Brankovic", section: "kitchen", code: "STEVAN" },
-        { name: "Gerry Gupip", section: "kitchen", code: "GERRY9" },
-        { name: "Cathy Pelli", section: "kitchen", code: "CATHY3" },
-        { name: "Giulia Montorro", section: "kitchen", code: "GIULIA" },
-        { name: "Kim Lai", section: "kitchen", code: "KIMLAI" },
-        { name: "Luccio Tonno", section: "kitchen", code: "LUCCIO" },
-        // Floor (19)
-        { name: "Peter Tricarico", section: "floor", code: "PETER8" },
-        { name: "David Pasqualone", section: "floor", code: "DAVID4" },
-        { name: "Louis Pasqualone", section: "floor", code: "LOUIS6" },
-        { name: "Rocco Cirelli", section: "floor", code: "ROCCO2" },
-        { name: "Julian Poloni", section: "floor", code: "JULIAN" },
-        { name: "Nathan Trimboli", section: "floor", code: "NATHAN" },
-        { name: "Costa Vlahos", section: "floor", code: "COSTA1" },
-        { name: "Vin Lai", section: "floor", code: "VINLAI" },
-        { name: "Dean Margellis", section: "floor", code: "DEANMA" },
-        { name: "Aidan Trimboli", section: "floor", code: "AIDANT" },
-        { name: "Jaimee Lidell", section: "floor", code: "JAIMEE" },
-        { name: "Monique Elasmar", section: "floor", code: "MONIQU" },
-        { name: "Luka Tigani", section: "floor", code: "LUKATI" },
-        { name: "Jack Testa", section: "floor", code: "JACKTE" },
-        { name: "Massimo Interlandi", section: "floor", code: "MASSIM" },
-        { name: "Olivier Leone", section: "floor", code: "OLIVIE" },
-        { name: "Alessio Interlandi", section: "floor", code: "ALESSI" },
-        { name: "Charlie Pavia", section: "floor", code: "CHARLI" },
-        { name: "Jacob Doubleday", section: "floor", code: "JACOB0" },
-        // Bar (3)
-        { name: "Claudio Bottigliero", section: "bar", code: "CLAUDI" },
-        { name: "Remzi Asllanaj", section: "bar", code: "REMZIA" },
-        { name: "Raffaele Martino", section: "bar", code: "RAFFAE" },
-        // Setup (2)
-        { name: "Walter Testa", section: "setup", code: "WALTER" },
-        { name: "Carl Testa", section: "setup", code: "CARLTE" }
-    ];
+    function showToast(msg) { let t = document.getElementById("toast"); t.textContent = msg; t.style.display = "block"; setTimeout(() => t.style.display = "none", 2500); }
+    function formatDate(d) { try { return new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }); } catch(e) { return d; } }
+    function escapeHtml(s) { return s ? s.replace(/[&<>]/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;" }[m])) : ""; }
+    function generateCode() { return Math.random().toString(36).substring(2, 8).toUpperCase(); }
 
-    // ============================================
-    // DEFAULT EVENTS (UPCOMING ONLY)
-    // ============================================
-    const DEFAULT_EVENTS = [
-        { date: "2026-05-17", venue: "Sala Reggio Ballroom" },
-        { date: "2026-05-22", venue: "Sala Reggio Ballroom" },
-        { date: "2026-05-23", venue: "Sala Reggio Ballroom" },
-        { date: "2026-05-24", venue: "Sala Reggio Ballroom" },
-        { date: "2026-05-29", venue: "Sala Reggio Ballroom" },
-        { date: "2026-05-30", venue: "Sala Reggio Ballroom" },
-        { date: "2026-05-31", venue: "Sala Reggio Ballroom" },
-        { date: "2026-06-07", venue: "Sala Reggio Ballroom" },
-        { date: "2026-06-13", venue: "Sala Reggio Ballroom" },
-        { date: "2026-06-20", venue: "Sala Reggio Ballroom" },
-        { date: "2026-06-21", venue: "Sala Reggio Ballroom" },
-        { date: "2026-07-19", venue: "Sala Reggio Ballroom" },
-        { date: "2026-07-25", venue: "Sala Reggio Ballroom" },
-        { date: "2026-08-01", venue: "Sala Reggio Ballroom" },
-        { date: "2026-08-02", venue: "Sala Reggio Ballroom" },
-        { date: "2026-08-08", venue: "Sala Reggio Ballroom" },
-        { date: "2026-08-15", venue: "Sala Reggio Ballroom" },
-        { date: "2026-08-16", venue: "Fior Events" },
-        { date: "2026-08-22", venue: "Sala Reggio Ballroom" },
-        { date: "2026-08-30", venue: "Sala Reggio Ballroom" },
-        { date: "2026-09-13", venue: "Sala Reggio Ballroom" },
-        { date: "2026-09-18", venue: "Sala Reggio Ballroom" },
-        { date: "2026-10-03", venue: "Fior Events" },
-        { date: "2026-10-17", venue: "Sala Reggio Ballroom" },
-        { date: "2026-11-13", venue: "Sala Reggio Ballroom" },
-        { date: "2026-11-21", venue: "Sala Reggio Ballroom" }
-    ];
-
-    // ============================================
-    // HELPER FUNCTIONS
-    // ============================================
-    function formatDate(dateStr) {
-        try {
-            const d = new Date(dateStr);
-            return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-        } catch(e) {
-            return dateStr;
-        }
-    }
-
-    function showToast() {
-        const toast = document.getElementById("toast");
-        toast.style.display = "block";
-        setTimeout(() => { toast.style.display = "none"; }, 2500);
-    }
-
-    function showMessage(elementId, text, type) {
-        const el = document.getElementById(elementId);
-        if (el) {
-            el.textContent = text;
-            el.className = `message ${type}`;
-            setTimeout(() => {
-                el.className = "message";
-                el.textContent = "";
-            }, 4000);
-        }
-    }
-
-    function generateRandomCode() {
-        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789";
-        let result = "";
-        for (let i = 0; i < 6; i++) {
-            result += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return result;
-    }
-
-    function escapeHtml(str) {
-        if (!str) return "";
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === "&") return "&amp;";
-            if (m === "<") return "&lt;";
-            if (m === ">") return "&gt;";
-            return m;
-        });
-    }
-
-    // ============================================
-    // CAPACITY CALCULATION FUNCTIONS
-    // ============================================
-    function getAssignedCount(eventId, section) {
-        let count = 0;
-        for (let empId in submissions) {
-            const emp = employees.find(e => e.id === empId);
-            if (emp && emp.section === section && submissions[empId].includes(eventId)) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    function getRemainingSpots(eventId, section) {
-        const limit = CAPACITY_LIMITS[section] || 999;
-        const current = getAssignedCount(eventId, section);
-        return Math.max(0, limit - current);
-    }
-
-    function canSignUp(emp, eventId) {
-        const section = emp.section;
-        const currentCount = getAssignedCount(eventId, section);
-        const limit = CAPACITY_LIMITS[section] || 999;
-        const alreadyAssigned = (submissions[emp.id] || []).includes(eventId);
-        return alreadyAssigned || currentCount < limit;
-    }
-
-    // ============================================
-    // DELETE PAST EVENTS
-    // ============================================
-    async function deletePastEvents() {
-        const today = new Date().toISOString().split('T')[0];
-        const eventsToDelete = events.filter(e => e.date < today);
-        for (const ev of eventsToDelete) {
-            await db.collection("events").doc(ev.id).delete();
-            console.log(`Deleted past event: ${ev.date} - ${ev.venue}`);
-        }
-        if (eventsToDelete.length > 0) {
-            await loadData();
-            renderEventSummary();
-            renderEventList();
-            renderMatrix();
-            if (currentEmployee) renderDatesList();
-        }
-    }
-
-    // ============================================
-    // LOAD DATA FROM FIRESTORE
-    // ============================================
-    async function loadData() {
-        try {
-            const employeesSnap = await db.collection("employees").get();
-            employees = [];
-            employeesSnap.forEach(doc => employees.push({ id: doc.id, ...doc.data() }));
-
-            const eventsSnap = await db.collection("events").get();
-            events = [];
-            eventsSnap.forEach(doc => events.push({ id: doc.id, ...doc.data() }));
-            events.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-            const submissionsSnap = await db.collection("submissions").get();
-            submissions = {};
-            submissionsSnap.forEach(doc => {
-                submissions[doc.id] = doc.data().eventIds || [];
-            });
-
-            const totalStaff = employees.length;
-            const totalEvents = events.length;
-            
-            let totalAssignments = 0;
-            for (let empId in submissions) {
-                totalAssignments += submissions[empId].length;
-            }
-
-            document.getElementById("statusBadge").innerHTML = `● Live | ${totalStaff} staff | ${totalEvents} events`;
-            document.getElementById("debugInfo").innerHTML = `✅ Connected! ${totalStaff} employees loaded.`;
-
-            // Update admin stats
-            const statsContainer = document.getElementById("adminStats");
-            if (statsContainer) {
-                statsContainer.innerHTML = `
-                    <div class="stat-card"><div class="stat-number">${totalStaff}</div><div class="stat-label">Total Employees</div></div>
-                    <div class="stat-card"><div class="stat-number">${totalEvents}</div><div class="stat-label">Upcoming Events</div></div>
-                    <div class="stat-card"><div class="stat-number">${totalAssignments}</div><div class="stat-label">Total Availability Submissions</div></div>
-                `;
-            }
-
-            return true;
-        } catch (err) {
-            console.error("Load error:", err);
-            document.getElementById("statusBadge").innerHTML = "● Connection error";
-            document.getElementById("debugInfo").innerHTML = `❌ Error: ${err.message}<br>Check Firebase security rules.`;
-            return false;
-        }
-    }
-
-    // ============================================
-    // SEED DATABASE WITH EMPLOYEES AND EVENTS
-    // ============================================
-    async function seedEmployees() {
-        let addedCount = 0;
-        for (const emp of ALL_EMPLOYEES) {
-            const existing = await db.collection("employees").where("code", "==", emp.code).get();
-            if (existing.empty) {
-                await db.collection("employees").add(emp);
-                addedCount++;
-            }
-        }
-        showMessage("adminMessage", `✅ Seeded ${addedCount} new employees. Total: ${ALL_EMPLOYEES.length} employees loaded.`, "success");
+    async function resetToOriginalEmployees() {
+        let batch = db.batch();
+        let existing = await db.collection("employees").get();
+        existing.forEach(doc => batch.delete(doc.ref));
+        await batch.commit();
+        for (let e of ORIGINAL_EMPLOYEES) await db.collection("employees").add(e);
         await loadData();
         renderEmployeeGrid();
-        renderStaffSelector();
+        renderEmployeeSelect();
+        renderCredentialsTable();
         renderMatrix();
-        renderEventSummary();
-        document.getElementById("debugInfo").innerHTML = `✅ ${employees.length}/38 employees loaded! All 38 staff members are now available.`;
+        renderSummary();
+        showToast("Reset to original 38 employees!");
     }
 
-    async function seedEvents() {
-        const eventsSnap = await db.collection("events").get();
-        if (eventsSnap.empty) {
-            for (const ev of DEFAULT_EVENTS) {
-                await db.collection("events").add(ev);
-            }
-            console.log(`✅ ${DEFAULT_EVENTS.length} events seeded`);
-        }
+    async function seedAllEvents() {
+        let existing = await db.collection("events").get();
+        let batch = db.batch();
+        existing.forEach(doc => batch.delete(doc.ref));
+        await batch.commit();
+        for (let d of ALL_DATES) await db.collection("events").add({ date: d, venue: "Sala Reggio Ballroom" });
         await loadData();
         renderEventList();
-        renderEventSummary();
         renderMatrix();
-        if (currentEmployee) renderDatesList();
+        renderSummary();
+        showToast("22 events seeded!");
     }
 
-    // ============================================
-    // SETUP REAL-TIME LISTENERS
-    // ============================================
-    function setupRealtimeListeners() {
-        db.collection("employees").onSnapshot(async () => {
+    async function addEmployee() {
+        let name = document.getElementById("newName").value.trim();
+        let section = document.getElementById("newSection").value;
+        let code = document.getElementById("newCode").value.trim().toUpperCase();
+        let password = document.getElementById("newPassword").value.trim();
+        if(!name) { alert("Enter name"); return; }
+        if(!password) { alert("Enter password"); return; }
+        if(!code) code = generateCode();
+        await db.collection("employees").add({ name, section, code, password });
+        document.getElementById("newName").value = "";
+        document.getElementById("newCode").value = "";
+        document.getElementById("newPassword").value = "";
+        await loadData();
+        renderEmployeeGrid();
+        renderEmployeeSelect();
+        renderCredentialsTable();
+        renderMatrix();
+        renderSummary();
+        showToast(`Added ${name}`);
+    }
+
+    async function deleteEmployee(id) {
+        if(confirm("Delete this employee?")) {
+            await db.collection("employees").doc(id).delete();
+            await db.collection("submissions").doc(id).delete();
             await loadData();
-            renderStaffSelector();
             renderEmployeeGrid();
+            renderEmployeeSelect();
+            renderCredentialsTable();
             renderMatrix();
-            renderEventSummary();
-        });
-
-        db.collection("events").onSnapshot(async () => {
-            await loadData();
-            await deletePastEvents();
-            renderEventList();
-            renderEventSummary();
-            if (currentEmployee) renderDatesList();
-            renderMatrix();
-        });
-
-        db.collection("submissions").onSnapshot(async () => {
-            await loadData();
-            if (currentEmployee) renderDatesList();
-            renderMatrix();
-            renderEventSummary();
-        });
+            renderSummary();
+            showToast("Employee deleted");
+        }
     }
 
-    // ============================================
-    // STAFF LOGIN & SELECTION FUNCTIONS
-    // ============================================
-    function renderStaffSelector() {
-        const container = document.getElementById("staffSelector");
-        if (!container) return;
+    function openEditModal(emp) {
+        editingEmployeeId = emp.id;
+        document.getElementById("editName").value = emp.name;
+        document.getElementById("editSection").value = emp.section;
+        document.getElementById("editCode").value = emp.code;
+        document.getElementById("editPassword").value = emp.password || "";
+        document.getElementById("editModal").style.display = "flex";
+    }
+
+    async function saveEditEmployee() {
+        let name = document.getElementById("editName").value.trim();
+        let section = document.getElementById("editSection").value;
+        let code = document.getElementById("editCode").value.trim().toUpperCase();
+        let password = document.getElementById("editPassword").value.trim();
+        if(!name || !code || !password) { alert("All fields required"); return; }
+        await db.collection("employees").doc(editingEmployeeId).update({ name, section, code, password });
+        document.getElementById("editModal").style.display = "none";
+        await loadData();
+        renderEmployeeGrid();
+        renderEmployeeSelect();
+        renderCredentialsTable();
+        renderMatrix();
+        renderSummary();
+        showToast("Employee updated");
+    }
+
+    async function loadData() {
+        let es = await db.collection("employees").get();
+        employees = []; es.forEach(d => employees.push({ id: d.id, ...d.data() }));
+        let evs = await db.collection("events").get();
+        events = []; evs.forEach(d => events.push({ id: d.id, ...d.data() }));
+        events.sort((a,b)=>new Date(a.date)-new Date(b.date));
+        let subs = await db.collection("submissions").get();
+        submissions = {}; subs.forEach(d => { submissions[d.id] = d.data().eventIds || []; });
+        document.getElementById("statusBadge").innerHTML = `● Live | ${employees.length} staff | ${events.length} events`;
+        if(document.getElementById("eventCount")) document.getElementById("eventCount").innerText = events.length;
+        if(document.getElementById("empCount")) document.getElementById("empCount").innerText = employees.length;
+        if(employees.length === 0) await resetToOriginalEmployees();
+        if(events.length === 0) await seedAllEvents();
+    }
+
+    function renderCredentialsTable() {
+        let tbody = document.getElementById("credentialsBody");
+        if(!tbody) return;
+        tbody.innerHTML = "";
+        for(let emp of employees.sort((a,b)=>a.name.localeCompare(b.name))) {
+            let row = tbody.insertRow();
+            row.insertCell(0).innerHTML = escapeHtml(emp.name);
+            row.insertCell(1).innerHTML = `<span style="color:#D4AF37;font-family:monospace;">${escapeHtml(emp.code)}</span>`;
+            row.insertCell(2).innerHTML = `<span style="font-family:monospace;">${escapeHtml(emp.password)}</span>`;
+            row.insertCell(3).innerHTML = escapeHtml(emp.section);
+        }
+    }
+
+    function getRemaining(eventId, section) {
+        let count = 0;
+        for(let id in submissions) {
+            let emp = employees.find(e => e.id === id);
+            if(emp && emp.section === section && submissions[id].includes(eventId)) count++;
+        }
+        return Math.max(0, (CAPACITY[section]||999) - count);
+    }
+
+    function renderEmployeeSelect() {
+        let sel = document.getElementById("employeeSelect");
+        if(!sel) return;
+        sel.innerHTML = '<option value="">-- Select Employee --</option>';
+        for(let emp of employees.sort((a,b)=>a.name.localeCompare(b.name))) {
+            let opt = document.createElement("option");
+            opt.value = emp.id;
+            opt.textContent = `${emp.name} (${emp.section})`;
+            sel.appendChild(opt);
+        }
+    }
+
+    async function renderStaffDates() {
+        let container = document.getElementById("staffDatesList");
+        if(!container || !currentEmployee) return;
         container.innerHTML = "";
-        for (const emp of employees) {
-            const btn = document.createElement("button");
-            btn.className = "staff-btn";
-            btn.textContent = `${emp.name} (${emp.code})`;
-            btn.onclick = () => selectEmployee(emp);
-            container.appendChild(btn);
-        }
-        if (employees.length === 0) {
-            container.innerHTML = '<p style="color: #999; padding: 20px;">Loading employees. Click "Seed All 38 Employees" in Admin Panel if empty.</p>';
-        }
-    }
-
-    function selectEmployee(emp) {
-        currentEmployee = emp;
-        document.getElementById("staffDetails").classList.remove("hidden");
-        document.getElementById("displayName").innerText = emp.name;
-        document.getElementById("displaySection").innerText = emp.section.charAt(0).toUpperCase() + emp.section.slice(1);
-        document.getElementById("displayCode").innerText = emp.code;
-        document.getElementById("manualCode").value = emp.code;
-        renderDatesList();
-    }
-
-    function manualLoadEmployee() {
-        const code = document.getElementById("manualCode").value.trim().toUpperCase();
-        const emp = employees.find(e => e.code === code);
-        if (!emp) {
-            showMessage("staffMessage", `Code "${code}" not found. Please check your code or contact admin.`, "error");
-            return;
-        }
-        selectEmployee(emp);
-    }
-
-    // ============================================
-    // RENDER DATES FOR STAFF (THEIR AVAILABILITY)
-    // ============================================
-    async function renderDatesList() {
-        const container = document.getElementById("datesList");
-        if (!container || !currentEmployee) return;
-        container.innerHTML = "";
-        const mySubmissions = submissions[currentEmployee.id] || [];
-        const section = currentEmployee.section;
-
-        for (const ev of events) {
-            const isChecked = mySubmissions.includes(ev.id);
-            const remaining = getRemainingSpots(ev.id, section);
-            const isFull = remaining === 0 && !isChecked;
-
-            const div = document.createElement("div");
-            div.className = "date-item";
-            div.innerHTML = `
-                <div class="event-info">
-                    <div class="event-date">${formatDate(ev.date)}</div>
-                    <div class="event-venue">${escapeHtml(ev.venue)}</div>
-                </div>
-                <div class="capacity-info">
-                    <span class="capacity-badge ${remaining === 0 ? 'full' : 'available'}">${section}: ${remaining} ${remaining === 1 ? 'spot' : 'spots'} left</span>
-                </div>
-                <label class="checkbox-label ${isFull ? 'disabled' : ''}">
-                    <input type="checkbox" data-id="${ev.id}" ${isChecked ? "checked" : ""} ${isFull ? "disabled" : ""}>
-                    <span>Available to work</span>
-                    ${isFull ? '<span class="full-notice">(Section Full)</span>' : ''}
-                </label>
-            `;
+        let mySubs = submissions[currentEmployee.id] || [];
+        let section = currentEmployee.section;
+        for(let ev of events) {
+            let checked = mySubs.includes(ev.id);
+            let remaining = getRemaining(ev.id, section);
+            let full = remaining === 0 && !checked;
+            let div = document.createElement("div"); div.className = "date-item";
+            div.innerHTML = `<div><div class="event-date">${formatDate(ev.date)}</div><div class="event-venue-name">📍 ${escapeHtml(ev.venue || "Sala Reggio")}</div></div>
+                <div><span class="capacity-badge">${section}: ${remaining} left</span></div>
+                <label class="checkbox-label"><input type="checkbox" data-id="${ev.id}" ${checked?"checked":""} ${full?"disabled":""}> Available ${full?'(Full)':''}</label>`;
             container.appendChild(div);
-        }
-
-        if (events.length === 0) {
-            container.innerHTML = '<div style="padding: 35px; text-align: center;">No upcoming events scheduled. Admin can add events.</div>';
         }
     }
 
     async function saveAvailability() {
-        if (!currentEmployee) {
-            showMessage("staffMessage", "Please log in first", "error");
-            return;
-        }
-
-        const checkboxes = document.querySelectorAll("#datesList input[type='checkbox']");
-        const selected = [];
-        checkboxes.forEach(cb => {
-            if (cb.checked) selected.push(cb.getAttribute("data-id"));
-        });
-
-        // Validate capacity before saving
-        const section = currentEmployee.section;
-        for (let eventId of selected) {
-            const remaining = getRemainingSpots(eventId, section);
-            const already = (submissions[currentEmployee.id] || []).includes(eventId);
-            if (!already && remaining <= 0) {
-                const event = events.find(e => e.id === eventId);
-                showMessage("staffMessage", `Cannot sign up for ${event?.venue}: ${section} section is full.`, "error");
-                return;
-            }
-        }
-
+        if(!currentEmployee) return;
+        let checks = document.querySelectorAll("#staffDatesList input");
+        let selected = [];
+        checks.forEach(cb => { if(cb.checked) selected.push(cb.dataset.id); });
         await db.collection("submissions").doc(currentEmployee.id).set({ eventIds: selected });
-        showToast();
-        showMessage("staffMessage", `✓ Availability saved for ${currentEmployee.name}! Thank you.`, "success");
-        renderEventSummary();
+        showToast("Saved!");
+        await loadData();
         renderMatrix();
+        renderSummary();
+        renderStaffDates();
     }
 
-    // ============================================
-    // ADMIN: EMPLOYEE MANAGEMENT
-    // ============================================
-    async function renderEmployeeGrid() {
-        const container = document.getElementById("employeeGrid");
-        if (!container) return;
-        container.innerHTML = "";
-        
-        if (employees.length === 0) {
-            container.innerHTML = '<div class="loading">No employees. Click "Seed All 38 Employees" button above.</div>';
+    async function employeeLogin() {
+        let id = document.getElementById("employeeSelect").value;
+        let pwd = document.getElementById("employeePassword").value;
+        let emp = employees.find(e => e.id === id);
+        if(!emp || emp.password !== pwd) {
+            document.getElementById("employeeLoginError").textContent = "Invalid credentials";
+            document.getElementById("employeeLoginError").style.display = "block";
             return;
         }
+        document.getElementById("employeeLoginError").style.display = "none";
+        currentEmployee = emp;
+        document.getElementById("loginContainer").style.display = "none";
+        document.getElementById("staffPanel").classList.remove("hidden");
+        document.getElementById("adminPanel").classList.add("hidden");
+        document.getElementById("staffWelcomeMsg").innerHTML = `👋 Welcome ${emp.name} (${emp.section})`;
+        await renderStaffDates();
+    }
 
-        for (const emp of employees) {
-            const card = document.createElement("div");
-            card.className = "employee-card";
-            card.innerHTML = `
-                <div class="employee-name">
-                    ${escapeHtml(emp.name)}
-                    <span class="employee-code">${emp.code}</span>
-                </div>
-                <div class="employee-section">${emp.section} ${emp.section === 'floor' ? '(max 8)' : emp.section === 'kitchen' ? '(max 4)' : emp.section === 'bar' ? '(max 2)' : emp.section === 'manager' ? '(max 1)' : ''}</div>
+    function staffLogout() { currentEmployee = null; document.getElementById("loginContainer").style.display = "grid"; document.getElementById("staffPanel").classList.add("hidden"); document.getElementById("employeePassword").value = ""; }
+
+    async function adminLogin() {
+        let pwd = document.getElementById("adminPassword").value;
+        if(pwd !== ADMIN_PW) { document.getElementById("adminLoginError").textContent = "Wrong password"; document.getElementById("adminLoginError").style.display = "block"; return; }
+        document.getElementById("adminLoginError").style.display = "none";
+        isAdmin = true;
+        document.getElementById("loginContainer").style.display = "none";
+        document.getElementById("adminPanel").classList.remove("hidden");
+        document.getElementById("staffPanel").classList.add("hidden");
+        await renderEmployeeGrid();
+        await renderEventList();
+        await renderMatrix();
+        await renderSummary();
+        await renderAdminStats();
+        renderCredentialsTable();
+    }
+
+    function adminLogout() { isAdmin = false; document.getElementById("loginContainer").style.display = "grid"; document.getElementById("adminPanel").classList.add("hidden"); document.getElementById("adminPassword").value = ""; }
+
+    async function renderAdminStats() {
+        let container = document.getElementById("adminStats");
+        if(container) container.innerHTML = `<div class="stat-card"><div class="stat-number">${employees.length}</div><div class="stat-label">Staff</div></div><div class="stat-card"><div class="stat-number">${events.length}</div><div class="stat-label">Events</div></div><div class="stat-card"><div class="stat-number">${Object.keys(submissions).length}</div><div class="stat-label">Active</div></div>`;
+    }
+
+    async function renderEmployeeGrid() {
+        let container = document.getElementById("employeeGrid");
+        if(!container) return;
+        container.innerHTML = "";
+        for(let emp of employees.sort((a,b)=>a.name.localeCompare(b.name))) {
+            let card = document.createElement("div"); card.className = "employee-card";
+            card.innerHTML = `<div class="employee-name">${escapeHtml(emp.name)}<span class="employee-code">${emp.code}</span></div>
+                <div class="employee-section">${emp.section}</div>
+                <div class="employee-pwd">🔑 Password: ${emp.password}</div>
                 <div class="employee-actions">
-                    <button class="edit-employee" data-id="${emp.id}" data-name="${emp.name}" data-section="${emp.section}" data-code="${emp.code}">✏️ Edit</button>
-                    <button class="delete-employee" data-id="${emp.id}" class="danger">🗑️ Delete</button>
-                </div>
-            `;
+                    <button class="edit-employee" data-id="${emp.id}">✏️ Edit</button>
+                    <button class="delete-employee" data-id="${emp.id}">🗑️ Delete</button>
+                </div>`;
             container.appendChild(card);
         }
-
-        document.querySelectorAll(".edit-employee").forEach(btn => {
-            btn.addEventListener("click", () => {
-                editingEmployeeId = btn.dataset.id;
-                document.getElementById("editEmpName").value = btn.dataset.name;
-                document.getElementById("editEmpSection").value = btn.dataset.section;
-                document.getElementById("editEmpCode").value = btn.dataset.code;
-                document.getElementById("editModal").style.display = "flex";
-            });
-        });
-
-        document.querySelectorAll(".delete-employee").forEach(btn => {
-            btn.addEventListener("click", async () => {
-                if (confirm("Delete this employee? This will also remove their availability data.")) {
-                    await db.collection("employees").doc(btn.dataset.id).delete();
-                    await db.collection("submissions").doc(btn.dataset.id).delete();
-                    showToast();
-                    showMessage("adminMessage", "Employee deleted", "success");
-                }
-            });
-        });
-        
-        document.getElementById("empCount").innerHTML = employees.length;
+        document.querySelectorAll(".edit-employee").forEach(btn => btn.addEventListener("click", () => { let emp = employees.find(e=>e.id===btn.dataset.id); if(emp) openEditModal(emp); }));
+        document.querySelectorAll(".delete-employee").forEach(btn => btn.addEventListener("click", () => deleteEmployee(btn.dataset.id)));
     }
 
-    async function saveEditEmployee() {
-        const name = document.getElementById("editEmpName").value.trim();
-        const section = document.getElementById("editEmpSection").value;
-        const code = document.getElementById("editEmpCode").value.trim().toUpperCase();
-
-        if (!name || !code) {
-            showMessage("adminMessage", "Name and code required", "error");
-            return;
-        }
-
-        await db.collection("employees").doc(editingEmployeeId).update({ name, section, code });
-        document.getElementById("editModal").style.display = "none";
-        showToast();
-        showMessage("adminMessage", "Employee updated", "success");
-        await loadData();
-        renderEmployeeGrid();
-        renderStaffSelector();
-        renderMatrix();
-        renderEventSummary();
-        if (currentEmployee && currentEmployee.id === editingEmployeeId) {
-            currentEmployee = { id: editingEmployeeId, name, section, code };
-            document.getElementById("displayName").innerText = name;
-            document.getElementById("displaySection").innerText = section;
-            document.getElementById("displayCode").innerText = code;
-        }
-    }
-
-    async function addEmployee() {
-        const name = document.getElementById("newEmpName").value.trim();
-        const section = document.getElementById("newEmpSection").value;
-        let code = document.getElementById("newEmpCode").value.trim().toUpperCase();
-
-        if (!name) {
-            showMessage("adminMessage", "Please enter employee name", "error");
-            return;
-        }
-        if (!code) code = generateRandomCode();
-
-        const existing = employees.find(e => e.code === code);
-        if (existing) {
-            showMessage("adminMessage", `Code ${code} already exists`, "error");
-            return;
-        }
-
-        await db.collection("employees").add({ name, section, code });
-        document.getElementById("newEmpName").value = "";
-        document.getElementById("newEmpCode").value = "";
-        showToast();
-        showMessage("adminMessage", `Added ${name} with code ${code}`, "success");
-        await loadData();
-        renderEmployeeGrid();
-        renderStaffSelector();
-        renderMatrix();
-        renderEventSummary();
-    }
-
-    // ============================================
-    // ADMIN: EVENT MANAGEMENT
-    // ============================================
     async function renderEventList() {
-        const container = document.getElementById("eventList");
-        if (!container) return;
+        let container = document.getElementById("eventList");
+        if(!container) return;
         container.innerHTML = "";
-        
-        if (events.length === 0) {
-            container.innerHTML = '<p style="padding: 20px; text-align: center;">No events. Add your first event above.</p>';
-            return;
-        }
-
-        for (const ev of events) {
-            const div = document.createElement("div");
-            div.className = "event-item";
-            div.innerHTML = `
-                <div>
-                    <span class="event-date-small">${formatDate(ev.date)}</span>
-                    <span style="margin-left: 18px;">${escapeHtml(ev.venue)}</span>
-                </div>
-                <button class="delete-event" data-id="${ev.id}" style="background: #dc3545; color: white; padding: 6px 14px; border-radius: 25px;">Delete</button>
-            `;
+        for(let ev of events) {
+            let div = document.createElement("div"); div.className = "event-item";
+            div.innerHTML = `<div><strong>${formatDate(ev.date)}</strong> - ${escapeHtml(ev.venue || "Sala Reggio")}</div><button class="delete-event" data-id="${ev.id}" style="background:#dc3545;color:white;padding:6px 14px;border-radius:25px;">Delete</button>`;
             container.appendChild(div);
         }
-
-        document.querySelectorAll(".delete-event").forEach(btn => {
-            btn.addEventListener("click", async () => {
-                if (confirm("Delete this event? This will remove all staff availability for this event.")) {
-                    await db.collection("events").doc(btn.dataset.id).delete();
-                    showToast();
-                    showMessage("adminMessage", "Event deleted", "success");
-                }
-            });
-        });
+        document.querySelectorAll(".delete-event").forEach(btn => btn.addEventListener("click", async () => { if(confirm("Delete?")) { await db.collection("events").doc(btn.dataset.id).delete(); await loadData(); await renderEventList(); await renderMatrix(); await renderSummary(); showToast("Deleted"); } }));
     }
 
     async function addEvent() {
-        const date = document.getElementById("newEventDate").value;
-        const venue = document.getElementById("newEventVenue").value.trim();
-
-        if (!date || !venue) {
-            showMessage("adminMessage", "Please enter both date and venue", "error");
-            return;
-        }
-
-        await db.collection("events").add({ date, venue });
+        let date = document.getElementById("newEventDate").value;
+        let venue = document.getElementById("newEventVenue").value;
+        if(!date) { alert("Please select a date"); return; }
+        await db.collection("events").add({ date: date, venue: venue });
         document.getElementById("newEventDate").value = "";
-        document.getElementById("newEventVenue").value = "";
-        showToast();
-        showMessage("adminMessage", `Added event: ${formatDate(date)} - ${venue}`, "success");
         await loadData();
-        renderEventList();
-        renderEventSummary();
-        renderMatrix();
-        if (currentEmployee) renderDatesList();
+        await renderEventList();
+        await renderMatrix();
+        await renderSummary();
+        showToast("Event added!");
     }
 
-    // ============================================
-    // ADMIN: EVENT SUMMARY (STAFF LISTS PER EVENT)
-    // ============================================
-    async function renderEventSummary() {
-        const container = document.getElementById("eventSummaryContainer");
-        if (!container) return;
-
-        if (events.length === 0) {
-            container.innerHTML = '<div class="card"><p>No upcoming events scheduled.</p></div>';
-            return;
-        }
-
-        let html = "";
-
-        for (const ev of events) {
-            const floorStaff = [], kitchenStaff = [], barStaff = [], managerStaff = [], setupStaff = [], cleanerStaff = [];
-
-            for (const emp of employees) {
-                if ((submissions[emp.id] || []).includes(ev.id)) {
-                    if (emp.section === "floor") floorStaff.push(emp);
-                    else if (emp.section === "kitchen") kitchenStaff.push(emp);
-                    else if (emp.section === "bar") barStaff.push(emp);
-                    else if (emp.section === "manager") managerStaff.push(emp);
-                    else if (emp.section === "setup") setupStaff.push(emp);
-                    else if (emp.section === "cleaner") cleanerStaff.push(emp);
-                }
-            }
-
-            const floorRemaining = CAPACITY_LIMITS.floor - floorStaff.length;
-            const kitchenRemaining = CAPACITY_LIMITS.kitchen - kitchenStaff.length;
-            const barRemaining = CAPACITY_LIMITS.bar - barStaff.length;
-            const managerRemaining = CAPACITY_LIMITS.manager - managerStaff.length;
-
-            html += `
-                <div class="event-summary-card">
-                    <h3>${escapeHtml(ev.venue)}</h3>
-                    <div class="event-summary-date">${formatDate(ev.date)}</div>
-                    
-                    <div class="section-staff-list">
-                        <div class="section-title">🪑 Floor Staff (need 8)</div>
-                        <div class="staff-list">${floorStaff.map(s => `<span class="staff-tag">${escapeHtml(s.name)}</span>`).join('') || '<span style="color:#999;">No staff assigned</span>'}</div>
-                        <div class="count-badge">${floorStaff.length}/8 assigned | ${floorRemaining} spots remaining</div>
-                        ${floorRemaining === 0 ? '<div class="capacity-status full">✓ Full - No more spots available</div>' : `<div class="capacity-status open">⏳ ${floorRemaining} spot(s) open</div>`}
-                    </div>
-                    
-                    <div class="section-staff-list">
-                        <div class="section-title">🍳 Kitchen Staff (need 4)</div>
-                        <div class="staff-list">${kitchenStaff.map(s => `<span class="staff-tag">${escapeHtml(s.name)}</span>`).join('') || '<span style="color:#999;">No staff assigned</span>'}</div>
-                        <div class="count-badge">${kitchenStaff.length}/4 assigned | ${kitchenRemaining} spots remaining</div>
-                        ${kitchenRemaining === 0 ? '<div class="capacity-status full">✓ Full - No more spots available</div>' : `<div class="capacity-status open">⏳ ${kitchenRemaining} spot(s) open</div>`}
-                    </div>
-                    
-                    <div class="section-staff-list">
-                        <div class="section-title">🍸 Bar Staff (need 2)</div>
-                        <div class="staff-list">${barStaff.map(s => `<span class="staff-tag">${escapeHtml(s.name)}</span>`).join('') || '<span style="color:#999;">No staff assigned</span>'}</div>
-                        <div class="count-badge">${barStaff.length}/2 assigned | ${barRemaining} spots remaining</div>
-                        ${barRemaining === 0 ? '<div class="capacity-status full">✓ Full - No more spots available</div>' : `<div class="capacity-status open">⏳ ${barRemaining} spot(s) open</div>`}
-                    </div>
-                    
-                    <div class="section-staff-list">
-                        <div class="section-title">📋 Manager (need 1)</div>
-                        <div class="staff-list">${managerStaff.map(s => `<span class="staff-tag manager">${escapeHtml(s.name)}</span>`).join('') || '<span style="color:#999;">No manager assigned</span>'}</div>
-                        <div class="count-badge">${managerStaff.length}/1 assigned | ${managerRemaining} spots remaining</div>
-                        ${managerRemaining === 0 ? '<div class="capacity-status full">✓ Manager assigned</div>' : `<div class="capacity-status open">⏳ Manager needed</div>`}
-                    </div>
-                    
-                    <div class="section-staff-list">
-                        <div class="section-title">🔧 Setup Crew</div>
-                        <div class="staff-list">${setupStaff.map(s => `<span class="staff-tag">${escapeHtml(s.name)}</span>`).join('') || '<span style="color:#999;">No setup crew assigned</span>'}</div>
-                    </div>
-                </div>
-            `;
-        }
-
-        container.innerHTML = html;
-    }
-
-    // ============================================
-    // ADMIN: AVAILABILITY MATRIX
-    // ============================================
     async function renderMatrix() {
-        const container = document.getElementById("matrixContainer");
-        if (!container) return;
-
-        let filteredEmployees = currentFilter === "all" ? employees : employees.filter(e => e.section === currentFilter);
-
-        if (filteredEmployees.length === 0) {
-            container.innerHTML = '<div class="loading">No employees in this section</div>';
-            return;
-        }
-
-        if (events.length === 0) {
-            container.innerHTML = '<div class="loading">No events scheduled yet</div>';
-            return;
-        }
-
-        let html = `<table class="availability-table">
-            <thead>
-                <tr>
-                    <th>Event Date / Venue</th>`;
-        for (const emp of filteredEmployees) {
-            html += `<th>${escapeHtml(emp.name)}<br><small>${emp.code}</small></th>`;
-        }
-        html += `</thead>
-            </thead>
-            <tbody>`;
-
-        for (const ev of events) {
-            html += `<tr>
-                <td><strong>${formatDate(ev.date)}</strong><br>${escapeHtml(ev.venue)}</td>`;
-            for (const emp of filteredEmployees) {
-                const isAvail = (submissions[emp.id] || []).includes(ev.id);
-                const remaining = getRemainingSpots(ev.id, emp.section);
-                html += `<td style="text-align:center;">
-                    ${isAvail ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}
-                    ${remaining < 3 && remaining > 0 && !isAvail ? `<br><small style="color:#666;">${remaining} left</small>` : ''}
-                 </td>`;
-            }
+        let container = document.getElementById("matrixContainer");
+        if(!container) return;
+        let filtered = currentFilter === "all" ? employees : employees.filter(e => e.section === currentFilter);
+        if(filtered.length === 0) { container.innerHTML = "<div>No employees</div>"; return; }
+        let html = `<table class="availability-table"><thead><tr><th>Date</th>${filtered.map(e => `<th>${e.name}<br><small>${e.code}</small></th>`).join('')}</tr></thead><tbody>`;
+        for(let ev of events) {
+            html += `<tr><td><strong>${formatDate(ev.date)}</strong><br><span style="font-size:10px;color:#D4AF37;">${ev.venue || ""}</span></td>`;
+            for(let emp of filtered) { let avail = (submissions[emp.id] || []).includes(ev.id); html += `<td>${avail ? '<span class="available-yes">✓</span>' : '<span class="available-no">✗</span>'}</td>`; }
             html += `</tr>`;
         }
-
-        html += `</tbody>
-        </table>`;
+        html += `</tbody></table>`;
         container.innerHTML = html;
-
-        // Update matrix stats
-        const statsContainer = document.getElementById("matrixStats");
-        if (statsContainer) {
-            let totalAssignments = 0;
-            for (const emp of filteredEmployees) {
-                totalAssignments += (submissions[emp.id] || []).length;
-            }
-            statsContainer.innerHTML = `
-                <div class="stat-card"><div class="stat-number">${filteredEmployees.length}</div><div class="stat-label">Staff in filter</div></div>
-                <div class="stat-card"><div class="stat-number">${events.length}</div><div class="stat-label">Upcoming Events</div></div>
-                <div class="stat-card"><div class="stat-number">${totalAssignments}</div><div class="stat-label">Total Availability</div></div>
-                <div class="stat-card"><div class="stat-number">${employees.length}</div><div class="stat-label">Total Staff</div></div>
-            `;
-        }
     }
 
-    // ============================================
-    // FILTER INITIALIZATION
-    // ============================================
+    async function renderSummary() {
+        let container = document.getElementById("summaryContainer");
+        if(!container) return;
+        let html = "";
+        for(let ev of events) {
+            let counts = { floor: [], kitchen: [], bar: [], manager: [], setup: [] };
+            for(let emp of employees) { if((submissions[emp.id] || []).includes(ev.id)) counts[emp.section].push(emp.name); }
+            html += `<div class="event-summary-card"><h3>${formatDate(ev.date)}</h3><div class="event-summary-venue">📍 ${escapeHtml(ev.venue || "Sala Reggio")}</div>
+                <div class="section-staff-list"><div class="section-title">Floor (8)</div><div class="staff-list">${counts.floor.map(n=>`<span class="staff-tag">${escapeHtml(n)}</span>`).join('')||'None'}</div><div>${counts.floor.length}/8</div></div>
+                <div class="section-staff-list"><div class="section-title">Kitchen (4)</div><div class="staff-list">${counts.kitchen.map(n=>`<span class="staff-tag">${escapeHtml(n)}</span>`).join('')||'None'}</div><div>${counts.kitchen.length}/4</div></div>
+                <div class="section-staff-list"><div class="section-title">Bar (2)</div><div class="staff-list">${counts.bar.map(n=>`<span class="staff-tag">${escapeHtml(n)}</span>`).join('')||'None'}</div><div>${counts.bar.length}/2</div></div>
+                <div class="section-staff-list"><div class="section-title">Manager (1)</div><div class="staff-list">${counts.manager.map(n=>`<span class="staff-tag manager" style="background:#D4AF37;color:#000;">${escapeHtml(n)}</span>`).join('')||'None'}</div><div>${counts.manager.length}/1</div></div>
+                <div class="section-staff-list"><div class="section-title">Setup</div><div class="staff-list">${counts.setup.map(n=>`<span class="staff-tag">${escapeHtml(n)}</span>`).join('')||'None'}</div></div></div>`;
+        }
+        container.innerHTML = html;
+    }
+
     function initFilters() {
-        document.querySelectorAll(".filter-chip").forEach(chip => {
-            chip.addEventListener("click", () => {
-                document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
-                chip.classList.add("active");
-                currentFilter = chip.dataset.section;
-                renderMatrix();
-            });
-        });
+        let container = document.getElementById("matrixFilters");
+        if(!container) return;
+        container.innerHTML = `<span class="filter-chip active" data-section="all">All</span><span class="filter-chip" data-section="manager">Manager</span><span class="filter-chip" data-section="floor">Floor</span><span class="filter-chip" data-section="kitchen">Kitchen</span><span class="filter-chip" data-section="bar">Bar</span><span class="filter-chip" data-section="setup">Setup</span>`;
+        document.querySelectorAll(".filter-chip").forEach(chip => { chip.addEventListener("click", () => { document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active")); chip.classList.add("active"); currentFilter = chip.dataset.section; renderMatrix(); }); });
     }
 
-    // ============================================
-    // EXPORT FUNCTIONS
-    // ============================================
-    function exportToCSV() {
-        let csv = "Event Date,Event Venue,";
-        for (const emp of employees) {
-            csv += `"${emp.name} (${emp.code})",`;
-        }
-        csv = csv.slice(0, -1);
-        csv += "\n";
-
-        for (const ev of events) {
-            csv += `"${formatDate(ev.date)}","${ev.venue}",`;
-            for (const emp of employees) {
-                const isAvail = (submissions[emp.id] || []).includes(ev.id);
-                csv += isAvail ? "Yes," : "No,";
-            }
-            csv = csv.slice(0, -1);
-            csv += "\n";
-        }
-
-        const blob = new Blob([csv], { type: "text/csv" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "staff-availability.csv";
-        a.click();
-        URL.revokeObjectURL(url);
-        showToast();
-    }
-
-    function exportCodesToCSV() {
-        let csv = "Name,Code,Section\n";
-        for (const emp of employees) {
-            csv += `"${emp.name}","${emp.code}","${emp.section}"\n`;
-        }
-        const blob = new Blob([csv], { type: "text/csv" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "employee-codes.csv";
-        a.click();
-        URL.revokeObjectURL(url);
-        showToast();
-    }
-
-    // ============================================
-    // TAB SWITCHING
-    // ============================================
     function switchTab(tabId) {
-        document.querySelectorAll(".tab-pane").forEach(pane => {
-            pane.classList.remove("active");
-        });
-        document.querySelectorAll(".tab-btn").forEach(btn => {
-            btn.classList.remove("active");
-        });
+        document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
         document.getElementById(`${tabId}-pane`).classList.add("active");
         document.querySelector(`[data-tab="${tabId}"]`).classList.add("active");
-
-        if (tabId === "admin") {
-            renderEmployeeGrid();
-            renderEventList();
-        } else if (tabId === "matrix") {
-            renderMatrix();
-        } else if (tabId === "summary") {
-            renderEventSummary();
-        }
+        if(tabId === "employees") { renderEmployeeGrid(); renderCredentialsTable(); }
+        if(tabId === "events") renderEventList();
+        if(tabId === "matrix") renderMatrix();
+        if(tabId === "summary") renderSummary();
+        if(tabId === "dashboard") renderAdminStats();
     }
 
-    // ============================================
-    // INITIALIZATION
-    // ============================================
     async function init() {
         await loadData();
-        
-        // If no employees, show message but don't auto-seed (let admin click button)
-        if (employees.length === 0) {
-            document.getElementById("debugInfo").innerHTML = "⚠️ No employees found. Go to Admin Panel and click 'Seed All 38 Employees' to load all staff.";
-            document.getElementById("staffSelector").innerHTML = '<p style="padding: 20px;">No employees loaded. Admin needs to seed the database.</p>';
-        } else {
-            renderStaffSelector();
-        }
-        
-        await seedEvents();
-        await loadData();
-        
+        renderEmployeeSelect();
         renderEmployeeGrid();
         renderEventList();
         renderMatrix();
-        renderEventSummary();
+        renderSummary();
+        renderCredentialsTable();
         initFilters();
-        
-        // Event Listeners
-        document.getElementById("loadManualBtn").addEventListener("click", manualLoadEmployee);
-        document.getElementById("saveBtn").addEventListener("click", saveAvailability);
-        document.getElementById("addEmpBtn").addEventListener("click", addEmployee);
-        document.getElementById("addEventBtn").addEventListener("click", addEvent);
-        document.getElementById("exportCSVBtn").addEventListener("click", exportToCSV);
-        document.getElementById("exportCodesBtn").addEventListener("click", exportCodesToCSV);
-        document.getElementById("genCodeBtn").addEventListener("click", () => {
-            document.getElementById("newEmpCode").value = generateRandomCode();
-        });
-        document.getElementById("seedEmployeesBtn").addEventListener("click", seedEmployees);
-        document.getElementById("saveEditBtn").addEventListener("click", saveEditEmployee);
-
-        document.querySelectorAll(".tab-btn").forEach(btn => {
-            btn.addEventListener("click", () => switchTab(btn.dataset.tab));
-        });
-
-        document.querySelectorAll(".close-modal").forEach(el => {
-            el.addEventListener("click", () => {
-                document.getElementById("editModal").style.display = "none";
-            });
-        });
-
-        window.onclick = (e) => {
-            if (e.target === document.getElementById("editModal")) {
-                document.getElementById("editModal").style.display = "none";
-            }
-        };
-
-        document.getElementById("manualCode").addEventListener("keypress", (e) => {
-            if (e.key === "Enter") manualLoadEmployee();
-        });
-
-        // Auto-delete past events every 5 minutes
-        setInterval(async () => {
-            await deletePastEvents();
-            renderEventSummary();
-        }, 300000);
+        document.getElementById("employeeLoginBtn").onclick = employeeLogin;
+        document.getElementById("adminLoginBtn").onclick = adminLogin;
+        document.getElementById("staffSaveBtn").onclick = saveAvailability;
+        document.getElementById("staffLogoutBtn").onclick = staffLogout;
+        document.getElementById("adminLogoutBtn").onclick = adminLogout;
+        document.getElementById("addEventBtn").onclick = addEvent;
+        document.getElementById("seedEventsBtn").onclick = seedAllEvents;
+        document.getElementById("resetEmployeesBtn").onclick = resetToOriginalEmployees;
+        document.getElementById("addEmployeeBtn").onclick = addEmployee;
+        document.getElementById("genCodeBtn").onclick = () => document.getElementById("newCode").value = generateCode();
+        document.getElementById("saveEditBtn").onclick = saveEditEmployee;
+        document.querySelectorAll(".close-modal").forEach(el => el.onclick = () => document.getElementById("editModal").style.display = "none");
+        window.onclick = (e) => { if(e.target === document.getElementById("editModal")) document.getElementById("editModal").style.display = "none"; };
+        document.querySelectorAll(".tab-btn").forEach(btn => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
     }
-
     init();
 </script>
 </body>
