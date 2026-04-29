@@ -2,116 +2,471 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Monday Night Soccer | Elite Command Center</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Monday Night Soccer | Team Hub</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: linear-gradient(145deg, #f0f4f8 0%, #e8edf3 100%); font-family: 'Inter', sans-serif; min-height: 100vh; }
-        
-        :root {
-            --primary: #3b82f6;
-            --primary-dark: #2563eb;
-            --accent: #f59e0b;
-            --success: #10b981;
-            --danger: #ef4444;
-            --yellow: #eab308;
-            --orange: #f97316;
-            --dark: #0f172a;
-            --gray: #64748b;
-            --light: #f8fafc;
-            --border: #e2e8f0;
-            --card-bg: #ffffff;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
         
-        .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+        body {
+            background: #f5f7fa;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            padding: 16px;
+            padding-bottom: 40px;
+            min-height: 100vh;
+        }
         
-        /* Header */
-        .header { background: var(--card-bg); border-radius: 28px; padding: 20px 32px; margin-bottom: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
-        .logo { display: flex; align-items: center; gap: 16px; }
-        .logo-icon { width: 52px; height: 52px; background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 18px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(59,130,246,0.3); }
-        .logo-icon i { font-size: 28px; color: white; }
-        .logo h1 { font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 800; background: linear-gradient(135deg, var(--dark), var(--primary)); background-clip: text; -webkit-background-clip: text; color: transparent; letter-spacing: -0.5px; }
-        .logo span { font-size: 0.7rem; color: var(--gray); letter-spacing: 1px; font-weight: 500; }
-        .user-badge { background: var(--light); padding: 8px 24px; border-radius: 60px; border: 1px solid var(--border); display: flex; align-items: center; gap: 14px; font-weight: 500; }
-        .user-badge i { color: var(--primary); font-size: 1.1rem; }
-        .user-badge button { background: var(--danger); border: none; padding: 6px 18px; border-radius: 40px; color: white; cursor: pointer; font-weight: 600; font-size: 0.8rem; transition: all 0.2s; }
-        .user-badge button:hover { background: #dc2626; transform: scale(0.96); }
+        /* Large touch targets - senior friendly */
+        button, .tab-btn, .player-card, select, input {
+            cursor: pointer;
+            min-height: 52px;
+        }
         
-        /* Tabs */
-        .tabs { display: flex; gap: 12px; justify-content: center; margin-bottom: 32px; flex-wrap: wrap; }
-        .tab-btn { background: white; border: 1px solid var(--border); padding: 14px 32px; border-radius: 80px; font-weight: 700; cursor: pointer; color: var(--gray); font-size: 0.9rem; transition: all 0.25s; font-family: 'Outfit', sans-serif; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .tab-btn i { font-size: 1rem; }
-        .tab-btn:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-3px); box-shadow: 0 12px 24px rgba(59,130,246,0.12); }
-        .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 8px 20px rgba(59,130,246,0.3); transform: translateY(-2px); }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
         
-        .panel { display: none; animation: fadeSlideUp 0.35s ease; }
-        .panel.active-panel { display: block; }
-        @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        /* Header - clean and readable */
+        .header {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 20px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            border: 1px solid #e9ecef;
+            text-align: center;
+        }
         
-        /* Cards */
-        .card { background: var(--card-bg); border-radius: 28px; padding: 28px; margin-bottom: 28px; border: 1px solid var(--border); box-shadow: 0 8px 24px rgba(0,0,0,0.04); transition: all 0.25s; }
-        .card:hover { box-shadow: 0 16px 32px rgba(0,0,0,0.08); transform: translateY(-2px); }
-        .card h2, .card h3 { font-family: 'Outfit', sans-serif; font-weight: 800; margin-bottom: 22px; color: var(--dark); border-left: 5px solid var(--primary); padding-left: 18px; font-size: 1.4rem; letter-spacing: -0.3px; }
+        .logo-icon {
+            width: 56px;
+            height: 56px;
+            background: #1a73e8;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
         
-        label { font-weight: 600; display: block; margin-top: 12px; margin-bottom: 6px; color: var(--gray); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.8px; }
-        select, input, button { padding: 14px 20px; border-radius: 60px; border: 1.5px solid var(--border); font-size: 0.9rem; background: white; color: var(--dark); width: 100%; margin: 6px 0; font-family: 'Inter', sans-serif; transition: all 0.2s; font-weight: 500; }
-        select:focus, input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
-        button { background: var(--primary); color: white; font-weight: 700; border: none; cursor: pointer; width: auto; min-width: 150px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); transition: all 0.2s; }
-        button:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(59,130,246,0.3); }
-        button:active { transform: translateY(1px); }
-        .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); box-shadow: none; }
-        .btn-outline:hover { background: var(--primary); color: white; }
-        .btn-success { background: var(--success); }
-        .btn-success:hover { background: #059669; }
-        .btn-warning { background: var(--accent); }
-        .btn-warning:hover { background: #d97706; }
-        .flex-btns { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 20px; }
+        .logo-icon i {
+            font-size: 32px;
+            color: white;
+        }
         
-        /* Pitch */
-        .pitch-modern { background: linear-gradient(145deg, #2ecc71, #27ae60); border-radius: 32px; padding: 28px; position: relative; box-shadow: 0 20px 30px -12px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.2); border: 2px solid #f1c40f; }
-        .teams-container { display: flex; gap: 24px; flex-wrap: wrap; }
-        .team-card { flex: 1; background: rgba(0,0,0,0.55); backdrop-filter: blur(12px); border-radius: 24px; padding: 20px; min-width: 240px; }
-        .team-title { text-align: center; font-size: 1.6rem; font-weight: 800; padding: 12px; border-radius: 60px; margin-bottom: 20px; font-family: 'Outfit', sans-serif; }
-        .yellow-title { background: rgba(234,179,8,0.9); color: #422800; }
-        .orange-title { background: rgba(249,115,22,0.9); color: white; }
-        .player-list-simple { display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto; }
-        .player-name-card { background: rgba(255,255,255,0.15); border-radius: 60px; padding: 10px 16px; text-align: center; font-weight: 500; font-size: 0.85rem; color: white; backdrop-filter: blur(4px); }
-        .score-display { text-align: center; margin-top: 20px; padding: 12px; background: rgba(0,0,0,0.6); border-radius: 60px; color: white; font-weight: 700; font-size: 1.1rem; }
+        .header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #1a1a2e;
+            letter-spacing: -0.3px;
+        }
         
-        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-        .count-box { background: var(--light); border-radius: 24px; padding: 24px; text-align: center; border: 1px solid var(--border); transition: all 0.2s; }
-        .count-number { font-size: 2.8rem; font-weight: 800; color: var(--primary); font-family: 'Outfit', sans-serif; }
+        .header p {
+            font-size: 14px;
+            color: #5a626e;
+            margin-top: 6px;
+        }
         
-        .data-table { width: 100%; border-collapse: collapse; background: white; border-radius: 20px; overflow: hidden; border: 1px solid var(--border); }
-        .data-table th, .data-table td { padding: 14px 12px; text-align: left; border-bottom: 1px solid var(--border); color: var(--dark); }
-        .data-table th { background: var(--light); color: var(--primary); font-weight: 700; font-size: 0.85rem; }
+        .user-badge {
+            background: #e8f0fe;
+            padding: 12px 18px;
+            border-radius: 60px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 12px;
+            font-weight: 600;
+            font-size: 15px;
+        }
         
-        /* Chat */
-        .chat-premium { background: white; border-radius: 28px; overflow: hidden; height: 520px; display: flex; flex-direction: column; border: 1px solid var(--border); box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
-        .chat-header { background: var(--light); padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
-        .chat-header i { font-size: 1.5rem; color: var(--primary); }
-        .chat-messages { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; background: #fafcff; }
-        .chat-message { display: flex; flex-direction: column; max-width: 75%; animation: messagePop 0.25s ease; }
-        @keyframes messagePop { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        .chat-message.sent { align-self: flex-end; }
-        .chat-message.sent .chat-bubble { background: var(--primary); color: white; border-radius: 24px 24px 6px 24px; }
-        .chat-message.received .chat-bubble { background: white; color: var(--dark); border-radius: 24px 24px 24px 6px; border: 1px solid var(--border); }
-        .chat-bubble { padding: 12px 20px; font-size: 0.9rem; line-height: 1.4; }
-        .chat-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 0.7rem; font-weight: 600; }
-        .admin-badge { background: var(--accent); padding: 2px 10px; border-radius: 30px; font-size: 0.6rem; color: white; margin-left: 8px; }
-        .chat-footer { padding: 16px 20px; background: white; border-top: 1px solid var(--border); display: flex; gap: 12px; align-items: center; }
-        .chat-footer input { flex: 1; margin: 0; border-radius: 60px; background: var(--light); }
-        .chat-footer button { margin: 0; min-width: 100px; }
+        .user-badge button {
+            background: #dc3545;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            min-height: 42px;
+        }
         
-        .login-card { background: white; border-radius: 40px; padding: 48px; text-align: center; border: 1px solid var(--border); max-width: 480px; margin: 80px auto; box-shadow: 0 30px 50px rgba(0,0,0,0.08); }
-        .guest-badge { background: var(--accent); color: white; font-size: 0.65rem; padding: 2px 8px; border-radius: 20px; margin-left: 8px; }
-        .selection-badge { background: var(--primary); color: white; font-size: 0.7rem; padding: 4px 12px; border-radius: 30px; display: inline-block; margin-left: 10px; }
+        /* Tabs - big and clear */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
         
-        @media (max-width: 800px) { .teams-container { flex-direction: column; } .chat-message { max-width: 90%; } .header { flex-direction: column; gap: 15px; text-align: center; } }
+        .tab-btn {
+            background: white;
+            border: 1px solid #dee2e6;
+            padding: 14px 20px;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 15px;
+            color: #495057;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        }
+        
+        .tab-btn i {
+            font-size: 16px;
+        }
+        
+        .tab-btn.active {
+            background: #1a73e8;
+            color: white;
+            border-color: #1a73e8;
+            box-shadow: 0 4px 12px rgba(26,115,232,0.3);
+        }
+        
+        /* Cards - high contrast */
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        
+        .card h2, .card h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            color: #1a1a2e;
+            border-left: 4px solid #1a73e8;
+            padding-left: 14px;
+        }
+        
+        label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #495057;
+            display: block;
+            margin-bottom: 6px;
+            margin-top: 12px;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: 16px;
+            border: 1.5px solid #dee2e6;
+            border-radius: 60px;
+            background: white;
+            font-family: inherit;
+            margin: 6px 0;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #1a73e8;
+        }
+        
+        button {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 140px;
+        }
+        
+        button:active {
+            transform: scale(0.97);
+        }
+        
+        .btn-outline {
+            background: white;
+            color: #1a73e8;
+            border: 2px solid #1a73e8;
+        }
+        
+        .btn-outline:active {
+            background: #e8f0fe;
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .flex-btns {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+        
+        /* Pitch - clean simple */
+        .pitch-simple {
+            background: linear-gradient(145deg, #2e7d32, #1b5e20);
+            border-radius: 28px;
+            padding: 20px;
+            border: 3px solid #ffc107;
+        }
+        
+        .teams-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .team-box {
+            flex: 1;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(8px);
+            border-radius: 20px;
+            padding: 16px;
+            min-width: 200px;
+        }
+        
+        .team-title {
+            font-size: 22px;
+            font-weight: 800;
+            text-align: center;
+            padding: 10px;
+            border-radius: 60px;
+            margin-bottom: 16px;
+        }
+        
+        .yellow-title {
+            background: #ffc107;
+            color: #2c2c2c;
+        }
+        
+        .orange-title {
+            background: #fd7e14;
+            color: white;
+        }
+        
+        .player-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+        
+        .player-chip {
+            background: rgba(255,255,255,0.18);
+            border-radius: 60px;
+            padding: 10px 14px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 500;
+            color: white;
+        }
+        
+        .score-box {
+            text-align: center;
+            margin-top: 16px;
+            padding: 12px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 60px;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        
+        /* Stats grids */
+        .stat-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .count-card {
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+        
+        .count-number {
+            font-size: 48px;
+            font-weight: 800;
+            color: #1a73e8;
+        }
+        
+        .attendee-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .attendee-tag {
+            background: #e9ecef;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        /* Data table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        
+        .data-table th, .data-table td {
+            padding: 14px 10px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 14px;
+        }
+        
+        .data-table th {
+            background: #f8f9fa;
+            color: #1a73e8;
+            font-weight: 700;
+        }
+        
+        /* Chat - simple and large */
+        .chat-container {
+            background: #f8f9fa;
+            border-radius: 24px;
+            overflow: hidden;
+            height: 480px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .chat-message {
+            display: flex;
+            flex-direction: column;
+            max-width: 85%;
+        }
+        
+        .chat-message.sent {
+            align-self: flex-end;
+        }
+        
+        .chat-message.sent .chat-bubble {
+            background: #1a73e8;
+            color: white;
+            border-radius: 20px 20px 4px 20px;
+        }
+        
+        .chat-message.received .chat-bubble {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 20px 20px 20px 4px;
+        }
+        
+        .chat-bubble {
+            padding: 12px 16px;
+            font-size: 15px;
+        }
+        
+        .chat-name {
+            font-weight: 700;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        
+        .chat-time {
+            font-size: 11px;
+            color: #888;
+            margin-top: 4px;
+        }
+        
+        .chat-footer {
+            padding: 14px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-footer input {
+            flex: 1;
+            margin: 0;
+            font-size: 16px;
+        }
+        
+        .chat-footer button {
+            margin: 0;
+            min-width: 90px;
+        }
+        
+        .admin-badge {
+            background: #fd7e14;
+            padding: 2px 10px;
+            border-radius: 30px;
+            font-size: 11px;
+            margin-left: 8px;
+            color: white;
+        }
+        
+        .login-card {
+            background: white;
+            border-radius: 32px;
+            padding: 36px 24px;
+            text-align: center;
+            max-width: 400px;
+            margin: 40px auto;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        }
+        
+        .guest-tag {
+            background: #fd7e14;
+            color: white;
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 30px;
+            margin-left: 8px;
+        }
+        
+        .selection-status {
+            background: #e8f0fe;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a73e8;
+        }
+        
+        @media (max-width: 550px) {
+            body { padding: 12px; }
+            .card { padding: 18px; }
+            .team-box { min-width: 100%; }
+            .tab-btn { padding: 12px 16px; font-size: 13px; }
+            button { padding: 12px 20px; }
+        }
     </style>
 </head>
 <body>
@@ -129,9 +484,9 @@
     };
     
     let db = null;
-    try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); console.log("Firebase ready"); } catch(e) { console.warn("Firebase fallback", e); }
+    try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); } catch(e) { console.warn(e); }
     
-    // Data State
+    // Data
     let players = ["Alex Rowe", "Ali Mekawy", "Carlo", "Charlie", "Chris Del Monaco", "Chris M", "Chris S", "Danny", "Dante", "David", "Dimitri", "Enzo", "Farid", "Faros", "Frank", "George B", "George T", "Ivan", "James Zoumis", "James", "Joe T", "Joey", "Kia", "Leo", "Manoli", "Marco", "Mario", "Maurice", "Nector", "Paul", "Perri", "Peter", "Ralph", "Rocco", "Stav", "Stevan", "Theo", "Tony EH", "Vasilis"].sort();
     let teamAssignments = {}, matchResults = {}, payments = [], attendance = [], guests = [];
     let isAdminLoggedIn = false, currentUser = null;
@@ -159,7 +514,7 @@
         let secondLast = new Date(lastMonday);
         secondLast.setDate(secondLast.getDate() - 7);
         while (cur <= secondLast) {
-            weeks.push({ dateStr: cur.toISOString().split('T')[0], label: `MON ${cur.toLocaleDateString('en-AU', { day:'numeric', month:'short' })}` });
+            weeks.push({ dateStr: cur.toISOString().split('T')[0], label: `Mon ${cur.toLocaleDateString('en-AU', { day:'numeric', month:'short' })}` });
             cur.setDate(cur.getDate() + 7);
         }
         return weeks;
@@ -185,29 +540,29 @@
     async function saveGuest(g) { if(db && guestsRef) await guestsRef.doc(`${g.guestName}_${g.gameDate}`).set(g); guests.push(g); }
     
     function loginAsPlayer(name) { currentUser = { name, role: "player" }; isAdminLoggedIn = false; localStorage.setItem("soccer_user", JSON.stringify(currentUser)); renderMainApp(); }
-    function adminLogin(pw) { if(pw === "admin123") { currentUser = { name: "admin", role: "admin" }; isAdminLoggedIn = true; localStorage.setItem("soccer_user", JSON.stringify(currentUser)); renderMainApp(); return true; } return false; }
+    function adminLogin(pw) { if(pw === "admin123") { currentUser = { name: "Admin", role: "admin" }; isAdminLoggedIn = true; localStorage.setItem("soccer_user", JSON.stringify(currentUser)); renderMainApp(); return true; } return false; }
     function logout() { currentUser = null; localStorage.removeItem("soccer_user"); renderLoginScreen(); }
     
     async function renderLoginScreen() {
         await loadData();
-        document.getElementById("appContainer").innerHTML = `<div class="login-card"><div class="logo-icon" style="margin:0 auto 20px; width:70px; height:70px;"><i class="fas fa-futbol" style="font-size:36px;"></i></div><h2 style="color:var(--dark); margin-bottom:10px;">Monday Night Soccer</h2><p style="color:var(--gray); margin-bottom:30px;">Elite Command Center</p><select id="playerNameSelect" style="margin-bottom:15px;"><option>-- Select Player --</option>${players.map(p=>`<option>${escapeHtml(p)}</option>`)}</select><button id="playerLoginBtn" style="width:100%;">⚡ ENTER AS PLAYER</button><hr style="margin:25px 0; border-color:var(--border);"><input type="password" id="adminPassword" placeholder="Admin Password"><button id="adminLoginBtn" style="width:100%; background:var(--gray);">👑 ADMIN LOGIN</button><div id="loginError" style="color:var(--danger); margin-top:16px;"></div></div>`;
-        document.getElementById("playerLoginBtn").onclick = () => { const name = document.getElementById("playerNameSelect").value; if(name && name !== "-- Select Player --") loginAsPlayer(name); else document.getElementById("loginError").innerText = "Select your name"; };
+        document.getElementById("appContainer").innerHTML = `<div class="login-card"><div class="logo-icon" style="margin:0 auto 16px;"><i class="fas fa-futbol"></i></div><h2 style="font-size:28px; margin-bottom:8px;">Monday Soccer</h2><p style="color:#6c757d; margin-bottom:24px;">Select your name to continue</p><select id="playerNameSelect" style="margin-bottom:16px;"><option>-- Select Player --</option>${players.map(p=>`<option>${escapeHtml(p)}</option>`)}</select><button id="playerLoginBtn" style="width:100%; margin-bottom:20px;">Enter as Player</button><hr style="margin:20px 0; border-color:#e9ecef;"><input type="password" id="adminPassword" placeholder="Admin Password"><button id="adminLoginBtn" style="width:100%; margin-top:12px; background:#6c757d;">Admin Login</button><div id="loginError" style="color:#dc3545; margin-top:16px;"></div></div>`;
+        document.getElementById("playerLoginBtn").onclick = () => { const name = document.getElementById("playerNameSelect").value; if(name && name !== "-- Select Player --") loginAsPlayer(name); else document.getElementById("loginError").innerText = "Please select your name"; };
         document.getElementById("adminLoginBtn").onclick = () => { if(!adminLogin(document.getElementById("adminPassword").value)) document.getElementById("loginError").innerText = "Wrong password"; };
     }
     
     async function renderMainApp() {
         await loadData();
         const container = document.getElementById("appContainer");
-        container.innerHTML = `<div class="header"><div class="logo"><div class="logo-icon"><i class="fas fa-futbol"></i></div><div><h1>MONDAY NIGHT SOCCER</h1><span>PREMIER LEAGUE HUB • 2026</span></div></div><div class="user-badge"><i class="fas fa-user-astronaut"></i> <span>${currentUser.role === "admin" ? "ADMIN MODE" : currentUser.name}</span> <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Exit</button></div></div>
+        container.innerHTML = `<div class="header"><div class="logo-icon" style="margin:0 auto 10px;"><i class="fas fa-futbol"></i></div><h1>MONDAY NIGHT SOCCER</h1><p>Weekly Hub · 2026</p><div class="user-badge"><i class="fas fa-user-circle"></i> ${currentUser.role === "admin" ? "ADMIN MODE" : currentUser.name}<button id="logoutBtn">Exit</button></div></div>
         <div class="tabs" id="tabs"></div><div id="panelContainer"></div>`;
         document.getElementById("logoutBtn").onclick = logout;
-        const tabs = [{ id: "attendance", label: "ATTENDANCE", icon: "fa-calendar-check" }, { id: "teams", label: "TEAM PITCH", icon: "fa-futbol" }, { id: "chat", label: "CHAT ROOM", icon: "fa-comments" }, { id: "stats", label: "HALL OF FAME", icon: "fa-trophy" }, { id: "history", label: "MATCH HISTORY", icon: "fa-clock" }, { id: "rules", label: "THE CODE", icon: "fa-scroll" }];
-        if (isAdminLoggedIn) tabs.push({ id: "admin", label: "ADMIN HUB", icon: "fa-shield-alt" });
+        const tabs = [{ id: "attendance", label: "📋 RSVP", icon: "fa-calendar" }, { id: "teams", label: "👥 TEAMS", icon: "fa-users" }, { id: "chat", label: "💬 CHAT", icon: "fa-comments" }, { id: "stats", label: "🏆 LEADERS", icon: "fa-trophy" }, { id: "history", label: "📜 HISTORY", icon: "fa-clock" }, { id: "rules", label: "📖 RULES", icon: "fa-scroll" }];
+        if (isAdminLoggedIn) tabs.push({ id: "admin", label: "⚙️ ADMIN", icon: "fa-shield" });
         document.getElementById("tabs").innerHTML = tabs.map(t => `<button class="tab-btn" data-tab="${t.id}"><i class="fas ${t.icon}"></i> ${t.label}</button>`).join('');
         document.getElementById("panelContainer").innerHTML = tabs.map(t => `<div id="${t.id}Panel" class="panel"></div>`).join('');
         document.getElementById("attendancePanel").classList.add("active-panel");
         if(document.querySelector(".tab-btn")) document.querySelector(".tab-btn").classList.add("active");
-        renderAttendancePanel(); renderTeamPitchPanel(); renderChatPanel(); renderStatsPanel(); renderHistoryPanel(); renderRulesPanel();
+        renderAttendancePanel(); renderTeamsPanel(); renderChatPanel(); renderStatsPanel(); renderHistoryPanel(); renderRulesPanel();
         if (isAdminLoggedIn) renderAdminPanel();
         document.querySelectorAll(".tab-btn").forEach(btn => {
             btn.onclick = () => {
@@ -215,148 +570,134 @@
                 document.getElementById(`${btn.dataset.tab}Panel`).classList.add("active-panel");
                 document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
                 btn.classList.add("active");
-                if(btn.dataset.tab === "teams") renderTeamPitchPanel();
+                if(btn.dataset.tab === "teams") renderTeamsPanel();
                 if(btn.dataset.tab === "attendance") renderAttendancePanel();
                 if(btn.dataset.tab === "admin") renderAdminPanel();
             };
         });
     }
     
-    function renderTeamPitchPanel() {
+    function renderTeamsPanel() {
         const weeks = getFutureWeeks();
-        if (!weeks.length) { document.getElementById("teamsPanel").innerHTML = `<div class="card">No upcoming fixtures</div>`; return; }
-        document.getElementById("teamsPanel").innerHTML = `<div class="card"><h2><i class="fas fa-users"></i> TEAM LINEUPS</h2><select id="pitchWeekSelect" style="margin-bottom:20px; max-width:320px;">${weeks.map(w=>`<option value="${w.dateStr}">${w.label}</option>`)}</select>
-        <div class="pitch-modern"><div class="teams-container" id="teamsContainer"></div><div id="matchScoreDisplay" class="score-display"></div></div></div>`;
-        document.getElementById("pitchWeekSelect").onchange = () => renderTeamLineup();
+        if (!weeks.length) { document.getElementById("teamsPanel").innerHTML = `<div class="card">No upcoming games</div>`; return; }
+        document.getElementById("teamsPanel").innerHTML = `<div class="card"><h2>👥 Team Lineups</h2><select id="teamWeekSelect" style="margin-bottom:16px;">${weeks.map(w=>`<option value="${w.dateStr}">${w.label}</option>`)}</select><div class="pitch-simple"><div class="teams-row" id="teamsRowContainer"></div><div id="scoreDisplay" class="score-box"></div></div></div>`;
+        document.getElementById("teamWeekSelect").onchange = () => renderTeamLineup();
         renderTeamLineup();
     }
     
     function renderTeamLineup() {
-        const gameDate = document.getElementById("pitchWeekSelect")?.value;
+        const gameDate = document.getElementById("teamWeekSelect")?.value;
         if(!gameDate) return;
         const assignments = teamAssignments[gameDate] || {};
-        const yellowPlayers = Object.keys(assignments).filter(p => assignments[p] === "yellow").sort();
-        const orangePlayers = Object.keys(assignments).filter(p => assignments[p] === "orange").sort();
+        const yellow = Object.keys(assignments).filter(p => assignments[p] === "yellow").sort();
+        const orange = Object.keys(assignments).filter(p => assignments[p] === "orange").sort();
         const match = matchResults[gameDate] || { yellowScore: 0, orangeScore: 0 };
-        const container = document.getElementById("teamsContainer");
+        const container = document.getElementById("teamsRowContainer");
         if(container) {
-            container.innerHTML = `
-                <div class="team-card"><div class="team-title yellow-title"><i class="fas fa-star"></i> YELLOW TEAM</div><div class="player-list-simple">${yellowPlayers.map(p => `<div class="player-name-card">⚽ ${escapeHtml(p)}</div>`).join('') || '<div class="player-name-card">— No players —</div>'}</div></div>
-                <div class="team-card"><div class="team-title orange-title"><i class="fas fa-fire"></i> ORANGE TEAM</div><div class="player-list-simple">${orangePlayers.map(p => `<div class="player-name-card">⚽ ${escapeHtml(p)}</div>`).join('') || '<div class="player-name-card">— No players —</div>'}</div></div>
-            `;
+            container.innerHTML = `<div class="team-box"><div class="team-title yellow-title">🟡 YELLOW</div><div class="player-list">${yellow.map(p => `<div class="player-chip">${escapeHtml(p)}</div>`).join('') || '<div class="player-chip">—</div>'}</div></div>
+            <div class="team-box"><div class="team-title orange-title">🟠 ORANGE</div><div class="player-list">${orange.map(p => `<div class="player-chip">${escapeHtml(p)}</div>`).join('') || '<div class="player-chip">—</div>'}</div></div>`;
         }
-        document.getElementById("matchScoreDisplay").innerHTML = `🏆 CURRENT SCORE: 🟡 ${match.yellowScore} - ${match.orangeScore} 🟠`;
+        document.getElementById("scoreDisplay").innerHTML = `🏆 SCORE: 🟡 ${match.yellowScore} — ${match.orangeScore} 🟠`;
     }
     
     function renderAttendancePanel() {
         const weeks = getFutureWeeks();
-        document.getElementById("attendancePanel").innerHTML = `<div class="card"><h2><i class="fas fa-check-circle"></i> RSVP SYSTEM</h2><select id="attWeekSelect">${weeks.map(w=>`<option value="${w.dateStr}">${w.label}</option>`)}</select><select id="attPlayerSelect"><option>-- Select Player --</option>${players.map(p=>`<option>${escapeHtml(p)}</option>`)}</select><div class="flex-btns"><button id="attendingBtn"><i class="fas fa-check"></i> ATTENDING ($5)</button><button id="notAttendingBtn" class="btn-outline"><i class="fas fa-times"></i> UNAVAILABLE</button></div><div id="attMsg" style="margin-top:16px;"></div></div>
-        <div class="card"><h2><i class="fas fa-users"></i> ATTENDEES FOR SELECTED WEEK</h2><div id="attCounts" class="stat-grid"></div></div>`;
-        document.getElementById("attWeekSelect").onchange = renderAttendanceCounts;
-        document.getElementById("attendingBtn").onclick = async () => { const p = document.getElementById("attPlayerSelect").value, w = document.getElementById("attWeekSelect").value; if(p && w && p!=="-- Select Player --") { await saveAttendance({player:p, gameDate:w, status:"in"}); renderAttendanceCounts(); document.getElementById("attMsg").innerHTML = `<div style="background:#d1fae5; padding:12px; border-radius:60px; color:#065f46;">✅ ${p} confirmed attending!</div>`; setTimeout(()=>document.getElementById("attMsg").innerHTML="",2000); if(isAdminLoggedIn) renderAdminPanel(); } };
-        document.getElementById("notAttendingBtn").onclick = async () => { const p = document.getElementById("attPlayerSelect").value, w = document.getElementById("attWeekSelect").value; if(p && w) { await saveAttendance({player:p, gameDate:w, status:"out"}); renderAttendanceCounts(); document.getElementById("attMsg").innerHTML = `<div style="background:#fee2e2; padding:12px; border-radius:60px; color:#991b1b;">❌ ${p} marked unavailable</div>`; setTimeout(()=>document.getElementById("attMsg").innerHTML="",2000); } };
-        renderAttendanceCounts();
+        document.getElementById("attendancePanel").innerHTML = `<div class="card"><h2>📋 RSVP - $5 per player</h2><select id="attWeekSelect">${weeks.map(w=>`<option value="${w.dateStr}">${w.label}</option>`)}</select><select id="attPlayerSelect"><option>-- Select Name --</option>${players.map(p=>`<option>${escapeHtml(p)}</option>`)}</select><div class="flex-btns"><button id="attendingBtn">✅ I'M PLAYING</button><button id="notAttendingBtn" class="btn-outline">❌ CAN'T PLAY</button></div><div id="attMsg" style="margin-top:12px; font-size:14px;"></div></div>
+        <div class="card"><h2>📋 Who's Playing This Week</h2><div id="attendeeListContainer"></div></div>`;
+        document.getElementById("attWeekSelect").onchange = renderAttendeeList;
+        document.getElementById("attendingBtn").onclick = async () => { const p = document.getElementById("attPlayerSelect").value, w = document.getElementById("attWeekSelect").value; if(p && p !== "-- Select Name --") { await saveAttendance({player:p, gameDate:w, status:"in"}); renderAttendeeList(); document.getElementById("attMsg").innerHTML = `✅ ${p} added to playing list`; setTimeout(()=>document.getElementById("attMsg").innerHTML="",2000); if(isAdminLoggedIn) renderAdminPanel(); } };
+        document.getElementById("notAttendingBtn").onclick = async () => { const p = document.getElementById("attPlayerSelect").value, w = document.getElementById("attWeekSelect").value; if(p && p !== "-- Select Name --") { await saveAttendance({player:p, gameDate:w, status:"out"}); renderAttendeeList(); document.getElementById("attMsg").innerHTML = `❌ ${p} marked as unavailable`; setTimeout(()=>document.getElementById("attMsg").innerHTML="",2000); } };
+        renderAttendeeList();
     }
-    async function renderAttendanceCounts() {
+    
+    async function renderAttendeeList() {
         const week = document.getElementById("attWeekSelect")?.value;
         if(!week) return;
         const attending = attendance.filter(a => a.gameDate === week && a.status === 'in').map(a=>a.player);
-        const notAttending = attendance.filter(a => a.gameDate === week && a.status === 'out').map(a=>a.player);
-        document.getElementById("attCounts").innerHTML = `<div class="count-box"><i class="fas fa-futbol" style="font-size:2rem; color:var(--success);"></i><div class="count-number">${attending.length}</div><div style="font-weight:600;">ATTENDING</div><div style="font-size:0.8rem; margin-top:10px; color:var(--dark);">${attending.map(p => `<span style="display:inline-block; background:#e2e8f0; padding:4px 12px; border-radius:30px; margin:4px;">${escapeHtml(p)}</span>`).join('') || '<span>None yet</span>'}</div></div>
-        <div class="count-box"><i class="fas fa-bed" style="font-size:2rem; color:var(--danger);"></i><div class="count-number">${notAttending.length}</div><div style="font-weight:600;">ABSENT</div><div style="font-size:0.8rem; margin-top:10px; color:var(--gray);">${notAttending.slice(0,8).join(', ')}${notAttending.length>8? '...' : ''}</div></div>`;
+        const weeklyGuests = guests.filter(g=>g.gameDate===week).map(g=>g.guestName);
+        const allPlaying = [...attending, ...weeklyGuests];
+        document.getElementById("attendeeListContainer").innerHTML = `<div class="count-card"><div class="count-number">${allPlaying.length}</div><div>Players This Week</div><div class="attendee-list">${allPlaying.map(p => `<span class="attendee-tag">${escapeHtml(p)} ${weeklyGuests.includes(p)?'🎭':''}</span>`).join('') || '<span>No one yet</span>'}</div></div>`;
     }
     
     function renderChatPanel() {
-        document.getElementById("chatPanel").innerHTML = `<div class="card"><h2><i class="fas fa-comment-dots"></i> LIVE CHAT</h2><div class="chat-premium"><div class="chat-header"><i class="fas fa-headset"></i><h3>Pitch Talk • Live</h3><span style="font-size:0.7rem; background:var(--success); padding:2px 12px; border-radius:20px; color:white;">LIVE</span></div><div id="chatMessages" class="chat-messages">Loading messages...</div><div class="chat-footer"><input id="chatInput" placeholder="Type your message..."><button id="sendChatBtn"><i class="fas fa-paper-plane"></i> Send</button></div></div></div>`;
+        document.getElementById("chatPanel").innerHTML = `<div class="card"><h2>💬 Team Chat</h2><div class="chat-container"><div id="chatMessages" class="chat-messages">Loading...</div><div class="chat-footer"><input id="chatInput" placeholder="Type message..."><button id="sendChatBtn">Send</button></div></div></div>`;
         document.getElementById("sendChatBtn").onclick = async () => { const msg = document.getElementById("chatInput").value.trim(); if(msg && messagesRef) { await messagesRef.add({ name: currentUser.name, message: msg, isAdmin: currentUser.role==="admin", timestamp: firebase.firestore.FieldValue.serverTimestamp() }); document.getElementById("chatInput").value = ""; } };
-        if(messagesRef) messagesRef.orderBy("timestamp","asc").onSnapshot(snap=>{ const container = document.getElementById("chatMessages"); if(!container) return; let html=""; snap.forEach(doc=>{ const d=doc.data(); const time = d.timestamp ? d.timestamp.toDate().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : ""; const isSent = d.name === currentUser.name; const displayName = d.isAdmin ? `${d.name} <span class="admin-badge">ADMIN</span>` : d.name; html += `<div class="chat-message ${isSent ? 'sent' : 'received'}"><div class="chat-bubble"><div class="chat-meta"><span class="chat-name">${escapeHtml(displayName)}</span><span class="chat-time">${time}</span></div><div>${escapeHtml(d.message)}</div></div></div>`; }); container.innerHTML = html || "<div style='text-align:center; opacity:0.5; padding:40px;'>✨ No messages yet. Start the conversation!</div>"; container.scrollTop = container.scrollHeight; });
+        if(messagesRef) messagesRef.orderBy("timestamp","asc").onSnapshot(snap=>{ const container = document.getElementById("chatMessages"); if(!container) return; let html=""; snap.forEach(doc=>{ const d=doc.data(); const time = d.timestamp ? d.timestamp.toDate().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : ""; const isSent = d.name === currentUser.name; const displayName = d.isAdmin ? `${d.name} <span class="admin-badge">ADMIN</span>` : d.name; html += `<div class="chat-message ${isSent ? 'sent' : 'received'}"><div class="chat-bubble"><div class="chat-name">${escapeHtml(displayName)}</div><div>${escapeHtml(d.message)}</div><div class="chat-time">${time}</div></div></div>`; }); container.innerHTML = html || "<div style='text-align:center; padding:30px; color:#888;'>No messages yet</div>"; container.scrollTop = container.scrollHeight; });
     }
     
     async function renderStatsPanel() {
         let tally = new Map();
         attendance.forEach(a => { if(a.status === 'in') tally.set(a.player, (tally.get(a.player)||0)+1); });
-        let sorted = Array.from(tally.entries()).map(([n,g]) => ({name:n, games:g})).sort((a,b)=>b.games - a.games).slice(0,15);
-        let html = `<div class="card"><h2><i class="fas fa-crown"></i> ATTENDANCE LEADERBOARD</h2><table class="data-table"><thead><tr><th>#</th><th>PLAYER</th><th>MATCHES</th></tr></thead><tbody>`;
-        sorted.forEach((p,i)=> html += `<tr><td style="color:var(--primary); font-weight:bold;">${i+1}</td><td>${escapeHtml(p.name)}</td><td><i class="fas fa-calendar-alt" style="color:var(--accent);"></i> ${p.games}</td></tr>`);
+        let sorted = Array.from(tally.entries()).map(([n,g]) => ({name:n, games:g})).sort((a,b)=>b.games - a.games).slice(0,12);
+        let html = `<div class="card"><h2>🏆 Attendance Leaders</h2><table class="data-table"><thead><th>Rank</th><th>Player</th><th>Games</th></thead><tbody>`;
+        sorted.forEach((p,i)=> html += `<tr><td style="font-weight:700;">${i+1}</td><td>${escapeHtml(p.name)}</td><td>🎽 ${p.games}</td></tr>`);
         html += `</tbody></table></div>`; document.getElementById("statsPanel").innerHTML = html;
     }
     
     async function renderHistoryPanel() {
-        const pastWeeks = ALL_GAME_WEEKS.filter(w => w.dateStr < getCurrentAESTDate()).reverse().slice(0,12);
-        let html = `<div class="card"><h2><i class="fas fa-history"></i> PAST BATTLES</h2><table class="data-table"><thead><tr><th>WEEK</th><th>YELLOW</th><th>ORANGE</th><th>SCORE</th></tr></thead><tbody>`;
+        const pastWeeks = ALL_GAME_WEEKS.filter(w => w.dateStr < getCurrentAESTDate()).reverse().slice(0,10);
+        let html = `<div class="card"><h2>📜 Past Games</h2><table class="data-table"><thead><th>Week</th><th>Yellow</th><th>Orange</th><th>Score</th></thead><tbody>`;
         for(let week of pastWeeks){
             const assignments = teamAssignments[week.dateStr]||{};
-            const yellow = Object.keys(assignments).filter(p=>assignments[p]==="yellow").slice(0,3);
-            const orange = Object.keys(assignments).filter(p=>assignments[p]==="orange").slice(0,3);
+            const yellow = Object.keys(assignments).filter(p=>assignments[p]==="yellow").slice(0,2);
+            const orange = Object.keys(assignments).filter(p=>assignments[p]==="orange").slice(0,2);
             const match = matchResults[week.dateStr]||{yellowScore:0, orangeScore:0};
-            html += `<tr><td style="font-weight:bold;">${week.label}</td><td>${yellow.join(', ')}${Object.keys(assignments).filter(p=>assignments[p]==="yellow").length>3?'...':''}</td><td>${orange.join(', ')}${Object.keys(assignments).filter(p=>assignments[p]==="orange").length>3?'...':''}</td><td><span style="color:#eab308; font-weight:700;">${match.yellowScore}</span> - <span style="color:#f97316; font-weight:700;">${match.orangeScore}</span></td></tr>`;
+            html += `<tr><td style="font-weight:600;">${week.label}</td><td>${yellow.join(', ')}${Object.keys(assignments).filter(p=>assignments[p]==="yellow").length>2?'...':''}</td><td>${orange.join(', ')}${Object.keys(assignments).filter(p=>assignments[p]==="orange").length>2?'...':''}</td><td>🟡${match.yellowScore} 🟠${match.orangeScore}</td></tr>`;
         }
         html += `</tbody></table></div>`; document.getElementById("historyPanel").innerHTML = html;
     }
-    function renderRulesPanel() { document.getElementById("rulesPanel").innerHTML = `<div class="card"><h2><i class="fas fa-gavel"></i> THE CODE OF CONDUCT</h2><ul style="line-height:2; margin-left:20px;"><li>🚫 No tackles from behind → Free kick</li><li>🧤 Goalie rotation mandatory (5 min minimum) → Goal penalty</li><li>⚡ No showboating → Immediate expulsion</li><li>🔴 Foul within 1m of goal → Shot from halfway</li><li>💪 Respect the ref and opponents</li></ul></div>`; }
+    function renderRulesPanel() { document.getElementById("rulesPanel").innerHTML = `<div class="card"><h2>📖 Rules</h2><ul style="line-height:1.8; margin-left:20px;"><li>❌ No tackling from behind → Free kick</li><li>🧤 Goalie rotation (5 min min) → Goal penalty</li><li>⚡ No showboating → Expulsion</li><li>🔴 Foul within 1m of goal → Shot from halfway</li><li>💰 $5 weekly fee per player</li></ul></div>`; }
     
-    // ADMIN HUB with Pre-Selection Button (Selection before Yellow/Orange)
+    // ADMIN PANEL - Simple, senior friendly
     async function renderAdminPanel() {
         const futureWeeks = getFutureWeeks();
-        document.getElementById("adminPanel").innerHTML = `<div class="card"><h3><i class="fas fa-coins"></i> CASH COLLECTION ($5/player)</h3><select id="adminCashWeek">${futureWeeks.map(w=>`<option value="${w.dateStr}">${w.label}</option>`)}</select><div id="cashList"></div><div id="treasuryTotal" class="count-box" style="margin-top:16px;"></div></div>
-        <div class="card"><h3><i class="fas fa-users"></i> TEAM ASSIGNMENT (Attendees Only)</h3><select id="adminTeamWeek">${futureWeeks.map(w=>`<option value="${w.dateStr}">${w.label}</option>`)}</select>
-        <div id="teamAssignList"></div>
-        <button id="saveTeamBtn" class="btn-success" style="margin-top:16px;">💾 SAVE FORMATION</button></div>
-        <div class="card"><h3><i class="fas fa-user-plus"></i> GUEST PLAYER</h3><select id="guestWeekSelectAdmin">${futureWeeks.map(w=>`<option value="${w.dateStr}">${w.label}</option>`)}</select><input id="guestNameAdmin" placeholder="Guest name (e.g., 'John Guest')"><button id="addGuestAdminBtn">➕ ADD GUEST</button><div id="guestListAdmin"></div></div>
-        <div class="card"><h3><i class="fas fa-chart-line"></i> MATCH RESULT</h3><select id="resultWeekSelectAdmin">${ALL_GAME_WEEKS.map(w=>`<option value="${w.dateStr}">${w.label}</option>`)}</select><div class="flex-btns"><input type="number" id="resYellow" placeholder="Yellow Score" style="width:100px;"><input type="number" id="resOrange" placeholder="Orange Score" style="width:100px;"><button id="saveResultAdminBtn">SAVE RESULT</button></div></div>`;
-        document.getElementById("adminCashWeek").onchange = renderCashAdmin;
-        document.getElementById("adminTeamWeek").onchange = renderTeamAssignAdmin;
-        document.getElementById("saveTeamBtn").onclick = async () => { await saveTeams(); renderTeamLineup(); renderHistoryPanel(); alert("✅ Teams saved successfully!"); };
-        document.getElementById("addGuestAdminBtn").onclick = async () => { const name = document.getElementById("guestNameAdmin").value.trim(), week = document.getElementById("guestWeekSelectAdmin").value; if(name && week) { await saveGuest({guestName:name, gameDate:week}); document.getElementById("guestNameAdmin").value=""; renderGuestListAdmin(); renderTeamAssignAdmin(); alert(`Guest "${name}" added!`); } };
-        document.getElementById("saveResultAdminBtn").onclick = async () => { const week = document.getElementById("resultWeekSelectAdmin").value, y = parseInt(document.getElementById("resYellow").value)||0, o = parseInt(document.getElementById("resOrange").value)||0; if(!matchResults[week]) matchResults[week]={}; matchResults[week].yellowScore=y; matchResults[week].orangeScore=o; await saveResults(); alert("Result saved!"); renderHistoryPanel(); renderTeamLineup(); };
-        renderCashAdmin(); renderTeamAssignAdmin(); renderGuestListAdmin();
+        document.getElementById("adminPanel").innerHTML = `<div class="card"><h3>💰 Collect $5 Fees</h3><select id="cashWeekSelect">${futureWeeks.map(w=>`<option value="${w.dateStr}">${w.label}</option>`)}</select><div id="cashCollectionList"></div><div id="totalTreasury" class="count-card" style="margin-top:16px;"></div></div>
+        <div class="card"><h3>👥 Assign Teams</h3><select id="assignWeekSelect">${futureWeeks.map(w=>`<option value="${w.dateStr}">${w.label}</option>`)}</select><div id="teamAssignList"></div><button id="saveTeamsAssignBtn" class="btn-success" style="margin-top:16px;">💾 Save Teams</button></div>
+        <div class="card"><h3>🎭 Add Guest Player</h3><select id="guestWeekSelect">${futureWeeks.map(w=>`<option value="${w.dateStr}">${w.label}</option>`)}</select><input id="guestNameInput" placeholder="Guest name"><button id="addGuestBtn">➕ Add Guest</button><div id="guestList"></div></div>
+        <div class="card"><h3>⚽ Set Match Score</h3><select id="scoreWeekSelect">${ALL_GAME_WEEKS.map(w=>`<option value="${w.dateStr}">${w.label}</option>`)}</select><div class="flex-btns"><input type="number" id="yellowScore" placeholder="Yellow" style="width:100px;"><input type="number" id="orangeScore" placeholder="Orange" style="width:100px;"><button id="saveScoreBtn">Save Score</button></div></div>`;
+        document.getElementById("cashWeekSelect").onchange = renderCashCollection;
+        document.getElementById("assignWeekSelect").onchange = renderTeamAssignmentList;
+        document.getElementById("saveTeamsAssignBtn").onclick = async () => { await saveTeams(); renderTeamLineup(); alert("Teams saved!"); };
+        document.getElementById("addGuestBtn").onclick = async () => { const name = document.getElementById("guestNameInput").value.trim(), week = document.getElementById("guestWeekSelect").value; if(name && week) { await saveGuest({guestName:name, gameDate:week}); document.getElementById("guestNameInput").value=""; renderGuestList(); renderTeamAssignmentList(); renderAttendeeList(); alert(`Guest ${name} added`); } };
+        document.getElementById("saveScoreBtn").onclick = async () => { const week = document.getElementById("scoreWeekSelect").value, y = parseInt(document.getElementById("yellowScore").value)||0, o = parseInt(document.getElementById("orangeScore").value)||0; if(!matchResults[week]) matchResults[week]={}; matchResults[week].yellowScore=y; matchResults[week].orangeScore=o; await saveResults(); alert("Score saved!"); renderHistoryPanel(); renderTeamLineup(); };
+        renderCashCollection(); renderTeamAssignmentList(); renderGuestList();
     }
     
-    async function renderCashAdmin() {
-        const week = document.getElementById("adminCashWeek").value;
+    async function renderCashCollection() {
+        const week = document.getElementById("cashWeekSelect").value;
         const attending = attendance.filter(a=>a.gameDate===week && a.status==='in').map(a=>a.player);
         const paidList = payments.filter(p=>p.gameDate===week).map(p=>p.player);
-        let html = `<div style="margin-bottom:12px;">💰 Attending: ${attending.length} players ($5 each)</div>`;
+        let html = `<div style="margin-bottom:12px;"><strong>💰 ${attending.length} players attending ($5 each)</strong></div>`;
         for(let p of attending){
             const isPaid = paidList.includes(p);
-            html += `<div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0; padding:8px 12px; background:var(--light); border-radius:60px;"><span style="font-weight:500;">${escapeHtml(p)}</span><button class="cashBtn" data-player="${escapeHtml(p)}" style="background:${isPaid?'var(--success)':'var(--primary)'}; padding:6px 20px; min-width:110px;">${isPaid?'✓ PAID':'COLLECT $5'}</button></div>`;
+            html += `<div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0; background:#f8f9fa; border-radius:60px; padding:10px 16px;"><span style="font-weight:500;">${escapeHtml(p)}</span><button class="collectBtn" data-player="${escapeHtml(p)}" style="background:${isPaid?'#28a745':'#1a73e8'}; padding:8px 20px; min-width:100px;">${isPaid?'Paid':'Collect $5'}</button></div>`;
         }
         const totalCollected = payments.filter(p=>p.gameDate===week).length * 5;
-        html += `<div class="count-box" style="margin-top:16px;">💵 This week: $${totalCollected} / $${attending.length * 5}</div>`;
-        document.getElementById("cashList").innerHTML = html || "<div>No attending players</div>";
-        document.getElementById("treasuryTotal").innerHTML = `🏦 TOTAL TREASURY: $${payments.reduce((a,b)=>a+5,0)}`;
-        document.querySelectorAll(".cashBtn").forEach(btn=>btn.onclick=async()=>{ const player=btn.dataset.player; if(!payments.find(p=>p.player===player&&p.gameDate===week)){ await savePayment({player, gameDate:week, amount:5}); renderCashAdmin(); } });
+        html += `<div style="margin-top:12px; background:#e8f0fe; border-radius:60px; padding:12px; text-align:center;"><strong>This week: $${totalCollected} / $${attending.length * 5}</strong></div>`;
+        document.getElementById("cashCollectionList").innerHTML = html || "<div>No attending players</div>";
+        document.getElementById("totalTreasury").innerHTML = `<strong>🏦 Total Treasury: $${payments.reduce((a,b)=>a+5,0)}</strong>`;
+        document.querySelectorAll(".collectBtn").forEach(btn=>btn.onclick=async()=>{ const player=btn.dataset.player; if(!payments.find(p=>p.player===player&&p.gameDate===week)){ await savePayment({player, gameDate:week, amount:5}); renderCashCollection(); } });
     }
     
-    async function renderTeamAssignAdmin() {
-        const week = document.getElementById("adminTeamWeek").value;
+    async function renderTeamAssignmentList() {
+        const week = document.getElementById("assignWeekSelect").value;
         const attending = attendance.filter(a=>a.gameDate===week && a.status==='in').map(a=>a.player);
         const weeklyGuests = guests.filter(g=>g.gameDate===week).map(g=>g.guestName);
         const all = [...attending, ...weeklyGuests];
         if(!teamAssignments[week]) teamAssignments[week]={};
-        
-        let html = `<div style="margin-bottom:16px; padding:12px; background:var(--light); border-radius:60px;"><i class="fas fa-info-circle"></i> <strong>Step 1: Select "Choose Team" → Step 2: Pick Yellow or Orange</strong></div>`;
-        
+        let html = `<div style="margin-bottom:12px;"><strong>👥 Select Team for Each Player:</strong></div>`;
         for(let p of all){
-            const currentTeam = teamAssignments[week][p] || "";
-            const isSelected = currentTeam !== "";
-            html += `<div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0; background:var(--light); border-radius:60px; padding:8px 16px;">
-                <span style="font-weight:500;">${escapeHtml(p)} ${weeklyGuests.includes(p)?'<span class="guest-badge"><i class="fas fa-glass-cheers"></i> GUEST</span>':''} ${isSelected ? `<span class="selection-badge"><i class="fas fa-check-circle"></i> Assigned to ${currentTeam === 'yellow' ? '🟡 YELLOW' : '🟠 ORANGE'}</span>` : ''}</span>
-                <select class="teamSelect" data-player="${escapeHtml(p)}" style="width:180px; margin:0;">
-                    <option value="">📋 Choose Team</option>
-                    <option value="yellow" ${currentTeam==="yellow"?"selected":""}>🟡 Yellow Team</option>
-                    <option value="orange" ${currentTeam==="orange"?"selected":""}>🟠 Orange Team</option>
-                </select>
-            </div>`;
+            const current = teamAssignments[week][p] || "";
+            html += `<div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0; background:#f8f9fa; border-radius:60px; padding:8px 16px;"><span style="font-weight:500;">${escapeHtml(p)} ${weeklyGuests.includes(p)?'🎭':''}</span><select class="teamSelectAdmin" data-player="${escapeHtml(p)}" style="width:140px; margin:0;"><option value="">— Select Team —</option><option value="yellow" ${current==="yellow"?"selected":""}>🟡 Yellow</option><option value="orange" ${current==="orange"?"selected":""}>🟠 Orange</option></select></div>`;
         }
-        document.getElementById("teamAssignList").innerHTML = html || "<div>No attending players/guests this week</div>";
-        document.querySelectorAll(".teamSelect").forEach(sel=>sel.addEventListener("change",()=>{ const player=sel.dataset.player; const value=sel.value; if(value) teamAssignments[week][player]=value; else delete teamAssignments[week][player]; renderTeamAssignAdmin(); }));
+        document.getElementById("teamAssignList").innerHTML = html || "<div>No players available</div>";
+        document.querySelectorAll(".teamSelectAdmin").forEach(sel=>sel.addEventListener("change",()=>{ const player=sel.dataset.player; const val=sel.value; if(val) teamAssignments[week][player]=val; else delete teamAssignments[week][player]; }));
     }
     
-    async function renderGuestListAdmin() {
-        const week = document.getElementById("guestWeekSelectAdmin").value;
+    async function renderGuestList() {
+        const week = document.getElementById("guestWeekSelect").value;
         const weeklyGuests = guests.filter(g=>g.gameDate===week);
-        document.getElementById("guestListAdmin").innerHTML = `<div style="margin-top:12px; padding:12px; background:var(--light); border-radius:60px;">🎟️ Guests this week: ${weeklyGuests.map(g=>escapeHtml(g.guestName)).join(', ') || 'none'}</div>`;
+        document.getElementById("guestList").innerHTML = `<div style="margin-top:12px; background:#e8f0fe; border-radius:60px; padding:12px; text-align:center;">🎭 Guests: ${weeklyGuests.map(g=>escapeHtml(g.guestName)).join(', ') || 'none'}</div>`;
     }
     
     function escapeHtml(str) { return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
@@ -364,7 +705,7 @@
     (async () => {
         const stored = localStorage.getItem("soccer_user");
         if(stored) {
-            try { const u = JSON.parse(stored); if(u.role==="admin"){ isAdminLoggedIn=true; currentUser={name:"admin",role:"admin"}; } else { currentUser={name:u.name,role:"player"}; } await loadData(); renderMainApp(); return; } catch(e){}
+            try { const u = JSON.parse(stored); if(u.role==="admin"){ isAdminLoggedIn=true; currentUser={name:"Admin",role:"admin"}; } else { currentUser={name:u.name,role:"player"}; } await loadData(); renderMainApp(); return; } catch(e){}
         }
         renderLoginScreen();
     })();
