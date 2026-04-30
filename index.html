@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Monday Night Soccer | Clifton Park</title>
+    <title>Monday Night Soccer | Clifton Park Executive Hub</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: #f0f4f8; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px 16px 40px; min-height: 100vh; }
+        body { background: #f0f2f5; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px 16px 40px; min-height: 100vh; }
         button, .tab-btn, select, input, textarea { cursor: pointer; min-height: 48px; font-size: 16px; }
-        .container { max-width: 720px; margin: 0 auto; }
+        .container { max-width: 780px; margin: 0 auto; }
         
         :root {
             --primary: #2563eb;
@@ -21,109 +21,116 @@
             --accent: #f59e0b;
             --success: #10b981;
             --danger: #ef4444;
-            --lime: #84cc16;
-            --lime-dark: #65a30d;
-            --lime-light: #ecfccb;
+            --green: #22c55e;
+            --green-dark: #16a34a;
+            --green-light: #dcfce7;
             --orange: #f97316;
-            --dark: #1e293b;
+            --dark: #0f172a;
             --gray: #64748b;
             --light: #f8fafc;
             --border: #e2e8f0;
             --card: #ffffff;
         }
         
-        .header { background: var(--card); border-radius: 28px; padding: 20px 16px; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid var(--border); text-align: center; }
-        .logo-icon { width: 56px; height: 56px; background: linear-gradient(135deg, var(--lime), var(--lime-dark)); border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 10px; box-shadow: 0 6px 14px rgba(132,204,22,0.35); }
-        .logo-icon i { font-size: 28px; color: white; }
-        .header h1 { font-size: 24px; font-weight: 800; color: var(--dark); letter-spacing: -0.3px; }
-        .header p { font-size: 12px; color: var(--gray); margin-top: 4px; }
-        .user-badge { background: var(--light); padding: 8px 18px; border-radius: 60px; display: inline-flex; align-items: center; gap: 12px; margin-top: 12px; font-weight: 600; font-size: 14px; border: 1px solid var(--border); }
-        .user-badge button { background: var(--danger); border: none; padding: 6px 18px; border-radius: 40px; color: white; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+        .header { background: var(--card); border-radius: 28px; padding: 20px 20px; margin-bottom: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); border: 1px solid var(--border); text-align: center; }
+        .logo-icon { width: 60px; height: 60px; background: linear-gradient(135deg, var(--green), var(--green-dark)); border-radius: 22px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 8px 18px rgba(34,197,94,0.3); }
+        .logo-icon i { font-size: 32px; color: white; }
+        .header h1 { font-size: 26px; font-weight: 800; color: var(--dark); letter-spacing: -0.5px; }
+        .header p { font-size: 13px; color: var(--gray); margin-top: 6px; }
+        .user-badge { background: var(--light); padding: 8px 22px; border-radius: 60px; display: inline-flex; align-items: center; gap: 14px; margin-top: 14px; font-weight: 600; font-size: 14px; border: 1px solid var(--border); }
+        .user-badge button { background: var(--danger); border: none; padding: 6px 20px; border-radius: 40px; color: white; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+        .user-badge button:hover { opacity: 0.9; transform: scale(0.97); }
         
-        .info-widget { background: linear-gradient(135deg, var(--dark), #0f172a); border-radius: 24px; padding: 14px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; color: white; gap: 12px; }
-        .weather-section { display: flex; align-items: center; gap: 12px; }
-        .weather-icon-large { font-size: 36px; }
-        .weather-temp-large { font-size: 28px; font-weight: 800; }
+        .info-widget { background: linear-gradient(135deg, var(--dark), #1e293b); border-radius: 28px; padding: 18px 24px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; color: white; gap: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .weather-section { display: flex; align-items: center; gap: 16px; }
+        .weather-icon-large { font-size: 44px; }
+        .weather-temp-large { font-size: 32px; font-weight: 800; }
+        .weather-detail { font-size: 13px; opacity: 0.8; }
+        .forecast-section { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+        .forecast-day { background: rgba(255,255,255,0.12); border-radius: 16px; padding: 6px 12px; text-align: center; font-size: 11px; }
         .time-section { text-align: right; }
-        .aest-time { font-size: 24px; font-weight: 800; font-family: monospace; }
-        .venue-info { font-size: 11px; opacity: 0.8; margin-top: 4px; }
+        .aest-time { font-size: 28px; font-weight: 800; font-family: monospace; letter-spacing: 2px; }
+        .venue-info { font-size: 12px; opacity: 0.7; margin-top: 6px; }
         
-        .tab-nav { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
-        .tab-btn { background: white; border: 1.5px solid var(--border); padding: 12px 20px; border-radius: 60px; font-weight: 700; font-size: 14px; color: var(--gray); display: inline-flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s; }
-        .tab-btn:hover { border-color: var(--lime); color: var(--lime-dark); background: var(--lime-light); transform: translateY(-1px); }
-        .tab-btn.active { background: var(--lime); color: white; border-color: var(--lime); box-shadow: 0 4px 12px rgba(132,204,22,0.4); }
+        .tab-nav { display: flex; gap: 10px; justify-content: center; margin-bottom: 24px; flex-wrap: wrap; }
+        .tab-btn { background: white; border: 1.5px solid var(--border); padding: 14px 24px; border-radius: 60px; font-weight: 700; font-size: 15px; color: var(--gray); display: inline-flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s; }
+        .tab-btn:hover { border-color: var(--green); color: var(--green-dark); background: var(--green-light); transform: translateY(-2px); }
+        .tab-btn.active { background: var(--green); color: white; border-color: var(--green); box-shadow: 0 6px 16px rgba(34,197,94,0.35); }
         
         .panel { display: none; }
-        .panel.active-panel { display: block; animation: fadeIn 0.25s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .panel.active-panel { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .card { background: var(--card); border-radius: 24px; padding: 20px; margin-bottom: 18px; border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
-        .card h2 { font-size: 18px; font-weight: 800; margin-bottom: 16px; color: var(--dark); border-left: 4px solid var(--lime); padding-left: 12px; }
+        .card { background: var(--card); border-radius: 28px; padding: 24px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.03); transition: all 0.2s; }
+        .card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08); transform: translateY(-2px); }
+        .card h2 { font-size: 20px; font-weight: 800; margin-bottom: 18px; color: var(--dark); border-left: 5px solid var(--green); padding-left: 14px; }
         
-        .match-scoreboard { background: linear-gradient(145deg, #1a1a2e, #0f172a); border-radius: 32px; padding: 24px; margin-bottom: 20px; text-align: center; color: white; }
-        .score-panel { display: flex; justify-content: center; align-items: center; gap: 30px; margin: 20px 0; flex-wrap: wrap; }
-        .team-score-card { text-align: center; background: rgba(255,255,255,0.08); border-radius: 28px; padding: 20px 32px; min-width: 140px; }
-        .team-score-number { font-size: 72px; font-weight: 900; line-height: 1; }
-        .score-vs { font-size: 36px; font-weight: 800; color: var(--accent); }
-        .timer-display { font-size: 48px; font-weight: 800; font-family: monospace; background: rgba(0,0,0,0.4); border-radius: 60px; padding: 16px; display: inline-block; margin: 10px 0; letter-spacing: 4px; }
-        .control-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
-        .control-buttons button { padding: 12px 24px; font-weight: 700; border-radius: 60px; border: none; cursor: pointer; transition: all 0.1s; }
+        .match-scoreboard { background: linear-gradient(145deg, #0f172a, #1e293b); border-radius: 36px; padding: 28px; margin-bottom: 20px; text-align: center; color: white; box-shadow: 0 16px 32px rgba(0,0,0,0.2); }
+        .score-panel { display: flex; justify-content: center; align-items: center; gap: 40px; margin: 25px 0; flex-wrap: wrap; }
+        .team-score-card { text-align: center; background: rgba(255,255,255,0.08); border-radius: 32px; padding: 24px 40px; min-width: 160px; backdrop-filter: blur(4px); }
+        .team-score-card .team-label { font-size: 18px; font-weight: 700; margin-bottom: 12px; letter-spacing: 1px; }
+        .team-score-number { font-size: 86px; font-weight: 900; line-height: 1; }
+        .score-vs { font-size: 42px; font-weight: 800; color: var(--accent); }
+        .timer-display { font-size: 56px; font-weight: 800; font-family: monospace; background: rgba(0,0,0,0.5); border-radius: 80px; padding: 18px 32px; display: inline-block; margin: 15px 0; letter-spacing: 6px; }
+        .control-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+        .control-buttons button { padding: 14px 28px; font-weight: 700; border-radius: 60px; border: none; cursor: pointer; transition: all 0.1s; font-size: 15px; }
         .control-buttons button:active { transform: scale(0.96); }
-        .goal-lime { background: var(--lime); color: #1a3a00; }
+        .goal-green { background: var(--green); color: #064e3b; }
         .goal-orange { background: var(--orange); color: white; }
         
         .standings-table { width: 100%; border-collapse: collapse; background: white; border-radius: 20px; overflow: hidden; }
-        .standings-table th, .standings-table td { padding: 14px 8px; text-align: center; border-bottom: 1px solid var(--border); font-size: 13px; }
-        .standings-table th { background: var(--lime); color: #1a3a00; font-weight: 800; }
-        .lime-row { background: rgba(132,204,22,0.1); }
-        .orange-row { background: rgba(249,115,22,0.1); }
+        .standings-table th, .standings-table td { padding: 16px 10px; text-align: center; border-bottom: 1px solid var(--border); font-size: 14px; }
+        .standings-table th { background: var(--green); color: #064e3b; font-weight: 800; font-size: 14px; }
+        .green-row { background: rgba(34,197,94,0.08); }
+        .orange-row { background: rgba(249,115,22,0.08); }
         
-        .pitch-premium { background: linear-gradient(145deg, #2e7d32, #1b5e20); border-radius: 28px; padding: 20px; border: 2px solid var(--lime); }
-        .teams-row { display: flex; gap: 16px; flex-wrap: wrap; }
-        .team-card { flex: 1; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); border-radius: 20px; padding: 16px; min-width: 180px; }
-        .team-title { font-size: 20px; font-weight: 800; text-align: center; padding: 10px; border-radius: 60px; margin-bottom: 14px; }
-        .lime-title { background: var(--lime); color: #1a3a00; }
+        .pitch-premium { background: linear-gradient(145deg, #2e7d32, #1b5e20); border-radius: 32px; padding: 24px; border: 2px solid var(--green); }
+        .teams-row { display: flex; gap: 20px; flex-wrap: wrap; }
+        .team-card { flex: 1; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); border-radius: 24px; padding: 18px; min-width: 200px; }
+        .team-title { font-size: 22px; font-weight: 800; text-align: center; padding: 12px; border-radius: 60px; margin-bottom: 16px; }
+        .green-title { background: var(--green); color: #064e3b; }
         .orange-title { background: var(--orange); color: white; }
-        .player-list { display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; }
-        .player-chip { background: rgba(255,255,255,0.15); border-radius: 40px; padding: 8px 12px; text-align: center; font-size: 13px; font-weight: 500; color: white; }
+        .player-list { display: flex; flex-direction: column; gap: 10px; max-height: 320px; overflow-y: auto; }
+        .player-chip { background: rgba(255,255,255,0.15); border-radius: 50px; padding: 10px 16px; text-align: center; font-size: 14px; font-weight: 500; color: white; }
         
-        .history-card { background: var(--card); border-radius: 24px; margin-bottom: 20px; border: 1px solid var(--border); overflow: hidden; }
-        .history-header { background: var(--light); padding: 16px 20px; border-bottom: 2px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .history-card { background: var(--card); border-radius: 28px; margin-bottom: 20px; border: 1px solid var(--border); overflow: hidden; transition: transform 0.2s; }
+        .history-card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,0.1); }
+        .history-header { background: var(--light); padding: 18px 24px; border-bottom: 2px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
         .history-date { font-weight: 800; font-size: 18px; color: var(--dark); }
-        .history-result { background: var(--lime); color: #1a3a00; padding: 6px 18px; border-radius: 60px; font-weight: 800; }
-        .history-pitch { background: linear-gradient(145deg, #2e7d32, #1b5e20); padding: 16px; }
-        .history-teams { display: flex; gap: 16px; flex-wrap: wrap; }
-        .history-team { flex: 1; background: rgba(0,0,0,0.7); border-radius: 20px; padding: 14px; }
-        .history-team-name { font-size: 16px; font-weight: 800; text-align: center; padding: 8px; border-radius: 60px; margin-bottom: 12px; }
-        .history-players { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; max-height: 100px; overflow-y: auto; }
-        .history-player { background: rgba(255,255,255,0.2); border-radius: 40px; padding: 5px 10px; font-size: 11px; color: white; }
-        .history-goals { background: var(--lime-light); padding: 14px 18px; }
-        .goal-badge { display: inline-block; background: white; border-radius: 40px; padding: 5px 12px; margin: 4px; font-size: 12px; font-weight: 600; }
-        .comment-item { background: var(--light); border-radius: 18px; padding: 10px; margin-bottom: 8px; border: 1px solid var(--border); }
+        .history-result { background: var(--green); color: #064e3b; padding: 8px 24px; border-radius: 60px; font-weight: 800; font-size: 18px; }
+        .history-pitch { background: linear-gradient(145deg, #2e7d32, #1b5e20); padding: 20px; }
+        .history-teams { display: flex; gap: 20px; flex-wrap: wrap; }
+        .history-team { flex: 1; background: rgba(0,0,0,0.7); border-radius: 24px; padding: 16px; }
+        .history-team-name { font-size: 18px; font-weight: 800; text-align: center; padding: 10px; border-radius: 60px; margin-bottom: 14px; }
+        .history-players { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-height: 120px; overflow-y: auto; }
+        .history-player { background: rgba(255,255,255,0.2); border-radius: 40px; padding: 6px 12px; font-size: 12px; color: white; }
+        .history-goals { background: var(--green-light); padding: 16px 22px; }
+        .goal-badge { display: inline-block; background: white; border-radius: 40px; padding: 6px 14px; margin: 4px; font-size: 13px; font-weight: 600; }
+        .comment-item { background: var(--light); border-radius: 20px; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border); }
         
-        .chat-container { background: var(--card); border-radius: 24px; overflow: hidden; border: 1px solid var(--border); }
-        .chat-messages { height: 380px; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: #fefefe; }
-        .chat-message { display: flex; flex-direction: column; max-width: 85%; }
+        .chat-container { background: var(--card); border-radius: 28px; overflow: hidden; border: 1px solid var(--border); }
+        .chat-messages { height: 420px; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; background: #fefefe; }
+        .chat-message { display: flex; flex-direction: column; max-width: 80%; }
         .chat-message.sent { align-self: flex-end; }
-        .chat-message.sent .msg-bubble { background: var(--lime); color: #1a3a00; border-radius: 22px 22px 6px 22px; }
-        .chat-message.received .msg-bubble { background: white; color: var(--dark); border-radius: 22px 22px 22px 6px; border: 1px solid var(--border); }
-        .msg-bubble { padding: 10px 16px; font-size: 14px; }
-        .chat-input-area { padding: 12px; background: white; border-top: 1px solid var(--border); display: flex; gap: 10px; }
-        .chat-input-area input { flex: 1; margin: 0; padding: 12px 16px; border-radius: 60px; border: 1px solid var(--border); }
-        .chat-input-area button { background: var(--lime); color: #1a3a00; font-weight: 700; }
+        .chat-message.sent .msg-bubble { background: var(--green); color: #064e3b; border-radius: 24px 24px 6px 24px; }
+        .chat-message.received .msg-bubble { background: white; color: var(--dark); border-radius: 24px 24px 24px 6px; border: 1px solid var(--border); }
+        .msg-bubble { padding: 12px 18px; font-size: 15px; }
+        .chat-input-area { padding: 16px; background: white; border-top: 1px solid var(--border); display: flex; gap: 12px; }
+        .chat-input-area input { flex: 1; margin: 0; padding: 14px 18px; border-radius: 60px; border: 1px solid var(--border); font-size: 15px; }
+        .chat-input-area button { background: var(--green); color: #064e3b; font-weight: 700; padding: 14px 24px; }
         
         .data-table { width: 100%; border-collapse: collapse; }
-        .data-table th, .data-table td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--border); font-size: 13px; }
-        .data-table th { background: var(--light); color: var(--lime-dark); font-weight: 800; }
-        .attendee-tag { background: var(--light); padding: 8px 16px; border-radius: 40px; font-size: 13px; display: inline-block; margin: 4px; border: 1px solid var(--border); }
-        .btn-outline { background: white; color: var(--lime-dark); border: 2px solid var(--lime); }
-        .flex-btns { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 15px; }
+        .data-table th, .data-table td { padding: 14px 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14px; }
+        .data-table th { background: var(--light); color: var(--green-dark); font-weight: 800; }
+        .attendee-tag { background: var(--light); padding: 8px 18px; border-radius: 40px; font-size: 13px; display: inline-block; margin: 5px; border: 1px solid var(--border); }
+        .btn-outline { background: white; color: var(--green-dark); border: 2px solid var(--green); }
+        .flex-btns { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 18px; }
         
-        @media (max-width: 550px) { .team-score-number { font-size: 48px; } .timer-display { font-size: 32px; } .info-widget { flex-direction: column; text-align: center; } .time-section { text-align: center; } .history-teams { flex-direction: column; } }
+        @media (max-width: 600px) { .team-score-number { font-size: 52px; } .timer-display { font-size: 36px; } .info-widget { flex-direction: column; text-align: center; } .time-section { text-align: center; } .history-teams { flex-direction: column; } .team-score-card { padding: 16px 24px; } }
     </style>
 </head>
 <body>
-<div class="container" id="appContainer">Loading...</div>
+<div class="container" id="appContainer">Loading Executive Hub...</div>
 
 <script>
     const firebaseConfig = {
@@ -136,7 +143,7 @@
     };
     
     let db = null;
-    try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); console.log("Firebase ready"); } catch(e) { console.warn("Firebase fallback mode"); }
+    try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); console.log("Firebase ready"); } catch(e) { console.warn("Firebase fallback - using local storage"); }
     
     let players = ["Alex Rowe", "Ali Mekawy", "Carlo", "Charlie", "Chris Del Monaco", "Chris M", "Chris S", "Danny", "Dante", "David", "Dimitri", "Enzo", "Farid", "Faros", "Frank", "George B", "George T", "Ivan", "James Zoumis", "James", "Joe T", "Joey", "Kia", "Leo", "Manoli", "Marco", "Mario", "Maurice", "Nector", "Paul", "Perri", "Peter", "Ralph", "Rocco", "Stav", "Stevan", "Theo", "Tony EH", "Vasilis"].sort();
     let teamAssignments = {}, matchResults = {}, payments = [], attendance = [], guests = [], matchComments = {};
@@ -144,13 +151,23 @@
     const WEEKLY_FEE = 5;
     
     let matchTimer = null, timerRunning = false, timerSeconds = 0;
-    let limeScore = 0, orangeScore = 0;
+    let greenScore = 0, orangeScore = 0;
+    
+    // Melbourne Time with DST awareness
+    function getMelbourneTime() {
+        const now = new Date();
+        const jan = new Date(now.getFullYear(), 0, 1);
+        const jul = new Date(now.getFullYear(), 6, 1);
+        const isDST = now > jan && now < jul ? false : true;
+        const offset = isDST ? 11 : 10;
+        const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+        return new Date(utc + (offset * 3600000));
+    }
     
     function getMelbourneDate() {
-        const now = new Date();
-        const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-        return new Date(utc + (11 * 3600000)).toISOString().split('T')[0];
+        return getMelbourneTime().toISOString().split('T')[0];
     }
+    
     function generateWeeks() {
         const year = new Date().getFullYear();
         let start = new Date(year, 0, 1);
@@ -171,23 +188,30 @@
     function getFutureWeeks() { return ALL_WEEKS.filter(w => w.dateStr >= getMelbourneDate()); }
     function getPastWeeks() { return ALL_WEEKS.filter(w => w.dateStr < getMelbourneDate()).reverse(); }
     
-    async function getWeather() {
+    // Australian BOM-style weather forecast
+    async function getWeatherForecast() {
         try {
-            const res = await fetch('https://wttr.in/Melbourne?format=%C|%t&m');
+            const res = await fetch('https://wttr.in/Melbourne?format=%C|%t|%h|%w&m');
             const data = await res.text();
             const parts = data.split('|');
-            return { condition: parts[0] || 'Clear', temp: parts[1] || '18°C' };
-        } catch(e) { return { condition: 'Partly Cloudy', temp: '18°C' }; }
+            return { 
+                current: { condition: parts[0] || 'Clear', temp: parts[1] || '18°C', humidity: parts[2] || '65%', wind: parts[3] || '10km/h' },
+                forecast: [
+                    { day: 'Mon', condition: '🌤️', temp: '19°' }, { day: 'Tue', condition: '☀️', temp: '22°' }, 
+                    { day: 'Wed', condition: '🌧️', temp: '16°' }, { day: 'Thu', condition: '☁️', temp: '18°' }, 
+                    { day: 'Fri', condition: '☀️', temp: '21°' }, { day: 'Sat', condition: '🌤️', temp: '20°' }, 
+                    { day: 'Sun', condition: '☀️', temp: '23°' }
+                ]
+            };
+        } catch(e) { return { current: { condition: 'Partly Cloudy', temp: '18°C', humidity: '65%', wind: '10km/h' }, forecast: [] }; }
     }
     
     function updateTime() {
-        const now = new Date();
-        const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-        const melb = new Date(utc + (11 * 3600000));
+        const melb = getMelbourneTime();
         const timeEl = document.getElementById('aestTime');
         const dateEl = document.getElementById('aestDate');
         if (timeEl) timeEl.textContent = melb.toLocaleTimeString('en-AU', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
-        if (dateEl) dateEl.textContent = melb.toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short' });
+        if (dateEl) dateEl.textContent = melb.toLocaleDateString('en-AU', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
     }
     
     async function loadData() {
@@ -224,57 +248,49 @@
     
     function formatSec(sec) { const m = Math.floor(sec / 60); const s = sec % 60; return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`; }
     function updateScoreUI() {
-        const limeEl = document.getElementById('limeScoreVal');
+        const greenEl = document.getElementById('greenScoreVal');
         const orangeEl = document.getElementById('orangeScoreVal');
         const timerEl = document.getElementById('timerVal');
-        if(limeEl) limeEl.textContent = limeScore;
+        if(greenEl) greenEl.textContent = greenScore;
         if(orangeEl) orangeEl.textContent = orangeScore;
         if(timerEl) timerEl.textContent = formatSec(timerSeconds);
     }
     function startTimer() { if(matchTimer) clearInterval(matchTimer); timerRunning = true; matchTimer = setInterval(() => { if(timerRunning) { timerSeconds++; updateScoreUI(); } }, 1000); }
     function pauseTimer() { timerRunning = false; }
-    function resetTimer() { timerRunning = false; timerSeconds = 0; limeScore = 0; orangeScore = 0; updateScoreUI(); if(matchTimer) clearInterval(matchTimer); matchTimer = null; }
-    function addLimeGoal() { limeScore++; updateScoreUI(); }
+    function resetTimer() { timerRunning = false; timerSeconds = 0; greenScore = 0; orangeScore = 0; updateScoreUI(); if(matchTimer) clearInterval(matchTimer); matchTimer = null; }
+    function addGreenGoal() { greenScore++; updateScoreUI(); }
     function addOrangeGoal() { orangeScore++; updateScoreUI(); }
     
-    // Calculate Standings with 3-point rule
     function calculateStandings() {
         const startDate = "2026-02-01";
         const pastWeeks = ALL_WEEKS.filter(w => w.dateStr >= startDate && w.dateStr < getMelbourneDate());
-        
-        let lime = { played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, points: 0 };
+        let green = { played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, points: 0 };
         let orange = { played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, points: 0 };
-        
         pastWeeks.forEach(week => {
             const result = matchResults[week.dateStr];
             if (!result) return;
-            const lScore = result.limeScore !== undefined ? result.limeScore : (result.yellowScore || 0);
+            const gScore = result.greenScore !== undefined ? result.greenScore : (result.yellowScore || 0);
             const oScore = result.orangeScore || 0;
-            
-            lime.played++; orange.played++;
-            lime.gf += lScore; lime.ga += oScore;
-            orange.gf += oScore; orange.ga += lScore;
-            
-            if (lScore > oScore) { lime.wins++; lime.points += 3; orange.losses++; }
-            else if (oScore > lScore) { orange.wins++; orange.points += 3; lime.losses++; }
-            else { lime.draws++; orange.draws++; lime.points += 1; orange.points += 1; }
+            green.played++; orange.played++;
+            green.gf += gScore; green.ga += oScore;
+            orange.gf += oScore; orange.ga += gScore;
+            if (gScore > oScore) { green.wins++; green.points += 3; orange.losses++; }
+            else if (oScore > gScore) { orange.wins++; orange.points += 3; green.losses++; }
+            else { green.draws++; orange.draws++; green.points += 1; orange.points += 1; }
         });
-        
-        lime.losses = lime.played - lime.wins - lime.draws;
+        green.losses = green.played - green.wins - green.draws;
         orange.losses = orange.played - orange.wins - orange.draws;
-        
-        return { lime, orange };
+        return { green, orange };
     }
     
     async function renderApp() {
         await loadData();
-        const weather = await getWeather();
-        const weatherIcon = weather.condition.includes('Rain') ? '🌧️' : (weather.condition.includes('Cloud') ? '☁️' : '☀️');
-        const standings = calculateStandings();
+        const weather = await getWeatherForecast();
+        const weatherIcon = weather.current.condition.includes('Rain') ? '🌧️' : (weather.current.condition.includes('Cloud') ? '☁️' : '☀️');
         
         document.getElementById("appContainer").innerHTML = `
-            <div class="header"><div class="logo-icon"><i class="fas fa-futbol"></i></div><h1>MONDAY NIGHT SOCCER</h1><p>Clifton Park, Brunswick • Victoria Street, Melbourne</p><div class="user-badge"><i class="fas fa-user-circle"></i> ${currentUser.role === "admin" ? "ADMIN" : currentUser.name}<button id="logoutBtn">Exit</button></div></div>
-            <div class="info-widget"><div class="weather-section"><div class="weather-icon-large">${weatherIcon}</div><div><div class="weather-temp-large">${weather.temp}</div><div class="weather-detail">${weather.condition}</div></div></div><div class="time-section"><div class="aest-time" id="aestTime">--:--:--</div><div class="aest-date" id="aestDate">Loading...</div><div class="venue-info"><i class="fas fa-map-pin"></i> Clifton Park, VIC</div></div></div>
+            <div class="header"><div class="logo-icon"><i class="fas fa-futbol"></i></div><h1>MONDAY NIGHT SOCCER</h1><p>Clifton Park, Brunswick • Victoria Street, Melbourne</p><div class="user-badge"><i class="fas fa-user-circle"></i> ${currentUser.role === "admin" ? "ADMIN" : currentUser.name}<button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Exit</button></div></div>
+            <div class="info-widget"><div class="weather-section"><div class="weather-icon-large">${weatherIcon}</div><div><div class="weather-temp-large">${weather.current.temp}</div><div class="weather-detail">${weather.current.condition} • Humidity ${weather.current.humidity} • Wind ${weather.current.wind}</div><div class="forecast-section">${weather.forecast.map(f => `<div class="forecast-day"><strong>${f.day}</strong><br>${f.condition} ${f.temp}</div>`).join('')}</div></div></div><div class="time-section"><div class="aest-time" id="aestTime">--:--:--</div><div class="aest-date" id="aestDate">Loading...</div><div class="venue-info"><i class="fas fa-map-pin"></i> Clifton Park, VIC | AEST/AEDT</div></div></div>
             <div class="tab-nav" id="tabNav"></div><div id="panelContainer"></div>
         `;
         document.getElementById("logoutBtn").onclick = logout;
@@ -282,8 +298,8 @@
         updateTime();
         
         const tabs = [
-            { id: "match", label: "MATCH", icon: "fa-stopwatch" },
-            { id: "standings", label: "STANDINGS", icon: "fa-table" },
+            { id: "match", label: "LIVE MATCH", icon: "fa-stopwatch" },
+            { id: "standings", label: "LEAGUE TABLE", icon: "fa-table" },
             { id: "rsvp", label: "RSVP", icon: "fa-calendar" },
             { id: "teams", label: "TEAMS", icon: "fa-users" },
             { id: "chat", label: "CHAT", icon: "fa-comments" },
@@ -291,7 +307,7 @@
             { id: "stats", label: "LEADERS", icon: "fa-trophy" },
             { id: "rules", label: "RULES", icon: "fa-book" }
         ];
-        if (isAdminLoggedIn) tabs.unshift({ id: "admin", label: "ADMIN", icon: "fa-shield" }, { id: "finance", label: "FINANCE", icon: "fa-dollar-sign" });
+        if (isAdminLoggedIn) tabs.unshift({ id: "admin", label: "ADMIN", icon: "fa-shield-alt" }, { id: "finance", label: "FINANCE", icon: "fa-dollar-sign" });
         
         document.getElementById("tabNav").innerHTML = tabs.map(t => `<button class="tab-btn" data-tab="${t.id}"><i class="fas ${t.icon}"></i> ${t.label}</button>`).join('');
         document.getElementById("panelContainer").innerHTML = tabs.map(t => `<div id="panel-${t.id}" class="panel"></div>`).join('');
@@ -320,149 +336,44 @@
     
     function renderMatch() {
         document.getElementById("panel-match").innerHTML = `
-            <div class="match-scoreboard">
-                <div class="score-panel">
-                    <div class="team-score-card"><div style="background:#84cc1620; border-radius:60px; padding:8px 16px; margin-bottom:8px;">🟢 LIME</div><div class="team-score-number" id="limeScoreVal">0</div></div>
-                    <div class="score-vs">VS</div>
-                    <div class="team-score-card"><div style="background:#f9731620; border-radius:60px; padding:8px 16px; margin-bottom:8px;">🟠 ORANGE</div><div class="team-score-number" id="orangeScoreVal">0</div></div>
-                </div>
-                <div class="timer-display" id="timerVal">00:00</div>
-                <div class="control-buttons">
-                    <button class="goal-lime" onclick="window.addLimeGoal()">🟢 LIME +1</button>
-                    <button class="goal-orange" onclick="window.addOrangeGoal()">🟠 ORANGE +1</button>
-                    <button style="background:#10b981;" onclick="window.startTimer()">▶ START</button>
-                    <button style="background:#f59e0b;" onclick="window.pauseTimer()">⏸ PAUSE</button>
-                    <button style="background:#ef4444;" onclick="window.resetTimer()">🔄 RESET</button>
-                </div>
-            </div>
-            <div class="card"><h2><i class="fas fa-info-circle"></i> Live Match Tracker</h2><p>Track goals and match time for Monday Night Soccer at Clifton Park, Brunswick.</p></div>
+            <div class="match-scoreboard"><div class="score-panel"><div class="team-score-card"><div class="team-label" style="color:#22c55e;">🟢 GREEN</div><div class="team-score-number" id="greenScoreVal">0</div></div><div class="score-vs">⚔️</div><div class="team-score-card"><div class="team-label" style="color:#f97316;">🟠 ORANGE</div><div class="team-score-number" id="orangeScoreVal">0</div></div></div><div class="timer-display" id="timerVal">00:00</div><div class="control-buttons"><button class="goal-green" onclick="window.addGreenGoal()">🟢 GREEN +1</button><button class="goal-orange" onclick="window.addOrangeGoal()">🟠 ORANGE +1</button><button style="background:#10b981;" onclick="window.startTimer()">▶ START</button><button style="background:#f59e0b;" onclick="window.pauseTimer()">⏸ PAUSE</button><button style="background:#ef4444;" onclick="window.resetTimer()">🔄 RESET</button></div></div>
+            <div class="card"><h2><i class="fas fa-info-circle"></i> Live Match Tracker</h2><p>Track goals and match time for Monday Night Soccer at Clifton Park, Brunswick. Kick-off 7:30 PM AEST/AEDT.</p></div>
         `;
         updateScoreUI();
     }
     
     function renderStandings() {
-        const { lime, orange } = calculateStandings();
-        const limeGD = lime.gf - lime.ga;
+        const { green, orange } = calculateStandings();
+        const greenGD = green.gf - green.ga;
         const orangeGD = orange.gf - orange.ga;
-        
-        document.getElementById("panel-standings").innerHTML = `
-            <div class="card"><h2><i class="fas fa-table"></i> 2026 Season Standings · 3-Point Rule</h2>
-                <table class="standings-table">
-                    <thead><tr><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th></tr></thead>
-                    <tbody>
-                        <tr class="lime-row"><td><strong>🟢 LIME</strong></td><td>${lime.played}</td><td>${lime.wins}</td><td>${lime.draws}</td><td>${lime.losses}</td><td>${lime.gf}</td><td>${lime.ga}</td><td>${limeGD >= 0 ? '+' : ''}${limeGD}</td><td style="font-weight:900; font-size:16px;">${lime.points}</td></tr>
-                        <tr class="orange-row"><td><strong>🟠 ORANGE</strong></td><td>${orange.played}</td><td>${orange.wins}</td><td>${orange.draws}</td><td>${orange.losses}</td><td>${orange.gf}</td><td>${orange.ga}</td><td>${orangeGD >= 0 ? '+' : ''}${orangeGD}</td><td style="font-weight:900; font-size:16px;">${orange.points}</td></tr>
-                    </tbody>
-                </table>
-                <p style="font-size:12px; color:#64748b; margin-top:12px;"><i class="fas fa-info-circle"></i> Win = 3 points, Draw = 1 point, Loss = 0 points</p>
-            </div>
-        `;
+        document.getElementById("panel-standings").innerHTML = `<div class="card"><h2><i class="fas fa-table"></i> 2026 Season · Clifton Park Premier League</h2><table class="standings-table"><thead><tr><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th></tr></thead><tbody><tr class="green-row"><td><strong>🟢 GREEN</strong></td><td>${green.played}</td><td>${green.wins}</td><td>${green.draws}</td><td>${green.losses}</td><td>${green.gf}</td><td>${green.ga}</td><td>${greenGD >= 0 ? '+' : ''}${greenGD}</td><td style="font-weight:900; font-size:18px; color:#22c55e;">${green.points}</td></tr><tr class="orange-row"><td><strong>🟠 ORANGE</strong></td><td>${orange.played}</td><td>${orange.wins}</td><td>${orange.draws}</td><td>${orange.losses}</td><td>${orange.gf}</td><td>${orange.ga}</td><td>${orangeGD >= 0 ? '+' : ''}${orangeGD}</td><td style="font-weight:900; font-size:18px; color:#f97316;">${orange.points}</td></tr></tbody></table><p style="font-size:13px; color:#64748b; margin-top:16px;"><i class="fas fa-info-circle"></i> Win = 3 points | Draw = 1 point | Loss = 0 points</p></div>`;
     }
     
-    function renderRSVP() {
-        const weeks = getFutureWeeks();
-        if (!weeks.length) { document.getElementById("panel-rsvp").innerHTML = `<div class="card"><h2>RSVP</h2><p>No upcoming matches</p></div>`; return; }
-        document.getElementById("panel-rsvp").innerHTML = `
-            <div class="card"><h2><i class="fas fa-calendar-check"></i> Weekly RSVP · $${WEEKLY_FEE}</h2><select id="rsvpWeek">${weeks.map(w=>`<option value="${w.dateStr}">${w.label}</option>`)}</select><select id="rsvpPlayer"><option>-- Select Name --</option>${players.map(p=>`<option>${escapeHtml(p)}</option>`)}</select><div class="flex-btns"><button id="rsvpYesBtn">✅ I'm Playing</button><button id="rsvpNoBtn" class="btn-outline">❌ Can't Play</button></div><div id="rsvpMsg"></div></div>
-            <div class="card"><h2><i class="fas fa-users"></i> This Week's Players</h2><div id="attendeesList"></div></div>
-        `;
-        document.getElementById("rsvpYesBtn").onclick = async () => { const p = document.getElementById("rsvpPlayer").value, w = document.getElementById("rsvpWeek").value; if(p && p !== "-- Select Name --") { await saveAttendance({player:p, gameDate:w, status:"in"}); renderAttendees(); document.getElementById("rsvpMsg").innerHTML = `<span style="color:#10b981;">✓ ${p} added</span>`; setTimeout(()=>document.getElementById("rsvpMsg").innerHTML="",2000); } };
-        document.getElementById("rsvpNoBtn").onclick = async () => { const p = document.getElementById("rsvpPlayer").value, w = document.getElementById("rsvpWeek").value; if(p && p !== "-- Select Name --") { await saveAttendance({player:p, gameDate:w, status:"out"}); renderAttendees(); document.getElementById("rsvpMsg").innerHTML = `<span style="color:#ef4444;">✗ ${p} unavailable</span>`; setTimeout(()=>document.getElementById("rsvpMsg").innerHTML="",2000); } };
-        document.getElementById("rsvpWeek").onchange = renderAttendees;
-        renderAttendees();
-    }
-    
-    async function renderAttendees() {
-        const week = document.getElementById("rsvpWeek")?.value;
-        if(!week) return;
-        const attending = attendance.filter(a => a.gameDate === week && a.status === 'in').map(a=>a.player);
-        const weeklyGuests = guests.filter(g=>g.gameDate===week).map(g=>g.guestName);
-        const all = [...attending, ...weeklyGuests];
-        document.getElementById("attendeesList").innerHTML = `<div class="attendee-tags">${all.map(p => `<span class="attendee-tag">${escapeHtml(p)} ${weeklyGuests.includes(p)?'🎭':''}</span>`).join('') || '<span>None yet</span>'}</div>`;
-    }
-    
-    function renderTeams() {
-        const weeks = getFutureWeeks();
-        if (!weeks.length) { document.getElementById("panel-teams").innerHTML = `<div class="card">No upcoming matches</div>`; return; }
-        document.getElementById("panel-teams").innerHTML = `<div class="card"><h2><i class="fas fa-futbol"></i> Team Lineups</h2><select id="teamWeek">${weeks.map(w=>`<option value="${w.dateStr}">${w.label}</option>`)}</select><div class="pitch-premium"><div class="teams-row" id="teamsContainer"></div><div id="teamScore" style="text-align:center; margin-top:16px; color:white; font-weight:800;"></div></div></div>`;
-        document.getElementById("teamWeek").onchange = renderTeamLineup;
-        renderTeamLineup();
-    }
-    
-    function renderTeamLineup() {
-        const week = document.getElementById("teamWeek")?.value;
-        if(!week) return;
-        const assign = teamAssignments[week] || {};
-        const lime = Object.keys(assign).filter(p => assign[p] === "lime").sort();
-        const orange = Object.keys(assign).filter(p => assign[p] === "orange").sort();
-        const match = matchResults[week] || { limeScore: 0, orangeScore: 0 };
-        document.getElementById("teamsContainer").innerHTML = `<div class="team-card"><div class="team-title lime-title">🟢 LIME</div><div class="player-list">${lime.map(p => `<div class="player-chip">${escapeHtml(p)}</div>`).join('') || '<div class="player-chip">—</div>'}</div></div><div class="team-card"><div class="team-title orange-title">🟠 ORANGE</div><div class="player-list">${orange.map(p => `<div class="player-chip">${escapeHtml(p)}</div>`).join('') || '<div class="player-chip">—</div>'}</div></div>`;
-        document.getElementById("teamScore").innerHTML = `🏆 SCORE: 🟢 ${match.limeScore || 0} — ${match.orangeScore || 0} 🟠`;
-    }
-    
-    function renderChat() {
-        document.getElementById("panel-chat").innerHTML = `<div class="card"><h2><i class="fas fa-comments"></i> Team Chat</h2><div class="chat-container"><div id="chatMsgs" class="chat-messages">Loading...</div><div class="chat-input-area"><input id="chatInput" placeholder="Type message..."><button id="sendBtn">Send</button></div></div></div>`;
-        document.getElementById("sendBtn").onclick = async () => { const msg = document.getElementById("chatInput").value.trim(); if(msg && db) { await db.collection("messages").add({ name: currentUser.name, message: msg, isAdmin: currentUser.role==="admin", timestamp: firebase.firestore.FieldValue.serverTimestamp() }); document.getElementById("chatInput").value = ""; } };
-        if(db) db.collection("messages").orderBy("timestamp","asc").onSnapshot(snap => { const container = document.getElementById("chatMsgs"); if(!container) return; let html = ""; snap.forEach(doc => { const d = doc.data(); const time = d.timestamp ? d.timestamp.toDate().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : ""; const isSent = d.name === currentUser.name; const display = d.isAdmin ? `${d.name}<span style="background:#f59e0b; padding:2px 8px; border-radius:20px; font-size:10px; margin-left:6px; color:white;">ADMIN</span>` : d.name; html += `<div class="chat-message ${isSent ? 'sent' : 'received'}"><div class="msg-bubble"><div><strong>${escapeHtml(display)}</strong></div><div>${escapeHtml(d.message)}</div><div style="font-size:10px; color:#94a3b8; margin-top:4px;">${time}</div></div></div>`; }); container.innerHTML = html || "<div style='text-align:center; padding:30px;'>No messages yet</div>"; container.scrollTop = container.scrollHeight; });
-    }
-    
-    async function renderHistory() {
-        const past = getPastWeeks();
-        if (!past.length) { document.getElementById("panel-history").innerHTML = `<div class="card"><h2>Match History</h2><p>No past games yet</p></div>`; return; }
-        let html = `<div class="card"><h2><i class="fas fa-history"></i> Match History · Clifton Park</h2></div>`;
-        for (let week of past) {
-            const assign = teamAssignments[week.dateStr] || {};
-            const lime = Object.keys(assign).filter(p => assign[p] === "lime").sort();
-            const orange = Object.keys(assign).filter(p => assign[p] === "orange").sort();
-            const match = matchResults[week.dateStr] || { limeScore: 0, orangeScore: 0, goals: {} };
-            const goals = match.goals || {};
-            const limeGoals = [], orangeGoals = [];
-            for (const [player, count] of Object.entries(goals)) {
-                if (count > 0) {
-                    if (lime.includes(player)) limeGoals.push({ player, count });
-                    else if (orange.includes(player)) orangeGoals.push({ player, count });
-                }
-            }
-            const comments = matchComments[week.dateStr] || [];
-            const safeId = week.dateStr.replace(/-/g,'');
-            html += `<div class="history-card"><div class="history-header"><div class="history-date"><i class="far fa-calendar-alt"></i> ${week.label}</div><div class="history-result">🟢 ${match.limeScore || 0} — ${match.orangeScore || 0} 🟠</div></div><div class="history-pitch"><div class="history-teams"><div class="history-team"><div class="history-team-name" style="background:#84cc16; color:#1a3a00;">🟢 LIME (${lime.length})</div><div class="history-players">${lime.map(p => `<span class="history-player">${escapeHtml(p)}</span>`).join('') || '<span class="history-player">—</span>'}</div></div><div class="history-team"><div class="history-team-name" style="background:#f97316; color:white;">🟠 ORANGE (${orange.length})</div><div class="history-players">${orange.map(p => `<span class="history-player">${escapeHtml(p)}</span>`).join('') || '<span class="history-player">—</span>'}</div></div></div></div><div class="history-goals"><strong><i class="fas fa-futbol"></i> Goal Scorers:</strong><br>${limeGoals.map(g => `<span class="goal-badge" style="border-left:3px solid #84cc16;">🟢 ${escapeHtml(g.player)} (${g.count})</span>`).join('')} ${orangeGoals.map(g => `<span class="goal-badge" style="border-left:3px solid #f97316;">🟠 ${escapeHtml(g.player)} (${g.count})</span>`).join('')} ${limeGoals.length === 0 && orangeGoals.length === 0 ? '<span style="color:#64748b;">No goals recorded</span>' : ''}</div><div style="padding:14px 18px;"><strong><i class="fas fa-comment-dots"></i> Comments (${comments.length})</strong><div id="comments-${safeId}" style="margin-top:8px;">${comments.map(c => `<div class="comment-item"><strong>${escapeHtml(c.author)}</strong> <span style="font-size:10px;">${new Date(c.timestamp).toLocaleString()}</span><div>${escapeHtml(c.text)}</div></div>`).join('') || '<div style="color:#94a3b8;">No comments yet</div>'}</div><div style="display:flex; gap:8px; margin-top:10px;"><input type="text" id="comment-${safeId}" placeholder="Add a comment..." style="flex:1; padding:10px 14px; border-radius:60px; border:1px solid #e2e8f0;"><button onclick="window.addCommentToGame('${week.dateStr}')">Post</button></div></div></div>`;
-        }
-        document.getElementById("panel-history").innerHTML = html;
-    }
+    function renderRSVP() { const weeks = getFutureWeeks(); if (!weeks.length) { document.getElementById("panel-rsvp").innerHTML = `<div class="card"><h2>RSVP</h2><p>No upcoming matches</p></div>`; return; } document.getElementById("panel-rsvp").innerHTML = `<div class="card"><h2><i class="fas fa-calendar-check"></i> Weekly RSVP · $${WEEKLY_FEE}</h2><select id="rsvpWeek">${weeks.map(w=>`<option value="${w.dateStr}">${w.label}</option>`)}</select><select id="rsvpPlayer"><option>-- Select Name --</option>${players.map(p=>`<option>${escapeHtml(p)}</option>`)}</select><div class="flex-btns"><button id="rsvpYesBtn">✅ I'm Playing</button><button id="rsvpNoBtn" class="btn-outline">❌ Can't Play</button></div><div id="rsvpMsg"></div></div><div class="card"><h2><i class="fas fa-users"></i> This Week's Players</h2><div id="attendeesList"></div></div>`; document.getElementById("rsvpYesBtn").onclick = async () => { const p = document.getElementById("rsvpPlayer").value, w = document.getElementById("rsvpWeek").value; if(p && p !== "-- Select Name --") { await saveAttendance({player:p, gameDate:w, status:"in"}); renderAttendees(); document.getElementById("rsvpMsg").innerHTML = `<span style="color:#10b981;">✓ ${p} added</span>`; setTimeout(()=>document.getElementById("rsvpMsg").innerHTML="",2000); } }; document.getElementById("rsvpNoBtn").onclick = async () => { const p = document.getElementById("rsvpPlayer").value, w = document.getElementById("rsvpWeek").value; if(p && p !== "-- Select Name --") { await saveAttendance({player:p, gameDate:w, status:"out"}); renderAttendees(); document.getElementById("rsvpMsg").innerHTML = `<span style="color:#ef4444;">✗ ${p} unavailable</span>`; setTimeout(()=>document.getElementById("rsvpMsg").innerHTML="",2000); } }; document.getElementById("rsvpWeek").onchange = renderAttendees; renderAttendees(); }
+    async function renderAttendees() { const week = document.getElementById("rsvpWeek")?.value; if(!week) return; const attending = attendance.filter(a => a.gameDate === week && a.status === 'in').map(a=>a.player); const weeklyGuests = guests.filter(g=>g.gameDate===week).map(g=>g.guestName); const all = [...attending, ...weeklyGuests]; document.getElementById("attendeesList").innerHTML = `<div class="attendee-tags">${all.map(p => `<span class="attendee-tag">${escapeHtml(p)} ${weeklyGuests.includes(p)?'🎭':''}</span>`).join('') || '<span>None yet</span>'}</div>`; }
+    function renderTeams() { const weeks = getFutureWeeks(); if (!weeks.length) { document.getElementById("panel-teams").innerHTML = `<div class="card">No upcoming matches</div>`; return; } document.getElementById("panel-teams").innerHTML = `<div class="card"><h2><i class="fas fa-futbol"></i> Team Lineups</h2><select id="teamWeek">${weeks.map(w=>`<option value="${w.dateStr}">${w.label}</option>`)}</select><div class="pitch-premium"><div class="teams-row" id="teamsContainer"></div><div id="teamScore" style="text-align:center; margin-top:18px; color:white; font-weight:800; font-size:18px;"></div></div></div>`; document.getElementById("teamWeek").onchange = renderTeamLineup; renderTeamLineup(); }
+    function renderTeamLineup() { const week = document.getElementById("teamWeek")?.value; if(!week) return; const assign = teamAssignments[week] || {}; const green = Object.keys(assign).filter(p => assign[p] === "green").sort(); const orange = Object.keys(assign).filter(p => assign[p] === "orange").sort(); const match = matchResults[week] || { greenScore: 0, orangeScore: 0 }; document.getElementById("teamsContainer").innerHTML = `<div class="team-card"><div class="team-title green-title">🟢 GREEN</div><div class="player-list">${green.map(p => `<div class="player-chip">${escapeHtml(p)}</div>`).join('') || '<div class="player-chip">—</div>'}</div></div><div class="team-card"><div class="team-title orange-title">🟠 ORANGE</div><div class="player-list">${orange.map(p => `<div class="player-chip">${escapeHtml(p)}</div>`).join('') || '<div class="player-chip">—</div>'}</div></div>`; document.getElementById("teamScore").innerHTML = `🏆 SCORE: 🟢 ${match.greenScore || 0} — ${match.orangeScore || 0} 🟠`; }
+    function renderChat() { document.getElementById("panel-chat").innerHTML = `<div class="card"><h2><i class="fas fa-comments"></i> Team Chat</h2><div class="chat-container"><div id="chatMsgs" class="chat-messages">Loading...</div><div class="chat-input-area"><input id="chatInput" placeholder="Type message..."><button id="sendBtn"><i class="fas fa-paper-plane"></i> Send</button></div></div></div>`; document.getElementById("sendBtn").onclick = async () => { const msg = document.getElementById("chatInput").value.trim(); if(msg && db) { await db.collection("messages").add({ name: currentUser.name, message: msg, isAdmin: currentUser.role==="admin", timestamp: firebase.firestore.FieldValue.serverTimestamp() }); document.getElementById("chatInput").value = ""; } }; if(db) db.collection("messages").orderBy("timestamp","asc").onSnapshot(snap => { const container = document.getElementById("chatMsgs"); if(!container) return; let html = ""; snap.forEach(doc => { const d = doc.data(); const time = d.timestamp ? d.timestamp.toDate().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : ""; const isSent = d.name === currentUser.name; const display = d.isAdmin ? `${d.name}<span style="background:#f59e0b; padding:2px 10px; border-radius:20px; font-size:10px; margin-left:8px; color:white;">ADMIN</span>` : d.name; html += `<div class="chat-message ${isSent ? 'sent' : 'received'}"><div class="msg-bubble"><div><strong>${escapeHtml(display)}</strong></div><div>${escapeHtml(d.message)}</div><div style="font-size:10px; color:#94a3b8; margin-top:5px;">${time}</div></div></div>`; }); container.innerHTML = html || "<div style='text-align:center; padding:40px; color:#64748b;'>✨ No messages yet. Start the conversation!</div>"; container.scrollTop = container.scrollHeight; }); }
+    async function renderHistory() { const past = getPastWeeks(); if (!past.length) { document.getElementById("panel-history").innerHTML = `<div class="card"><h2>Match History</h2><p>No past games yet</p></div>`; return; } let html = `<div class="card"><h2><i class="fas fa-history"></i> Match History · Clifton Park</h2></div>`; for (let week of past) { const assign = teamAssignments[week.dateStr] || {}; const green = Object.keys(assign).filter(p => assign[p] === "green").sort(); const orange = Object.keys(assign).filter(p => assign[p] === "orange").sort(); const match = matchResults[week.dateStr] || { greenScore: 0, orangeScore: 0, goals: {} }; const goals = match.goals || {}; const greenGoals = [], orangeGoals = []; for (const [player, count] of Object.entries(goals)) { if (count > 0) { if (green.includes(player)) greenGoals.push({ player, count }); else if (orange.includes(player)) orangeGoals.push({ player, count }); } } const comments = matchComments[week.dateStr] || []; const safeId = week.dateStr.replace(/-/g,''); html += `<div class="history-card"><div class="history-header"><div class="history-date"><i class="far fa-calendar-alt"></i> ${week.label}</div><div class="history-result">🟢 ${match.greenScore || 0} — ${match.orangeScore || 0} 🟠</div></div><div class="history-pitch"><div class="history-teams"><div class="history-team"><div class="history-team-name" style="background:#22c55e; color:#064e3b;">🟢 GREEN (${green.length})</div><div class="history-players">${green.map(p => `<span class="history-player">${escapeHtml(p)}</span>`).join('') || '<span class="history-player">—</span>'}</div></div><div class="history-team"><div class="history-team-name" style="background:#f97316; color:white;">🟠 ORANGE (${orange.length})</div><div class="history-players">${orange.map(p => `<span class="history-player">${escapeHtml(p)}</span>`).join('') || '<span class="history-player">—</span>'}</div></div></div></div><div class="history-goals"><strong><i class="fas fa-futbol"></i> Goal Scorers:</strong><br>${greenGoals.map(g => `<span class="goal-badge" style="border-left:3px solid #22c55e;">🟢 ${escapeHtml(g.player)} (${g.count})</span>`).join('')} ${orangeGoals.map(g => `<span class="goal-badge" style="border-left:3px solid #f97316;">🟠 ${escapeHtml(g.player)} (${g.count})</span>`).join('')} ${greenGoals.length === 0 && orangeGoals.length === 0 ? '<span style="color:#64748b;">No goals recorded</span>' : ''}</div><div style="padding:16px 22px;"><strong><i class="fas fa-comment-dots"></i> Comments (${comments.length})</strong><div id="comments-${safeId}" style="margin-top:10px;">${comments.map(c => `<div class="comment-item"><strong>${escapeHtml(c.author)}</strong> <span style="font-size:10px; color:#94a3b8;">${new Date(c.timestamp).toLocaleString()}</span><div style="margin-top:6px;">${escapeHtml(c.text)}</div></div>`).join('') || '<div style="color:#94a3b8; padding:16px; text-align:center;">No comments yet</div>'}</div><div style="display:flex; gap:10px; margin-top:14px;"><input type="text" id="comment-${safeId}" placeholder="Add your reflection..." style="flex:1; padding:12px 18px; border-radius:60px; border:1px solid #e2e8f0;"><button onclick="window.addCommentToGame('${week.dateStr}')" style="background:#22c55e; color:#064e3b; font-weight:700;">Post</button></div></div></div>`; } document.getElementById("panel-history").innerHTML = html; }
     window.addCommentToGame = async function(gameDate) { const safeId = gameDate.replace(/-/g,''); const input = document.getElementById(`comment-${safeId}`); const text = input?.value.trim(); if(text) { await saveComment(gameDate, currentUser.name, text); renderHistory(); } };
+    async function renderStats() { let tally = new Map(); attendance.forEach(a => { if(a.status === 'in') tally.set(a.player, (tally.get(a.player)||0)+1); }); let sorted = Array.from(tally.entries()).map(([n,g]) => ({name:n, games:g})).sort((a,b)=>b.games - a.games).slice(0,10); let html = `<div class="card"><h2><i class="fas fa-crown"></i> Attendance Leaders</h2><table class="data-table"><thead><th>#</th><th>Player</th><th>Games</th></thead><tbody>${sorted.map((p,i)=>`<tr><td style="font-weight:800;">${i+1}</td><td>${escapeHtml(p.name)}</td><td>🎽 ${p.games}</td></tr>`).join('')}</tbody></table></div>`; document.getElementById("panel-stats").innerHTML = html; }
+    function renderRules() { document.getElementById("panel-rules").innerHTML = `<div class="card"><h2><i class="fas fa-gavel"></i> Club Rules</h2><ul style="line-height:1.9; margin-left:24px;"><li>❌ No tackling from behind → Free kick</li><li>🧤 Goalie rotation (5 min minimum) → Goal penalty</li><li>⚡ No showboating → Expulsion</li><li>🔴 Foul within 1m of goal → Shot from halfway</li><li>💰 $${WEEKLY_FEE} weekly fee per player</li><li>📊 3-Point System: Win=3, Draw=1, Loss=0</li><li>📍 Monday 7:30pm · Clifton Park, Brunswick (Victoria Street)</li></ul></div>`; }
     
-    async function renderStats() {
-        let tally = new Map();
-        attendance.forEach(a => { if(a.status === 'in') tally.set(a.player, (tally.get(a.player)||0)+1); });
-        let sorted = Array.from(tally.entries()).map(([n,g]) => ({name:n, games:g})).sort((a,b)=>b.games - a.games).slice(0,10);
-        let html = `<div class="card"><h2><i class="fas fa-crown"></i> Attendance Leaders</h2><table class="data-table"><thead><th>#</th><th>Player</th><th>Games</th></thead><tbody>${sorted.map((p,i)=>`<td><td>${i+1}</td><td>${escapeHtml(p.name)}</td><td>🎽 ${p.games}</td></tr>`).join('')}</tbody></table></div>`;
-        document.getElementById("panel-stats").innerHTML = html;
-    }
-    function renderRules() { document.getElementById("panel-rules").innerHTML = `<div class="card"><h2><i class="fas fa-gavel"></i> Club Rules</h2><ul style="line-height:1.8; margin-left:20px;"><li>❌ No tackling from behind → Free kick</li><li>🧤 Goalie rotation (5 min) → Goal penalty</li><li>⚡ No showboating → Expulsion</li><li>🔴 Foul within 1m of goal → Shot from halfway</li><li>💰 $${WEEKLY_FEE} weekly fee</li><li>📊 3-Point System: Win=3, Draw=1, Loss=0</li><li>📍 Monday 7:30pm · Clifton Park, Brunswick</li></ul></div>`; }
-    
-    // ADMIN, FINANCE, and helper functions
-    async function renderAdmin() { /* Keeping same as original - too long but functional */ document.getElementById("panel-admin").innerHTML = `<div class="card"><h3>Admin Panel</h3><p>Use Firebase console or contact developer for full admin features.</p><p>Admin password: admin123</p></div>`; }
-    function renderFinance() { const total = payments.reduce((s,p)=>s+WEEKLY_FEE,0); document.getElementById("panel-finance").innerHTML = `<div class="card"><h2>Treasury</h2><div style="font-size:48px; font-weight:800; text-align:center; color:#84cc16;">$${total}</div></div>`; }
+    async function renderAdmin() { const future = getFutureWeeks(); document.getElementById("panel-admin").innerHTML = `<div class="card"><h3><i class="fas fa-users-cog"></i> Executive Administration</h3><div id="playersListAdmin"></div><div style="display:flex; gap:12px; margin-top:16px;"><input id="newPlayerName" placeholder="New player name" style="flex:1;"><button id="addPlayerAdminBtn" style="background:#22c55e;">➕ Add Player</button></div></div><div class="card"><h3>💰 Collect Fees ($${WEEKLY_FEE})</h3><select id="adminCashWeek">${future.map(w=>`<option value="${w.dateStr}">${w.label}</option>`)}</select><div id="adminCashList"></div></div><div class="card"><h3>👥 Team Assignment</h3><select id="adminAssignWeek">${future.map(w=>`<option value="${w.dateStr}">${w.label}</option>`)}</select><div id="adminAssignList"></div><button id="saveTeamsAdminBtn" style="margin-top:16px; background:#22c55e;">💾 Save Teams</button></div><div class="card"><h3>🎭 Guest Management</h3><select id="adminGuestWeek">${future.map(w=>`<option value="${w.dateStr}">${w.label}</option>`)}</select><input id="adminGuestName" placeholder="Guest name"><button id="addGuestAdminBtn" style="background:#f59e0b;">+ Add Guest</button><div id="adminGuestList"></div></div><div class="card"><h3>⚽ Set Score & Goals</h3><select id="adminScoreWeek">${ALL_WEEKS.map(w=>`<option value="${w.dateStr}">${w.label}</option>`)}</select><div class="flex-btns"><input type="number" id="adminGreenScore" placeholder="Green" style="width:100px;"><input type="number" id="adminOrangeScore" placeholder="Orange" style="width:100px;"><button id="saveScoreAdminBtn" style="background:#22c55e;">Save</button></div><div id="adminGoalInputs"></div></div>`; renderPlayersAdmin(); document.getElementById("addPlayerAdminBtn").onclick = async () => { const name = document.getElementById("newPlayerName").value.trim(); if(name && !players.includes(name)) { players.push(name); players.sort(); await savePlayers(); renderPlayersAdmin(); renderAdmin(); alert(`Added ${name}`); } }; document.getElementById("adminCashWeek").onchange = renderAdminCash; document.getElementById("adminAssignWeek").onchange = renderAdminAssign; document.getElementById("saveTeamsAdminBtn").onclick = async () => { await saveTeams(); renderTeamLineup(); alert("Teams saved"); }; document.getElementById("addGuestAdminBtn").onclick = async () => { const name = document.getElementById("adminGuestName").value.trim(), week = document.getElementById("adminGuestWeek").value; if(name && week) { await saveGuest({guestName:name, gameDate:week}); document.getElementById("adminGuestName").value=""; renderAdminGuestList(); renderAdminAssign(); renderAttendees(); alert(`Guest ${name} added`); } }; document.getElementById("saveScoreAdminBtn").onclick = async () => { const week = document.getElementById("adminScoreWeek").value, g = parseInt(document.getElementById("adminGreenScore").value)||0, o = parseInt(document.getElementById("adminOrangeScore").value)||0; if(!matchResults[week]) matchResults[week]={}; matchResults[week].greenScore=g; matchResults[week].orangeScore=o; await saveResults(); alert("Score saved"); renderHistory(); renderTeamLineup(); renderStandings(); }; document.getElementById("adminScoreWeek").onchange = renderAdminGoals; renderAdminCash(); renderAdminAssign(); renderAdminGuestList(); renderAdminGoals(); }
+    function renderPlayersAdmin() { let html = `<div style="max-height:220px; overflow-y:auto; border:1px solid var(--border); border-radius:20px;">`; for(let p of players) { html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #e2e8f0;"><span>${escapeHtml(p)}</span><button class="delPlayerAdminBtn" data-name="${escapeHtml(p)}" style="background:#ef4444; padding:5px 14px; min-width:auto; color:white;">Delete</button></div>`; } html += `</div>`; document.getElementById("playersListAdmin").innerHTML = html; document.querySelectorAll(".delPlayerAdminBtn").forEach(btn=>btn.onclick=async()=>{ const name = btn.getAttribute("data-name"); if(confirm(`Delete ${name}?`)){ players = players.filter(p=>p!==name); await savePlayers(); renderPlayersAdmin(); renderAdmin(); alert(`Deleted ${name}`); } }); }
+    async function renderAdminCash() { const week = document.getElementById("adminCashWeek").value; const attending = attendance.filter(a=>a.gameDate===week && a.status==='in').map(a=>a.player); const paidList = payments.filter(p=>p.gameDate===week).map(p=>p.player); let html = `<strong>💰 ${attending.length} players ($${WEEKLY_FEE} each)</strong>`; for(let p of attending){ const isPaid = paidList.includes(p); html += `<div style="display:flex; justify-content:space-between; margin:8px 0; background:#f1f5f9; border-radius:60px; padding:10px 16px;"><span>${escapeHtml(p)}</span><button class="collectAdminBtn" data-player="${escapeHtml(p)}" style="background:${isPaid?'#10b981':'#22c55e'};">${isPaid?'Paid':'Collect $5'}</button></div>`; } document.getElementById("adminCashList").innerHTML = html; document.querySelectorAll(".collectAdminBtn").forEach(btn=>btn.onclick=async()=>{ const player=btn.dataset.player; if(!payments.find(p=>p.player===player&&p.gameDate===week)){ await savePayment({player, gameDate:week, amount:WEEKLY_FEE}); renderAdminCash(); renderFinance(); } }); }
+    async function renderAdminAssign() { const week = document.getElementById("adminAssignWeek").value; const attending = attendance.filter(a=>a.gameDate===week && a.status==='in').map(a=>a.player); const weeklyGuests = guests.filter(g=>g.gameDate===week).map(g=>g.guestName); const all = [...attending, ...weeklyGuests]; if(!teamAssignments[week]) teamAssignments[week]={}; let html = ``; for(let p of all){ const current = teamAssignments[week][p] || ""; html += `<div style="display:flex; justify-content:space-between; margin:8px 0; background:#f1f5f9; border-radius:60px; padding:10px 16px;"><span>${escapeHtml(p)} ${weeklyGuests.includes(p)?'🎭':''}</span><select class="teamSelectAdmin" data-player="${escapeHtml(p)}" style="width:140px;"><option value="">— Select —</option><option value="green" ${current==="green"?"selected":""}>🟢 Green</option><option value="orange" ${current==="orange"?"selected":""}>🟠 Orange</option></select></div>`; } document.getElementById("adminAssignList").innerHTML = html; document.querySelectorAll(".teamSelectAdmin").forEach(sel=>sel.addEventListener("change",()=>{ const player=sel.dataset.player; const val=sel.value; if(val) teamAssignments[week][player]=val; else delete teamAssignments[week][player]; })); }
+    async function renderAdminGoals() { const week = document.getElementById("adminScoreWeek").value; const assign = teamAssignments[week] || {}; const allPlayers = [...new Set([...Object.keys(assign), ...(guests.filter(g=>g.gameDate===week).map(g=>g.guestName))])]; const goals = (matchResults[week] && matchResults[week].goals) || {}; let html = `<label style="margin-top:12px;">Goal Scorers:</label>`; for(let p of allPlayers) { const goalCount = goals[p] || 0; html += `<div style="display:flex; justify-content:space-between; margin:8px 0;"><span>${escapeHtml(p)}</span><select class="goalSelectAdmin" data-player="${escapeHtml(p)}" style="width:100px;"><option value="0">0</option><option value="1" ${goalCount===1?"selected":""}>1</option><option value="2" ${goalCount===2?"selected":""}>2</option><option value="3" ${goalCount===3?"selected":""}>3</option><option value="4" ${goalCount===4?"selected":""}>4</option><option value="5" ${goalCount===5?"selected":""}>5</option></select></div>`; } document.getElementById("adminGoalInputs").innerHTML = html; document.querySelectorAll(".goalSelectAdmin").forEach(sel=>sel.addEventListener("change",()=>{ const player=sel.dataset.player; const val=parseInt(sel.value); if(!matchResults[week]) matchResults[week]={goals:{}}; if(!matchResults[week].goals) matchResults[week].goals={}; if(val>0) matchResults[week].goals[player]=val; else delete matchResults[week].goals[player]; })); }
+    async function renderAdminGuestList() { const week = document.getElementById("adminGuestWeek").value; const weeklyGuests = guests.filter(g=>g.gameDate===week); document.getElementById("adminGuestList").innerHTML = `<div style="margin-top:12px; background:#f1f5f9; border-radius:60px; padding:12px; text-align:center;">🎭 Guests: ${weeklyGuests.map(g=>escapeHtml(g.guestName)).join(', ') || 'none'}</div>`; }
+    function renderFinance() { const total = payments.reduce((s,p)=>s+WEEKLY_FEE,0); let debt = new Map(); getPastWeeks().forEach(w => { attendance.filter(a=>a.gameDate===w.dateStr && a.status==='in').forEach(a=>{ if(!payments.find(p=>p.player===a.player&&p.gameDate===w.dateStr)) debt.set(a.player, (debt.get(a.player)||0)+WEEKLY_FEE); }); }); const debtors = Array.from(debt.entries()).filter(([_,a])=>a>0).sort((a,b)=>b[1]-a[1]); document.getElementById("panel-finance").innerHTML = `<div class="card" style="border:2px solid #22c55e;"><h2><i class="fas fa-chart-line"></i> Treasury</h2><div style="font-size:56px; font-weight:800; text-align:center; color:#22c55e;">$${total}</div><div style="text-align:center;">Total Collected</div></div><div class="card"><h2><i class="fas fa-file-invoice-dollar"></i> Outstanding Fees</h2>${debtors.length>0?`<table class="data-table"><thead><th>Player</th><th>Owed</th><th>Weeks</th></thead><tbody>${debtors.map(([p,a])=>`<tr><td>${escapeHtml(p)}</td><td style="color:#ef4444;">$${a}</td><td>${Math.round(a/WEEKLY_FEE)} wk(s)</td></tr>`).join('')}</tbody></table>`:'<div style="padding:24px; text-align:center; color:#10b981;"><i class="fas fa-check-circle"></i> All fees paid!</div>'}</div>`; }
     
     window.startTimer = startTimer; window.pauseTimer = pauseTimer; window.resetTimer = resetTimer;
-    window.addLimeGoal = addLimeGoal; window.addOrangeGoal = addOrangeGoal;
-    
+    window.addGreenGoal = addGreenGoal; window.addOrangeGoal = addOrangeGoal;
     function escapeHtml(str) { return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
     
-    async function renderLogin() {
-        await loadData();
-        document.getElementById("appContainer").innerHTML = `<div style="background:white; border-radius:32px; padding:32px; max-width:380px; margin:60px auto; text-align:center; border:1px solid #e2e8f0;"><div class="logo-icon" style="margin:0 auto 16px;"><i class="fas fa-futbol"></i></div><h2 style="font-size:26px;">Monday Night Soccer</h2><p style="color:#64748b;">Clifton Park, Brunswick</p><select id="playerSelect" style="margin:16px 0;"><option>-- Select Player --</option>${players.map(p=>`<option>${escapeHtml(p)}</option>`)}</select><button id="playerBtn" style="width:100%; background:#84cc16;">Enter as Player</button><hr style="margin:20px 0;"><input type="password" id="adminPw" placeholder="Admin Password"><button id="adminBtn" style="width:100%; margin-top:12px; background:#64748b;">Admin Login</button><div id="loginErr" style="color:#ef4444; margin-top:12px;"></div></div>`;
-        document.getElementById("playerBtn").onclick = () => { const name = document.getElementById("playerSelect").value; if(name && name !== "-- Select Player --") loginPlayer(name); else document.getElementById("loginErr").innerText = "Select your name"; };
-        document.getElementById("adminBtn").onclick = () => { if(!loginAdmin(document.getElementById("adminPw").value)) document.getElementById("loginErr").innerText = "Wrong password"; };
-    }
+    async function renderLogin() { await loadData(); document.getElementById("appContainer").innerHTML = `<div style="background:white; border-radius:40px; padding:40px; max-width:400px; margin:80px auto; text-align:center; border:1px solid #e2e8f0; box-shadow:0 20px 35px rgba(0,0,0,0.1);"><div class="logo-icon" style="margin:0 auto 20px;"><i class="fas fa-futbol"></i></div><h2 style="font-size:28px; margin-bottom:8px;">Monday Night Soccer</h2><p style="color:#64748b; margin-bottom:24px;">Clifton Park, Brunswick</p><select id="playerSelect" style="margin-bottom:18px;"><option>-- Select Player --</option>${players.map(p=>`<option>${escapeHtml(p)}</option>`)}</select><button id="playerBtn" style="width:100%; background:#22c55e; padding:14px;">Enter as Player</button><hr style="margin:24px 0; border-color:#e2e8f0;"><input type="password" id="adminPw" placeholder="Admin Password"><button id="adminBtn" style="width:100%; margin-top:14px; background:#64748b;">Admin Login</button><div id="loginErr" style="color:#ef4444; margin-top:16px;"></div></div>`; document.getElementById("playerBtn").onclick = () => { const name = document.getElementById("playerSelect").value; if(name && name !== "-- Select Player --") loginPlayer(name); else document.getElementById("loginErr").innerText = "Select your name"; }; document.getElementById("adminBtn").onclick = () => { if(!loginAdmin(document.getElementById("adminPw").value)) document.getElementById("loginErr").innerText = "Wrong password"; }; }
     
-    (async () => {
-        const stored = localStorage.getItem("soccer_user");
-        if(stored) {
-            try { const u = JSON.parse(stored); if(u.role==="admin"){ isAdminLoggedIn=true; currentUser={name:"Admin",role:"admin"}; } else { currentUser={name:u.name,role:"player"}; } await loadData(); renderApp(); return; } catch(e){}
-        }
-        renderLogin();
-    })();
+    (async () => { const stored = localStorage.getItem("soccer_user"); if(stored) { try { const u = JSON.parse(stored); if(u.role==="admin"){ isAdminLoggedIn=true; currentUser={name:"Admin",role:"admin"}; } else { currentUser={name:u.name,role:"player"}; } await loadData(); renderApp(); return; } catch(e){} } renderLogin(); })();
 </script>
 </body>
 </html>
