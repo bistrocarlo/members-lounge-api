@@ -3,125 +3,620 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
     <title>Monday Night Soccer | 8pm Kickoff</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #eef2f5; font-family: 'Inter', sans-serif; padding: 0; min-height: 100vh; display: flex; flex-direction: column; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
         
-        /* Main App Container */
-        .app-wrapper { display: flex; flex-direction: column; height: 100vh; max-width: 500px; margin: 0 auto; background: #eef2f5; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+        body {
+            background: #eef2f5;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Main App Container - iPhone optimized */
+        .app-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 500px;
+            margin: 0 auto;
+            background: #eef2f5;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            position: relative;
+        }
         
         /* Header */
-        .app-header { background: white; padding: 16px 20px; text-align: center; border-bottom: 1px solid #e2e8f0; }
-        .logo-icon { width: 48px; height: 48px; background: #1a73e8; border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 8px; }
-        .logo-icon i { font-size: 24px; color: white; }
-        .app-header h1 { font-size: 20px; font-weight: 800; color: #1e293b; }
-        .user-badge { background: #f1f5f9; padding: 6px 12px; border-radius: 60px; display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; }
-        .user-badge button { background: #dc3545; border: none; padding: 4px 12px; border-radius: 40px; color: white; font-weight: 600; font-size: 12px; }
+        .app-header {
+            background: white;
+            padding: 16px 20px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+            flex-shrink: 0;
+        }
+        
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: #1a73e8;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+        
+        .logo-icon i {
+            font-size: 24px;
+            color: white;
+        }
+        
+        .app-header h1 {
+            font-size: 20px;
+            font-weight: 800;
+            color: #1e293b;
+        }
+        
+        .user-badge {
+            background: #f1f5f9;
+            padding: 6px 12px;
+            border-radius: 60px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            font-size: 12px;
+        }
+        
+        .user-badge button {
+            background: #dc3545;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+        }
         
         /* Hero Attendance Banner */
-        .hero-attendance { background: linear-gradient(135deg, #1a73e8, #0d5bbf); color: white; padding: 20px; text-align: center; margin: 12px; border-radius: 24px; }
-        .hero-attendance h2 { font-size: 20px; margin-bottom: 4px; }
-        .hero-attendance .kickoff { font-size: 13px; opacity: 0.9; margin-bottom: 12px; }
-        .attendance-buttons { display: flex; gap: 12px; justify-content: center; }
-        .btn-play { background: #28a745; padding: 12px 24px; border-radius: 60px; font-weight: 800; font-size: 16px; border: none; color: white; cursor: pointer; }
-        .btn-sit { background: #dc3545; padding: 12px 24px; border-radius: 60px; font-weight: 800; font-size: 16px; border: none; color: white; cursor: pointer; }
+        .hero-attendance {
+            background: linear-gradient(135deg, #1a73e8, #0d5bbf);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin: 12px;
+            border-radius: 24px;
+            flex-shrink: 0;
+        }
+        
+        .hero-attendance h2 {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+        
+        .hero-attendance .kickoff {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-bottom: 12px;
+        }
+        
+        .attendance-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        
+        .btn-play {
+            background: #28a745;
+            padding: 12px 24px;
+            border-radius: 60px;
+            font-weight: 800;
+            font-size: 16px;
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+        
+        .btn-sit {
+            background: #dc3545;
+            padding: 12px 24px;
+            border-radius: 60px;
+            font-weight: 800;
+            font-size: 16px;
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+        
+        .btn-play:active, .btn-sit:active, button:active {
+            transform: scale(0.96);
+        }
         
         /* Alert Banner */
-        .alert-banner { background: linear-gradient(90deg, #ff4757, #ff6b6b); color: white; padding: 10px; text-align: center; font-weight: 700; font-size: 13px; margin: 0 12px 12px; border-radius: 60px; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 0.9; } 50% { opacity: 1; background: #ff4757; } 100% { opacity: 0.9; } }
+        .alert-banner {
+            background: linear-gradient(90deg, #ff4757, #ff6b6b);
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 13px;
+            margin: 0 12px 12px;
+            border-radius: 60px;
+            animation: pulse 1.5s infinite;
+            flex-shrink: 0;
+        }
         
-        /* Page Content */
-        .page-container { flex: 1; overflow-y: auto; padding: 12px; }
-        .page { display: none; }
-        .page.active-page { display: block; animation: fadeIn 0.25s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse {
+            0% { opacity: 0.9; }
+            50% { opacity: 1; background: #ff4757; }
+            100% { opacity: 0.9; }
+        }
         
-        /* Bottom Tab Bar */
-        .bottom-tab-bar { background: white; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; padding: 8px 12px 12px; position: sticky; bottom: 0; }
-        .tab-item { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; cursor: pointer; padding: 8px 12px; border-radius: 40px; transition: all 0.2s; color: #94a3b8; font-size: 12px; }
-        .tab-item i { font-size: 22px; }
-        .tab-item.active { color: #1a73e8; background: #e8f0fe; }
+        /* Page Container */
+        .page-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active-page {
+            display: block;
+            animation: fadeIn 0.25s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Bottom Tab Bar - iPhone friendly */
+        .bottom-tab-bar {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 8px 12px;
+            flex-shrink: 0;
+            gap: 2px;
+        }
+        
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px 8px;
+            border-radius: 40px;
+            transition: all 0.2s;
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 500;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .tab-item i {
+            font-size: 22px;
+        }
+        
+        .tab-item.active {
+            color: #1a73e8;
+            background: #e8f0fe;
+        }
         
         /* Cards */
-        .card { background: white; border-radius: 20px; padding: 16px; margin-bottom: 12px; border: 1px solid #e2e8f0; }
-        .card h2 { font-size: 16px; font-weight: 700; margin-bottom: 12px; border-left: 3px solid #1a73e8; padding-left: 10px; }
-        .card h3 { font-size: 14px; font-weight: 600; margin: 12px 0 8px; }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .card h2 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            border-left: 3px solid #1a73e8;
+            padding-left: 10px;
+        }
+        
+        .card h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 12px 0 8px;
+        }
         
         /* Match Cards */
-        .match-card { background: white; border-radius: 20px; margin-bottom: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
-        .match-header { background: #f8fafc; padding: 12px 16px; display: flex; justify-content: space-between; flex-wrap: wrap; }
-        .match-date { font-weight: 800; font-size: 14px; }
-        .match-result-badge { background: #1a73e8; color: white; padding: 4px 12px; border-radius: 60px; font-weight: 800; font-size: 14px; }
-        .teams-section { padding: 16px; background: linear-gradient(145deg, #2e7d32, #1b5e20); }
-        .teams-flex { display: flex; gap: 12px; flex-wrap: wrap; }
-        .team-card-mini { flex: 1; background: rgba(0,0,0,0.65); border-radius: 16px; padding: 12px; min-width: 140px; }
-        .team-name-yellow { background: #ffc107; color: #2c2c2c; font-weight: 800; text-align: center; padding: 6px; border-radius: 60px; font-size: 14px; margin-bottom: 8px; }
-        .team-name-orange { background: #fd7e14; color: white; font-weight: 800; text-align: center; padding: 6px; border-radius: 60px; font-size: 14px; margin-bottom: 8px; }
-        .player-list-mini { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
-        .player-badge-mini { background: rgba(255,255,255,0.2); border-radius: 40px; padding: 4px 8px; font-size: 11px; color: white; }
-        .score-display-big { text-align: center; margin-top: 12px; font-size: 22px; font-weight: 800; background: rgba(0,0,0,0.6); border-radius: 60px; padding: 8px; color: white; }
-        .goals-section { padding: 12px 16px; background: #fefce8; }
-        .goals-list { display: flex; flex-wrap: wrap; gap: 8px; }
-        .goal-item { background: white; border-radius: 40px; padding: 6px 12px; font-size: 12px; font-weight: 600; border-left: 3px solid #eab308; }
-        .comments-section { padding: 12px 16px; }
-        .add-comment { display: flex; gap: 8px; margin-top: 10px; }
-        .add-comment input { flex: 1; padding: 10px 14px; border-radius: 60px; border: 1.5px solid #e2e8f0; font-size: 14px; }
-        .comment-item { background: #f8fafc; border-radius: 16px; padding: 10px; margin-bottom: 8px; font-size: 13px; }
+        .match-card {
+            background: white;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
         
-        select, input { width: 100%; padding: 12px 14px; border: 1.5px solid #e2e8f0; border-radius: 60px; margin: 4px 0; font-size: 14px; }
-        button { background: #1a73e8; color: white; border: none; padding: 12px 20px; border-radius: 60px; font-weight: 700; cursor: pointer; font-size: 14px; }
-        .btn-outline { background: white; color: #1a73e8; border: 2px solid #1a73e8; }
-        .flex-btns { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
-        .stat-card { background: #f8fafc; border-radius: 16px; padding: 12px; text-align: center; }
-        .attendee-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-        .attendee-tag { background: #e2e8f0; padding: 6px 12px; border-radius: 40px; font-size: 13px; }
-        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        .data-table th, .data-table td { padding: 10px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-        .profile-grid { display: flex; flex-direction: column; gap: 10px; }
-        .profile-item { background: #f8fafc; border-radius: 16px; padding: 12px; border-left: 3px solid #1a73e8; }
-        .profile-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-        .profile-name { font-weight: 800; font-size: 15px; }
-        .profile-details { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 0; }
-        .profile-badge { background: white; border-radius: 30px; padding: 4px 10px; font-size: 11px; font-weight: 600; }
-        .badge-paid { background: #28a745; color: white; border-radius: 40px; padding: 3px 10px; font-size: 11px; }
-        .badge-owing { background: #dc3545; color: white; border-radius: 40px; padding: 3px 10px; font-size: 11px; }
-        .captain-card { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 16px; padding: 12px; margin-bottom: 12px; text-align: center; font-size: 13px; }
-        .weather-card { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); color: white; border-radius: 20px; padding: 16px; text-align: center; }
-        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: white; border-radius: 28px; padding: 20px; max-width: 350px; width: 90%; max-height: 80vh; overflow-y: auto; }
-        .rule-box { background: #fef3c7; border-left: 3px solid #f59e0b; padding: 12px; border-radius: 12px; margin-bottom: 12px; font-size: 13px; }
+        .match-header {
+            background: #f8fafc;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        
+        .match-date {
+            font-weight: 800;
+            font-size: 14px;
+        }
+        
+        .match-result-badge {
+            background: #1a73e8;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 60px;
+            font-weight: 800;
+            font-size: 14px;
+        }
+        
+        .teams-section {
+            padding: 16px;
+            background: linear-gradient(145deg, #2e7d32, #1b5e20);
+        }
+        
+        .teams-flex {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .team-card-mini {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.65);
+            border-radius: 16px;
+            padding: 12px;
+            min-width: 140px;
+        }
+        
+        .team-name-yellow {
+            background: #ffc107;
+            color: #2c2c2c;
+            font-weight: 800;
+            text-align: center;
+            padding: 6px;
+            border-radius: 60px;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .team-name-orange {
+            background: #fd7e14;
+            color: white;
+            font-weight: 800;
+            text-align: center;
+            padding: 6px;
+            border-radius: 60px;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .player-list-mini {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+        }
+        
+        .player-badge-mini {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 40px;
+            padding: 4px 8px;
+            font-size: 11px;
+            color: white;
+        }
+        
+        .score-display-big {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 22px;
+            font-weight: 800;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 60px;
+            padding: 8px;
+            color: white;
+        }
+        
+        .goals-section {
+            padding: 12px 16px;
+            background: #fefce8;
+        }
+        
+        .goals-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .goal-item {
+            background: white;
+            border-radius: 40px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border-left: 3px solid #eab308;
+        }
+        
+        .comments-section {
+            padding: 12px 16px;
+        }
+        
+        .add-comment {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .add-comment input {
+            flex: 1;
+            padding: 10px 14px;
+            border-radius: 60px;
+            border: 1.5px solid #e2e8f0;
+            font-size: 14px;
+            background: white;
+        }
+        
+        .comment-item {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 10px;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 60px;
+            margin: 4px 0;
+            font-size: 14px;
+            background: white;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        
+        button {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 60px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 14px;
+            transition: transform 0.1s ease;
+        }
+        
+        button:active {
+            transform: scale(0.96);
+        }
+        
+        .btn-outline {
+            background: white;
+            color: #1a73e8;
+            border: 2px solid #1a73e8;
+        }
+        
+        .flex-btns {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+        
+        .stat-card {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 12px;
+            text-align: center;
+        }
+        
+        .attendee-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .attendee-tag {
+            background: #e2e8f0;
+            padding: 6px 12px;
+            border-radius: 40px;
+            font-size: 13px;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        
+        .data-table th, .data-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .profile-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .profile-item {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 12px;
+            border-left: 3px solid #1a73e8;
+        }
+        
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .profile-name {
+            font-weight: 800;
+            font-size: 15px;
+        }
+        
+        .profile-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 10px 0 0;
+        }
+        
+        .profile-badge {
+            background: white;
+            border-radius: 30px;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .badge-paid {
+            background: #28a745;
+            color: white;
+            border-radius: 40px;
+            padding: 3px 10px;
+            font-size: 11px;
+        }
+        
+        .badge-owing {
+            background: #dc3545;
+            color: white;
+            border-radius: 40px;
+            padding: 3px 10px;
+            font-size: 11px;
+        }
+        
+        .captain-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 12px;
+            text-align: center;
+            font-size: 13px;
+        }
+        
+        .weather-card {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
+            border-radius: 20px;
+            padding: 16px;
+            text-align: center;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 28px;
+            padding: 20px;
+            max-width: 350px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .rule-box {
+            background: #fef3c7;
+            border-left: 3px solid #f59e0b;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            font-size: 13px;
+        }
+        
+        /* Login Container */
+        .login-container {
+            background: white;
+            border-radius: 32px;
+            padding: 32px;
+            max-width: 380px;
+            width: 90%;
+            margin: 60px auto;
+            text-align: center;
+        }
+        
+        /* Scrollbar */
+        .page-container::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .page-container::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 4px;
+        }
+        
+        .page-container::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 4px;
+        }
+        
+        @media (max-width: 450px) {
+            .tab-item span {
+                font-size: 10px;
+            }
+            .tab-item i {
+                font-size: 20px;
+            }
+        }
     </style>
 </head>
 <body>
-<div class="app-wrapper">
-    <div class="app-header">
-        <div class="logo-icon"><i class="fas fa-futbol"></i></div>
-        <h1>MONDAY NIGHT SOCCER</h1>
-        <div class="user-badge" id="userBadge"><i class="fas fa-user-circle"></i> <span id="userName">Loading...</span> <button id="logoutBtn">Exit</button></div>
-    </div>
-    
-    <div id="heroContainer"></div>
-    <div id="alertContainer"></div>
-    
-    <div class="page-container" id="pageContainer">
-        <div id="page-profiles" class="page"></div>
-        <div id="page-scoreboard" class="page"></div>
-        <div id="page-teamselect" class="page"></div>
-        <div id="page-history" class="page"></div>
-        <div id="page-rsvp" class="page"></div>
-        <div id="page-weather" class="page"></div>
-        <div id="page-chat" class="page"></div>
-        <div id="page-finance" class="page"></div>
-        <div id="page-rules" class="page"></div>
-    </div>
-    
-    <div class="bottom-tab-bar" id="bottomTabBar"></div>
-</div>
+<div class="app-wrapper" id="appWrapper"></div>
 
 <script>
     // Firebase Config
@@ -134,7 +629,7 @@
         appId: "1:634335208908:web:dca705b65fc52de0606969"
     };
     let db = null;
-    try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); } catch(e) { console.warn("Demo mode"); }
+    try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); console.log("Firebase ready"); } catch(e) { console.warn("Demo mode"); }
     
     const POSITIONS = ["Goalkeeper","Defender","Defensive Midfielder","Midfielder Centre","Midfielder Attacking","Wing Back Right","Wing Back Left","Attacking Midfielder","Striker","Winger Left","Winger Right"];
     
@@ -155,7 +650,6 @@
     
     let weatherData = { temp: "18°C", condition: "Clear", icon: "fa-sun", rainChance: 10, wind: "12 km/h", humidity: "65%" };
     
-    // Firestore Refs
     const playersRef = db?.collection("config").doc("players");
     const profilesRef = db?.collection("config").doc("playerProfiles");
     const teamsRef = db?.collection("config").doc("teamAssignments");
@@ -269,6 +763,7 @@
             }
         } catch(e) { console.warn(e); }
     }
+    
     async function saveProfiles() { if(db && profilesRef) await profilesRef.set(playerProfiles); }
     async function saveTeams() { if(db && teamsRef) await teamsRef.set(teamAssignments); }
     async function savePayment(p) { if(db && paymentsRef) await paymentsRef.doc(`${p.player}_${p.gameDate}`).set(p); const idx = payments.findIndex(pay => pay.player === p.player && pay.gameDate === p.gameDate); if(idx !== -1) payments[idx] = p; else payments.push(p); }
@@ -389,7 +884,7 @@
             html += `<h3>📅 ${currentWeek.label}</h3><table class="data-table"><thead><tr><th>Player</th><th>Status</th><th>Action</th></tr></thead><tbody>`;
             for (let player of signed) {
                 const isPaid = payments.some(p => p.player === player && p.gameDate === currentWeek.dateStr);
-                html += `<tr><td>${escapeHtml(player)}</td><td>${isPaid ? '<span class="badge-paid">PAID</span>' : '<span class="badge-owing">OWING</span>'}</td>
+                html += `<tr><td><strong>${escapeHtml(player)}</strong></td><td>${isPaid ? '<span class="badge-paid">PAID</span>' : '<span class="badge-owing">OWING</span>'}</td>
                     <td>${!isPaid ? `<button class="markPaidBtn" data-player="${escapeHtml(player)}" data-date="${currentWeek.dateStr}" style="padding:6px 12px;">Mark Paid</button>` : '—'}</td></tr>`;
             }
             html += `</tbody></table>`;
@@ -491,10 +986,18 @@
     function updateHero() {
         const nextWeek = getFutureWeeks()[0];
         const currentStatus = nextWeek ? attendance.find(a => a.gameDate === nextWeek.dateStr && a.player === currentUser?.name)?.status : null;
-        document.getElementById("heroContainer").innerHTML = `<div class="hero-attendance"><h2><i class="fas fa-futbol"></i> ${nextWeek?.label || "This Monday"} • 8pm</h2><div class="kickoff">Clifton Park, Brunswick</div><div class="attendance-buttons"><button id="heroPlayBtn" class="btn-play">✅ I'M PLAYING</button><button id="heroSitBtn" class="btn-sit">❌ CAN'T PLAY</button></div><div style="margin-top:8px; font-size:12px;">${currentStatus === 'in' ? '✓ You are PLAYING' : (currentStatus === 'out' ? '✗ You are NOT PLAYING' : 'Tap above to set attendance')}</div></div>`;
-        document.getElementById("heroPlayBtn")?.addEventListener("click", () => setAttendance("in"));
-        document.getElementById("heroSitBtn")?.addEventListener("click", () => setAttendance("out"));
-        document.getElementById("alertContainer").innerHTML = `<div class="alert-banner"><i class="fas fa-exclamation-triangle"></i> ${weeklyCaptain} is this week's Captain! Only attending players can be captain</div>`;
+        const heroDiv = document.getElementById("heroContainer");
+        if(heroDiv) {
+            heroDiv.innerHTML = `<div class="hero-attendance"><h2><i class="fas fa-futbol"></i> ${nextWeek?.label || "This Monday"} • 8pm</h2><div class="kickoff">Clifton Park, Brunswick</div><div class="attendance-buttons"><button id="heroPlayBtn" class="btn-play">✅ I'M PLAYING</button><button id="heroSitBtn" class="btn-sit">❌ CAN'T PLAY</button></div><div style="margin-top:8px; font-size:12px;">${currentStatus === 'in' ? '✓ You are PLAYING' : (currentStatus === 'out' ? '✗ You are NOT PLAYING' : 'Tap above to set attendance')}</div></div>`;
+            const playBtn = document.getElementById("heroPlayBtn");
+            const sitBtn = document.getElementById("heroSitBtn");
+            if(playBtn) playBtn.addEventListener("click", () => setAttendance("in"));
+            if(sitBtn) sitBtn.addEventListener("click", () => setAttendance("out"));
+        }
+        const alertDiv = document.getElementById("alertContainer");
+        if(alertDiv) {
+            alertDiv.innerHTML = `<div class="alert-banner"><i class="fas fa-exclamation-triangle"></i> ${weeklyCaptain} is this week's Captain! Only attending players can be captain</div>`;
+        }
     }
     
     function renderAllPages() {
@@ -523,17 +1026,21 @@
             { id: "rules", icon: "fa-book", label: "Rules" }
         ];
         const bar = document.getElementById("bottomTabBar");
-        bar.innerHTML = tabs.map(t => `<button class="tab-item" data-page="${t.id}"><i class="fas ${t.icon}"></i><span>${t.label}</span></button>`).join('');
-        document.querySelectorAll(".tab-item").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const pageId = btn.dataset.page;
-                document.querySelectorAll(".page").forEach(p => p.classList.remove("active-page"));
-                document.getElementById(`page-${pageId}`).classList.add("active-page");
-                document.querySelectorAll(".tab-item").forEach(b => b.classList.remove("active"));
-                btn.classList.add("active");
+        if(bar) {
+            bar.innerHTML = tabs.map(t => `<button class="tab-item" data-page="${t.id}"><i class="fas ${t.icon}"></i><span>${t.label}</span></button>`).join('');
+            document.querySelectorAll(".tab-item").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const pageId = btn.dataset.page;
+                    document.querySelectorAll(".page").forEach(p => p.classList.remove("active-page"));
+                    const targetPage = document.getElementById(`page-${pageId}`);
+                    if(targetPage) targetPage.classList.add("active-page");
+                    document.querySelectorAll(".tab-item").forEach(b => b.classList.remove("active"));
+                    btn.classList.add("active");
+                });
             });
-        });
-        document.querySelector(".tab-item").click();
+            const firstTab = document.querySelector(".tab-item");
+            if(firstTab) firstTab.click();
+        }
     }
     
     function escapeHtml(str) { return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
@@ -541,17 +1048,61 @@
     async function renderApp() {
         await loadData();
         await fetchMelbourneWeather();
-        document.getElementById("userName").innerText = currentUser.role === "admin" ? "ADMIN" : currentUser.name;
-        document.getElementById("logoutBtn").onclick = logout;
+        const wrapper = document.getElementById("appWrapper");
+        wrapper.innerHTML = `
+            <div class="app-header">
+                <div class="logo-icon"><i class="fas fa-futbol"></i></div>
+                <h1>MONDAY NIGHT SOCCER</h1>
+                <div class="user-badge"><i class="fas fa-user-circle"></i> <span id="userNameSpan">${currentUser.role === "admin" ? "ADMIN" : currentUser.name}</span> <button id="logoutBtnMain">Exit</button></div>
+            </div>
+            <div id="heroContainer"></div>
+            <div id="alertContainer"></div>
+            <div class="page-container" id="pageContainer">
+                <div id="page-profiles" class="page"></div>
+                <div id="page-scoreboard" class="page"></div>
+                <div id="page-teamselect" class="page"></div>
+                <div id="page-history" class="page"></div>
+                <div id="page-rsvp" class="page"></div>
+                <div id="page-weather" class="page"></div>
+                <div id="page-chat" class="page"></div>
+                <div id="page-finance" class="page"></div>
+                <div id="page-rules" class="page"></div>
+            </div>
+            <div class="bottom-tab-bar" id="bottomTabBar"></div>
+        `;
+        document.getElementById("logoutBtnMain").onclick = logout;
         renderAllPages();
         initTabs();
     }
     
     async function renderLogin() {
         await loadData();
-        document.body.innerHTML = `<div style="background:white; border-radius:32px; padding:32px; max-width:380px; margin:60px auto; text-align:center;"><div style="width:56px; height:56px; background:#1a73e8; border-radius:20px; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;"><i class="fas fa-futbol" style="font-size:28px; color:white;"></i></div><h2>Monday Night Soccer</h2><p style="margin-bottom:16px;">8pm Kickoff • Clifton Park, Brunswick</p><select id="playerSelect"><option>-- Select Player --</option>${players.map(p=>`<option>${escapeHtml(p)}</option>`)}</select><button id="playerLoginBtn" style="width:100%; margin-top:8px;">Enter as Player</button><hr style="margin:16px 0;"><input type="password" id="adminPw" placeholder="Admin Password"><button id="adminLoginBtn" style="width:100%; margin-top:8px;">Admin Login</button><div id="loginErr" style="color:red; margin-top:12px;"></div></div>`;
-        document.getElementById("playerLoginBtn").onclick = () => { const n = document.getElementById("playerSelect").value; if(n && n !== "-- Select Player --") loginAsPlayer(n); else document.getElementById("loginErr").innerText = "Select name"; };
-        document.getElementById("adminLoginBtn").onclick = () => { if(!adminLogin(document.getElementById("adminPw").value)) document.getElementById("loginErr").innerText = "Wrong password (admin123)"; };
+        const wrapper = document.getElementById("appWrapper");
+        wrapper.innerHTML = `
+            <div class="login-container">
+                <div style="width:56px; height:56px; background:#1a73e8; border-radius:20px; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;"><i class="fas fa-futbol" style="font-size:28px; color:white;"></i></div>
+                <h2>Monday Night Soccer</h2>
+                <p style="margin-bottom:16px;">8pm Kickoff • Clifton Park, Brunswick</p>
+                <select id="playerSelectLogin">
+                    <option>-- Select Player --</option>
+                    ${players.map(p=>`<option>${escapeHtml(p)}</option>`).join('')}
+                </select>
+                <button id="playerLoginBtn" style="width:100%; margin-top:8px;">Enter as Player</button>
+                <hr style="margin:16px 0;">
+                <input type="password" id="adminPwLogin" placeholder="Admin Password">
+                <button id="adminLoginBtn" style="width:100%; margin-top:8px;">Admin Login</button>
+                <div id="loginErr" style="color:red; margin-top:12px;"></div>
+            </div>
+        `;
+        document.getElementById("playerLoginBtn").onclick = () => {
+            const n = document.getElementById("playerSelectLogin").value;
+            if(n && n !== "-- Select Player --") loginAsPlayer(n);
+            else document.getElementById("loginErr").innerText = "Select your name";
+        };
+        document.getElementById("adminLoginBtn").onclick = () => {
+            const pw = document.getElementById("adminPwLogin").value;
+            if(!adminLogin(pw)) document.getElementById("loginErr").innerText = "Wrong password (admin123)";
+        };
     }
     
     (async () => {
