@@ -74,7 +74,6 @@
         .badge-owing { background: #dc3545; color: white; border-radius: 40px; padding: 4px 12px; font-size: 11px; }
         .weather-card { background: linear-gradient(135deg, #0f2027, #203a43); color: white; border-radius: 24px; padding: 20px; text-align: center; }
         .admin-team-item { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; background: #f1f5f9; border-radius: 60px; padding: 8px 16px; }
-        .rule-box { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; border-radius: 12px; margin-bottom: 12px; font-size: 13px; }
         .playing-list { background: #e8f0fe; border-radius: 20px; padding: 16px; margin-bottom: 14px; }
         .playing-title { font-weight: 800; font-size: 15px; margin-bottom: 10px; color: #1a73e8; }
         .guest-section { background: #f0fdf4; border-radius: 20px; padding: 16px; margin-bottom: 14px; border: 1px solid #bbf7d0; }
@@ -268,7 +267,6 @@
         await saveAttendance({ player: currentUser.name, gameDate: currentWeek.dateStr, status: status });
     }
     
-    // Add Guest function for players
     async function addGuestForPlayer(guestName) {
         if (!currentUser) { alert("Please login first"); return; }
         const currentWeek = getFutureWeeks()[0];
@@ -357,7 +355,7 @@
         for(let match of Object.values(matchResults)) if(match.goals) for(let [scorer, count] of Object.entries(match.goals)) if(stats.has(scorer)) stats.get(scorer).goals += count;
         const topGoals = Array.from(stats.entries()).map(([n,s]) => ({ name:n, goals:s.goals })).sort((a,b)=>b.goals - a.goals).slice(0,8);
         const topApps = Array.from(stats.entries()).map(([n,s]) => ({ name:n, apps:s.appearances + (playerProfiles[n]?.openingBalanceGames||0) })).sort((a,b)=>b.apps - a.apps).slice(0,8);
-        document.getElementById("page-scoreboard").innerHTML = `<div class="card"><h2>🏆 Leaderboard</h2><div><h3>⚽ Top Scorers</h3><table class="data-table">${topGoals.map((p,i)=>`<tr><td style="width:40px;"><strong>${i+1}</strong></td><td><strong>${escapeHtml(p.name)}</strong></td><td><strong>${p.goals}</strong> goals</td>`).join('')}可有</div><div style="margin-top:16px;"><h3>🏃 Most Games</h3><table class="data-table">${topApps.map((p,i)=>`<tr><td style="width:40px;"><strong>${i+1}</strong></td><td><strong>${escapeHtml(p.name)}</strong></td><td><strong>${p.apps}</strong> games</td>`).join('')}</table></div></div>`;
+        document.getElementById("page-scoreboard").innerHTML = `<div class="card"><h2>🏆 Leaderboard</h2><div><h3>⚽ Top Scorers</h3><table class="data-table">${topGoals.map((p,i)=>`<tr><td style="width:40px;"><strong>${i+1}</strong></td><td><strong>${escapeHtml(p.name)}</strong></td><td><strong>${p.goals}</strong> goals</td>`).join('')}可有</div><div style="margin-top:16px;"><h3>🏃 Most Games</h3><table class="data-table">${topApps.map((p,i)=>`<tr><td style="width:40px;"><strong>${i+1}</strong></td><td><strong>${escapeHtml(p.name)}</strong></td><td><strong>${p.apps}</strong> games</td>`).join('')}</td></div></div>`;
     }
     
     // ========== HISTORY PAGE ==========
@@ -408,7 +406,7 @@
         document.getElementById("page-rules").innerHTML = `<div class="card"><h2>📜 League Rules</h2><div style="white-space: pre-line; font-size: 14px; line-height: 1.6;">${escapeHtml(rulesText)}</div></div>`; 
     }
     
-    // ========== ADMIN PAGE - Only visible to admin ==========
+    // ========== ADMIN PAGE - Only 4 buttons ==========
     function renderAdminPage() {
         if (!isAdminLoggedIn) { 
             document.getElementById("page-admin").innerHTML = `<div class="card"><h2>🔒 Admin Area</h2><p>Admin access only. Please login as Admin from the main screen.</p></div>`; 
@@ -449,9 +447,9 @@
                         <td>${isPaid ? '<span class="badge-paid">✓ PAID</span>' : '<span class="badge-owing">❌ OWING $5</span>'}</td>
                         <td>${!isPaid ? `<button class="markPaidBtn" data-player="${escapeHtml(player)}" data-date="${currentWeek.dateStr}" style="padding:6px 12px;">Mark Paid</button>` : '—'}</td></tr>`;
                 }
-                financeHtml += `</tbody><table>`;
+                financeHtml += `</tbody></table>`;
             }
-            financeHtml += `<h3 style="margin-top:16px;">📜 Outstanding Debts</h3><table class="data-table"><thead><tr><th>Player</th><th>Owed</th></tr></thead><tbody>`;
+            financeHtml += `<h3 style="margin-top:16px;">📜 Outstanding Debts</h3><table class="data-table"><thead><tr><th>Player</th><th>Owed</th></table></thead><tbody>`;
             if(debts.length > 0) for(let d of debts) financeHtml += `<tr><td>${escapeHtml(d.player)}</td><td class="badge-owing">$${d.debt}</td></tr>`;
             else financeHtml += `<tr><td colspan="2">✨ No outstanding debts! ✨</td></tr>`;
             financeHtml += `</tbody></table></div>`;
