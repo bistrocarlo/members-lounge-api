@@ -82,6 +82,10 @@
         .admin-action-btn { background: white; border: 2px solid #1a73e8; color: #1a73e8; padding: 16px; border-radius: 60px; font-weight: 700; font-size: 16px; text-align: center; cursor: pointer; transition: all 0.2s; }
         .admin-action-btn i { margin-right: 10px; }
         .admin-action-btn:active { transform: scale(0.96); background: #e8f0fe; }
+        .finance-summary { background: linear-gradient(135deg, #1a73e8, #0d5bbf); color: white; border-radius: 20px; padding: 16px; margin-bottom: 16px; text-align: center; }
+        .finance-summary h3 { color: white; margin: 0 0 8px 0; }
+        .finance-summary .amount { font-size: 32px; font-weight: 800; }
+        .transaction-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
         .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
         .modal-content { background: white; border-radius: 32px; padding: 24px; max-width: 340px; width: 85%; max-height: 80vh; overflow-y: auto; }
         .login-box { background: white; border-radius: 40px; padding: 32px 24px; margin: 60px 20px; text-align: center; }
@@ -355,7 +359,7 @@
         for(let match of Object.values(matchResults)) if(match.goals) for(let [scorer, count] of Object.entries(match.goals)) if(stats.has(scorer)) stats.get(scorer).goals += count;
         const topGoals = Array.from(stats.entries()).map(([n,s]) => ({ name:n, goals:s.goals })).sort((a,b)=>b.goals - a.goals).slice(0,8);
         const topApps = Array.from(stats.entries()).map(([n,s]) => ({ name:n, apps:s.appearances + (playerProfiles[n]?.openingBalanceGames||0) })).sort((a,b)=>b.apps - a.apps).slice(0,8);
-        document.getElementById("page-scoreboard").innerHTML = `<div class="card"><h2>🏆 Leaderboard</h2><div><h3>⚽ Top Scorers</h3><table class="data-table">${topGoals.map((p,i)=>`<tr><td style="width:40px;"><strong>${i+1}</strong></td><td><strong>${escapeHtml(p.name)}</strong></td><td><strong>${p.goals}</strong> goals</td>`).join('')}可有</div><div style="margin-top:16px;"><h3>🏃 Most Games</h3><table class="data-table">${topApps.map((p,i)=>`<tr><td style="width:40px;"><strong>${i+1}</strong></td><td><strong>${escapeHtml(p.name)}</strong></td><td><strong>${p.apps}</strong> games</td>`).join('')}</td></div></div>`;
+        document.getElementById("page-scoreboard").innerHTML = `<div class="card"><h2>🏆 Leaderboard</h2><div><h3>⚽ Top Scorers</h3><table class="data-table">${topGoals.map((p,i)=>`<tr><td style="width:40px;"><strong>${i+1}</strong></td><td><strong>${escapeHtml(p.name)}</strong></td><td><strong>${p.goals}</strong> goals</td>`).join('')}可有</div><div style="margin-top:16px;"><h3>🏃 Most Games</h3><table class="data-table">${topApps.map((p,i)=>`<tr><td style="width:40px;"><strong>${i+1}</strong></td><td><strong>${escapeHtml(p.name)}</strong></td><td><strong>${p.apps}</strong> games</td>`).join('')}</table></div></div>`;
     }
     
     // ========== HISTORY PAGE ==========
@@ -406,7 +410,7 @@
         document.getElementById("page-rules").innerHTML = `<div class="card"><h2>📜 League Rules</h2><div style="white-space: pre-line; font-size: 14px; line-height: 1.6;">${escapeHtml(rulesText)}</div></div>`; 
     }
     
-    // ========== ADMIN PAGE - Only 4 buttons ==========
+    // ========== ADMIN PAGE - Only Admin tab, Professional Finance ==========
     function renderAdminPage() {
         if (!isAdminLoggedIn) { 
             document.getElementById("page-admin").innerHTML = `<div class="card"><h2>🔒 Admin Area</h2><p>Admin access only. Please login as Admin from the main screen.</p></div>`; 
@@ -415,14 +419,25 @@
         const currentWeek = getFutureWeeks()[0];
         const signedPlayers = currentWeek ? attendance.filter(a => a.gameDate === currentWeek.dateStr && a.status === 'in').map(a => a.player) : [];
         const totalCollected = payments.reduce((sum, p) => sum + 5, 0);
+        
+        // Calculate detailed outstanding debts
         let debts = [];
         for(let player of players) {
             let unpaid = 0;
             const playerGames = attendance.filter(a => a.player === player && a.status === 'in');
-            for (let game of playerGames) if (!payments.some(p => p.player === player && p.gameDate === game.gameDate)) unpaid += 5;
+            for (let game of playerGames) {
+                if (!payments.some(p => p.player === player && p.gameDate === game.gameDate)) unpaid += 5;
+            }
             if(unpaid > 0) debts.push({ player, debt: unpaid });
         }
         debts.sort((a,b) => b.debt - a.debt);
+        
+        // Group payments by week for transaction history
+        let paymentsByWeek = {};
+        payments.forEach(p => {
+            if (!paymentsByWeek[p.gameDate]) paymentsByWeek[p.gameDate] = [];
+            paymentsByWeek[p.gameDate].push(p);
+        });
         
         let html = `<div class="card"><h2>⚙️ Admin Control Panel</h2><div class="admin-buttons">
             <button id="adminFinanceBtn" class="admin-action-btn"><i class="fas fa-dollar-sign"></i> 💰 Financial Ledger</button>
@@ -436,30 +451,68 @@
         <div id="adminRulesPanel" style="display:none;"></div>`;
         document.getElementById("page-admin").innerHTML = html;
         
-        // Finance Panel
+        // Professional Finance Panel
         document.getElementById("adminFinanceBtn").onclick = () => {
-            let financeHtml = `<div class="card"><h2>💰 Financial Ledger</h2><div class="stat-card"><strong>🏦 Total Treasury: $${totalCollected}</strong></div>`;
+            let financeHtml = `<div class="card">
+                <h2>💰 Financial Ledger</h2>
+                <div class="finance-summary">
+                    <h3>Total Treasury</h3>
+                    <div class="amount">$${totalCollected}</div>
+                    <p style="font-size:12px; margin-top:8px;">Collected from ${payments.length} payments</p>
+                </div>`;
+            
+            // Current week payment status
             if(currentWeek && signedPlayers.length > 0) {
-                financeHtml += `<h3>📅 ${currentWeek.label} - Payment Status</h3><table class="data-table"><thead><tr><th>Player</th><th>Status</th><th>Action</th></tr></thead><tbody>`;
+                financeHtml += `<h3>📅 ${currentWeek.label} - Payment Status</h3>
+                <table class="data-table"><thead><tr><th>Player</th><th>Status</th><th>Amount</th><th>Action</th></tr></thead><tbody>`;
                 for (let player of signedPlayers) {
                     const isPaid = payments.some(p => p.player === player && p.gameDate === currentWeek.dateStr);
-                    financeHtml += `<tr><td><strong>${escapeHtml(player)}</strong></td>
-                        <td>${isPaid ? '<span class="badge-paid">✓ PAID</span>' : '<span class="badge-owing">❌ OWING $5</span>'}</td>
-                        <td>${!isPaid ? `<button class="markPaidBtn" data-player="${escapeHtml(player)}" data-date="${currentWeek.dateStr}" style="padding:6px 12px;">Mark Paid</button>` : '—'}</td></tr>`;
+                    financeHtml += `<tr>
+                        <td><strong>${escapeHtml(player)}</strong></td>
+                        <td>${isPaid ? '<span class="badge-paid">✓ PAID</span>' : '<span class="badge-owing">❌ OWING</span>'}</td>
+                        <td>${isPaid ? '$5.00' : '$5.00'}</td>
+                        <td>${!isPaid ? `<button class="markPaidBtn" data-player="${escapeHtml(player)}" data-date="${currentWeek.dateStr}" style="padding:6px 12px;">Record Payment</button>` : '—'}</button>}</td>
+                    </tr>`;
                 }
                 financeHtml += `</tbody></table>`;
+            } else if(currentWeek) {
+                financeHtml += `<p>No players signed up for this week.</p>`;
             }
-            financeHtml += `<h3 style="margin-top:16px;">📜 Outstanding Debts</h3><table class="data-table"><thead><tr><th>Player</th><th>Owed</th></table></thead><tbody>`;
-            if(debts.length > 0) for(let d of debts) financeHtml += `<tr><td>${escapeHtml(d.player)}</td><td class="badge-owing">$${d.debt}</td></tr>`;
-            else financeHtml += `<tr><td colspan="2">✨ No outstanding debts! ✨</td></tr>`;
+            
+            // Outstanding debts ledger
+            financeHtml += `<h3 style="margin-top:20px;">📜 Outstanding Debts</h3>
+            <table class="data-table"><thead><tr><th>Player</th><th>Games Played</th><th>Unpaid Amount</th></tr></thead><tbody>`;
+            if(debts.length > 0) {
+                for(let d of debts) {
+                    const playerGamesCount = attendance.filter(a => a.player === d.player && a.status === 'in').length;
+                    financeHtml += `<tr><td><strong>${escapeHtml(d.player)}</strong></td><td>${playerGamesCount} games</td><td class="badge-owing">$${d.debt}.00</td></tr>`;
+                }
+            } else {
+                financeHtml += `<tr><td colspan="3" style="text-align:center;">✨ No outstanding debts - all players are paid up! ✨</td></tr>`;
+            }
+            financeHtml += `</tbody></table>`;
+            
+            // Transaction History
+            financeHtml += `<h3 style="margin-top:20px;">📋 Transaction History</h3>
+            <table class="data-table"><thead><tr><th>Date</th><th>Player</th><th>Amount</th><th>Week</th></tr></thead><tbody>`;
+            if(payments.length > 0) {
+                payments.slice().reverse().forEach(p => {
+                    const weekLabel = ALL_GAME_WEEKS.find(w => w.dateStr === p.gameDate)?.label || p.gameDate;
+                    financeHtml += `<tr><td>${new Date(p.timestamp || Date.now()).toLocaleDateString()}</td><td><strong>${escapeHtml(p.player)}</strong></td><td class="badge-paid">$${p.amount}.00</td><td>${weekLabel}</td></tr>`;
+                });
+            } else {
+                financeHtml += `<tr><td colspan="4" style="text-align:center;">No transactions recorded yet</td></tr>`;
+            }
             financeHtml += `</tbody></table></div>`;
+            
             document.getElementById("adminFinancePanel").innerHTML = financeHtml;
             document.getElementById("adminFinancePanel").style.display = "block";
             document.getElementById("adminTeamsPanel").style.display = "none";
             document.getElementById("adminGuestsPanel").style.display = "none";
             document.getElementById("adminRulesPanel").style.display = "none";
+            
             document.querySelectorAll(".markPaidBtn").forEach(btn => btn.addEventListener("click", async () => {
-                await savePayment({ player: btn.dataset.player, gameDate: btn.dataset.date, amount: 5 });
+                await savePayment({ player: btn.dataset.player, gameDate: btn.dataset.date, amount: 5, timestamp: Date.now() });
                 renderAdminPage();
             }));
         };
@@ -473,9 +526,9 @@
                 for(let player of signedPlayers) {
                     const current = teamAssignments[currentWeek.dateStr][player] || "";
                     listHtml += `<div class="admin-team-item"><span><strong>${escapeHtml(player)}</strong></span>
-                        <select class="admin-team-select" data-player="${escapeHtml(player)}" style="width:140px;"><option value="">—</option><option value="yellow" ${current==="yellow"?"selected":""}>🟡 Yellow</option><option value="orange" ${current==="orange"?"selected":""}>🟠 Orange</option></select></div>`;
+                        <select class="admin-team-select" data-player="${escapeHtml(player)}" style="width:140px;"><option value="">— Select Team —</option><option value="yellow" ${current==="yellow"?"selected":""}>🟡 Yellow Team</option><option value="orange" ${current==="orange"?"selected":""}>🟠 Orange Team</option></select></div>`;
                 }
-                listHtml += `<div class="flex-btns"><button id="autoAssignTeamsBtn" class="btn-outline">🎲 Auto-Balance</button><button id="saveTeamsBtn">💾 Save Teams</button></div></div>`;
+                listHtml += `<div class="flex-btns"><button id="autoAssignTeamsBtn" class="btn-outline">🎲 Auto-Balance Teams</button><button id="saveTeamsBtn">💾 Save Team Assignments</button></div></div>`;
                 document.getElementById("adminTeamsPanel").innerHTML = listHtml;
                 document.querySelectorAll(".admin-team-select").forEach(sel => sel.addEventListener("change", () => { teamAssignments[currentWeek.dateStr][sel.dataset.player] = sel.value; }));
                 document.getElementById("autoAssignTeamsBtn")?.addEventListener("click", () => {
