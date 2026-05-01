@@ -83,9 +83,7 @@
         .admin-action-btn i { margin-right: 10px; }
         .admin-action-btn:active { transform: scale(0.96); background: #e8f0fe; }
         .finance-summary { background: linear-gradient(135deg, #1a73e8, #0d5bbf); color: white; border-radius: 20px; padding: 16px; margin-bottom: 16px; text-align: center; }
-        .finance-summary h3 { color: white; margin: 0 0 8px 0; }
         .finance-summary .amount { font-size: 32px; font-weight: 800; }
-        .transaction-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
         .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
         .modal-content { background: white; border-radius: 32px; padding: 24px; max-width: 340px; width: 85%; max-height: 80vh; overflow-y: auto; }
         .login-box { background: white; border-radius: 40px; padding: 32px 24px; margin: 60px 20px; text-align: center; }
@@ -248,7 +246,6 @@
         await updateCaptainForCurrentWeek();
         renderHomePage();
         renderProfilesPage();
-        if(isAdminLoggedIn) renderAdminPage();
     }
     async function saveComment(gameDate, author, text) {
         const comment = { gameDate, author, text, timestamp: Date.now() };
@@ -278,7 +275,6 @@
         if (!guestName.trim()) { alert("Please enter a guest name"); return; }
         await saveGuest({ guestName: guestName.trim(), gameDate: currentWeek.dateStr, addedBy: currentUser.name });
         renderHomePage();
-        if(isAdminLoggedIn) renderAdminPage();
     }
     
     function showEditProfileModal(playerName) {
@@ -314,19 +310,17 @@
         document.getElementById('cancelBtn').onclick = () => modalDiv.remove();
     }
     
-    // ========== HOME PAGE ==========
     function renderHomePage() {
         const nextWeek = getFutureWeeks()[0];
         const currentStatus = nextWeek ? attendance.find(a => a.gameDate === nextWeek.dateStr && a.player === currentUser?.name)?.status : null;
         const playingThisWeek = nextWeek ? attendance.filter(a => a.gameDate === nextWeek.dateStr && a.status === 'in').map(a => a.player) : [];
         const weeklyGuests = nextWeek ? guests.filter(g => g.gameDate === nextWeek.dateStr).map(g => ({ name: g.guestName, addedBy: g.addedBy })) : [];
-        
         const homeContainer = document.getElementById("homeContainer");
         if(homeContainer) {
             homeContainer.innerHTML = `<div class="attendance-card"><h2><i class="fas fa-futbol"></i> ${nextWeek?.label || "This Monday"} • 8pm</h2><div>Clifton Park, Brunswick</div><div class="big-buttons"><button id="homePlayBtn" class="btn-play-big">✅ I'M PLAYING</button><button id="homeSitBtn" class="btn-sit-big">❌ CAN'T PLAY</button></div><div class="status-text">${currentStatus === 'in' ? '✓ You are PLAYING' : (currentStatus === 'out' ? '✗ You are NOT PLAYING' : 'Tap above to set your attendance')}</div></div>
             <div class="playing-list"><div class="playing-title"><i class="fas fa-users"></i> 🟢 Players Playing This Week (${playingThisWeek.length})</div><div class="attendee-tags">${playingThisWeek.map(p=>`<span class="attendee-tag">${escapeHtml(p)}</span>`).join('')||'<span>No players signed up yet</span>'}</div></div>
-            <div class="guest-section"><div class="guest-title"><i class="fas fa-user-friends"></i> 🎭 Guests This Week (${weeklyGuests.length})</div><div class="attendee-tags">${weeklyGuests.map(g=>`<span class="guest-tag">${escapeHtml(g.name)} <small style="opacity:0.7;">(brought by ${escapeHtml(g.addedBy)})</small></span>`).join('')||'<span>No guests added yet</span>'}</div>
-            <div style="margin-top: 12px;"><input type="text" id="guestNameInput" placeholder="Enter guest name (e.g., John)" style="margin-bottom:8px;"><button id="addGuestBtnPlayer" class="btn-outline" style="width:100%;">➕ Bring a Guest</button></div></div>`;
+            <div class="guest-section"><div class="guest-title"><i class="fas fa-user-friends"></i> 🎭 Guests This Week (${weeklyGuests.length})</div><div class="attendee-tags">${weeklyGuests.map(g=>`<span class="guest-tag">${escapeHtml(g.name)} <small>(by ${escapeHtml(g.addedBy)})</small></span>`).join('')||'<span>No guests added yet</span>'}</div>
+            <div style="margin-top: 12px;"><input type="text" id="guestNameInput" placeholder="Enter guest name" style="margin-bottom:8px;"><button id="addGuestBtnPlayer" class="btn-outline" style="width:100%;">➕ Bring a Guest</button></div></div>`;
             document.getElementById("homePlayBtn")?.addEventListener("click", () => setAttendance("in"));
             document.getElementById("homeSitBtn")?.addEventListener("click", () => setAttendance("out"));
             document.getElementById("addGuestBtnPlayer")?.addEventListener("click", () => {
@@ -337,7 +331,6 @@
         }
     }
     
-    // ========== PROFILES PAGE ==========
     function renderProfilesPage() {
         let html = `<div class="card"><h2>👤 Player Profiles</h2>`;
         for(let player of players) {
@@ -351,7 +344,6 @@
         document.querySelectorAll(".edit-profile-btn").forEach(btn => btn.addEventListener("click", () => showEditProfileModal(btn.dataset.player)));
     }
     
-    // ========== SCOREBOARD PAGE ==========
     function renderScoreboardPage() {
         let stats = new Map();
         players.forEach(p => stats.set(p, { goals: 0, appearances: 0 }));
@@ -359,15 +351,14 @@
         for(let match of Object.values(matchResults)) if(match.goals) for(let [scorer, count] of Object.entries(match.goals)) if(stats.has(scorer)) stats.get(scorer).goals += count;
         const topGoals = Array.from(stats.entries()).map(([n,s]) => ({ name:n, goals:s.goals })).sort((a,b)=>b.goals - a.goals).slice(0,8);
         const topApps = Array.from(stats.entries()).map(([n,s]) => ({ name:n, apps:s.appearances + (playerProfiles[n]?.openingBalanceGames||0) })).sort((a,b)=>b.apps - a.apps).slice(0,8);
-        document.getElementById("page-scoreboard").innerHTML = `<div class="card"><h2>🏆 Leaderboard</h2><div><h3>⚽ Top Scorers</h3><table class="data-table">${topGoals.map((p,i)=>`<tr><td style="width:40px;"><strong>${i+1}</strong></td><td><strong>${escapeHtml(p.name)}</strong></td><td><strong>${p.goals}</strong> goals</td>`).join('')}可有</div><div style="margin-top:16px;"><h3>🏃 Most Games</h3><table class="data-table">${topApps.map((p,i)=>`<tr><td style="width:40px;"><strong>${i+1}</strong></td><td><strong>${escapeHtml(p.name)}</strong></td><td><strong>${p.apps}</strong> games</td>`).join('')}</table></div></div>`;
+        document.getElementById("page-scoreboard").innerHTML = `<div class="card"><h2>🏆 Leaderboard</h2><div><h3>⚽ Top Scorers</h3><table class="data-table">${topGoals.map((p,i)=>`<tr><td><strong>${i+1}</strong></td><td><strong>${escapeHtml(p.name)}</strong></td><td>${p.goals} goals</td></tr>`).join('')}</table></div><div style="margin-top:16px;"><h3>🏃 Most Games</h3><table class="data-table">${topApps.map((p,i)=>`<tr><td><strong>${i+1}</strong></td><td><strong>${escapeHtml(p.name)}</strong></td><td>${p.apps} games</td></tr>`).join('')}</table></div></div>`;
     }
     
-    // ========== HISTORY PAGE ==========
     async function renderHistoryPage() {
         const past = getPastWeeks();
-        if (!past.length) { document.getElementById("page-history").innerHTML = `<div class="card"><h2>📖 Match History</h2><p>No past games</p></div>`; return; }
+        if (!past.length) { document.getElementById("page-history").innerHTML = `<div class="card"><h2>📖 Match History</h2><p>No past games yet. Check back after Monday!</p></div>`; return; }
         let html = `<div class="card"><h2>📖 Match History</h2></div>`;
-        for (let week of past.slice(0, 8)) {
+        for (let week of past) {
             const assignments = teamAssignments[week.dateStr] || {};
             const yellow = Object.keys(assignments).filter(p => assignments[p] === "yellow");
             const orange = Object.keys(assignments).filter(p => assignments[p] === "orange");
@@ -375,14 +366,18 @@
             const goals = match.goals || {};
             const yellowGoals = [], orangeGoals = [];
             for (let [player, count] of Object.entries(goals)) if (count>0) { if(yellow.includes(player)) yellowGoals.push({player,count}); else if(orange.includes(player)) orangeGoals.push({player,count}); }
+            const weeklyGuests = guests.filter(g => g.gameDate === week.dateStr);
             const comments = matchComments[week.dateStr] || [];
             const safeId = week.dateStr.replace(/-/g, '');
-            html += `<div class="match-card"><div class="match-header"><div class="match-date">${week.label}</div><div class="match-result">🟡 ${match.yellowScore} - ${match.orangeScore} 🟠</div></div>
-                <div class="teams-section"><div class="team-row"><div class="team-box"><div class="team-yellow">🟡 YELLOW</div><div class="player-list">${yellow.map(p=>`<span class="player-tag">${escapeHtml(p)}</span>`).join('')}</div></div>
-                <div class="team-box"><div class="team-orange">🟠 ORANGE</div><div class="player-list">${orange.map(p=>`<span class="player-tag">${escapeHtml(p)}</span>`).join('')}</div></div></div><div class="score-big">${match.yellowScore} - ${match.orangeScore}</div></div>
-                <div class="goals-section"><div class="goals-list">${yellowGoals.map(g=>`<div class="goal-badge">🟡 ${g.player} ×${g.count}</div>`).join('')}${orangeGoals.map(g=>`<div class="goal-badge">🟠 ${g.player} ×${g.count}</div>`).join('')}</div></div>
-                <div class="comments-section"><div>💬 Comments</div><div id="comments-${safeId}">${comments.map(c=>`<div class="comment-item"><strong>${escapeHtml(c.author)}</strong><br>${escapeHtml(c.text)}</div>`).join('')||'<div>No comments</div>'}</div>
-                <div class="add-comment"><input id="commentInput-${safeId}" placeholder="Add comment..."><button onclick="window.addComment('${week.dateStr}')">Comment</button></div></div></div>`;
+            html += `<div class="match-card">
+                <div class="match-header"><div class="match-date">${week.label}</div><div class="match-result">🟡 ${match.yellowScore} - ${match.orangeScore} 🟠</div></div>
+                <div class="teams-section"><div class="team-row"><div class="team-box"><div class="team-yellow">🟡 YELLOW</div><div class="player-list">${yellow.map(p=>`<span class="player-tag">${escapeHtml(p)}</span>`).join('') || '<span class="player-tag">—</span>'}</div></div>
+                <div class="team-box"><div class="team-orange">🟠 ORANGE</div><div class="player-list">${orange.map(p=>`<span class="player-tag">${escapeHtml(p)}</span>`).join('') || '<span class="player-tag">—</span>'}</div></div></div>
+                <div class="score-big">${match.yellowScore} - ${match.orangeScore}</div></div>
+                <div class="goals-section"><div class="goals-title">⚽ Goal Scorers</div><div class="goals-list">${yellowGoals.map(g=>`<div class="goal-badge">🟡 ${g.player} ×${g.count}</div>`).join('')}${orangeGoals.map(g=>`<div class="goal-badge">🟠 ${g.player} ×${g.count}</div>`).join('')}${yellowGoals.length === 0 && orangeGoals.length === 0 ? '<div class="goal-badge">No goals recorded</div>' : ''}</div></div>
+                ${weeklyGuests.length > 0 ? `<div class="goals-section" style="background:#f0fdf4;"><div class="goals-title">🎭 Guests</div><div class="goals-list">${weeklyGuests.map(g=>`<div class="goal-badge" style="border-left-color:#28a745;">${escapeHtml(g.guestName)} <small>(brought by ${escapeHtml(g.addedBy)})</small></div>`).join('')}</div></div>` : ''}
+                <div class="comments-section"><div>💬 Comments (${comments.length})</div><div id="comments-${safeId}">${comments.map(c=>`<div class="comment-item"><strong>${escapeHtml(c.author)}</strong><br>${escapeHtml(c.text)}</div>`).join('')||'<div style="color:#94a3b8;">No comments yet. Be the first!</div>'}</div>
+                <div class="add-comment"><input id="commentInput-${safeId}" placeholder="Share your thoughts..."><button onclick="window.addComment('${week.dateStr}')">Comment</button></div></div></div>`;
         }
         document.getElementById("page-history").innerHTML = html;
     }
@@ -391,54 +386,30 @@
         if(input?.value.trim()) { await saveComment(gameDate, currentUser.name, input.value.trim()); input.value = ""; renderHistoryPage(); }
     };
     
-    // ========== WEATHER PAGE ==========
     function renderWeatherPage() {
         const nextMonday = new Date(); nextMonday.setDate(nextMonday.getDate() + ((1 + 7 - nextMonday.getDay()) % 7));
         const formatted = nextMonday.toLocaleDateString('en-AU', { weekday:'long', day:'numeric', month:'long' });
         document.getElementById("page-weather").innerHTML = `<div class="card"><h2>🌤️ Match Forecast</h2><div class="weather-card"><div style="text-align:center;"><i class="fas ${weatherData.icon}" style="font-size:56px;"></i><h3 style="margin:8px 0;">${weatherData.condition}</h3><h1 style="font-size:52px;">${weatherData.temp}</h1><p>🌧️ Rain: ${weatherData.rainChance}%</p><hr style="margin:16px 0; opacity:0.3;"><p><strong>${formatted}</strong><br>8:00pm AEST • Clifton Park, Brunswick</p></div></div></div>`;
     }
     
-    // ========== CHAT PAGE ==========
     function renderChatPage() {
         document.getElementById("page-chat").innerHTML = `<div class="card"><h2>💬 Live Chat</h2><div id="chatMsgs" style="height:320px; overflow-y:auto; background:#f8fafc; border-radius:20px; padding:12px; margin-bottom:12px;"></div><div style="display:flex; gap:8px;"><input id="chatInput" placeholder="Type message..."><button id="chatSendBtn">Send</button></div></div>`;
         if(db) db.collection("messages").orderBy("timestamp","asc").onSnapshot(snap => { const c=document.getElementById("chatMsgs"); if(!c) return; let h=""; snap.forEach(d=>{ const m=d.data(); h+=`<div style="margin-bottom:12px;"><strong>${escapeHtml(m.name)}</strong><div style="background:white; border-radius:14px; padding:8px 12px; margin-top:4px;">${escapeHtml(m.message)}</div></div>`; }); c.innerHTML=h||"<div>No messages</div>"; c.scrollTop=c.scrollHeight; });
         document.getElementById("chatSendBtn").onclick = async () => { const msg = document.getElementById("chatInput").value.trim(); if(msg && db) { await db.collection("messages").add({ name: currentUser.name, message: msg, timestamp: firebase.firestore.FieldValue.serverTimestamp() }); document.getElementById("chatInput").value = ""; } };
     }
     
-    // ========== RULES PAGE ==========
     function renderRulesPage() { 
         document.getElementById("page-rules").innerHTML = `<div class="card"><h2>📜 League Rules</h2><div style="white-space: pre-line; font-size: 14px; line-height: 1.6;">${escapeHtml(rulesText)}</div></div>`; 
     }
     
-    // ========== ADMIN PAGE - Only Admin tab, Professional Finance ==========
+    // ADMIN PAGE - Clean, only the 4 buttons, no extra content shown by default
     function renderAdminPage() {
         if (!isAdminLoggedIn) { 
             document.getElementById("page-admin").innerHTML = `<div class="card"><h2>🔒 Admin Area</h2><p>Admin access only. Please login as Admin from the main screen.</p></div>`; 
             return; 
         }
-        const currentWeek = getFutureWeeks()[0];
-        const signedPlayers = currentWeek ? attendance.filter(a => a.gameDate === currentWeek.dateStr && a.status === 'in').map(a => a.player) : [];
-        const totalCollected = payments.reduce((sum, p) => sum + 5, 0);
         
-        // Calculate detailed outstanding debts
-        let debts = [];
-        for(let player of players) {
-            let unpaid = 0;
-            const playerGames = attendance.filter(a => a.player === player && a.status === 'in');
-            for (let game of playerGames) {
-                if (!payments.some(p => p.player === player && p.gameDate === game.gameDate)) unpaid += 5;
-            }
-            if(unpaid > 0) debts.push({ player, debt: unpaid });
-        }
-        debts.sort((a,b) => b.debt - a.debt);
-        
-        // Group payments by week for transaction history
-        let paymentsByWeek = {};
-        payments.forEach(p => {
-            if (!paymentsByWeek[p.gameDate]) paymentsByWeek[p.gameDate] = [];
-            paymentsByWeek[p.gameDate].push(p);
-        });
-        
+        // Simple admin page with just the 4 buttons - no panels visible until clicked
         let html = `<div class="card"><h2>⚙️ Admin Control Panel</h2><div class="admin-buttons">
             <button id="adminFinanceBtn" class="admin-action-btn"><i class="fas fa-dollar-sign"></i> 💰 Financial Ledger</button>
             <button id="adminTeamsBtn" class="admin-action-btn"><i class="fas fa-users"></i> ⚽ Assign Teams</button>
@@ -451,66 +422,40 @@
         <div id="adminRulesPanel" style="display:none;"></div>`;
         document.getElementById("page-admin").innerHTML = html;
         
-        // Professional Finance Panel
+        // Finance Panel - Professional Ledger
         document.getElementById("adminFinanceBtn").onclick = () => {
-            let financeHtml = `<div class="card">
-                <h2>💰 Financial Ledger</h2>
-                <div class="finance-summary">
-                    <h3>Total Treasury</h3>
-                    <div class="amount">$${totalCollected}</div>
-                    <p style="font-size:12px; margin-top:8px;">Collected from ${payments.length} payments</p>
-                </div>`;
+            const currentWeek = getFutureWeeks()[0];
+            const signedPlayers = currentWeek ? attendance.filter(a => a.gameDate === currentWeek.dateStr && a.status === 'in').map(a => a.player) : [];
+            const totalCollected = payments.reduce((sum, p) => sum + 5, 0);
+            let debts = [];
+            for(let player of players) {
+                let unpaid = 0;
+                const playerGames = attendance.filter(a => a.player === player && a.status === 'in');
+                for (let game of playerGames) if (!payments.some(p => p.player === player && p.gameDate === game.gameDate)) unpaid += 5;
+                if(unpaid > 0) debts.push({ player, debt: unpaid });
+            }
+            debts.sort((a,b) => b.debt - a.debt);
             
-            // Current week payment status
+            let financeHtml = `<div class="card"><h2>💰 Financial Ledger</h2>
+                <div class="finance-summary"><div class="amount">$${totalCollected}</div><p style="font-size:12px;">Total Treasury</p></div>`;
             if(currentWeek && signedPlayers.length > 0) {
-                financeHtml += `<h3>📅 ${currentWeek.label} - Payment Status</h3>
-                <table class="data-table"><thead><tr><th>Player</th><th>Status</th><th>Amount</th><th>Action</th></tr></thead><tbody>`;
+                financeHtml += `<h3>📅 ${currentWeek.label} - Payment Status</h3><table class="data-table"><thead><tr><th>Player</th><th>Status</th><th>Action</th></tr></thead><tbody>`;
                 for (let player of signedPlayers) {
                     const isPaid = payments.some(p => p.player === player && p.gameDate === currentWeek.dateStr);
-                    financeHtml += `<tr>
-                        <td><strong>${escapeHtml(player)}</strong></td>
-                        <td>${isPaid ? '<span class="badge-paid">✓ PAID</span>' : '<span class="badge-owing">❌ OWING</span>'}</td>
-                        <td>${isPaid ? '$5.00' : '$5.00'}</td>
-                        <td>${!isPaid ? `<button class="markPaidBtn" data-player="${escapeHtml(player)}" data-date="${currentWeek.dateStr}" style="padding:6px 12px;">Record Payment</button>` : '—'}</button>}</td>
-                    </tr>`;
+                    financeHtml += `<tr><td><strong>${escapeHtml(player)}</strong></td><td>${isPaid ? '<span class="badge-paid">✓ PAID</span>' : '<span class="badge-owing">❌ OWING</span>'}</td>
+                        <td>${!isPaid ? `<button class="markPaidBtn" data-player="${escapeHtml(player)}" data-date="${currentWeek.dateStr}" style="padding:6px 12px;">Record Payment</button>` : '—'}</td></tr>`;
                 }
                 financeHtml += `</tbody></table>`;
-            } else if(currentWeek) {
-                financeHtml += `<p>No players signed up for this week.</p>`;
             }
-            
-            // Outstanding debts ledger
-            financeHtml += `<h3 style="margin-top:20px;">📜 Outstanding Debts</h3>
-            <table class="data-table"><thead><tr><th>Player</th><th>Games Played</th><th>Unpaid Amount</th></tr></thead><tbody>`;
-            if(debts.length > 0) {
-                for(let d of debts) {
-                    const playerGamesCount = attendance.filter(a => a.player === d.player && a.status === 'in').length;
-                    financeHtml += `<tr><td><strong>${escapeHtml(d.player)}</strong></td><td>${playerGamesCount} games</td><td class="badge-owing">$${d.debt}.00</td></tr>`;
-                }
-            } else {
-                financeHtml += `<tr><td colspan="3" style="text-align:center;">✨ No outstanding debts - all players are paid up! ✨</td></tr>`;
-            }
-            financeHtml += `</tbody></table>`;
-            
-            // Transaction History
-            financeHtml += `<h3 style="margin-top:20px;">📋 Transaction History</h3>
-            <table class="data-table"><thead><tr><th>Date</th><th>Player</th><th>Amount</th><th>Week</th></tr></thead><tbody>`;
-            if(payments.length > 0) {
-                payments.slice().reverse().forEach(p => {
-                    const weekLabel = ALL_GAME_WEEKS.find(w => w.dateStr === p.gameDate)?.label || p.gameDate;
-                    financeHtml += `<tr><td>${new Date(p.timestamp || Date.now()).toLocaleDateString()}</td><td><strong>${escapeHtml(p.player)}</strong></td><td class="badge-paid">$${p.amount}.00</td><td>${weekLabel}</td></tr>`;
-                });
-            } else {
-                financeHtml += `<tr><td colspan="4" style="text-align:center;">No transactions recorded yet</td></tr>`;
-            }
+            financeHtml += `<h3 style="margin-top:20px;">📜 Outstanding Debts</h3><table class="data-table"><thead><tr><th>Player</th><th>Amount Owed</th></tr></thead><tbody>`;
+            if(debts.length > 0) for(let d of debts) financeHtml += `<tr><td><strong>${escapeHtml(d.player)}</strong></td><td class="badge-owing">$${d.debt}</td></tr>`;
+            else financeHtml += `<tr><td colspan="2" style="text-align:center;">✨ No outstanding debts ✨</td></tr>`;
             financeHtml += `</tbody></table></div>`;
-            
             document.getElementById("adminFinancePanel").innerHTML = financeHtml;
             document.getElementById("adminFinancePanel").style.display = "block";
             document.getElementById("adminTeamsPanel").style.display = "none";
             document.getElementById("adminGuestsPanel").style.display = "none";
             document.getElementById("adminRulesPanel").style.display = "none";
-            
             document.querySelectorAll(".markPaidBtn").forEach(btn => btn.addEventListener("click", async () => {
                 await savePayment({ player: btn.dataset.player, gameDate: btn.dataset.date, amount: 5, timestamp: Date.now() });
                 renderAdminPage();
@@ -519,7 +464,9 @@
         
         // Teams Panel
         document.getElementById("adminTeamsBtn").onclick = () => {
+            const currentWeek = getFutureWeeks()[0];
             if(!currentWeek) { alert("No upcoming games"); return; }
+            const signedPlayers = attendance.filter(a => a.gameDate === currentWeek.dateStr && a.status === 'in').map(a => a.player);
             if(!teamAssignments[currentWeek.dateStr]) teamAssignments[currentWeek.dateStr] = {};
             const renderAssignList = () => {
                 let listHtml = `<div class="card"><h2>⚽ Assign Teams for ${currentWeek.label}</h2>`;
@@ -551,6 +498,7 @@
         
         // Guests Panel
         document.getElementById("adminGuestsBtn").onclick = () => {
+            const currentWeek = getFutureWeeks()[0];
             let weeklyGuests = guests.filter(g => g.gameDate === currentWeek?.dateStr);
             let guestHtml = `<div class="card"><h2>🎭 Guest List for ${currentWeek?.label || "Next Monday"}</h2><div class="attendee-tags">${weeklyGuests.map(g=>`<span class="guest-tag">${escapeHtml(g.guestName)} <small>(by ${escapeHtml(g.addedBy)})</small></span>`).join('')||'<span>No guests added</span>'}</div>
                 <input type="text" id="adminGuestName" placeholder="Guest name"><button id="adminAddGuestBtn">+ Add Guest</button></div>`;
@@ -599,7 +547,6 @@
     }
     
     function initNavigation() {
-        // Only show ADMIN tab if user is admin
         const modules = [
             { id: "home", name: "🏠 HOME" },
             { id: "profiles", name: "👤 PROFILES" },
