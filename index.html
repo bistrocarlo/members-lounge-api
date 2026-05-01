@@ -745,4 +745,18 @@
     
     async function renderLogin() {
         await loadData();
-        document.getElementById("app").innerHTML = `<div class="login-box"><div class="login-logo"><i class="fas fa-futbol"></i></
+        document.getElementById("app").innerHTML = `<div class="login-box"><div class="login-logo"><i class="fas fa-futbol"></i></div><h2>Monday Night Soccer</h2><p>8pm Kickoff • Clifton Park, Brunswick</p><select id="playerSelectLogin"><option>-- Select Player --</option>${players.map(p=>`<option>${escapeHtml(p)}</option>`).join('')}</select><button id="playerLoginBtn">Enter as Player</button><hr><input type="password" id="adminPwLogin" placeholder="Admin Password"><button id="adminLoginBtn">Admin Login</button><div id="loginErr" style="color:#dc3545; margin-top:12px;"></div></div>`;
+        document.getElementById("playerLoginBtn").onclick = () => { const n = document.getElementById("playerSelectLogin").value; if(n && n !== "-- Select Player --") loginAsPlayer(n); else document.getElementById("loginErr").innerText = "Select your name"; };
+        document.getElementById("adminLoginBtn").onclick = () => { if(!adminLogin(document.getElementById("adminPwLogin").value)) document.getElementById("loginErr").innerText = "Wrong password (admin123)"; };
+    }
+    
+    (async () => {
+        const stored = localStorage.getItem("soccer_user");
+        if(stored) {
+            try { const u = JSON.parse(stored); if(u.role==="admin"){ isAdminLoggedIn=true; currentUser={name:"Admin",role:"admin"}; } else { currentUser={name:u.name,role:"player"}; } await loadData(); renderApp(); return; } catch(e){}
+        }
+        renderLogin();
+    })();
+</script>
+</body>
+</html>
