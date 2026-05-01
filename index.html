@@ -8,7 +8,6 @@
     <title>Monday Night Soccer | 8pm</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
@@ -16,8 +15,8 @@
         body { background: #eef2f5; font-family: 'Inter', -apple-system, sans-serif; padding: 0; min-height: 100vh; }
         .app { max-width: 500px; margin: 0 auto; background: #eef2f5; min-height: 100vh; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
         .header { background: white; padding: 14px 20px; text-align: center; border-bottom: 1px solid #e2e8f0; }
-        .logo-icon { width: 44px; height: 44px; background: #1a73e8; border-radius: 18px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 4px; }
-        .logo-icon i { font-size: 22px; color: white; }
+        .logo-icon { width: 56px; height: 56px; background: #1a73e8; border-radius: 24px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 6px; }
+        .logo-icon i { font-size: 28px; color: white; }
         .header h1 { font-size: 18px; font-weight: 800; color: #1e293b; }
         .user-row { background: #f1f5f9; padding: 5px 12px; border-radius: 60px; display: inline-flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 12px; font-weight: 500; }
         .user-row button { background: #dc3545; border: none; padding: 4px 12px; border-radius: 40px; color: white; font-weight: 600; font-size: 11px; cursor: pointer; }
@@ -37,14 +36,14 @@
         .btn-sit-big { background: #dc3545; flex: 1; padding: 14px 20px; border-radius: 60px; font-weight: 800; font-size: 17px; border: none; color: white; cursor: pointer; }
         .status-text { font-size: 13px; background: rgba(255,255,255,0.2); display: inline-block; padding: 5px 14px; border-radius: 60px; margin-top: 8px; }
         .profile-item { background: #f8fafc; border-radius: 20px; padding: 14px; margin-bottom: 10px; border-left: 4px solid #1a73e8; display: flex; align-items: center; gap: 12px; }
-        .profile-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #1a73e8; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 20px; flex-shrink: 0; }
+        .profile-avatar { width: 50px; height: 50px; border-radius: 50%; background: #1a73e8; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 20px; flex-shrink: 0; }
         .profile-info { flex: 1; }
         .profile-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .profile-name { font-weight: 800; font-size: 15px; }
         .profile-details { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
         .profile-badge { background: white; border-radius: 40px; padding: 4px 12px; font-size: 11px; font-weight: 600; display: inline-block; }
         .edit-profile-btn { background: #475569; padding: 6px 14px; font-size: 12px; border-radius: 40px; border: none; color: white; cursor: pointer; }
-        .player-avatar-small { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: #1a73e8; display: inline-flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 14px; }
+        .player-avatar-small { width: 36px; height: 36px; border-radius: 50%; background: #1a73e8; display: inline-flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 14px; }
         .match-card { background: white; border-radius: 24px; margin-bottom: 14px; border: 1px solid #e2e8f0; overflow: hidden; }
         .match-header { background: #f8fafc; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
         .match-date { font-weight: 800; font-size: 14px; }
@@ -85,10 +84,17 @@
         .this-weeks-teams { background: linear-gradient(135deg, #1a73e8, #0d5bbf); color: white; border-radius: 24px; padding: 20px; margin-bottom: 16px; text-align: center; }
         .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
         .modal-content { background: white; border-radius: 32px; padding: 24px; max-width: 340px; width: 90%; max-height: 80vh; overflow-y: auto; }
-        .login-box { background: white; border-radius: 40px; padding: 32px 24px; margin: 60px 20px; text-align: center; }
-        .photo-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 10px auto; display: block; background: #e2e8f0; }
+        .login-box { background: white; border-radius: 48px; padding: 40px 28px; margin: 40px 20px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
+        .login-logo { width: 90px; height: 90px; background: linear-gradient(135deg, #1a73e8, #0d5bbf); border-radius: 32px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 8px 20px rgba(26,115,232,0.3); }
+        .login-logo i { font-size: 48px; color: white; }
+        .login-box h2 { font-size: 26px; font-weight: 800; margin-bottom: 8px; color: #1e293b; }
+        .login-box p { font-size: 14px; color: #64748b; margin-bottom: 28px; }
         .flex-btns { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
-        @media (max-width: 450px) { .nav-module { padding: 6px 12px; font-size: 11px; } .btn-play-big, .btn-sit-big { font-size: 16px; padding: 12px 16px; } }
+        select, input { width: 100%; padding: 14px 16px; border: 1.5px solid #e2e8f0; border-radius: 60px; margin: 8px 0; font-size: 16px; background: white; }
+        button { background: #1a73e8; color: white; border: none; padding: 14px 22px; border-radius: 60px; font-weight: 700; font-size: 16px; cursor: pointer; transition: transform 0.1s; }
+        button:active { transform: scale(0.97); }
+        hr { margin: 20px 0; border-color: #e2e8f0; }
+        @media (max-width: 450px) { .nav-module { padding: 6px 12px; font-size: 11px; } .btn-play-big, .btn-sit-big { font-size: 16px; padding: 12px 16px; } .login-logo { width: 75px; height: 75px; } .login-logo i { font-size: 38px; } }
     </style>
 </head>
 <body>
@@ -103,11 +109,10 @@
         messagingSenderId: "634335208908",
         appId: "1:634335208908:web:dca705b65fc52de0606969"
     };
-    let db = null, storage = null;
+    let db = null;
     try { 
         firebase.initializeApp(firebaseConfig); 
         db = firebase.firestore(); 
-        storage = firebase.storage();
         console.log("Firebase ready");
     } catch(e) { console.warn("Demo mode"); }
     
@@ -233,7 +238,7 @@
                 const gamesFromAttendance = attendance.filter(a => a.player === player && a.status === 'in').length;
                 const opening = playerProfiles[player]?.openingBalanceGames || 0;
                 if (playerProfiles[player]) playerProfiles[player].gamesPlayed = gamesFromAttendance + opening;
-                else playerProfiles[player] = { age: '—', position: '—', yearJoined: '—', gamesPlayed: gamesFromAttendance + opening, openingBalanceGames: 0, photoURL: null };
+                else playerProfiles[player] = { age: '—', position: '—', yearJoined: '—', gamesPlayed: gamesFromAttendance + opening, openingBalanceGames: 0 };
             }
         } catch(e) { console.warn(e); }
     }
@@ -273,7 +278,7 @@
         players.push(playerName);
         players.sort();
         if (db && playersRef) await playersRef.set({ list: players });
-        playerProfiles[playerName] = { age: '—', position: '—', yearJoined: '—', gamesPlayed: 0, openingBalanceGames: 0, photoURL: null };
+        playerProfiles[playerName] = { age: '—', position: '—', yearJoined: '—', gamesPlayed: 0, openingBalanceGames: 0 };
         await saveProfiles();
         return true;
     }
@@ -286,20 +291,6 @@
         return true;
     }
     
-    async function uploadProfilePhoto(playerName, file) {
-        if (!storage || !file) return null;
-        const storageRef = storage.ref();
-        const photoRef = storageRef.child(`profile_photos/${playerName}_${Date.now()}.jpg`);
-        try {
-            const snapshot = await photoRef.put(file);
-            const downloadURL = await snapshot.ref.getDownloadURL();
-            if (playerProfiles[playerName]) playerProfiles[playerName].photoURL = downloadURL;
-            else playerProfiles[playerName] = { age: '—', position: '—', yearJoined: '—', gamesPlayed: 0, openingBalanceGames: 0, photoURL: downloadURL };
-            await saveProfiles();
-            return downloadURL;
-        } catch(e) { console.error("Upload failed:", e); return null; }
-    }
-    
     function getInitials(name) { return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2); }
     function getAvatarColor(name) {
         const colors = ['#1a73e8', '#28a745', '#dc3545', '#fd7e14', '#6f42c1', '#20c997', '#e83e8c', '#6c757d'];
@@ -308,15 +299,16 @@
         return colors[Math.abs(hash) % colors.length];
     }
     
-    function renderProfileAvatar(name, photoURL, size = 50) {
-        if (photoURL) return `<img src="${photoURL}" class="profile-avatar" style="width:${size}px; height:${size}px; border-radius:50%; object-fit:cover;">`;
-        else return `<div class="profile-avatar" style="background:${getAvatarColor(name)}; width:${size}px; height:${size}px; font-size:${size/2.5}px;">${getInitials(name)}</div>`;
+    function renderProfileAvatar(name, size = 50) {
+        const bgColor = getAvatarColor(name);
+        const initials = getInitials(name);
+        return `<div class="profile-avatar" style="background:${bgColor}; width:${size}px; height:${size}px; font-size:${size/2.5}px;">${initials}</div>`;
     }
     
     function renderPlayerTag(name, size = 30) {
-        const p = playerProfiles[name] || {};
-        if (p.photoURL) return `<img src="${p.photoURL}" style="width:${size}px; height:${size}px; border-radius:50%; object-fit:cover; margin-right:4px;">`;
-        else return `<div class="player-avatar-small" style="background:${getAvatarColor(name)}; width:${size}px; height:${size}px; font-size:${size/2}px; margin-right:4px;">${getInitials(name)}</div>`;
+        const bgColor = getAvatarColor(name);
+        const initials = getInitials(name);
+        return `<div class="player-avatar-small" style="background:${bgColor}; width:${size}px; height:${size}px; font-size:${size/2}px; margin-right:4px;">${initials}</div>`;
     }
     
     function loginAsPlayer(name) { currentUser = { name, role: "player" }; isAdminLoggedIn = false; localStorage.setItem("soccer_user", JSON.stringify(currentUser)); renderApp(); }
@@ -340,11 +332,9 @@
     }
     
     function showEditProfileModal(playerName) {
-        const existing = playerProfiles[playerName] || { age: '', position: POSITIONS[0], yearJoined: '', openingBalanceGames: 0, photoURL: null };
+        const existing = playerProfiles[playerName] || { age: '', position: POSITIONS[0], yearJoined: '', openingBalanceGames: 0 };
         const modalDiv = document.createElement('div'); modalDiv.className = 'modal';
         modalDiv.innerHTML = `<div class="modal-content"><h3 style="margin-bottom:12px;">✏️ Edit Profile - ${escapeHtml(playerName)}</h3>
-            ${existing.photoURL ? `<img src="${existing.photoURL}" class="photo-preview" id="photoPreview">` : `<div class="photo-preview" id="photoPreview" style="background:#e2e8f0; display:flex; align-items:center; justify-content:center;"><i class="fas fa-camera" style="font-size:24px; color:#94a3b8;"></i></div>`}
-            <label>Upload Profile Photo</label><input type="file" id="photoUpload" accept="image/*">
             <label>Name</label><input id="editName" value="${escapeHtml(playerName)}">
             <label>Age</label><input id="editAge" value="${escapeHtml(existing.age || '')}">
             <label>Position</label><select id="editPosition">${POSITIONS.map(p => `<option ${existing.position === p ? 'selected' : ''}>${p}</option>`).join('')}</select>
@@ -352,18 +342,6 @@
             <label>🏆 Opening Games (history)</label><input id="editOpeningGames" type="number" value="${existing.openingBalanceGames || 0}">
             <div class="flex-btns"><button id="saveBtn">Save</button><button id="cancelBtn" class="btn-outline">Cancel</button></div></div>`;
         document.body.appendChild(modalDiv);
-        const fileInput = document.getElementById('photoUpload');
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files[0]) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const preview = document.getElementById('photoPreview');
-                    if (preview && preview.tagName === 'IMG') preview.src = event.target.result;
-                    else if (preview) preview.innerHTML = `<img src="${event.target.result}" class="photo-preview" style="width:80px; height:80px; border-radius:50%; object-fit:cover;">`;
-                };
-                reader.readAsDataURL(e.target.files[0]);
-            }
-        });
         document.getElementById('saveBtn').onclick = async () => {
             const newName = document.getElementById('editName').value.trim();
             const newAge = document.getElementById('editAge').value.trim();
@@ -371,7 +349,6 @@
             const newYear = document.getElementById('editYear').value.trim();
             const newOpening = parseInt(document.getElementById('editOpeningGames').value) || 0;
             if (!newName) { alert("Name required"); return; }
-            if (fileInput.files[0]) await uploadProfilePhoto(playerName, fileInput.files[0]);
             const gamesFromAttend = attendance.filter(a => a.player === playerName && a.status === 'in').length;
             const totalGames = gamesFromAttend + newOpening;
             if (newName !== playerName) {
@@ -380,8 +357,7 @@
                 if (idx !== -1) players[idx] = newName; else players.push(newName);
                 players.sort();
                 if (db && playersRef) await playersRef.set({ list: players });
-                const oldPhoto = playerProfiles[playerName]?.photoURL;
-                playerProfiles[newName] = { age: newAge || '—', position: newPosition, yearJoined: newYear || '—', gamesPlayed: totalGames, openingBalanceGames: newOpening, photoURL: oldPhoto };
+                playerProfiles[newName] = { age: newAge || '—', position: newPosition, yearJoined: newYear || '—', gamesPlayed: totalGames, openingBalanceGames: newOpening };
                 delete playerProfiles[playerName];
                 if (currentUser?.name === playerName) currentUser.name = newName;
             } else {
@@ -424,7 +400,7 @@
             const p = playerProfiles[player] || { age: '—', position: '—', yearJoined: '—', gamesPlayed: 0 };
             const canEdit = (currentUser?.name === player) || isAdminLoggedIn;
             html += `<div class="profile-item">
-                ${renderProfileAvatar(player, p.photoURL, 50)}
+                ${renderProfileAvatar(player, 50)}
                 <div class="profile-info">
                     <div class="profile-header"><div class="profile-name">⚽ ${escapeHtml(player)}</div>${canEdit ? `<button class="edit-profile-btn" data-player="${escapeHtml(player)}">Edit</button>` : ''}</div>
                     <div class="profile-details"><span class="profile-badge">🎂 ${escapeHtml(p.age)}</span><span class="profile-badge">⚽ ${escapeHtml(p.position)}</span><span class="profile-badge">📅 ${escapeHtml(p.yearJoined)}</span><span class="profile-badge">🏆 ${p.gamesPlayed || 0} games</span></div>
@@ -449,7 +425,7 @@
             return bTotal - aTotal;
         });
         document.getElementById("page-scoreboard").innerHTML = `<div class="card"><h2>🏆 All-Time Leaderboard</h2>
-            <div><h3>⚽ Top Goal Scorers</h3><table class="data-table">${topGoals.map((p,i)=>`<table><td style="width:40px;"><strong>${i+1}</strong></td><td>${renderPlayerTag(p.name, 24)} ${escapeHtml(p.name)}</td><td>${p.goals} goals</td></tr>`).join('')}</tbody></table></div>
+            <div><h3>⚽ Top Goal Scorers</h3><table class="data-table">${topGoals.map((p,i)=>`<tr><td style="width:40px;"><strong>${i+1}</strong></td><td>${renderPlayerTag(p.name, 24)} ${escapeHtml(p.name)}</td><td>${p.goals} goals</td></tr>`).join('')}</tbody></table></div>
             <div style="margin-top:16px;"><h3>🏃 Most Games Played</h3><table class="data-table">${topApps.map((p,i)=>`<tr><td style="width:40px;"><strong>${i+1}</strong></td><td>${renderPlayerTag(p.name, 24)} ${escapeHtml(p.name)}</td><td>${p.appearances + (playerProfiles[p.name]?.openingBalanceGames || 0)} games</td></tr>`).join('')}</tbody></table></div>
         </div>`;
     }
@@ -576,7 +552,7 @@
             for(let player of players) {
                 const p = playerProfiles[player] || {};
                 playersHtml += `<div class="profile-item" style="display:flex; align-items:center; gap:12px;">
-                    ${renderProfileAvatar(player, p.photoURL, 40)}
+                    ${renderProfileAvatar(player, 40)}
                     <div style="flex:1;"><strong>${escapeHtml(player)}</strong><br><small>${p.position || 'No position'} | ${p.gamesPlayed || 0} games</small></div>
                     <button class="deletePlayerBtn" data-player="${escapeHtml(player)}" style="background:#dc3545; padding:8px 16px; border:none; color:white; border-radius:40px; cursor:pointer;">🗑️ Delete</button>
                 </div>`;
@@ -749,7 +725,7 @@
         await loadData();
         await fetchMelbourneWeather();
         document.getElementById("app").innerHTML = `
-            <div class="header"><div class="logo-icon"><i class="chas-fa-futbol"></i></div><h1>MONDAY NIGHT SOCCER</h1><div class="user-row"><i class="fas fa-user-circle"></i> <strong>${currentUser.role === "admin" ? "ADMIN" : currentUser.name}</strong> <button id="logoutBtnMain">Exit</button></div></div>
+            <div class="header"><div class="logo-icon"><i class="fas fa-futbol"></i></div><h1>MONDAY NIGHT SOCCER</h1><div class="user-row"><i class="fas fa-user-circle"></i> <strong>${currentUser.role === "admin" ? "ADMIN" : currentUser.name}</strong> <button id="logoutBtnMain">Exit</button></div></div>
             <div class="top-nav" id="topNavBar"></div>
             <div id="module-home" class="module-container"><div id="homeContainer"></div></div>
             <div id="module-profiles" class="module-container"><div id="page-profiles"></div></div>
@@ -769,18 +745,4 @@
     
     async function renderLogin() {
         await loadData();
-        document.getElementById("app").innerHTML = `<div class="login-box"><div style="width:60px; height:60px; background:#1a73e8; border-radius:24px; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;"><i class="fas fa-futbol" style="font-size:30px; color:white;"></i></div><h2>Monday Night Soccer</h2><p style="margin-bottom:20px; color:#64748b;">8pm Kickoff • Clifton Park</p><select id="playerSelectLogin"><option>-- Select Player --</option>${players.map(p=>`<option>${escapeHtml(p)}</option>`).join('')}</select><button id="playerLoginBtn">Enter as Player</button><hr><input type="password" id="adminPwLogin" placeholder="Admin Password"><button id="adminLoginBtn">Admin Login</button><div id="loginErr" style="color:#dc3545; margin-top:12px;"></div></div>`;
-        document.getElementById("playerLoginBtn").onclick = () => { const n = document.getElementById("playerSelectLogin").value; if(n && n !== "-- Select Player --") loginAsPlayer(n); else document.getElementById("loginErr").innerText = "Select your name"; };
-        document.getElementById("adminLoginBtn").onclick = () => { if(!adminLogin(document.getElementById("adminPwLogin").value)) document.getElementById("loginErr").innerText = "Wrong password (admin123)"; };
-    }
-    
-    (async () => {
-        const stored = localStorage.getItem("soccer_user");
-        if(stored) {
-            try { const u = JSON.parse(stored); if(u.role==="admin"){ isAdminLoggedIn=true; currentUser={name:"Admin",role:"admin"}; } else { currentUser={name:u.name,role:"player"}; } await loadData(); renderApp(); return; } catch(e){}
-        }
-        renderLogin();
-    })();
-</script>
-</body>
-</html>
+        document.getElementById("app").innerHTML = `<div class="login-box"><div class="login-logo"><i class="fas fa-futbol"></i></
