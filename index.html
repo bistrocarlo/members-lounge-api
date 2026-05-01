@@ -246,6 +246,7 @@
         await updateCaptainForCurrentWeek();
         renderHomePage();
         renderProfilesPage();
+        renderScoreboardPage(); // Update leaderboards immediately
     }
     async function saveComment(gameDate, author, text) {
         const comment = { gameDate, author, text, timestamp: Date.now() };
@@ -306,6 +307,7 @@
             await saveProfiles();
             modalDiv.remove();
             renderProfilesPage();
+            renderScoreboardPage();
         };
         document.getElementById('cancelBtn').onclick = () => modalDiv.remove();
     }
@@ -344,14 +346,54 @@
         document.querySelectorAll(".edit-profile-btn").forEach(btn => btn.addEventListener("click", () => showEditProfileModal(btn.dataset.player)));
     }
     
+    // FIXED: Show ALL players in leaderboards, not just those playing this week
     function renderScoreboardPage() {
         let stats = new Map();
-        players.forEach(p => stats.set(p, { goals: 0, appearances: 0 }));
-        attendance.forEach(a => { if(a.status === 'in' && stats.has(a.player)) stats.get(a.player).appearances++; });
-        for(let match of Object.values(matchResults)) if(match.goals) for(let [scorer, count] of Object.entries(match.goals)) if(stats.has(scorer)) stats.get(scorer).goals += count;
-        const topGoals = Array.from(stats.entries()).map(([n,s]) => ({ name:n, goals:s.goals })).sort((a,b)=>b.goals - a.goals).slice(0,8);
-        const topApps = Array.from(stats.entries()).map(([n,s]) => ({ name:n, apps:s.appearances + (playerProfiles[n]?.openingBalanceGames||0) })).sort((a,b)=>b.apps - a.apps).slice(0,8);
-        document.getElementById("page-scoreboard").innerHTML = `<div class="card"><h2>🏆 Leaderboard</h2><div><h3>⚽ Top Scorers</h3><table class="data-table">${topGoals.map((p,i)=>`<tr><td><strong>${i+1}</strong></td><td><strong>${escapeHtml(p.name)}</strong></td><td>${p.goals} goals</td></tr>`).join('')}</table></div><div style="margin-top:16px;"><h3>🏃 Most Games</h3><table class="data-table">${topApps.map((p,i)=>`<tr><td><strong>${i+1}</strong></td><td><strong>${escapeHtml(p.name)}</strong></td><td>${p.apps} games</td></tr>`).join('')}</table></div></div>`;
+        // Initialize stats for ALL players
+        for(let player of players) {
+            stats.set(player, { goals: 0, appearances: 0 });
+        }
+        // Count appearances from attendance history (only 'in' status counts)
+        attendance.forEach(a => { 
+            if(a.status === 'in' && stats.has(a.player)) {
+                stats.get(a.player).appearances++;
+            }
+        });
+        // Count goals from match results
+        for(let match of Object.values(matchResults)) {
+            if(match.goals) {
+                for(let [scorer, count] of Object.entries(match.goals)) {
+                    if(stats.has(scorer)) {
+                        stats.get(scorer).goals += count;
+                    }
+                }
+            }
+        }
+        // Convert to array and sort
+        const allStats = Array.from(stats.entries()).map(([name, s]) => ({ 
+            name: name, 
+            goals: s.goals, 
+            appearances: s.appearances
+        }));
+        
+        // Sort by goals descending
+        const topGoals = [...allStats].sort((a,b) => b.goals - a.goals);
+        // Sort by appearances descending (total games = attendance games + opening balance)
+        const topApps = [...allStats].sort((a,b) => {
+            const aTotal = a.appearances + (playerProfiles[a.name]?.openingBalanceGames || 0);
+            const bTotal = b.appearances + (playerProfiles[b.name]?.openingBalanceGames || 0);
+            return bTotal - aTotal;
+        });
+        
+        document.getElementById("page-scoreboard").innerHTML = `<div class="card">
+            <h2>🏆 All-Time Leaderboard</h2>
+            <div style="margin-bottom:16px;"><h3>⚽ Top Goal Scorers (All Players)</h3><table class="data-table"><thead><tr><th>#</th><th>Player</th><th>Goals</th></tr></thead><tbody>
+                ${topGoals.map((p,i)=>`<tr><td><strong>${i+1}</strong></td><td><strong>${escapeHtml(p.name)}</strong></td><td>${p.goals} goals</td></tr>`).join('')}
+            </tbody></table></div>
+            <div><h3>🏃 Most Games Played (All Players)</h3><table class="data-table"><thead><tr><th>#</th><th>Player</th><th>Games</th></tr></thead><tbody>
+                ${topApps.map((p,i)=>`<tr><td><strong>${i+1}</strong></td><td><strong>${escapeHtml(p.name)}</strong></td><td>${p.appearances + (playerProfiles[p.name]?.openingBalanceGames || 0)} games</td></tr>`).join('')}
+            </tbody></table></div>
+        </div>`;
     }
     
     async function renderHistoryPage() {
@@ -402,14 +444,13 @@
         document.getElementById("page-rules").innerHTML = `<div class="card"><h2>📜 League Rules</h2><div style="white-space: pre-line; font-size: 14px; line-height: 1.6;">${escapeHtml(rulesText)}</div></div>`; 
     }
     
-    // ADMIN PAGE - Clean, only the 4 buttons, no extra content shown by default
+    // ADMIN PAGE - Clean with 4 buttons
     function renderAdminPage() {
         if (!isAdminLoggedIn) { 
             document.getElementById("page-admin").innerHTML = `<div class="card"><h2>🔒 Admin Area</h2><p>Admin access only. Please login as Admin from the main screen.</p></div>`; 
             return; 
         }
         
-        // Simple admin page with just the 4 buttons - no panels visible until clicked
         let html = `<div class="card"><h2>⚙️ Admin Control Panel</h2><div class="admin-buttons">
             <button id="adminFinanceBtn" class="admin-action-btn"><i class="fas fa-dollar-sign"></i> 💰 Financial Ledger</button>
             <button id="adminTeamsBtn" class="admin-action-btn"><i class="fas fa-users"></i> ⚽ Assign Teams</button>
@@ -422,7 +463,7 @@
         <div id="adminRulesPanel" style="display:none;"></div>`;
         document.getElementById("page-admin").innerHTML = html;
         
-        // Finance Panel - Professional Ledger
+        // Finance Panel
         document.getElementById("adminFinanceBtn").onclick = () => {
             const currentWeek = getFutureWeeks()[0];
             const signedPlayers = currentWeek ? attendance.filter(a => a.gameDate === currentWeek.dateStr && a.status === 'in').map(a => a.player) : [];
@@ -436,8 +477,7 @@
             }
             debts.sort((a,b) => b.debt - a.debt);
             
-            let financeHtml = `<div class="card"><h2>💰 Financial Ledger</h2>
-                <div class="finance-summary"><div class="amount">$${totalCollected}</div><p style="font-size:12px;">Total Treasury</p></div>`;
+            let financeHtml = `<div class="card"><h2>💰 Financial Ledger</h2><div class="finance-summary"><div class="amount">$${totalCollected}</div><p>Total Treasury</p></div>`;
             if(currentWeek && signedPlayers.length > 0) {
                 financeHtml += `<h3>📅 ${currentWeek.label} - Payment Status</h3><table class="data-table"><thead><tr><th>Player</th><th>Status</th><th>Action</th></tr></thead><tbody>`;
                 for (let player of signedPlayers) {
@@ -459,6 +499,7 @@
             document.querySelectorAll(".markPaidBtn").forEach(btn => btn.addEventListener("click", async () => {
                 await savePayment({ player: btn.dataset.player, gameDate: btn.dataset.date, amount: 5, timestamp: Date.now() });
                 renderAdminPage();
+                renderScoreboardPage();
             }));
         };
         
