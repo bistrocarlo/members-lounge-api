@@ -73,6 +73,7 @@
         .badge-owing { background: #dc3545; color: white; border-radius: 40px; padding: 4px 12px; font-size: 11px; }
         .weather-card { background: linear-gradient(135deg, #0f2027, #203a43); color: white; border-radius: 24px; padding: 20px; text-align: center; }
         .admin-team-item { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; background: #f1f5f9; border-radius: 60px; padding: 8px 16px; }
+        .rule-box { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; border-radius: 12px; margin-bottom: 12px; font-size: 13px; }
         .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
         .modal-content { background: white; border-radius: 32px; padding: 24px; max-width: 340px; width: 85%; max-height: 80vh; overflow-y: auto; }
         .login-box { background: white; border-radius: 40px; padding: 32px 24px; margin: 60px 20px; text-align: center; }
@@ -283,7 +284,7 @@
         document.getElementById('cancelBtn').onclick = () => modalDiv.remove();
     }
     
-    // ========== HOME PAGE (No captain banner) ==========
+    // ========== HOME PAGE ==========
     function renderHomePage() {
         const nextWeek = getFutureWeeks()[0];
         const currentStatus = nextWeek ? attendance.find(a => a.gameDate === nextWeek.dateStr && a.player === currentUser?.name)?.status : null;
@@ -364,30 +365,82 @@
     }
     
     // ========== RULES PAGE ==========
-    function renderRulesPage() { document.getElementById("page-rules").innerHTML = `<div class="card"><h2>📜 Rules</h2><ul style="margin-left:20px; font-size:14px; line-height:1.6;"><li>⏰ 8:00pm SHARP kickoff at Clifton Park</li><li>💰 $5 weekly fee - Admin collects</li><li>👑 Captain rotates automatically - only attending players eligible</li><li>✅ RSVP is the most important action</li><li>🏆 Opening balance for 17-18 year history</li></ul></div>`; }
+    function renderRulesPage() { document.getElementById("page-rules").innerHTML = `<div class="card"><h2>📜 Rules</h2><ul style="margin-left:20px; font-size:14px; line-height:1.6;"><li>⏰ 8:00pm SHARP kickoff at Clifton Park</li><li>💰 $5 weekly fee - Admin collects, unpaid debts carry forward</li><li>👑 Captain rotates automatically - only attending players eligible</li><li>✅ RSVP is the most important action</li><li>🏆 Opening balance for 17-18 year history</li></ul></div>`; }
     
-    // ========== ADMIN PAGE ==========
+    // ========== ADMIN PAGE (Players, Finance with expanded rules, Team Assignment) ==========
     function renderAdminPage() {
         if (!isAdminLoggedIn) { document.getElementById("page-admin").innerHTML = `<div class="card"><h2>🔒 Admin Area</h2><p>Admin access only - login with admin123</p></div>`; return; }
         const currentWeek = getFutureWeeks()[0];
         const signedPlayers = currentWeek ? attendance.filter(a => a.gameDate === currentWeek.dateStr && a.status === 'in').map(a => a.player) : [];
         const totalCollected = payments.reduce((sum, p) => sum + 5, 0);
+        
+        // Calculate outstanding debts for each player
         let debts = [];
         for(let player of players) {
             let unpaid = 0;
-            attendance.filter(a => a.player === player && a.status === 'in').forEach(g => { if(!payments.some(p => p.player === player && p.gameDate === g.gameDate)) unpaid += 5; });
+            const playerGames = attendance.filter(a => a.player === player && a.status === 'in');
+            for (let game of playerGames) {
+                const isPaid = payments.some(p => p.player === player && p.gameDate === game.gameDate);
+                if (!isPaid) unpaid += 5;
+            }
             if(unpaid > 0) debts.push({ player, debt: unpaid });
         }
-        let html = `<div class="card"><h2>👥 Players This Week</h2><div class="attendee-tags">${signedPlayers.map(p=>`<span class="attendee-tag">${escapeHtml(p)}</span>`).join('')||'<span>No players signed up yet</span>'}</div></div>`;
-        html += `<div class="card"><h2>💰 Financial Ledger</h2><div class="stat-card"><strong>🏦 Treasury: $${totalCollected}</strong></div><h3>Outstanding Debts</h3><table class="data-table">${debts.map(d=>`<tr><td style="width:60%;">${escapeHtml(d.player)}</td><td class="badge-owing">$${d.debt}</td>`).join('')||'<tr><td colspan="2">No debts! 🎉</td></tr>'}</table></div>`;
+        debts.sort((a,b) => b.debt - a.debt);
+        
+        let html = `<div class="card"><h2>📋 FINANCIAL RULES</h2><div class="rule-box"><strong>💰 Financial Policy:</strong><br>• $5 per player per game<br>• Payment must be collected by Admin before or after match<br>• Unpaid amounts carry forward to next week<br>• Outstanding ledger shown below</div></div>`;
+        
+        // Players attending this week
+        html += `<div class="card"><h2>👥 Players Attending This Week - ${currentWeek?.label || "Next Monday"}</h2><div class="attendee-tags">${signedPlayers.map(p=>`<span class="attendee-tag">${escapeHtml(p)}</span>`).join('')||'<span>No players signed up yet</span>'}</div></div>`;
+        
+        // Financial Ledger with expanded view
+        html += `<div class="card"><h2>💰 Financial Ledger & Outstanding Debts</h2><div class="stat-card"><strong>🏦 Total Treasury Collected: $${totalCollected}</strong></div>`;
+        
+        // Current week payment status
+        if(currentWeek && signedPlayers.length > 0) {
+            html += `<h3>📅 ${currentWeek.label} - Payment Status</h3><table class="data-table"><thead><tr><th>Player</th><th>Status</th><th>Action</th></tr></thead><tbody>`;
+            for (let player of signedPlayers) {
+                const isPaid = payments.some(p => p.player === player && p.gameDate === currentWeek.dateStr);
+                html += `<tr><td><strong>${escapeHtml(player)}</strong></td>
+                    <td>${isPaid ? '<span class="badge-paid">✓ PAID $5</span>' : '<span class="badge-owing">❌ OWING $5</span>'}</td>
+                    <td>${!isPaid ? `<button class="markPaidBtn" data-player="${escapeHtml(player)}" data-date="${currentWeek.dateStr}" style="padding:6px 12px;">Mark Paid</button>` : '—'}</td></tr>`;
+            }
+            html += `</tbody></table>`;
+        } else if(currentWeek) {
+            html += `<p>No players signed up for this week yet.</p>`;
+        }
+        
+        // Outstanding ledger - all players with unpaid amounts
+        html += `<h3 style="margin-top:16px;">📜 OUTSTANDING LEDGER (Unpaid Carry-over)</h3><table class="data-table"><thead><tr><th>Player</th><th>Amount Owed</th></tr></thead><tbody>`;
+        if(debts.length > 0) {
+            for(let d of debts) {
+                html += `<tr><td>${escapeHtml(d.player)}</td><td><span class="badge-owing">$${d.debt}</span></td></tr>`;
+            }
+        } else {
+            html += `<tr><td colspan="2" style="text-align:center;">✨ No outstanding debts! All players are paid up ✨</td></tr>`;
+        }
+        html += `</tbody></table></div>`;
+        
+        // Team Assignment
         html += `<div class="card"><h2>⚽ Assign Teams for ${currentWeek?.label || "Next Monday"}</h2>`;
-        if(currentWeek) {
+        if(currentWeek && signedPlayers.length > 0) {
             if(!teamAssignments[currentWeek.dateStr]) teamAssignments[currentWeek.dateStr] = {};
             html += `<div id="adminTeamAssignList"></div><div class="flex-btns"><button id="adminAutoAssignBtn" class="btn-outline">🎲 Auto-Balance Teams</button><button id="adminSaveTeamsBtn">💾 Save Team Assignments</button></div>`;
-        } else { html += `<p>No upcoming games to assign teams.</p>`; }
+        } else if(currentWeek) {
+            html += `<p>No players signed up to assign teams.</p>`;
+        } else {
+            html += `<p>No upcoming games to assign teams.</p>`;
+        }
         html += `</div>`;
         document.getElementById("page-admin").innerHTML = html;
-        if(currentWeek) {
+        
+        // Payment button handlers
+        document.querySelectorAll(".markPaidBtn").forEach(btn => btn.addEventListener("click", async () => {
+            await savePayment({ player: btn.dataset.player, gameDate: btn.dataset.date, amount: 5 });
+            renderAdminPage();
+        }));
+        
+        // Team assignment handlers
+        if(currentWeek && signedPlayers.length > 0) {
             const renderAssignList = () => {
                 let listHtml = ``;
                 for(let player of signedPlayers) {
