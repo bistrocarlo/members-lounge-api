@@ -8,6 +8,7 @@
     <title>Monday Night Soccer | 8pm</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
@@ -36,57 +37,39 @@
         .btn-play-big { background: #28a745; flex: 1; padding: 14px 20px; border-radius: 60px; font-weight: 800; font-size: 17px; border: none; color: white; cursor: pointer; }
         .btn-sit-big { background: #dc3545; flex: 1; padding: 14px 20px; border-radius: 60px; font-weight: 800; font-size: 17px; border: none; color: white; cursor: pointer; }
         .status-text { font-size: 13px; background: rgba(255,255,255,0.2); display: inline-block; padding: 5px 14px; border-radius: 60px; margin-top: 8px; }
-        .profile-item { background: #f8fafc; border-radius: 20px; padding: 14px; margin-bottom: 10px; border-left: 4px solid #1a73e8; }
+        .profile-item { background: #f8fafc; border-radius: 20px; padding: 14px; margin-bottom: 10px; border-left: 4px solid #1a73e8; display: flex; align-items: center; gap: 12px; }
+        .profile-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #1a73e8; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 20px; flex-shrink: 0; }
+        .profile-info { flex: 1; }
         .profile-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .profile-name { font-weight: 800; font-size: 15px; }
-        .profile-details { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-        .profile-badge { background: white; border-radius: 40px; padding: 4px 12px; font-size: 11px; font-weight: 600; }
-        .match-card { background: white; border-radius: 24px; margin-bottom: 14px; border: 1px solid #e2e8f0; overflow: hidden; }
-        .match-header { background: #f8fafc; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
-        .match-date { font-weight: 800; font-size: 14px; }
-        .match-result { background: #1a73e8; color: white; padding: 4px 14px; border-radius: 40px; font-weight: 700; font-size: 14px; }
-        .teams-section { padding: 16px; background: linear-gradient(145deg, #2e7d32, #1b5e20); }
-        .team-row { display: flex; gap: 12px; flex-wrap: wrap; }
-        .team-box { flex: 1; background: rgba(0,0,0,0.65); border-radius: 18px; padding: 12px; }
-        .team-yellow { background: #ffc107; color: #2c2c2c; font-weight: 800; text-align: center; padding: 6px; border-radius: 60px; font-size: 14px; margin-bottom: 8px; }
-        .team-orange { background: #fd7e14; color: white; font-weight: 800; text-align: center; padding: 6px; border-radius: 60px; font-size: 14px; margin-bottom: 8px; }
-        .player-list { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
-        .player-tag { background: rgba(255,255,255,0.2); border-radius: 40px; padding: 4px 10px; font-size: 11px; color: white; }
-        .score-big { text-align: center; margin-top: 12px; font-size: 22px; font-weight: 800; background: rgba(0,0,0,0.6); border-radius: 60px; padding: 8px; color: white; }
-        .goals-section { padding: 12px 16px; background: #fefce8; }
-        .goals-list { display: flex; flex-wrap: wrap; gap: 8px; }
-        .goal-badge { background: white; border-radius: 40px; padding: 5px 12px; font-size: 12px; font-weight: 600; border-left: 3px solid #eab308; }
-        .comments-section { padding: 12px 16px; }
-        .add-comment { display: flex; gap: 8px; margin-top: 10px; }
-        .add-comment input { flex: 1; padding: 12px; border-radius: 60px; border: 1.5px solid #e2e8f0; font-size: 14px; }
-        .comment-item { background: #f8fafc; border-radius: 16px; padding: 10px; margin-bottom: 8px; font-size: 13px; }
-        select, input { width: 100%; padding: 14px; border: 1.5px solid #e2e8f0; border-radius: 60px; margin: 6px 0; font-size: 16px; background: white; }
-        button { background: #1a73e8; color: white; border: none; padding: 14px 22px; border-radius: 60px; font-weight: 700; font-size: 15px; cursor: pointer; }
-        .btn-outline { background: white; color: #1a73e8; border: 2px solid #1a73e8; }
-        .flex-btns { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
-        .stat-card { background: #f8fafc; border-radius: 20px; padding: 16px; text-align: center; }
-        .attendee-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-        .attendee-tag { background: #e2e8f0; padding: 8px 16px; border-radius: 40px; font-size: 14px; }
-        .guest-tag { background: #d4edda; color: #155724; padding: 8px 16px; border-radius: 40px; font-size: 14px; }
-        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        .data-table th, .data-table td { padding: 10px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-        .badge-paid { background: #28a745; color: white; border-radius: 40px; padding: 4px 12px; font-size: 11px; }
-        .badge-owing { background: #dc3545; color: white; border-radius: 40px; padding: 4px 12px; font-size: 11px; }
-        .weather-card { background: linear-gradient(135deg, #0f2027, #203a43); color: white; border-radius: 24px; padding: 20px; text-align: center; }
+        .profile-details { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        .profile-badge { background: white; border-radius: 40px; padding: 4px 12px; font-size: 11px; font-weight: 600; display: inline-block; }
+        .edit-profile-btn { background: #475569; padding: 6px 14px; font-size: 12px; border-radius: 40px; }
+        .player-avatar-small { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: #1a73e8; display: inline-flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 14px; }
+        .match-card .player-tag { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.2); border-radius: 40px; padding: 4px 10px; font-size: 11px; color: white; margin: 2px; }
+        .attendee-tag { display: inline-flex; align-items: center; gap: 6px; background: #e2e8f0; padding: 6px 12px; border-radius: 40px; font-size: 13px; }
+        .guest-tag { background: #d4edda; color: #155724; }
         .admin-team-item { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; background: #f1f5f9; border-radius: 60px; padding: 8px 16px; }
-        .playing-list { background: #e8f0fe; border-radius: 20px; padding: 16px; margin-bottom: 14px; }
-        .playing-title { font-weight: 800; font-size: 15px; margin-bottom: 10px; color: #1a73e8; }
-        .guest-section { background: #f0fdf4; border-radius: 20px; padding: 16px; margin-bottom: 14px; border: 1px solid #bbf7d0; }
-        .guest-title { font-weight: 800; font-size: 15px; margin-bottom: 10px; color: #15803d; }
+        .admin-team-item .player-name { display: flex; align-items: center; gap: 8px; }
         .admin-buttons { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
         .admin-action-btn { background: white; border: 2px solid #1a73e8; color: #1a73e8; padding: 16px; border-radius: 60px; font-weight: 700; font-size: 16px; text-align: center; cursor: pointer; transition: all 0.2s; }
         .admin-action-btn i { margin-right: 10px; }
         .admin-action-btn:active { transform: scale(0.96); background: #e8f0fe; }
         .finance-summary { background: linear-gradient(135deg, #1a73e8, #0d5bbf); color: white; border-radius: 20px; padding: 16px; margin-bottom: 16px; text-align: center; }
         .finance-summary .amount { font-size: 32px; font-weight: 800; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .data-table th, .data-table td { padding: 10px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        .badge-paid { background: #28a745; color: white; border-radius: 40px; padding: 4px 12px; font-size: 11px; }
+        .badge-owing { background: #dc3545; color: white; border-radius: 40px; padding: 4px 12px; font-size: 11px; }
+        .weather-card { background: linear-gradient(135deg, #0f2027, #203a43); color: white; border-radius: 24px; padding: 20px; text-align: center; }
+        .playing-list { background: #e8f0fe; border-radius: 20px; padding: 16px; margin-bottom: 14px; }
+        .playing-title { font-weight: 800; font-size: 15px; margin-bottom: 10px; color: #1a73e8; }
+        .guest-section { background: #f0fdf4; border-radius: 20px; padding: 16px; margin-bottom: 14px; border: 1px solid #bbf7d0; }
+        .guest-title { font-weight: 800; font-size: 15px; margin-bottom: 10px; color: #15803d; }
         .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: white; border-radius: 32px; padding: 24px; max-width: 340px; width: 85%; max-height: 80vh; overflow-y: auto; }
+        .modal-content { background: white; border-radius: 32px; padding: 24px; max-width: 340px; width: 90%; max-height: 80vh; overflow-y: auto; }
         .login-box { background: white; border-radius: 40px; padding: 32px 24px; margin: 60px 20px; text-align: center; }
+        .photo-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 10px auto; display: block; background: #e2e8f0; }
         @media (max-width: 450px) { .nav-module { padding: 6px 12px; font-size: 11px; } .btn-play-big, .btn-sit-big { font-size: 16px; padding: 12px 16px; } }
     </style>
 </head>
@@ -102,12 +85,17 @@
         messagingSenderId: "634335208908",
         appId: "1:634335208908:web:dca705b65fc52de0606969"
     };
-    let db = null;
-    try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); } catch(e) { console.warn("Demo"); }
+    let db = null, storage = null;
+    try { 
+        firebase.initializeApp(firebaseConfig); 
+        db = firebase.firestore(); 
+        storage = firebase.storage();
+        console.log("Firebase ready with Storage");
+    } catch(e) { console.warn("Demo mode"); }
     
     const POSITIONS = ["Goalkeeper","Defender","Defensive Midfielder","Midfielder Centre","Midfielder Attacking","Wing Back Right","Wing Back Left","Attacking Midfielder","Striker","Winger Left","Winger Right"];
     let players = ["Alex Rowe","Ali Mekawy","Carlo","Charlie","Chris Del Monaco","Chris M","Chris S","Danny","Dante","David","Dimitri","Enzo","Farid","Faros","Frank","George B","George T","Ivan","James Zoumis","James","Joe T","Joey","Kia","Leo","Manoli","Marco","Mario","Maurice","Nector","Paul","Perri","Peter","Ralph","Rocco","Stav","Stevan","Theo","Tony EH","Vasilis"].sort();
-    let playerProfiles = {};
+    let playerProfiles = {}; // { name: { age, position, yearJoined, gamesPlayed, openingBalanceGames, photoURL } }
     let teamAssignments = {};
     let matchResults = {};
     let payments = [];
@@ -118,7 +106,7 @@
     let allCaptainsList = [], currentCaptainIndex = 0, weeklyCaptain = "", lastRotationWeek = "";
     const teamCaptainsOrder = ["Carlo", "Charlie", "Chris Del Monaco", "Danny", "David", "Frank", "James Zoumis", "Joe T", "Leo", "Marco", "Paul", "Peter", "Rocco", "Stav", "Theo", "Ali Mekawy", "George B", "Vasilis"];
     let weatherData = { temp: "18°C", condition: "Clear", icon: "fa-sun", rainChance: 10 };
-    let rulesText = "• ⏰ 8:00pm SHARP kickoff at Clifton Park\n• 💰 $5 weekly fee - Admin collects\n• 👑 Captain rotates automatically\n• ✅ RSVP is the most important action\n• 🏆 Opening balance for history\n• 🎭 Players can bring guests (enter guest name below)";
+    let rulesText = "• ⏰ 8:00pm SHARP kickoff at Clifton Park\n• 💰 $5 weekly fee - Admin collects\n• 👑 Captain rotates automatically\n• ✅ RSVP is the most important action\n• 🏆 Opening balance for history\n• 🎭 Players can bring guests";
     
     const playersRef = db?.collection("config").doc("players");
     const profilesRef = db?.collection("config").doc("playerProfiles");
@@ -227,7 +215,7 @@
                 const gamesFromAttendance = attendance.filter(a => a.player === player && a.status === 'in').length;
                 const opening = playerProfiles[player]?.openingBalanceGames || 0;
                 if (playerProfiles[player]) playerProfiles[player].gamesPlayed = gamesFromAttendance + opening;
-                else playerProfiles[player] = { age: '—', position: '—', yearJoined: '—', gamesPlayed: gamesFromAttendance + opening, openingBalanceGames: 0 };
+                else playerProfiles[player] = { age: '—', position: '—', yearJoined: '—', gamesPlayed: gamesFromAttendance + opening, openingBalanceGames: 0, photoURL: null };
             }
         } catch(e) { console.warn(e); }
     }
@@ -246,7 +234,8 @@
         await updateCaptainForCurrentWeek();
         renderHomePage();
         renderProfilesPage();
-        renderScoreboardPage(); // Update leaderboards immediately
+        renderScoreboardPage();
+        if(isAdminLoggedIn) renderAdminPage();
     }
     async function saveComment(gameDate, author, text) {
         const comment = { gameDate, author, text, timestamp: Date.now() };
@@ -258,6 +247,77 @@
     async function saveCaptainRotation() { if(db && captainRef) await captainRef.set({ index: currentCaptainIndex, captain: weeklyCaptain, lastWeek: lastRotationWeek }); }
     async function saveRules() { if(db && rulesRef) await rulesRef.set({ text: rulesText }); }
     async function saveGuest(g) { if(db && guestsRef) await guestsRef.doc(`${g.guestName}_${g.gameDate}`).set(g); guests.push(g); }
+    
+    // Player Management Functions
+    async function addPlayer(playerName) {
+        if (!playerName.trim()) return false;
+        if (players.includes(playerName)) return false;
+        players.push(playerName);
+        players.sort();
+        if (db && playersRef) await playersRef.set({ list: players });
+        playerProfiles[playerName] = { age: '—', position: '—', yearJoined: '—', gamesPlayed: 0, openingBalanceGames: 0, photoURL: null };
+        await saveProfiles();
+        return true;
+    }
+    async function deletePlayer(playerName) {
+        if (!players.includes(playerName)) return false;
+        players = players.filter(p => p !== playerName);
+        if (db && playersRef) await playersRef.set({ list: players });
+        delete playerProfiles[playerName];
+        await saveProfiles();
+        return true;
+    }
+    
+    // Photo upload function
+    async function uploadProfilePhoto(playerName, file) {
+        if (!storage || !file) return null;
+        const storageRef = storage.ref();
+        const photoRef = storageRef.child(`profile_photos/${playerName}_${Date.now()}.jpg`);
+        try {
+            const snapshot = await photoRef.put(file);
+            const downloadURL = await snapshot.ref.getDownloadURL();
+            if (playerProfiles[playerName]) {
+                playerProfiles[playerName].photoURL = downloadURL;
+            } else {
+                playerProfiles[playerName] = { age: '—', position: '—', yearJoined: '—', gamesPlayed: 0, openingBalanceGames: 0, photoURL: downloadURL };
+            }
+            await saveProfiles();
+            return downloadURL;
+        } catch(e) {
+            console.error("Upload failed:", e);
+            return null;
+        }
+    }
+    
+    function getInitials(name) {
+        return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    }
+    
+    function getAvatarColor(name) {
+        const colors = ['#1a73e8', '#28a745', '#dc3545', '#fd7e14', '#6f42c1', '#20c997', '#e83e8c', '#6c757d'];
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i);
+        return colors[Math.abs(hash) % colors.length];
+    }
+    
+    function renderProfileAvatar(name, photoURL, size = 50) {
+        if (photoURL) {
+            return `<img src="${photoURL}" class="profile-avatar" style="width:${size}px; height:${size}px; border-radius:50%; object-fit:cover;">`;
+        } else {
+            const bgColor = getAvatarColor(name);
+            const initials = getInitials(name);
+            return `<div class="profile-avatar" style="background:${bgColor}; width:${size}px; height:${size}px; font-size:${size/2.5}px;">${initials}</div>`;
+        }
+    }
+    
+    function renderPlayerTag(name, size = 30) {
+        const p = playerProfiles[name] || {};
+        if (p.photoURL) {
+            return `<img src="${p.photoURL}" style="width:${size}px; height:${size}px; border-radius:50%; object-fit:cover; margin-right:4px;">`;
+        } else {
+            return `<div class="player-avatar-small" style="background:${getAvatarColor(name)}; width:${size}px; height:${size}px; font-size:${size/2}px; margin-right:4px;">${getInitials(name)}</div>`;
+        }
+    }
     
     function loginAsPlayer(name) { currentUser = { name, role: "player" }; isAdminLoggedIn = false; localStorage.setItem("soccer_user", JSON.stringify(currentUser)); renderApp(); }
     function adminLogin(pw) { if(pw === "admin123") { currentUser = { name: "Admin", role: "admin" }; isAdminLoggedIn = true; localStorage.setItem("soccer_user", JSON.stringify(currentUser)); renderApp(); return true; } return false; }
@@ -279,10 +339,32 @@
     }
     
     function showEditProfileModal(playerName) {
-        const existing = playerProfiles[playerName] || { age: '', position: POSITIONS[0], yearJoined: '', openingBalanceGames: 0 };
+        const existing = playerProfiles[playerName] || { age: '', position: POSITIONS[0], yearJoined: '', openingBalanceGames: 0, photoURL: null };
         const modalDiv = document.createElement('div'); modalDiv.className = 'modal';
-        modalDiv.innerHTML = `<div class="modal-content"><h3 style="margin-bottom:12px;">✏️ Edit Profile</h3><label>Name</label><input id="editName" value="${escapeHtml(playerName)}"><label>Age</label><input id="editAge" value="${escapeHtml(existing.age || '')}"><label>Position</label><select id="editPosition">${POSITIONS.map(p => `<option ${existing.position === p ? 'selected' : ''}>${p}</option>`).join('')}</select><label>Year Joined</label><input id="editYear" value="${escapeHtml(existing.yearJoined || '')}"><label>🏆 Opening Games (history)</label><input id="editOpeningGames" type="number" value="${existing.openingBalanceGames || 0}"><div class="flex-btns"><button id="saveBtn">Save</button><button id="cancelBtn" class="btn-outline">Cancel</button></div></div>`;
+        modalDiv.innerHTML = `<div class="modal-content"><h3 style="margin-bottom:12px;">✏️ Edit Profile - ${escapeHtml(playerName)}</h3>
+            ${existing.photoURL ? `<img src="${existing.photoURL}" class="photo-preview" id="photoPreview">` : `<div class="photo-preview" id="photoPreview" style="background:#e2e8f0; display:flex; align-items:center; justify-content:center;"><i class="fas fa-camera" style="font-size:24px; color:#94a3b8;"></i></div>`}
+            <label>Upload Profile Photo</label><input type="file" id="photoUpload" accept="image/*">
+            <label>Name</label><input id="editName" value="${escapeHtml(playerName)}">
+            <label>Age</label><input id="editAge" value="${escapeHtml(existing.age || '')}">
+            <label>Position</label><select id="editPosition">${POSITIONS.map(p => `<option ${existing.position === p ? 'selected' : ''}>${p}</option>`).join('')}</select>
+            <label>Year Joined</label><input id="editYear" value="${escapeHtml(existing.yearJoined || '')}">
+            <label>🏆 Opening Games (history)</label><input id="editOpeningGames" type="number" value="${existing.openingBalanceGames || 0}">
+            <div class="flex-btns"><button id="saveBtn">Save</button><button id="cancelBtn" class="btn-outline">Cancel</button></div></div>`;
         document.body.appendChild(modalDiv);
+        
+        const fileInput = document.getElementById('photoUpload');
+        const previewImg = document.getElementById('photoPreview');
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    if (previewImg.tagName === 'IMG') previewImg.src = event.target.result;
+                    else previewImg.innerHTML = `<img src="${event.target.result}" class="photo-preview" style="width:80px; height:80px; border-radius:50%; object-fit:cover;">`;
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+        
         document.getElementById('saveBtn').onclick = async () => {
             const newName = document.getElementById('editName').value.trim();
             const newAge = document.getElementById('editAge').value.trim();
@@ -290,6 +372,12 @@
             const newYear = document.getElementById('editYear').value.trim();
             const newOpening = parseInt(document.getElementById('editOpeningGames').value) || 0;
             if (!newName) { alert("Name required"); return; }
+            
+            // Handle photo upload
+            if (fileInput.files[0]) {
+                await uploadProfilePhoto(playerName, fileInput.files[0]);
+            }
+            
             const gamesFromAttend = attendance.filter(a => a.player === playerName && a.status === 'in').length;
             const totalGames = gamesFromAttend + newOpening;
             if (newName !== playerName) {
@@ -298,7 +386,8 @@
                 if (idx !== -1) players[idx] = newName; else players.push(newName);
                 players.sort();
                 if (db && playersRef) await playersRef.set({ list: players });
-                playerProfiles[newName] = { age: newAge || '—', position: newPosition, yearJoined: newYear || '—', gamesPlayed: totalGames, openingBalanceGames: newOpening };
+                const oldPhoto = playerProfiles[playerName]?.photoURL;
+                playerProfiles[newName] = { age: newAge || '—', position: newPosition, yearJoined: newYear || '—', gamesPlayed: totalGames, openingBalanceGames: newOpening, photoURL: oldPhoto };
                 delete playerProfiles[playerName];
                 if (currentUser?.name === playerName) currentUser.name = newName;
             } else {
@@ -308,6 +397,8 @@
             modalDiv.remove();
             renderProfilesPage();
             renderScoreboardPage();
+            renderHomePage();
+            if(isAdminLoggedIn) renderAdminPage();
         };
         document.getElementById('cancelBtn').onclick = () => modalDiv.remove();
     }
@@ -320,7 +411,7 @@
         const homeContainer = document.getElementById("homeContainer");
         if(homeContainer) {
             homeContainer.innerHTML = `<div class="attendance-card"><h2><i class="fas fa-futbol"></i> ${nextWeek?.label || "This Monday"} • 8pm</h2><div>Clifton Park, Brunswick</div><div class="big-buttons"><button id="homePlayBtn" class="btn-play-big">✅ I'M PLAYING</button><button id="homeSitBtn" class="btn-sit-big">❌ CAN'T PLAY</button></div><div class="status-text">${currentStatus === 'in' ? '✓ You are PLAYING' : (currentStatus === 'out' ? '✗ You are NOT PLAYING' : 'Tap above to set your attendance')}</div></div>
-            <div class="playing-list"><div class="playing-title"><i class="fas fa-users"></i> 🟢 Players Playing This Week (${playingThisWeek.length})</div><div class="attendee-tags">${playingThisWeek.map(p=>`<span class="attendee-tag">${escapeHtml(p)}</span>`).join('')||'<span>No players signed up yet</span>'}</div></div>
+            <div class="playing-list"><div class="playing-title"><i class="fas fa-users"></i> 🟢 Players Playing This Week (${playingThisWeek.length})</div><div class="attendee-tags">${playingThisWeek.map(p=>`<span class="attendee-tag">${renderPlayerTag(p, 28)} ${escapeHtml(p)}</span>`).join('')||'<span>No players signed up yet</span>'}</div></div>
             <div class="guest-section"><div class="guest-title"><i class="fas fa-user-friends"></i> 🎭 Guests This Week (${weeklyGuests.length})</div><div class="attendee-tags">${weeklyGuests.map(g=>`<span class="guest-tag">${escapeHtml(g.name)} <small>(by ${escapeHtml(g.addedBy)})</small></span>`).join('')||'<span>No guests added yet</span>'}</div>
             <div style="margin-top: 12px;"><input type="text" id="guestNameInput" placeholder="Enter guest name" style="margin-bottom:8px;"><button id="addGuestBtnPlayer" class="btn-outline" style="width:100%;">➕ Bring a Guest</button></div></div>`;
             document.getElementById("homePlayBtn")?.addEventListener("click", () => setAttendance("in"));
@@ -338,69 +429,42 @@
         for(let player of players) {
             const p = playerProfiles[player] || { age: '—', position: '—', yearJoined: '—', gamesPlayed: 0 };
             const canEdit = (currentUser?.name === player) || isAdminLoggedIn;
-            html += `<div class="profile-item"><div class="profile-header"><div class="profile-name">⚽ ${escapeHtml(player)}</div>${canEdit ? `<button class="edit-profile-btn" data-player="${escapeHtml(player)}" style="padding:6px 14px; font-size:12px;">Edit</button>` : ''}</div>
-                <div class="profile-details"><span class="profile-badge">🎂 ${escapeHtml(p.age)}</span><span class="profile-badge">⚽ ${escapeHtml(p.position)}</span><span class="profile-badge">📅 ${escapeHtml(p.yearJoined)}</span><span class="profile-badge">🏆 ${p.gamesPlayed || 0} games</span></div></div>`;
+            html += `<div class="profile-item">
+                ${renderProfileAvatar(player, p.photoURL, 50)}
+                <div class="profile-info">
+                    <div class="profile-header"><div class="profile-name">⚽ ${escapeHtml(player)}</div>${canEdit ? `<button class="edit-profile-btn" data-player="${escapeHtml(player)}">Edit</button>` : ''}</div>
+                    <div class="profile-details"><span class="profile-badge">🎂 ${escapeHtml(p.age)}</span><span class="profile-badge">⚽ ${escapeHtml(p.position)}</span><span class="profile-badge">📅 ${escapeHtml(p.yearJoined)}</span><span class="profile-badge">🏆 ${p.gamesPlayed || 0} games</span></div>
+                </div>
+            </div>`;
         }
         html += `</div>`;
         document.getElementById("page-profiles").innerHTML = html;
         document.querySelectorAll(".edit-profile-btn").forEach(btn => btn.addEventListener("click", () => showEditProfileModal(btn.dataset.player)));
     }
     
-    // FIXED: Show ALL players in leaderboards, not just those playing this week
     function renderScoreboardPage() {
         let stats = new Map();
-        // Initialize stats for ALL players
-        for(let player of players) {
-            stats.set(player, { goals: 0, appearances: 0 });
-        }
-        // Count appearances from attendance history (only 'in' status counts)
-        attendance.forEach(a => { 
-            if(a.status === 'in' && stats.has(a.player)) {
-                stats.get(a.player).appearances++;
-            }
-        });
-        // Count goals from match results
-        for(let match of Object.values(matchResults)) {
-            if(match.goals) {
-                for(let [scorer, count] of Object.entries(match.goals)) {
-                    if(stats.has(scorer)) {
-                        stats.get(scorer).goals += count;
-                    }
-                }
-            }
-        }
-        // Convert to array and sort
-        const allStats = Array.from(stats.entries()).map(([name, s]) => ({ 
-            name: name, 
-            goals: s.goals, 
-            appearances: s.appearances
-        }));
-        
-        // Sort by goals descending
+        for(let player of players) stats.set(player, { goals: 0, appearances: 0 });
+        attendance.forEach(a => { if(a.status === 'in' && stats.has(a.player)) stats.get(a.player).appearances++; });
+        for(let match of Object.values(matchResults)) if(match.goals) for(let [scorer, count] of Object.entries(match.goals)) if(stats.has(scorer)) stats.get(scorer).goals += count;
+        const allStats = Array.from(stats.entries()).map(([name, s]) => ({ name, goals: s.goals, appearances: s.appearances }));
         const topGoals = [...allStats].sort((a,b) => b.goals - a.goals);
-        // Sort by appearances descending (total games = attendance games + opening balance)
         const topApps = [...allStats].sort((a,b) => {
             const aTotal = a.appearances + (playerProfiles[a.name]?.openingBalanceGames || 0);
             const bTotal = b.appearances + (playerProfiles[b.name]?.openingBalanceGames || 0);
             return bTotal - aTotal;
         });
-        
-        document.getElementById("page-scoreboard").innerHTML = `<div class="card">
-            <h2>🏆 All-Time Leaderboard</h2>
-            <div style="margin-bottom:16px;"><h3>⚽ Top Goal Scorers (All Players)</h3><table class="data-table"><thead><tr><th>#</th><th>Player</th><th>Goals</th></tr></thead><tbody>
-                ${topGoals.map((p,i)=>`<tr><td><strong>${i+1}</strong></td><td><strong>${escapeHtml(p.name)}</strong></td><td>${p.goals} goals</td></tr>`).join('')}
-            </tbody></table></div>
-            <div><h3>🏃 Most Games Played (All Players)</h3><table class="data-table"><thead><tr><th>#</th><th>Player</th><th>Games</th></tr></thead><tbody>
-                ${topApps.map((p,i)=>`<tr><td><strong>${i+1}</strong></td><td><strong>${escapeHtml(p.name)}</strong></td><td>${p.appearances + (playerProfiles[p.name]?.openingBalanceGames || 0)} games</td></tr>`).join('')}
-            </tbody></table></div>
+        document.getElementById("page-scoreboard").innerHTML = `<div class="card"><h2>🏆 All-Time Leaderboard</h2>
+            <div><h3>⚽ Top Goal Scorers</h3><table class="data-table">${topGoals.map((p,i)=>`<tr><td><strong>${i+1}</strong></td><td>${renderPlayerTag(p.name, 24)} ${escapeHtml(p.name)}</td><td>${p.goals} goals</td></tr>`).join('')}</table></div>
+            <div style="margin-top:16px;"><h3>🏃 Most Games Played</h3><table class="data-table">${topApps.map((p,i)=>`<tr><td><strong>${i+1}</strong></td><td>${renderPlayerTag(p.name, 24)} ${escapeHtml(p.name)}</td><td>${p.appearances + (playerProfiles[p.name]?.openingBalanceGames || 0)} games</td></tr>`).join('')}</table></div>
         </div>`;
     }
     
     async function renderHistoryPage() {
         const past = getPastWeeks();
-        if (!past.length) { document.getElementById("page-history").innerHTML = `<div class="card"><h2>📖 Match History</h2><p>No past games yet. Check back after Monday!</p></div>`; return; }
+        if (!past.length) { document.getElementById("page-history").innerHTML = `<div class="card"><h2>📖 Match History</h2><p>No past games yet.</p></div>`; return; }
         let html = `<div class="card"><h2>📖 Match History</h2></div>`;
-        for (let week of past) {
+        for (let week of past.slice(0, 8)) {
             const assignments = teamAssignments[week.dateStr] || {};
             const yellow = Object.keys(assignments).filter(p => assignments[p] === "yellow");
             const orange = Object.keys(assignments).filter(p => assignments[p] === "orange");
@@ -408,18 +472,14 @@
             const goals = match.goals || {};
             const yellowGoals = [], orangeGoals = [];
             for (let [player, count] of Object.entries(goals)) if (count>0) { if(yellow.includes(player)) yellowGoals.push({player,count}); else if(orange.includes(player)) orangeGoals.push({player,count}); }
-            const weeklyGuests = guests.filter(g => g.gameDate === week.dateStr);
             const comments = matchComments[week.dateStr] || [];
             const safeId = week.dateStr.replace(/-/g, '');
-            html += `<div class="match-card">
-                <div class="match-header"><div class="match-date">${week.label}</div><div class="match-result">🟡 ${match.yellowScore} - ${match.orangeScore} 🟠</div></div>
-                <div class="teams-section"><div class="team-row"><div class="team-box"><div class="team-yellow">🟡 YELLOW</div><div class="player-list">${yellow.map(p=>`<span class="player-tag">${escapeHtml(p)}</span>`).join('') || '<span class="player-tag">—</span>'}</div></div>
-                <div class="team-box"><div class="team-orange">🟠 ORANGE</div><div class="player-list">${orange.map(p=>`<span class="player-tag">${escapeHtml(p)}</span>`).join('') || '<span class="player-tag">—</span>'}</div></div></div>
-                <div class="score-big">${match.yellowScore} - ${match.orangeScore}</div></div>
-                <div class="goals-section"><div class="goals-title">⚽ Goal Scorers</div><div class="goals-list">${yellowGoals.map(g=>`<div class="goal-badge">🟡 ${g.player} ×${g.count}</div>`).join('')}${orangeGoals.map(g=>`<div class="goal-badge">🟠 ${g.player} ×${g.count}</div>`).join('')}${yellowGoals.length === 0 && orangeGoals.length === 0 ? '<div class="goal-badge">No goals recorded</div>' : ''}</div></div>
-                ${weeklyGuests.length > 0 ? `<div class="goals-section" style="background:#f0fdf4;"><div class="goals-title">🎭 Guests</div><div class="goals-list">${weeklyGuests.map(g=>`<div class="goal-badge" style="border-left-color:#28a745;">${escapeHtml(g.guestName)} <small>(brought by ${escapeHtml(g.addedBy)})</small></div>`).join('')}</div></div>` : ''}
-                <div class="comments-section"><div>💬 Comments (${comments.length})</div><div id="comments-${safeId}">${comments.map(c=>`<div class="comment-item"><strong>${escapeHtml(c.author)}</strong><br>${escapeHtml(c.text)}</div>`).join('')||'<div style="color:#94a3b8;">No comments yet. Be the first!</div>'}</div>
-                <div class="add-comment"><input id="commentInput-${safeId}" placeholder="Share your thoughts..."><button onclick="window.addComment('${week.dateStr}')">Comment</button></div></div></div>`;
+            html += `<div class="match-card"><div class="match-header"><div class="match-date">${week.label}</div><div class="match-result">🟡 ${match.yellowScore} - ${match.orangeScore} 🟠</div></div>
+                <div class="teams-section"><div class="team-row"><div class="team-box"><div class="team-yellow">🟡 YELLOW</div><div class="player-list">${yellow.map(p=>`<span class="player-tag">${renderPlayerTag(p, 28)} ${escapeHtml(p)}</span>`).join('') || '<span class="player-tag">—</span>'}</div></div>
+                <div class="team-box"><div class="team-orange">🟠 ORANGE</div><div class="player-list">${orange.map(p=>`<span class="player-tag">${renderPlayerTag(p, 28)} ${escapeHtml(p)}</span>`).join('') || '<span class="player-tag">—</span>'}</div></div></div><div class="score-big">${match.yellowScore} - ${match.orangeScore}</div></div>
+                <div class="goals-section"><div class="goals-title">⚽ Goal Scorers</div><div class="goals-list">${yellowGoals.map(g=>`<div class="goal-badge">🟡 ${g.player} ×${g.count}</div>`).join('')}${orangeGoals.map(g=>`<div class="goal-badge">🟠 ${g.player} ×${g.count}</div>`).join('')}</div></div>
+                <div class="comments-section"><div>💬 Comments</div><div id="comments-${safeId}">${comments.map(c=>`<div class="comment-item"><strong>${escapeHtml(c.author)}</strong><br>${escapeHtml(c.text)}</div>`).join('')||'<div>No comments</div>'}</div>
+                <div class="add-comment"><input id="commentInput-${safeId}" placeholder="Add comment..."><button onclick="window.addComment('${week.dateStr}')">Comment</button></div></div></div>`;
         }
         document.getElementById("page-history").innerHTML = html;
     }
@@ -444,24 +504,66 @@
         document.getElementById("page-rules").innerHTML = `<div class="card"><h2>📜 League Rules</h2><div style="white-space: pre-line; font-size: 14px; line-height: 1.6;">${escapeHtml(rulesText)}</div></div>`; 
     }
     
-    // ADMIN PAGE - Clean with 4 buttons
+    // ADMIN PAGE with Player Management
     function renderAdminPage() {
         if (!isAdminLoggedIn) { 
-            document.getElementById("page-admin").innerHTML = `<div class="card"><h2>🔒 Admin Area</h2><p>Admin access only. Please login as Admin from the main screen.</p></div>`; 
+            document.getElementById("page-admin").innerHTML = `<div class="card"><h2>🔒 Admin Area</h2><p>Admin access only.</p></div>`; 
             return; 
         }
-        
         let html = `<div class="card"><h2>⚙️ Admin Control Panel</h2><div class="admin-buttons">
+            <button id="adminPlayersBtn" class="admin-action-btn"><i class="fas fa-users"></i> 👥 Manage Players</button>
             <button id="adminFinanceBtn" class="admin-action-btn"><i class="fas fa-dollar-sign"></i> 💰 Financial Ledger</button>
             <button id="adminTeamsBtn" class="admin-action-btn"><i class="fas fa-users"></i> ⚽ Assign Teams</button>
             <button id="adminGuestsBtn" class="admin-action-btn"><i class="fas fa-user-plus"></i> 🎭 Guest List</button>
             <button id="adminRulesBtn" class="admin-action-btn"><i class="fas fa-edit"></i> 📝 Edit Rules</button>
         </div></div>
+        <div id="adminPlayersPanel" style="display:none;"></div>
         <div id="adminFinancePanel" style="display:none;"></div>
         <div id="adminTeamsPanel" style="display:none;"></div>
         <div id="adminGuestsPanel" style="display:none;"></div>
         <div id="adminRulesPanel" style="display:none;"></div>`;
         document.getElementById("page-admin").innerHTML = html;
+        
+        // Players Management Panel
+        document.getElementById("adminPlayersBtn").onclick = () => {
+            let playersHtml = `<div class="card"><h2>👥 Manage Players</h2>
+                <div style="margin-bottom:16px;"><input type="text" id="newPlayerName" placeholder="New player name"><button id="addPlayerBtn" style="margin-top:8px;">➕ Add Player</button></div>
+                <h3>Existing Players</h3><div class="profile-grid">`;
+            for(let player of players) {
+                const p = playerProfiles[player] || {};
+                playersHtml += `<div class="profile-item" style="display:flex; align-items:center; gap:12px;">
+                    ${renderProfileAvatar(player, p.photoURL, 40)}
+                    <div style="flex:1;"><strong>${escapeHtml(player)}</strong><br><small>${p.position || 'No position'} | ${p.gamesPlayed || 0} games</small></div>
+                    <button class="deletePlayerBtn" data-player="${escapeHtml(player)}" style="background:#dc3545; padding:8px 16px;">🗑️ Delete</button>
+                </div>`;
+            }
+            playersHtml += `</div></div>`;
+            document.getElementById("adminPlayersPanel").innerHTML = playersHtml;
+            document.getElementById("addPlayerBtn")?.addEventListener("click", async () => {
+                const newName = document.getElementById("newPlayerName").value.trim();
+                if (await addPlayer(newName)) {
+                    alert(`Player ${newName} added!`);
+                    document.getElementById("newPlayerName").value = "";
+                    renderAdminPage();
+                    renderProfilesPage();
+                } else alert("Player already exists or invalid name");
+            });
+            document.querySelectorAll(".deletePlayerBtn").forEach(btn => btn.addEventListener("click", async () => {
+                const playerName = btn.dataset.player;
+                if (confirm(`Delete ${playerName}? This will remove all their data.`)) {
+                    await deletePlayer(playerName);
+                    renderAdminPage();
+                    renderProfilesPage();
+                    renderScoreboardPage();
+                    renderHomePage();
+                }
+            }));
+            document.getElementById("adminPlayersPanel").style.display = "block";
+            document.getElementById("adminFinancePanel").style.display = "none";
+            document.getElementById("adminTeamsPanel").style.display = "none";
+            document.getElementById("adminGuestsPanel").style.display = "none";
+            document.getElementById("adminRulesPanel").style.display = "none";
+        };
         
         // Finance Panel
         document.getElementById("adminFinanceBtn").onclick = () => {
@@ -476,30 +578,29 @@
                 if(unpaid > 0) debts.push({ player, debt: unpaid });
             }
             debts.sort((a,b) => b.debt - a.debt);
-            
             let financeHtml = `<div class="card"><h2>💰 Financial Ledger</h2><div class="finance-summary"><div class="amount">$${totalCollected}</div><p>Total Treasury</p></div>`;
             if(currentWeek && signedPlayers.length > 0) {
                 financeHtml += `<h3>📅 ${currentWeek.label} - Payment Status</h3><table class="data-table"><thead><tr><th>Player</th><th>Status</th><th>Action</th></tr></thead><tbody>`;
                 for (let player of signedPlayers) {
                     const isPaid = payments.some(p => p.player === player && p.gameDate === currentWeek.dateStr);
-                    financeHtml += `<tr><td><strong>${escapeHtml(player)}</strong></td><td>${isPaid ? '<span class="badge-paid">✓ PAID</span>' : '<span class="badge-owing">❌ OWING</span>'}</td>
+                    financeHtml += `<tr><td>${renderPlayerTag(player, 24)} ${escapeHtml(player)}</td><td>${isPaid ? '<span class="badge-paid">✓ PAID</span>' : '<span class="badge-owing">❌ OWING</span>'}</td>
                         <td>${!isPaid ? `<button class="markPaidBtn" data-player="${escapeHtml(player)}" data-date="${currentWeek.dateStr}" style="padding:6px 12px;">Record Payment</button>` : '—'}</td></tr>`;
                 }
                 financeHtml += `</tbody></table>`;
             }
             financeHtml += `<h3 style="margin-top:20px;">📜 Outstanding Debts</h3><table class="data-table"><thead><tr><th>Player</th><th>Amount Owed</th></tr></thead><tbody>`;
-            if(debts.length > 0) for(let d of debts) financeHtml += `<tr><td><strong>${escapeHtml(d.player)}</strong></td><td class="badge-owing">$${d.debt}</td></tr>`;
+            if(debts.length > 0) for(let d of debts) financeHtml += `<tr><td>${renderPlayerTag(d.player, 24)} ${escapeHtml(d.player)}</td><td class="badge-owing">$${d.debt}</td></tr>`;
             else financeHtml += `<tr><td colspan="2" style="text-align:center;">✨ No outstanding debts ✨</td></tr>`;
             financeHtml += `</tbody></table></div>`;
             document.getElementById("adminFinancePanel").innerHTML = financeHtml;
             document.getElementById("adminFinancePanel").style.display = "block";
+            document.getElementById("adminPlayersPanel").style.display = "none";
             document.getElementById("adminTeamsPanel").style.display = "none";
             document.getElementById("adminGuestsPanel").style.display = "none";
             document.getElementById("adminRulesPanel").style.display = "none";
             document.querySelectorAll(".markPaidBtn").forEach(btn => btn.addEventListener("click", async () => {
                 await savePayment({ player: btn.dataset.player, gameDate: btn.dataset.date, amount: 5, timestamp: Date.now() });
                 renderAdminPage();
-                renderScoreboardPage();
             }));
         };
         
@@ -513,7 +614,7 @@
                 let listHtml = `<div class="card"><h2>⚽ Assign Teams for ${currentWeek.label}</h2>`;
                 for(let player of signedPlayers) {
                     const current = teamAssignments[currentWeek.dateStr][player] || "";
-                    listHtml += `<div class="admin-team-item"><span><strong>${escapeHtml(player)}</strong></span>
+                    listHtml += `<div class="admin-team-item"><div class="player-name">${renderPlayerTag(player, 28)} <strong>${escapeHtml(player)}</strong></div>
                         <select class="admin-team-select" data-player="${escapeHtml(player)}" style="width:140px;"><option value="">— Select Team —</option><option value="yellow" ${current==="yellow"?"selected":""}>🟡 Yellow Team</option><option value="orange" ${current==="orange"?"selected":""}>🟠 Orange Team</option></select></div>`;
                 }
                 listHtml += `<div class="flex-btns"><button id="autoAssignTeamsBtn" class="btn-outline">🎲 Auto-Balance Teams</button><button id="saveTeamsBtn">💾 Save Team Assignments</button></div></div>`;
@@ -531,6 +632,7 @@
                 document.getElementById("saveTeamsBtn")?.addEventListener("click", async () => { await saveTeams(); alert("Teams saved!"); renderAdminPage(); renderHistoryPage(); });
             };
             renderAssignList();
+            document.getElementById("adminPlayersPanel").style.display = "none";
             document.getElementById("adminFinancePanel").style.display = "none";
             document.getElementById("adminTeamsPanel").style.display = "block";
             document.getElementById("adminGuestsPanel").style.display = "none";
@@ -553,6 +655,7 @@
                     renderHomePage();
                 }
             });
+            document.getElementById("adminPlayersPanel").style.display = "none";
             document.getElementById("adminFinancePanel").style.display = "none";
             document.getElementById("adminTeamsPanel").style.display = "none";
             document.getElementById("adminGuestsPanel").style.display = "block";
@@ -561,7 +664,7 @@
         
         // Rules Panel
         document.getElementById("adminRulesBtn").onclick = () => {
-            let rulesHtml = `<div class="card"><h2>📝 Edit League Rules</h2><textarea id="rulesEditor" rows="8" style="width:100%; border-radius:16px; padding:12px; border:1px solid #e2e8f0;">${escapeHtml(rulesText)}</textarea><div class="flex-btns"><button id="saveRulesBtn">💾 Save Rules</button></div></div>`;
+            let rulesHtml = `<div class="card"><h2>📝 Edit League Rules</h2><textarea id="rulesEditor" rows="8" style="width:100%; border-radius:16px; padding:12px;">${escapeHtml(rulesText)}</textarea><div class="flex-btns"><button id="saveRulesBtn">💾 Save Rules</button></div></div>`;
             document.getElementById("adminRulesPanel").innerHTML = rulesHtml;
             document.getElementById("saveRulesBtn")?.addEventListener("click", async () => {
                 rulesText = document.getElementById("rulesEditor").value;
@@ -570,6 +673,7 @@
                 renderRulesPage();
                 renderAdminPage();
             });
+            document.getElementById("adminPlayersPanel").style.display = "none";
             document.getElementById("adminFinancePanel").style.display = "none";
             document.getElementById("adminTeamsPanel").style.display = "none";
             document.getElementById("adminGuestsPanel").style.display = "none";
@@ -598,21 +702,18 @@
             { id: "rules", name: "📜 RULES" }
         ];
         if (isAdminLoggedIn) modules.push({ id: "admin", name: "⚙️ ADMIN" });
-        
         const navBar = document.getElementById("topNavBar");
         navBar.innerHTML = modules.map(m => `<button class="nav-module" data-module="${m.id}">${m.name}</button>`).join('');
         document.querySelectorAll(".nav-module").forEach(btn => {
             btn.addEventListener("click", () => {
-                const moduleId = btn.dataset.module;
+                const id = btn.dataset.module;
                 document.querySelectorAll(".module-container").forEach(c => c.classList.remove("active-module"));
-                const target = document.getElementById(`module-${moduleId}`);
-                if(target) target.classList.add("active-module");
+                document.getElementById(`module-${id}`)?.classList.add("active-module");
                 document.querySelectorAll(".nav-module").forEach(b => b.classList.remove("active"));
                 btn.classList.add("active");
             });
         });
-        const homeBtn = document.querySelector('.nav-module[data-module="home"]');
-        if(homeBtn) homeBtn.click();
+        document.querySelector('.nav-module[data-module="home"]')?.click();
     }
     
     function escapeHtml(str) { return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
@@ -620,8 +721,7 @@
     async function renderApp() {
         await loadData();
         await fetchMelbourneWeather();
-        const wrapper = document.getElementById("app");
-        wrapper.innerHTML = `
+        document.getElementById("app").innerHTML = `
             <div class="header"><div class="logo-icon"><i class="fas fa-futbol"></i></div><h1>MONDAY NIGHT SOCCER</h1><div class="user-row"><i class="fas fa-user-circle"></i> <strong>${currentUser.role === "admin" ? "ADMIN" : currentUser.name}</strong> <button id="logoutBtnMain">Exit</button></div></div>
             <div class="top-nav" id="topNavBar"></div>
             <div id="module-home" class="module-container"><div id="homeContainer"></div></div>
@@ -641,10 +741,9 @@
     
     async function renderLogin() {
         await loadData();
-        const wrapper = document.getElementById("app");
-        wrapper.innerHTML = `<div class="login-box"><div style="width:60px; height:60px; background:#1a73e8; border-radius:24px; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;"><i class="fas fa-futbol" style="font-size:30px; color:white;"></i></div><h2>Monday Night Soccer</h2><p style="margin-bottom:20px; color:#64748b;">8pm Kickoff • Clifton Park</p><select id="playerSelectLogin" style="margin-bottom:12px;"><option>-- Select Player --</option>${players.map(p=>`<option>${escapeHtml(p)}</option>`).join('')}</select><button id="playerLoginBtn" style="width:100%; margin-bottom:16px;">Enter as Player</button><hr style="margin:16px 0;"><input type="password" id="adminPwLogin" placeholder="Admin Password"><button id="adminLoginBtn" style="width:100%; margin-top:10px;">Admin Login</button><div id="loginErr" style="color:#dc3545; margin-top:12px;"></div></div>`;
+        document.getElementById("app").innerHTML = `<div class="login-box"><div style="width:60px; height:60px; background:#1a73e8; border-radius:24px; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;"><i class="fas fa-futbol" style="font-size:30px; color:white;"></i></div><h2>Monday Night Soccer</h2><p style="margin-bottom:20px; color:#64748b;">8pm Kickoff • Clifton Park</p><select id="playerSelectLogin"><option>-- Select Player --</option>${players.map(p=>`<option>${escapeHtml(p)}</option>`).join('')}</select><button id="playerLoginBtn">Enter as Player</button><hr><input type="password" id="adminPwLogin" placeholder="Admin Password"><button id="adminLoginBtn">Admin Login</button><div id="loginErr" style="color:#dc3545; margin-top:12px;"></div></div>`;
         document.getElementById("playerLoginBtn").onclick = () => { const n = document.getElementById("playerSelectLogin").value; if(n && n !== "-- Select Player --") loginAsPlayer(n); else document.getElementById("loginErr").innerText = "Select your name"; };
-        document.getElementById("adminLoginBtn").onclick = () => { const pw = document.getElementById("adminPwLogin").value; if(!adminLogin(pw)) document.getElementById("loginErr").innerText = "Wrong password (admin123)"; };
+        document.getElementById("adminLoginBtn").onclick = () => { if(!adminLogin(document.getElementById("adminPwLogin").value)) document.getElementById("loginErr").innerText = "Wrong password (admin123)"; };
     }
     
     (async () => {
