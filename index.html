@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="format-detection" content="telephone=no">
-    <title>Monday Night Soccer | 8pm Kickoff</title>
+    <title>Monday Night Soccer | 8pm</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700;800&display=swap" rel="stylesheet">
@@ -18,192 +18,148 @@
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
-        
+
         body {
             background: #eef2f5;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
             padding: 0;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
         }
-        
-        /* Main App Container - iPhone optimized */
-        .app-wrapper {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
+
+        /* iPhone-optimized wrapper */
+        .app {
             max-width: 500px;
             margin: 0 auto;
             background: #eef2f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
             box-shadow: 0 0 20px rgba(0,0,0,0.05);
-            position: relative;
         }
-        
+
         /* Header */
-        .app-header {
+        .header {
             background: white;
-            padding: 16px 20px;
+            padding: 18px 20px;
             text-align: center;
             border-bottom: 1px solid #e2e8f0;
-            flex-shrink: 0;
         }
-        
         .logo-icon {
-            width: 48px;
-            height: 48px;
+            width: 52px;
+            height: 52px;
             background: #1a73e8;
-            border-radius: 20px;
+            border-radius: 24px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 8px;
         }
-        
-        .logo-icon i {
-            font-size: 24px;
-            color: white;
-        }
-        
-        .app-header h1 {
-            font-size: 20px;
-            font-weight: 800;
-            color: #1e293b;
-        }
-        
-        .user-badge {
+        .logo-icon i { font-size: 26px; color: white; }
+        .header h1 { font-size: 22px; font-weight: 800; color: #1e293b; letter-spacing: -0.3px; }
+        .user-row {
             background: #f1f5f9;
-            padding: 6px 12px;
+            padding: 8px 16px;
             border-radius: 60px;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            margin-top: 8px;
-            font-size: 12px;
+            gap: 12px;
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: 500;
         }
-        
-        .user-badge button {
+        .user-row button {
             background: #dc3545;
             border: none;
-            padding: 4px 12px;
+            padding: 6px 16px;
             border-radius: 40px;
             color: white;
             font-weight: 600;
-            font-size: 12px;
-            cursor: pointer;
+            font-size: 13px;
         }
-        
-        /* Hero Attendance Banner */
-        .hero-attendance {
+
+        /* Big Attendance Card */
+        .attendance-card {
             background: linear-gradient(135deg, #1a73e8, #0d5bbf);
             color: white;
-            padding: 20px;
+            margin: 16px 16px 12px 16px;
+            padding: 24px 20px;
+            border-radius: 32px;
             text-align: center;
-            margin: 12px;
-            border-radius: 24px;
-            flex-shrink: 0;
         }
-        
-        .hero-attendance h2 {
-            font-size: 20px;
+        .attendance-card h2 {
+            font-size: 24px;
             margin-bottom: 4px;
+            font-weight: 800;
         }
-        
-        .hero-attendance .kickoff {
-            font-size: 13px;
+        .attendance-card .venue {
+            font-size: 14px;
             opacity: 0.9;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
-        
-        .attendance-buttons {
+        .big-buttons {
             display: flex;
-            gap: 12px;
+            gap: 14px;
             justify-content: center;
+            margin: 16px 0 8px;
         }
-        
-        .btn-play {
+        .btn-play-big {
             background: #28a745;
-            padding: 12px 24px;
+            flex: 1;
+            padding: 16px 20px;
             border-radius: 60px;
             font-weight: 800;
-            font-size: 16px;
+            font-size: 18px;
             border: none;
             color: white;
             cursor: pointer;
-            transition: transform 0.1s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
-        
-        .btn-sit {
+        .btn-sit-big {
             background: #dc3545;
-            padding: 12px 24px;
+            flex: 1;
+            padding: 16px 20px;
             border-radius: 60px;
             font-weight: 800;
-            font-size: 16px;
+            font-size: 18px;
             border: none;
             color: white;
             cursor: pointer;
-            transition: transform 0.1s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
-        
-        .btn-play:active, .btn-sit:active, button:active {
-            transform: scale(0.96);
+        .status-text {
+            font-size: 14px;
+            margin-top: 10px;
+            background: rgba(255,255,255,0.2);
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 60px;
         }
-        
-        /* Alert Banner */
-        .alert-banner {
+
+        /* Captain Banner */
+        .captain-banner {
             background: linear-gradient(90deg, #ff4757, #ff6b6b);
             color: white;
-            padding: 10px;
+            padding: 12px 16px;
             text-align: center;
             font-weight: 700;
-            font-size: 13px;
-            margin: 0 12px 12px;
+            font-size: 14px;
+            margin: 0 16px 12px 16px;
             border-radius: 60px;
             animation: pulse 1.5s infinite;
-            flex-shrink: 0;
         }
-        
-        @keyframes pulse {
-            0% { opacity: 0.9; }
-            50% { opacity: 1; background: #ff4757; }
-            100% { opacity: 0.9; }
-        }
-        
-        /* Page Container */
-        .page-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 12px;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        .page {
-            display: none;
-        }
-        
-        .page.active-page {
-            display: block;
-            animation: fadeIn 0.25s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* Bottom Tab Bar - iPhone friendly */
-        .bottom-tab-bar {
+        @keyframes pulse { 0% { opacity: 0.9; } 50% { opacity: 1; background: #ff4757; } 100% { opacity: 0.9; } }
+
+        /* Bottom Navigation */
+        .bottom-nav {
             background: rgba(255, 255, 255, 0.96);
             backdrop-filter: blur(10px);
             border-top: 1px solid #e2e8f0;
             display: flex;
             justify-content: space-around;
-            padding: 8px 8px 12px;
-            flex-shrink: 0;
-            gap: 2px;
+            padding: 10px 12px 18px;
+            margin-top: auto;
         }
-        
-        .tab-item {
+        .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -211,341 +167,151 @@
             background: none;
             border: none;
             cursor: pointer;
-            padding: 8px 8px;
+            padding: 8px 12px;
             border-radius: 40px;
-            transition: all 0.2s;
             color: #94a3b8;
             font-size: 11px;
             font-weight: 500;
             flex: 1;
-            text-align: center;
+            transition: all 0.2s;
         }
-        
-        .tab-item i {
-            font-size: 22px;
+        .nav-item i { font-size: 24px; }
+        .nav-item.active { color: #1a73e8; background: #e8f0fe; }
+        .nav-item:active { transform: scale(0.94); }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 16px 16px 16px;
+            -webkit-overflow-scrolling: touch;
         }
-        
-        .tab-item.active {
-            color: #1a73e8;
-            background: #e8f0fe;
-        }
-        
+        .page { display: none; }
+        .page.active { display: block; animation: fadeIn 0.25s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
         /* Cards */
         .card {
             background: white;
-            border-radius: 20px;
-            padding: 16px;
-            margin-bottom: 12px;
+            border-radius: 24px;
+            padding: 18px;
+            margin-bottom: 14px;
             border: 1px solid #e2e8f0;
         }
-        
         .card h2 {
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 700;
-            margin-bottom: 12px;
-            border-left: 3px solid #1a73e8;
-            padding-left: 10px;
+            margin-bottom: 14px;
+            border-left: 4px solid #1a73e8;
+            padding-left: 12px;
         }
-        
-        .card h3 {
-            font-size: 14px;
-            font-weight: 600;
-            margin: 12px 0 8px;
-        }
-        
-        /* Match Cards */
-        .match-card {
-            background: white;
-            border-radius: 20px;
-            margin-bottom: 12px;
-            border: 1px solid #e2e8f0;
-            overflow: hidden;
-        }
-        
-        .match-header {
-            background: #f8fafc;
-            padding: 12px 16px;
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-        }
-        
-        .match-date {
-            font-weight: 800;
-            font-size: 14px;
-        }
-        
-        .match-result-badge {
-            background: #1a73e8;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 60px;
-            font-weight: 800;
-            font-size: 14px;
-        }
-        
-        .teams-section {
-            padding: 16px;
-            background: linear-gradient(145deg, #2e7d32, #1b5e20);
-        }
-        
-        .teams-flex {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        
-        .team-card-mini {
-            flex: 1;
-            background: rgba(0, 0, 0, 0.65);
-            border-radius: 16px;
-            padding: 12px;
-            min-width: 140px;
-        }
-        
-        .team-name-yellow {
-            background: #ffc107;
-            color: #2c2c2c;
-            font-weight: 800;
-            text-align: center;
-            padding: 6px;
-            border-radius: 60px;
-            font-size: 14px;
-            margin-bottom: 8px;
-        }
-        
-        .team-name-orange {
-            background: #fd7e14;
-            color: white;
-            font-weight: 800;
-            text-align: center;
-            padding: 6px;
-            border-radius: 60px;
-            font-size: 14px;
-            margin-bottom: 8px;
-        }
-        
-        .player-list-mini {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            justify-content: center;
-        }
-        
-        .player-badge-mini {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 40px;
-            padding: 4px 8px;
-            font-size: 11px;
-            color: white;
-        }
-        
-        .score-display-big {
-            text-align: center;
-            margin-top: 12px;
-            font-size: 22px;
-            font-weight: 800;
-            background: rgba(0, 0, 0, 0.6);
-            border-radius: 60px;
-            padding: 8px;
-            color: white;
-        }
-        
-        .goals-section {
-            padding: 12px 16px;
-            background: #fefce8;
-        }
-        
-        .goals-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        
-        .goal-item {
-            background: white;
-            border-radius: 40px;
-            padding: 6px 12px;
-            font-size: 12px;
-            font-weight: 600;
-            border-left: 3px solid #eab308;
-        }
-        
-        .comments-section {
-            padding: 12px 16px;
-        }
-        
-        .add-comment {
-            display: flex;
-            gap: 8px;
-            margin-top: 10px;
-        }
-        
-        .add-comment input {
-            flex: 1;
-            padding: 10px 14px;
-            border-radius: 60px;
-            border: 1.5px solid #e2e8f0;
-            font-size: 14px;
-            background: white;
-        }
-        
-        .comment-item {
-            background: #f8fafc;
-            border-radius: 16px;
-            padding: 10px;
-            margin-bottom: 8px;
-            font-size: 13px;
-        }
-        
-        select, input {
-            width: 100%;
-            padding: 12px 14px;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 60px;
-            margin: 4px 0;
-            font-size: 14px;
-            background: white;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-        
-        button {
-            background: #1a73e8;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 60px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 14px;
-            transition: transform 0.1s ease;
-        }
-        
-        button:active {
-            transform: scale(0.96);
-        }
-        
-        .btn-outline {
-            background: white;
-            color: #1a73e8;
-            border: 2px solid #1a73e8;
-        }
-        
-        .flex-btns {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 12px;
-        }
-        
-        .stat-card {
-            background: #f8fafc;
-            border-radius: 16px;
-            padding: 12px;
-            text-align: center;
-        }
-        
-        .attendee-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
-        }
-        
-        .attendee-tag {
-            background: #e2e8f0;
-            padding: 6px 12px;
-            border-radius: 40px;
-            font-size: 13px;
-        }
-        
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
-        
-        .data-table th, .data-table td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        
-        .profile-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
+        .card h3 { font-size: 15px; font-weight: 600; margin: 12px 0 8px; }
+
+        /* Profile List */
         .profile-item {
             background: #f8fafc;
-            border-radius: 16px;
-            padding: 12px;
-            border-left: 3px solid #1a73e8;
+            border-radius: 20px;
+            padding: 14px;
+            margin-bottom: 10px;
+            border-left: 4px solid #1a73e8;
         }
-        
         .profile-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 10px;
         }
-        
-        .profile-name {
-            font-weight: 800;
-            font-size: 15px;
-        }
-        
+        .profile-name { font-weight: 800; font-size: 16px; }
         .profile-details {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
-            margin: 10px 0 0;
+            margin-top: 10px;
         }
-        
         .profile-badge {
             background: white;
-            border-radius: 30px;
-            padding: 4px 10px;
-            font-size: 11px;
+            border-radius: 40px;
+            padding: 5px 12px;
+            font-size: 12px;
             font-weight: 600;
         }
-        
-        .badge-paid {
-            background: #28a745;
-            color: white;
+        .edit-btn {
+            background: #475569;
+            padding: 6px 14px;
+            font-size: 12px;
             border-radius: 40px;
-            padding: 3px 10px;
-            font-size: 11px;
         }
-        
-        .badge-owing {
-            background: #dc3545;
-            color: white;
-            border-radius: 40px;
-            padding: 3px 10px;
-            font-size: 11px;
+
+        /* Match Cards */
+        .match-card {
+            background: white;
+            border-radius: 24px;
+            margin-bottom: 14px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
         }
-        
-        .captain-card {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border-radius: 16px;
+        .match-header {
+            background: #f8fafc;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .match-date { font-weight: 800; font-size: 14px; }
+        .match-result { background: #1a73e8; color: white; padding: 4px 14px; border-radius: 40px; font-weight: 700; font-size: 14px; }
+        .teams-section { padding: 16px; background: linear-gradient(145deg, #2e7d32, #1b5e20); }
+        .team-row { display: flex; gap: 12px; flex-wrap: wrap; }
+        .team-box {
+            flex: 1;
+            background: rgba(0,0,0,0.65);
+            border-radius: 18px;
             padding: 12px;
-            margin-bottom: 12px;
-            text-align: center;
-            font-size: 13px;
+            min-width: 140px;
         }
+        .team-yellow { background: #ffc107; color: #2c2c2c; font-weight: 800; text-align: center; padding: 6px; border-radius: 60px; font-size: 14px; margin-bottom: 8px; }
+        .team-orange { background: #fd7e14; color: white; font-weight: 800; text-align: center; padding: 6px; border-radius: 60px; font-size: 14px; margin-bottom: 8px; }
+        .player-list { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+        .player-tag { background: rgba(255,255,255,0.2); border-radius: 40px; padding: 4px 10px; font-size: 11px; color: white; }
+        .score-big { text-align: center; margin-top: 12px; font-size: 24px; font-weight: 800; background: rgba(0,0,0,0.6); border-radius: 60px; padding: 8px; color: white; }
+        .goals-section { padding: 12px 16px; background: #fefce8; }
+        .goals-list { display: flex; flex-wrap: wrap; gap: 8px; }
+        .goal-badge { background: white; border-radius: 40px; padding: 5px 12px; font-size: 12px; font-weight: 600; border-left: 3px solid #eab308; }
+        .comments-section { padding: 12px 16px; }
+        .add-comment { display: flex; gap: 8px; margin-top: 10px; }
+        .add-comment input { flex: 1; padding: 12px; border-radius: 60px; border: 1.5px solid #e2e8f0; font-size: 14px; }
+        .comment-item { background: #f8fafc; border-radius: 16px; padding: 10px; margin-bottom: 8px; font-size: 13px; }
         
-        .weather-card {
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-            color: white;
-            border-radius: 20px;
-            padding: 16px;
-            text-align: center;
+        select, input {
+            width: 100%;
+            padding: 14px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 60px;
+            margin: 6px 0;
+            font-size: 16px;
+            background: white;
         }
+        button {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 14px 22px;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+        }
+        .btn-outline { background: white; color: #1a73e8; border: 2px solid #1a73e8; }
+        .flex-btns { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+        .stat-card { background: #f8fafc; border-radius: 20px; padding: 16px; text-align: center; }
+        .attendee-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .attendee-tag { background: #e2e8f0; padding: 8px 16px; border-radius: 40px; font-size: 14px; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .data-table th, .data-table td { padding: 10px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        .badge-paid { background: #28a745; color: white; border-radius: 40px; padding: 4px 12px; font-size: 11px; }
+        .badge-owing { background: #dc3545; color: white; border-radius: 40px; padding: 4px 12px; font-size: 11px; }
+        .weather-card { background: linear-gradient(135deg, #0f2027, #203a43); color: white; border-radius: 24px; padding: 20px; text-align: center; }
+        .captain-note { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 20px; padding: 14px; margin-bottom: 14px; text-align: center; font-size: 14px; }
         
         .modal {
             position: fixed;
@@ -553,70 +319,39 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0,0,0,0.5);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 1000;
         }
-        
         .modal-content {
             background: white;
-            border-radius: 28px;
-            padding: 20px;
-            max-width: 350px;
-            width: 90%;
+            border-radius: 32px;
+            padding: 24px;
+            max-width: 340px;
+            width: 85%;
             max-height: 80vh;
             overflow-y: auto;
         }
         
-        .rule-box {
-            background: #fef3c7;
-            border-left: 3px solid #f59e0b;
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            font-size: 13px;
-        }
-        
-        /* Login Container */
-        .login-container {
+        .login-box {
             background: white;
-            border-radius: 32px;
-            padding: 32px;
-            max-width: 380px;
-            width: 90%;
-            margin: 60px auto;
+            border-radius: 40px;
+            padding: 32px 24px;
+            margin: 60px 20px;
             text-align: center;
         }
         
-        /* Scrollbar */
-        .page-container::-webkit-scrollbar {
-            width: 4px;
-        }
-        
-        .page-container::-webkit-scrollbar-track {
-            background: #e2e8f0;
-            border-radius: 4px;
-        }
-        
-        .page-container::-webkit-scrollbar-thumb {
-            background: #94a3b8;
-            border-radius: 4px;
-        }
-        
         @media (max-width: 450px) {
-            .tab-item span {
-                font-size: 10px;
-            }
-            .tab-item i {
-                font-size: 20px;
-            }
+            .nav-item span { font-size: 10px; }
+            .nav-item i { font-size: 22px; }
+            .btn-play-big, .btn-sit-big { font-size: 16px; padding: 14px 16px; }
         }
     </style>
 </head>
 <body>
-<div class="app-wrapper" id="appWrapper"></div>
+<div class="app" id="app"></div>
 
 <script>
     // Firebase Config
@@ -629,7 +364,7 @@
         appId: "1:634335208908:web:dca705b65fc52de0606969"
     };
     let db = null;
-    try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); console.log("Firebase ready"); } catch(e) { console.warn("Demo mode"); }
+    try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); } catch(e) { console.warn("Demo"); }
     
     const POSITIONS = ["Goalkeeper","Defender","Defensive Midfielder","Midfielder Centre","Midfielder Attacking","Wing Back Right","Wing Back Left","Attacking Midfielder","Striker","Winger Left","Winger Right"];
     
@@ -650,6 +385,7 @@
     
     let weatherData = { temp: "18°C", condition: "Clear", icon: "fa-sun", rainChance: 10, wind: "12 km/h", humidity: "65%" };
     
+    // Refs
     const playersRef = db?.collection("config").doc("players");
     const profilesRef = db?.collection("config").doc("playerProfiles");
     const teamsRef = db?.collection("config").doc("teamAssignments");
@@ -717,7 +453,7 @@
     
     async function fetchMelbourneWeather() {
         try {
-            const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-37.77&longitude=144.97&hourly=temperature_2m,precipitation_probability,relativehumidity_2m,windspeed_10m,weathercode&timezone=Australia/Melbourne&forecast_days=7');
+            const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-37.77&longitude=144.97&hourly=temperature_2m,precipitation_probability,weathercode&timezone=Australia/Melbourne&forecast_days=7');
             const data = await response.json();
             const nextMonday = new Date(); nextMonday.setDate(nextMonday.getDate() + ((1 + 7 - nextMonday.getDay()) % 7)); nextMonday.setHours(20,0,0,0);
             const mondayDateStr = nextMonday.toISOString().split('T')[0];
@@ -728,12 +464,12 @@
                     const temp = Math.round(data.hourly.temperature_2m[i]);
                     const code = data.hourly.weathercode[i];
                     let condition = "Clear", icon = "fa-sun";
-                    if (code === 0) { condition = "Clear sky"; icon = "fa-sun"; }
+                    if (code === 0) { condition = "Clear"; icon = "fa-sun"; }
                     else if (code === 1 || code === 2) { condition = "Partly cloudy"; icon = "fa-cloud-sun"; }
                     else if (code === 3) { condition = "Overcast"; icon = "fa-cloud"; }
                     else if (code >= 51 && code <= 67) { condition = "Light rain"; icon = "fa-cloud-rain"; }
                     else if (code >= 80 && code <= 99) { condition = "Rain/storm"; icon = "fa-cloud-bolt"; }
-                    weatherData = { temp: `${temp}°C`, condition, icon, rainChance: data.hourly.precipitation_probability[i] || 0, humidity: `${data.hourly.relativehumidity_2m[i] || 65}%`, wind: `${data.hourly.windspeed_10m[i] || 12} km/h` };
+                    weatherData = { temp: `${temp}°C`, condition, icon, rainChance: data.hourly.precipitation_probability[i] || 0, wind: "12 km/h", humidity: "65%" };
                     break;
                 }
             }
@@ -777,8 +513,8 @@
         else playerProfiles[a.player] = { age: '—', position: '—', yearJoined: '—', gamesPlayed: gamesFromAttendance + opening, openingBalanceGames: 0 };
         await saveProfiles();
         await updateCaptainForCurrentWeek();
-        renderAllPages();
-        updateHero();
+        renderAll();
+        updateHeroUI();
     }
     async function saveComment(gameDate, author, text) {
         const comment = { gameDate, author, text, timestamp: Date.now() };
@@ -805,16 +541,23 @@
     function adminLogin(pw) { if(pw === "admin123") { currentUser = { name: "Admin", role: "admin" }; isAdminLoggedIn = true; localStorage.setItem("soccer_user", JSON.stringify(currentUser)); renderApp(); return true; } return false; }
     function logout() { currentUser = null; localStorage.removeItem("soccer_user"); renderLogin(); }
     async function setAttendance(status) {
-        if (!currentUser) return;
+        if (!currentUser) { alert("Please login first"); return; }
         const currentWeek = getFutureWeeks()[0];
-        if (!currentWeek) { alert("No upcoming matches scheduled"); return; }
+        if (!currentWeek) { alert("No upcoming matches"); return; }
         await saveAttendance({ player: currentUser.name, gameDate: currentWeek.dateStr, status: status });
     }
     
+    // Profile Edit Modal
     function showEditProfileModal(playerName) {
-        const existing = playerProfiles[playerName] || { age: '', position: POSITIONS[0], yearJoined: '', gamesPlayed: 0, openingBalanceGames: 0 };
+        const existing = playerProfiles[playerName] || { age: '', position: POSITIONS[0], yearJoined: '', openingBalanceGames: 0 };
         const modalDiv = document.createElement('div'); modalDiv.className = 'modal';
-        modalDiv.innerHTML = `<div class="modal-content"><h3>✏️ Edit Profile</h3><label>Name</label><input id="editName" value="${escapeHtml(playerName)}"><label>Age</label><input id="editAge" value="${escapeHtml(existing.age || '')}"><label>Position</label><select id="editPosition">${POSITIONS.map(p => `<option ${existing.position === p ? 'selected' : ''}>${p}</option>`).join('')}</select><label>Year Joined</label><input id="editYear" value="${escapeHtml(existing.yearJoined || '')}"><label>Opening Games</label><input id="editOpeningGames" type="number" value="${existing.openingBalanceGames || 0}"><div class="flex-btns"><button id="saveBtn">Save</button><button id="cancelBtn" class="btn-outline">Cancel</button></div></div>`;
+        modalDiv.innerHTML = `<div class="modal-content"><h3 style="margin-bottom:12px;">✏️ Edit Profile</h3>
+            <label>Name</label><input id="editName" value="${escapeHtml(playerName)}">
+            <label>Age</label><input id="editAge" value="${escapeHtml(existing.age || '')}">
+            <label>Position</label><select id="editPosition">${POSITIONS.map(p => `<option ${existing.position === p ? 'selected' : ''}>${p}</option>`).join('')}</select>
+            <label>Year Joined</label><input id="editYear" value="${escapeHtml(existing.yearJoined || '')}">
+            <label>🏆 Opening Games (history)</label><input id="editOpeningGames" type="number" value="${existing.openingBalanceGames || 0}">
+            <div class="flex-btns"><button id="saveBtn">Save</button><button id="cancelBtn" class="btn-outline">Cancel</button></div></div>`;
         document.body.appendChild(modalDiv);
         document.getElementById('saveBtn').onclick = async () => {
             const newName = document.getElementById('editName').value.trim();
@@ -839,21 +582,21 @@
             }
             await saveProfiles();
             modalDiv.remove();
-            renderAllPages();
+            renderAll();
         };
         document.getElementById('cancelBtn').onclick = () => modalDiv.remove();
     }
     
     // Page Renderers
     function renderProfilesPage() {
-        let html = `<div class="card"><h2>👤 Player Profiles</h2><div class="profile-grid">`;
+        let html = `<div class="card"><h2>👤 Player Profiles</h2>`;
         for(let player of players) {
             const p = playerProfiles[player] || { age: '—', position: '—', yearJoined: '—', gamesPlayed: 0 };
             const canEdit = (currentUser?.name === player) || isAdminLoggedIn;
-            html += `<div class="profile-item"><div class="profile-header"><div class="profile-name">⚽ ${escapeHtml(player)}</div>${canEdit ? `<button class="edit-profile-btn" data-player="${escapeHtml(player)}" style="padding:6px 12px; font-size:12px;">Edit</button>` : ''}</div>
+            html += `<div class="profile-item"><div class="profile-header"><div class="profile-name">⚽ ${escapeHtml(player)}</div>${canEdit ? `<button class="edit-profile-btn" data-player="${escapeHtml(player)}" style="padding:6px 14px; font-size:12px;">Edit</button>` : ''}</div>
                 <div class="profile-details"><span class="profile-badge">🎂 ${escapeHtml(p.age)}</span><span class="profile-badge">⚽ ${escapeHtml(p.position)}</span><span class="profile-badge">📅 ${escapeHtml(p.yearJoined)}</span><span class="profile-badge">🏆 ${p.gamesPlayed || 0} games</span></div></div>`;
         }
-        html += `</div></div>`;
+        html += `</div>`;
         document.getElementById("page-profiles").innerHTML = html;
         document.querySelectorAll(".edit-profile-btn").forEach(btn => btn.addEventListener("click", () => showEditProfileModal(btn.dataset.player)));
     }
@@ -865,11 +608,14 @@
         for(let match of Object.values(matchResults)) if(match.goals) for(let [scorer, count] of Object.entries(match.goals)) if(stats.has(scorer)) stats.get(scorer).goals += count;
         const topGoals = Array.from(stats.entries()).map(([n,s]) => ({ name:n, goals:s.goals })).sort((a,b)=>b.goals - a.goals).slice(0,8);
         const topApps = Array.from(stats.entries()).map(([n,s]) => ({ name:n, apps:s.appearances + (playerProfiles[n]?.openingBalanceGames||0) })).sort((a,b)=>b.apps - a.apps).slice(0,8);
-        document.getElementById("page-scoreboard").innerHTML = `<div class="card"><h2>🏆 Leaderboard</h2><div><h3>⚽ Top Scorers</h3><table class="data-table">${topGoals.map((p,i)=>`<tr><td>${i+1}</td><td><strong>${escapeHtml(p.name)}</strong></td><td>${p.goals} goals</td>`).join('')}</table></div><div style="margin-top:12px;"><h3>🏃 Most Games</h3><table class="data-table">${topApps.map((p,i)=>`<tr><td>${i+1}</td><td><strong>${escapeHtml(p.name)}</strong></td><td>${p.apps} games</td>`).join('')}</table></div></div>`;
+        document.getElementById("page-scoreboard").innerHTML = `<div class="card"><h2>🏆 Leaderboard</h2><div><h3>⚽ Top Scorers</h3><table class="data-table">${topGoals.map((p,i)=>`<tr><td><strong>${i+1}</strong></td><td>${escapeHtml(p.name)}</td><td><strong>${p.goals}</strong> goals</td>`).join('')}</table></div><div style="margin-top:16px;"><h3>🏃 Most Games</h3><table class="data-table">${topApps.map((p,i)=>`<tr><td><strong>${i+1}</strong></td><td>${escapeHtml(p.name)}</td><td><strong>${p.apps}</strong> games</td>`).join('')}</table></div></div>`;
     }
     
     function renderFinancePage() {
-        if (!isAdminLoggedIn) { document.getElementById("page-finance").innerHTML = `<div class="card"><h2>💰 Finance</h2><p>🔒 Admin only</p></div>`; return; }
+        if (!isAdminLoggedIn) { document.getElementById("page-finance").innerHTML = `<div class="card"><h2>💰 Finance</h2><p>🔒 Admin only</p><button id="adminHintBtn" class="btn-outline" style="margin-top:10px;">Admin Login</button></div>`;
+            document.getElementById("adminHintBtn")?.addEventListener("click", () => logout());
+            return;
+        }
         const currentWeek = getFutureWeeks()[0];
         const totalCollected = payments.reduce((sum, p) => sum + 5, 0);
         let debts = [];
@@ -889,7 +635,7 @@
             }
             html += `</tbody></table>`;
         }
-        html += `<h3>📜 Outstanding Debts</h3><table class="data-table">${debts.map(d=>`<tr><td>${escapeHtml(d.player)}</td><td class="badge-owing">$${d.debt}</td></tr>`).join('')||'<tr><td colspan="2">No debts! 🎉</td></tr>'}</table></div>`;
+        html += `<h3>📜 Outstanding Debts</h3><table class="data-table">${debts.map(d=>`<tr><td>${escapeHtml(d.player)}</td><td class="badge-owing">$${d.debt}</td>`).join('')||'<tr><td colspan="2">No debts! 🎉</td></tr>'}</table></div>`;
         document.getElementById("page-finance").innerHTML = html;
         document.querySelectorAll(".markPaidBtn").forEach(btn => btn.addEventListener("click", async () => { await savePayment({ player: btn.dataset.player, gameDate: btn.dataset.date, amount: 5 }); renderFinancePage(); }));
     }
@@ -899,27 +645,28 @@
         if (!weeks.length) { document.getElementById("page-teamselect").innerHTML = `<div class="card"><h2>⚽ Team Selection</h2><p>No upcoming games</p></div>`; return; }
         const week = weeks[0];
         const signed = attendance.filter(a => a.gameDate === week.dateStr && a.status === 'in').map(a => a.player);
-        let html = `<div class="card"><h2>⚽ Team Selection for ${week.label}</h2><div class="captain-card"><i class="fas fa-crown"></i> Captain: <strong>${weeklyCaptain}</strong><br><small>Only attending players can be captain</small></div>`;
+        let html = `<div class="card"><h2>⚽ Team Selection for ${week.label}</h2><div class="captain-note"><i class="fas fa-crown"></i> Captain: <strong>${weeklyCaptain}</strong><br>Only attending players can be captain</div>`;
         if(currentUser?.name === weeklyCaptain || isAdminLoggedIn) {
-            html += `<button id="autoAssignBtn" class="btn-outline" style="margin-bottom:12px;">🎲 Auto-Balance</button><div id="teamAssignList"></div><button id="saveTeamsBtn">💾 Save Teams</button>`;
+            html += `<button id="autoAssignBtn" class="btn-outline" style="margin-bottom:12px;">🎲 Auto-Balance Teams</button><div id="teamAssignList"></div><button id="saveTeamsBtn">💾 Save Team Assignments</button>`;
         } else {
             const assignments = teamAssignments[week.dateStr] || {};
             const yellow = Object.keys(assignments).filter(p => assignments[p] === "yellow");
             const orange = Object.keys(assignments).filter(p => assignments[p] === "orange");
-            html += `<div class="rule-box">Only ${weeklyCaptain} or admin can assign teams.</div><div class="teams-flex"><div class="team-card-mini"><div class="team-name-yellow">🟡 YELLOW</div><div class="player-list-mini">${yellow.map(p=>`<span class="player-badge-mini">${escapeHtml(p)}</span>`).join('') || '—'}</div></div>
-                <div class="team-card-mini"><div class="team-name-orange">🟠 ORANGE</div><div class="player-list-mini">${orange.map(p=>`<span class="player-badge-mini">${escapeHtml(p)}</span>`).join('') || '—'}</div></div></div>`;
+            html += `<div style="background:#fef3c7; padding:12px; border-radius:16px; margin-bottom:12px;">Only ${weeklyCaptain} or admin can assign teams.</div>
+                <div class="team-row"><div class="team-box"><div class="team-yellow">🟡 YELLOW</div><div class="player-list">${yellow.map(p=>`<span class="player-tag">${escapeHtml(p)}</span>`).join('') || '—'}</div></div>
+                <div class="team-box"><div class="team-orange">🟠 ORANGE</div><div class="player-list">${orange.map(p=>`<span class="player-tag">${escapeHtml(p)}</span>`).join('') || '—'}</div></div></div>`;
         }
         html += `</div>`;
         document.getElementById("page-teamselect").innerHTML = html;
         if(currentUser?.name === weeklyCaptain || isAdminLoggedIn) {
             if(!teamAssignments[week.dateStr]) teamAssignments[week.dateStr] = {};
             const renderList = () => {
-                let listHtml = `<h3>Assign Players:</h3>`;
+                let listHtml = `<h3 style="margin:12px 0 8px;">Assign Players:</h3>`;
                 for(let player of signed) {
                     const current = teamAssignments[week.dateStr][player] || "";
-                    listHtml += `<div style="display:flex; justify-content:space-between; margin:8px 0; background:#f1f5f9; border-radius:60px; padding:8px 12px;">
+                    listHtml += `<div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0; background:#f1f5f9; border-radius:60px; padding:8px 16px;">
                         <span><strong>${escapeHtml(player)}</strong></span>
-                        <select class="team-select" data-player="${escapeHtml(player)}"><option value="">—</option><option value="yellow" ${current==="yellow"?"selected":""}>🟡 Yellow</option><option value="orange" ${current==="orange"?"selected":""}>🟠 Orange</option></select></div>`;
+                        <select class="team-select" data-player="${escapeHtml(player)}" style="width:130px; margin:0;"><option value="">—</option><option value="yellow" ${current==="yellow"?"selected":""}>🟡 Yellow</option><option value="orange" ${current==="orange"?"selected":""}>🟠 Orange</option></select></div>`;
                 }
                 document.getElementById("teamAssignList").innerHTML = listHtml;
                 document.querySelectorAll(".team-select").forEach(sel => sel.addEventListener("change", () => { teamAssignments[week.dateStr][sel.dataset.player] = sel.value; }));
@@ -934,7 +681,7 @@
         const past = getPastWeeks();
         if (!past.length) { document.getElementById("page-history").innerHTML = `<div class="card"><h2>📖 Match History</h2><p>No past games</p></div>`; return; }
         let html = `<div class="card"><h2>📖 Match History</h2></div>`;
-        for (let week of past.slice(0, 10)) {
+        for (let week of past.slice(0, 8)) {
             const assignments = teamAssignments[week.dateStr] || {};
             const yellow = Object.keys(assignments).filter(p => assignments[p] === "yellow");
             const orange = Object.keys(assignments).filter(p => assignments[p] === "orange");
@@ -944,11 +691,11 @@
             for (let [player, count] of Object.entries(goals)) if (count>0) { if(yellow.includes(player)) yellowGoals.push({player,count}); else if(orange.includes(player)) orangeGoals.push({player,count}); }
             const comments = matchComments[week.dateStr] || [];
             const safeId = week.dateStr.replace(/-/g, '');
-            html += `<div class="match-card"><div class="match-header"><div class="match-date">${week.label}</div><div class="match-result-badge">🟡 ${match.yellowScore} - ${match.orangeScore} 🟠</div></div>
-                <div class="teams-section"><div class="teams-flex"><div class="team-card-mini"><div class="team-name-yellow">🟡 YELLOW</div><div class="player-list-mini">${yellow.map(p=>`<span class="player-badge-mini">${escapeHtml(p)}</span>`).join('')}</div></div>
-                <div class="team-card-mini"><div class="team-name-orange">🟠 ORANGE</div><div class="player-list-mini">${orange.map(p=>`<span class="player-badge-mini">${escapeHtml(p)}</span>`).join('')}</div></div></div><div class="score-display-big">${match.yellowScore} - ${match.orangeScore}</div></div>
-                <div class="goals-section"><div class="goals-title">⚽ Goals</div><div class="goals-list">${yellowGoals.map(g=>`<div class="goal-item">🟡 ${g.player} ×${g.count}</div>`).join('')}${orangeGoals.map(g=>`<div class="goal-item">🟠 ${g.player} ×${g.count}</div>`).join('')}</div></div>
-                <div class="comments-section"><div>💬 Comments</div><div id="comments-${safeId}">${comments.map(c=>`<div class="comment-item"><strong>${escapeHtml(c.author)}</strong><div>${escapeHtml(c.text)}</div></div>`).join('')||'<div>No comments</div>'}</div>
+            html += `<div class="match-card"><div class="match-header"><div class="match-date">${week.label}</div><div class="match-result">🟡 ${match.yellowScore} - ${match.orangeScore} 🟠</div></div>
+                <div class="teams-section"><div class="team-row"><div class="team-box"><div class="team-yellow">🟡 YELLOW</div><div class="player-list">${yellow.map(p=>`<span class="player-tag">${escapeHtml(p)}</span>`).join('')}</div></div>
+                <div class="team-box"><div class="team-orange">🟠 ORANGE</div><div class="player-list">${orange.map(p=>`<span class="player-tag">${escapeHtml(p)}</span>`).join('')}</div></div></div><div class="score-big">${match.yellowScore} - ${match.orangeScore}</div></div>
+                <div class="goals-section"><div class="goals-list">${yellowGoals.map(g=>`<div class="goal-badge">🟡 ${g.player} ×${g.count}</div>`).join('')}${orangeGoals.map(g=>`<div class="goal-badge">🟠 ${g.player} ×${g.count}</div>`).join('')}</div></div>
+                <div class="comments-section"><div>💬 Comments</div><div id="comments-${safeId}">${comments.map(c=>`<div class="comment-item"><strong>${escapeHtml(c.author)}</strong><br>${escapeHtml(c.text)}</div>`).join('')||'<div>No comments</div>'}</div>
                 <div class="add-comment"><input id="commentInput-${safeId}" placeholder="Add comment..."><button onclick="window.addComment('${week.dateStr}')">Comment</button></div></div></div>`;
         }
         document.getElementById("page-history").innerHTML = html;
@@ -961,7 +708,7 @@
     function renderRSVPage() {
         const weeks = getFutureWeeks();
         if (!weeks.length) { document.getElementById("page-rsvp").innerHTML = `<div class="card"><h2>📋 RSVP</h2><p>No upcoming matches</p></div>`; return; }
-        document.getElementById("page-rsvp").innerHTML = `<div class="card"><h2>📋 RSVP</h2><select id="rsvpWeek">${weeks.map(w=>`<option value="${w.dateStr}">${w.label}</option>`)}</select><select id="rsvpPlayer"><option>-- My Name --</option>${players.map(p=>`<option>${escapeHtml(p)}</option>`)}</select><div class="flex-btns"><button id="rsvpYesBtn">✅ I'm Playing</button><button id="rsvpNoBtn">❌ Can't Play</button></div><div id="rsvpMsg"></div></div><div class="card"><h2>Signed Players</h2><div id="attendeesList"></div></div>`;
+        document.getElementById("page-rsvp").innerHTML = `<div class="card"><h2>📋 RSVP for Next Match</h2><select id="rsvpWeek">${weeks.map(w=>`<option value="${w.dateStr}">${w.label}</option>`)}</select><select id="rsvpPlayer"><option>-- My Name --</option>${players.map(p=>`<option>${escapeHtml(p)}</option>`)}</select><div class="flex-btns"><button id="rsvpYesBtn">✅ I'm Playing</button><button id="rsvpNoBtn">❌ Can't Play</button></div><div id="rsvpMsg"></div></div><div class="card"><h2>Signed Players This Week</h2><div id="attendeesList"></div></div>`;
         document.getElementById("rsvpYesBtn").onclick = async () => { const p = document.getElementById("rsvpPlayer").value; const w = document.getElementById("rsvpWeek").value; if(p && p !== "-- My Name --") { await saveAttendance({player:p, gameDate:w, status:"in"}); renderRSVPage(); renderProfilesPage(); } };
         document.getElementById("rsvpNoBtn").onclick = async () => { const p = document.getElementById("rsvpPlayer").value; const w = document.getElementById("rsvpWeek").value; if(p) { await saveAttendance({player:p, gameDate:w, status:"out"}); renderRSVPage(); } };
         document.getElementById("rsvpWeek").onchange = () => { const week = document.getElementById("rsvpWeek").value; const attending = attendance.filter(a => a.gameDate === week && a.status === 'in').map(a=>a.player); document.getElementById("attendeesList").innerHTML = `<div class="attendee-tags">${attending.map(p=>`<span class="attendee-tag">${escapeHtml(p)}</span>`).join('')||'<span>None'}</div>`; };
@@ -970,37 +717,33 @@
     }
     
     function renderWeatherPage() {
-        const nextMonday = new Date(); nextMonday.setDate(nextMonday.getDate() + ((1 + 7 - nextMonday.getDay()) % 7)); nextMonday.setHours(20,0,0,0);
-        const formatted = nextMonday.toLocaleString('en-AU', { weekday:'long', day:'numeric', month:'long', hour:'2-digit', minute:'2-digit' });
-        document.getElementById("page-weather").innerHTML = `<div class="card"><h2>🌤️ Match Forecast</h2><div class="weather-card"><div style="text-align:center;"><i class="fas ${weatherData.icon}" style="font-size:48px;"></i><h3>${weatherData.condition}</h3><h1 style="font-size:48px;">${weatherData.temp}</h1><p>🌧️ Rain: ${weatherData.rainChance}% | 💨 Wind: ${weatherData.wind} | 💧 Humidity: ${weatherData.humidity}</p><hr style="margin:12px 0;"><p><strong>${formatted}</strong><br>8:00pm AEST • Clifton Park, Brunswick</p></div></div></div>`;
+        const nextMonday = new Date(); nextMonday.setDate(nextMonday.getDate() + ((1 + 7 - nextMonday.getDay()) % 7));
+        const formatted = nextMonday.toLocaleDateString('en-AU', { weekday:'long', day:'numeric', month:'long' });
+        document.getElementById("page-weather").innerHTML = `<div class="card"><h2>🌤️ Match Forecast</h2><div class="weather-card"><div style="text-align:center;"><i class="fas ${weatherData.icon}" style="font-size:56px;"></i><h3 style="margin:8px 0;">${weatherData.condition}</h3><h1 style="font-size:52px;">${weatherData.temp}</h1><p>🌧️ Rain: ${weatherData.rainChance}%</p><hr style="margin:16px 0; opacity:0.3;"><p><strong>${formatted}</strong><br>8:00pm AEST • Clifton Park, Brunswick</p></div></div></div>`;
     }
     
     function renderChatPage() {
-        document.getElementById("page-chat").innerHTML = `<div class="card"><h2>💬 Live Chat</h2><div id="chatMsgs" style="height:350px; overflow-y:auto; background:#f8fafc; border-radius:16px; padding:12px;"></div><div style="display:flex; gap:8px; margin-top:12px;"><input id="chatInput" placeholder="Type..."><button id="chatSendBtn">Send</button></div></div>`;
-        if(db) db.collection("messages").orderBy("timestamp","asc").onSnapshot(snap => { const c=document.getElementById("chatMsgs"); if(!c) return; let h=""; snap.forEach(d=>{ const m=d.data(); h+=`<div style="margin-bottom:10px;"><strong>${escapeHtml(m.name)}</strong><div style="background:white; border-radius:12px; padding:8px 10px; margin-top:4px;">${escapeHtml(m.message)}</div></div>`; }); c.innerHTML=h||"<div>No messages</div>"; c.scrollTop=c.scrollHeight; });
+        document.getElementById("page-chat").innerHTML = `<div class="card"><h2>💬 Live Chat</h2><div id="chatMsgs" style="height:320px; overflow-y:auto; background:#f8fafc; border-radius:20px; padding:12px; margin-bottom:12px;"></div><div style="display:flex; gap:8px;"><input id="chatInput" placeholder="Type message..."><button id="chatSendBtn">Send</button></div></div>`;
+        if(db) db.collection("messages").orderBy("timestamp","asc").onSnapshot(snap => { const c=document.getElementById("chatMsgs"); if(!c) return; let h=""; snap.forEach(d=>{ const m=d.data(); h+=`<div style="margin-bottom:12px;"><strong>${escapeHtml(m.name)}</strong><div style="background:white; border-radius:14px; padding:8px 12px; margin-top:4px;">${escapeHtml(m.message)}</div></div>`; }); c.innerHTML=h||"<div>No messages</div>"; c.scrollTop=c.scrollHeight; });
         document.getElementById("chatSendBtn").onclick = async () => { const msg = document.getElementById("chatInput").value.trim(); if(msg && db) { await db.collection("messages").add({ name: currentUser.name, message: msg, timestamp: firebase.firestore.FieldValue.serverTimestamp() }); document.getElementById("chatInput").value = ""; } };
     }
     
-    function renderRulesPage() { document.getElementById("page-rules").innerHTML = `<div class="card"><h2>📜 Rules</h2><ul style="margin-left:20px; font-size:13px;"><li>⏰ 8:00pm SHARP kickoff</li><li>💰 $5 weekly fee - Admin collects</li><li>👑 Captain rotates - only attending players eligible</li><li>✅ RSVP is most important</li><li>🏆 Opening balance for historic games</li></ul></div>`; }
+    function renderRulesPage() { document.getElementById("page-rules").innerHTML = `<div class="card"><h2>📜 Rules</h2><ul style="margin-left:20px; font-size:14px; line-height:1.6;"><li>⏰ 8:00pm SHARP kickoff</li><li>💰 $5 weekly fee - Admin collects</li><li>👑 Captain rotates automatically - only attending players eligible</li><li>✅ RSVP is the most important action</li><li>🏆 Opening balance for 17-18 year history</li></ul></div>`; }
     
-    function updateHero() {
+    function updateHeroUI() {
         const nextWeek = getFutureWeeks()[0];
         const currentStatus = nextWeek ? attendance.find(a => a.gameDate === nextWeek.dateStr && a.player === currentUser?.name)?.status : null;
         const heroDiv = document.getElementById("heroContainer");
         if(heroDiv) {
-            heroDiv.innerHTML = `<div class="hero-attendance"><h2><i class="fas fa-futbol"></i> ${nextWeek?.label || "This Monday"} • 8pm</h2><div class="kickoff">Clifton Park, Brunswick</div><div class="attendance-buttons"><button id="heroPlayBtn" class="btn-play">✅ I'M PLAYING</button><button id="heroSitBtn" class="btn-sit">❌ CAN'T PLAY</button></div><div style="margin-top:8px; font-size:12px;">${currentStatus === 'in' ? '✓ You are PLAYING' : (currentStatus === 'out' ? '✗ You are NOT PLAYING' : 'Tap above to set attendance')}</div></div>`;
-            const playBtn = document.getElementById("heroPlayBtn");
-            const sitBtn = document.getElementById("heroSitBtn");
-            if(playBtn) playBtn.addEventListener("click", () => setAttendance("in"));
-            if(sitBtn) sitBtn.addEventListener("click", () => setAttendance("out"));
+            heroDiv.innerHTML = `<div class="attendance-card"><h2><i class="fas fa-futbol"></i> ${nextWeek?.label || "This Monday"} • 8pm</h2><div class="venue">Clifton Park, Brunswick</div><div class="big-buttons"><button id="heroPlayBtn" class="btn-play-big">✅ I'M PLAYING</button><button id="heroSitBtn" class="btn-sit-big">❌ CAN'T PLAY</button></div><div class="status-text">${currentStatus === 'in' ? '✓ You are PLAYING' : (currentStatus === 'out' ? '✗ You are NOT PLAYING' : 'Tap above to set your attendance')}</div></div>`;
+            document.getElementById("heroPlayBtn")?.addEventListener("click", () => setAttendance("in"));
+            document.getElementById("heroSitBtn")?.addEventListener("click", () => setAttendance("out"));
         }
         const alertDiv = document.getElementById("alertContainer");
-        if(alertDiv) {
-            alertDiv.innerHTML = `<div class="alert-banner"><i class="fas fa-exclamation-triangle"></i> ${weeklyCaptain} is this week's Captain! Only attending players can be captain</div>`;
-        }
+        if(alertDiv) alertDiv.innerHTML = `<div class="captain-banner"><i class="fas fa-crown"></i> ${weeklyCaptain} is this week's Captain! Only attending players can be captain</div>`;
     }
     
-    function renderAllPages() {
+    function renderAll() {
         renderProfilesPage();
         renderScoreboardPage();
         renderTeamSelectPage();
@@ -1010,37 +753,23 @@
         renderChatPage();
         renderFinancePage();
         renderRulesPage();
-        updateHero();
+        updateHeroUI();
     }
     
-    function initTabs() {
-        const tabs = [
-            { id: "profiles", icon: "fa-id-card", label: "Profile" },
-            { id: "scoreboard", icon: "fa-trophy", label: "Stats" },
-            { id: "teamselect", icon: "fa-users", label: "Teams" },
-            { id: "history", icon: "fa-history", label: "History" },
-            { id: "rsvp", icon: "fa-calendar", label: "RSVP" },
-            { id: "weather", icon: "fa-cloud-sun", label: "Weather" },
-            { id: "chat", icon: "fa-comments", label: "Chat" },
-            { id: "finance", icon: "fa-dollar-sign", label: "Finance" },
-            { id: "rules", icon: "fa-book", label: "Rules" }
-        ];
-        const bar = document.getElementById("bottomTabBar");
-        if(bar) {
-            bar.innerHTML = tabs.map(t => `<button class="tab-item" data-page="${t.id}"><i class="fas ${t.icon}"></i><span>${t.label}</span></button>`).join('');
-            document.querySelectorAll(".tab-item").forEach(btn => {
-                btn.addEventListener("click", () => {
-                    const pageId = btn.dataset.page;
-                    document.querySelectorAll(".page").forEach(p => p.classList.remove("active-page"));
-                    const targetPage = document.getElementById(`page-${pageId}`);
-                    if(targetPage) targetPage.classList.add("active-page");
-                    document.querySelectorAll(".tab-item").forEach(b => b.classList.remove("active"));
-                    btn.classList.add("active");
-                });
+    function initNavigation() {
+        const pages = ["profiles", "scoreboard", "teamselect", "history", "rsvp", "weather", "chat", "finance", "rules"];
+        pages.forEach(pageId => {
+            const btn = document.getElementById(`nav-${pageId}`);
+            if(btn) btn.addEventListener("click", () => {
+                document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+                document.getElementById(`page-${pageId}`).classList.add("active");
+                document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+                btn.classList.add("active");
             });
-            const firstTab = document.querySelector(".tab-item");
-            if(firstTab) firstTab.click();
-        }
+        });
+        // Default first page
+        const firstBtn = document.getElementById("nav-profiles");
+        if(firstBtn) firstBtn.click();
     }
     
     function escapeHtml(str) { return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
@@ -1048,16 +777,16 @@
     async function renderApp() {
         await loadData();
         await fetchMelbourneWeather();
-        const wrapper = document.getElementById("appWrapper");
+        const wrapper = document.getElementById("app");
         wrapper.innerHTML = `
-            <div class="app-header">
+            <div class="header">
                 <div class="logo-icon"><i class="fas fa-futbol"></i></div>
                 <h1>MONDAY NIGHT SOCCER</h1>
-                <div class="user-badge"><i class="fas fa-user-circle"></i> <span id="userNameSpan">${currentUser.role === "admin" ? "ADMIN" : currentUser.name}</span> <button id="logoutBtnMain">Exit</button></div>
+                <div class="user-row"><i class="fas fa-user-circle"></i> <strong>${currentUser.role === "admin" ? "ADMIN" : currentUser.name}</strong> <button id="logoutBtnMain">Exit</button></div>
             </div>
             <div id="heroContainer"></div>
             <div id="alertContainer"></div>
-            <div class="page-container" id="pageContainer">
+            <div class="content" id="contentArea">
                 <div id="page-profiles" class="page"></div>
                 <div id="page-scoreboard" class="page"></div>
                 <div id="page-teamselect" class="page"></div>
@@ -1068,30 +797,40 @@
                 <div id="page-finance" class="page"></div>
                 <div id="page-rules" class="page"></div>
             </div>
-            <div class="bottom-tab-bar" id="bottomTabBar"></div>
+            <div class="bottom-nav">
+                <button class="nav-item" id="nav-profiles"><i class="fas fa-id-card"></i><span>Profile</span></button>
+                <button class="nav-item" id="nav-scoreboard"><i class="fas fa-trophy"></i><span>Stats</span></button>
+                <button class="nav-item" id="nav-teamselect"><i class="fas fa-users"></i><span>Teams</span></button>
+                <button class="nav-item" id="nav-history"><i class="fas fa-history"></i><span>History</span></button>
+                <button class="nav-item" id="nav-rsvp"><i class="fas fa-calendar"></i><span>RSVP</span></button>
+                <button class="nav-item" id="nav-weather"><i class="fas fa-cloud-sun"></i><span>Weather</span></button>
+                <button class="nav-item" id="nav-chat"><i class="fas fa-comments"></i><span>Chat</span></button>
+                <button class="nav-item" id="nav-finance"><i class="fas fa-dollar-sign"></i><span>Finance</span></button>
+                <button class="nav-item" id="nav-rules"><i class="fas fa-book"></i><span>Rules</span></button>
+            </div>
         `;
         document.getElementById("logoutBtnMain").onclick = logout;
-        renderAllPages();
-        initTabs();
+        renderAll();
+        initNavigation();
     }
     
     async function renderLogin() {
         await loadData();
-        const wrapper = document.getElementById("appWrapper");
+        const wrapper = document.getElementById("app");
         wrapper.innerHTML = `
-            <div class="login-container">
-                <div style="width:56px; height:56px; background:#1a73e8; border-radius:20px; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;"><i class="fas fa-futbol" style="font-size:28px; color:white;"></i></div>
-                <h2>Monday Night Soccer</h2>
-                <p style="margin-bottom:16px;">8pm Kickoff • Clifton Park, Brunswick</p>
-                <select id="playerSelectLogin">
+            <div class="login-box">
+                <div style="width:60px; height:60px; background:#1a73e8; border-radius:24px; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;"><i class="fas fa-futbol" style="font-size:30px; color:white;"></i></div>
+                <h2 style="margin-bottom:8px;">Monday Night Soccer</h2>
+                <p style="margin-bottom:20px; color:#64748b;">8pm Kickoff • Clifton Park</p>
+                <select id="playerSelectLogin" style="margin-bottom:12px;">
                     <option>-- Select Player --</option>
                     ${players.map(p=>`<option>${escapeHtml(p)}</option>`).join('')}
                 </select>
-                <button id="playerLoginBtn" style="width:100%; margin-top:8px;">Enter as Player</button>
+                <button id="playerLoginBtn" style="width:100%; margin-bottom:16px;">Enter as Player</button>
                 <hr style="margin:16px 0;">
                 <input type="password" id="adminPwLogin" placeholder="Admin Password">
-                <button id="adminLoginBtn" style="width:100%; margin-top:8px;">Admin Login</button>
-                <div id="loginErr" style="color:red; margin-top:12px;"></div>
+                <button id="adminLoginBtn" style="width:100%; margin-top:10px;">Admin Login</button>
+                <div id="loginErr" style="color:#dc3545; margin-top:12px;"></div>
             </div>
         `;
         document.getElementById("playerLoginBtn").onclick = () => {
