@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="format-detection" content="telephone=no">
     <title>Monday Night Soccer | 8pm</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -26,7 +25,6 @@
             min-height: 100vh;
         }
 
-        /* iPhone-optimized wrapper */
         .app {
             max-width: 500px;
             margin: 0 auto;
@@ -40,68 +38,90 @@
         /* Header */
         .header {
             background: white;
-            padding: 18px 20px;
+            padding: 14px 20px;
             text-align: center;
             border-bottom: 1px solid #e2e8f0;
         }
         .logo-icon {
-            width: 52px;
-            height: 52px;
+            width: 44px;
+            height: 44px;
             background: #1a73e8;
-            border-radius: 24px;
+            border-radius: 18px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
-        .logo-icon i { font-size: 26px; color: white; }
-        .header h1 { font-size: 22px; font-weight: 800; color: #1e293b; letter-spacing: -0.3px; }
+        .logo-icon i { font-size: 22px; color: white; }
+        .header h1 { font-size: 18px; font-weight: 800; color: #1e293b; }
         .user-row {
             background: #f1f5f9;
-            padding: 8px 16px;
+            padding: 5px 12px;
             border-radius: 60px;
             display: inline-flex;
             align-items: center;
-            gap: 12px;
-            margin-top: 10px;
-            font-size: 14px;
+            gap: 8px;
+            margin-top: 6px;
+            font-size: 12px;
             font-weight: 500;
         }
         .user-row button {
             background: #dc3545;
             border: none;
-            padding: 6px 16px;
+            padding: 4px 12px;
             border-radius: 40px;
             color: white;
             font-weight: 600;
-            font-size: 13px;
+            font-size: 11px;
         }
 
-        /* Big Attendance Card */
+        /* Top Navigation - Independent Tabs */
+        .top-nav {
+            background: white;
+            padding: 10px 12px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 6px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .nav-module {
+            background: #f8fafc;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 60px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .nav-module i { font-size: 14px; }
+        .nav-module.active {
+            background: #1a73e8;
+            color: white;
+        }
+        .nav-module:active { transform: scale(0.96); }
+
+        /* HOME PAGE - Attendance only (shown once) */
+        .home-page {
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+        }
         .attendance-card {
             background: linear-gradient(135deg, #1a73e8, #0d5bbf);
             color: white;
-            margin: 16px 16px 12px 16px;
-            padding: 24px 20px;
             border-radius: 32px;
+            padding: 28px 20px;
             text-align: center;
         }
-        .attendance-card h2 {
-            font-size: 24px;
-            margin-bottom: 4px;
-            font-weight: 800;
-        }
-        .attendance-card .venue {
-            font-size: 14px;
-            opacity: 0.9;
-            margin-bottom: 16px;
-        }
-        .big-buttons {
-            display: flex;
-            gap: 14px;
-            justify-content: center;
-            margin: 16px 0 8px;
-        }
+        .attendance-card h2 { font-size: 24px; margin-bottom: 6px; font-weight: 800; }
+        .attendance-card .venue { font-size: 14px; opacity: 0.9; margin-bottom: 20px; }
+        .big-buttons { display: flex; gap: 14px; justify-content: center; margin: 16px 0 12px; }
         .btn-play-big {
             background: #28a745;
             flex: 1;
@@ -128,67 +148,36 @@
         }
         .status-text {
             font-size: 14px;
-            margin-top: 10px;
             background: rgba(255,255,255,0.2);
             display: inline-block;
-            padding: 6px 16px;
+            padding: 6px 18px;
             border-radius: 60px;
+            margin-top: 8px;
         }
-
-        /* Captain Banner */
         .captain-banner {
             background: linear-gradient(90deg, #ff4757, #ff6b6b);
             color: white;
-            padding: 12px 16px;
+            padding: 10px;
             text-align: center;
             font-weight: 700;
-            font-size: 14px;
-            margin: 0 16px 12px 16px;
+            font-size: 13px;
+            margin-top: 16px;
             border-radius: 60px;
             animation: pulse 1.5s infinite;
         }
         @keyframes pulse { 0% { opacity: 0.9; } 50% { opacity: 1; background: #ff4757; } 100% { opacity: 0.9; } }
 
-        /* Bottom Navigation */
-        .bottom-nav {
-            background: rgba(255, 255, 255, 0.96);
-            backdrop-filter: blur(10px);
-            border-top: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 12px 18px;
-            margin-top: auto;
-        }
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 8px 12px;
-            border-radius: 40px;
-            color: #94a3b8;
-            font-size: 11px;
-            font-weight: 500;
-            flex: 1;
-            transition: all 0.2s;
-        }
-        .nav-item i { font-size: 24px; }
-        .nav-item.active { color: #1a73e8; background: #e8f0fe; }
-        .nav-item:active { transform: scale(0.94); }
-
-        /* Content Area */
-        .content {
+        /* Module Content Area - Independent pages */
+        .module-container {
             flex: 1;
             overflow-y: auto;
-            padding: 0 16px 16px 16px;
+            padding: 16px;
             -webkit-overflow-scrolling: touch;
+            display: none;
         }
-        .page { display: none; }
-        .page.active { display: block; animation: fadeIn 0.25s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .module-container.active-module {
+            display: block;
+        }
 
         /* Cards */
         .card {
@@ -207,7 +196,6 @@
         }
         .card h3 { font-size: 15px; font-weight: 600; margin: 12px 0 8px; }
 
-        /* Profile List */
         .profile-item {
             background: #f8fafc;
             border-radius: 20px;
@@ -236,14 +224,7 @@
             font-size: 12px;
             font-weight: 600;
         }
-        .edit-btn {
-            background: #475569;
-            padding: 6px 14px;
-            font-size: 12px;
-            border-radius: 40px;
-        }
 
-        /* Match Cards */
         .match-card {
             background: white;
             border-radius: 24px;
@@ -311,7 +292,6 @@
         .badge-paid { background: #28a745; color: white; border-radius: 40px; padding: 4px 12px; font-size: 11px; }
         .badge-owing { background: #dc3545; color: white; border-radius: 40px; padding: 4px 12px; font-size: 11px; }
         .weather-card { background: linear-gradient(135deg, #0f2027, #203a43); color: white; border-radius: 24px; padding: 20px; text-align: center; }
-        .captain-note { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 20px; padding: 14px; margin-bottom: 14px; text-align: center; font-size: 14px; }
         
         .modal {
             position: fixed;
@@ -344,8 +324,7 @@
         }
         
         @media (max-width: 450px) {
-            .nav-item span { font-size: 10px; }
-            .nav-item i { font-size: 22px; }
+            .nav-module { padding: 6px 12px; font-size: 11px; }
             .btn-play-big, .btn-sit-big { font-size: 16px; padding: 14px 16px; }
         }
     </style>
@@ -383,9 +362,8 @@
     let lastRotationWeek = "";
     const teamCaptainsOrder = ["Carlo", "Charlie", "Chris Del Monaco", "Danny", "David", "Frank", "James Zoumis", "Joe T", "Leo", "Marco", "Paul", "Peter", "Rocco", "Stav", "Theo", "Ali Mekawy", "George B", "Vasilis"];
     
-    let weatherData = { temp: "18°C", condition: "Clear", icon: "fa-sun", rainChance: 10, wind: "12 km/h", humidity: "65%" };
+    let weatherData = { temp: "18°C", condition: "Clear", icon: "fa-sun", rainChance: 10 };
     
-    // Refs
     const playersRef = db?.collection("config").doc("players");
     const profilesRef = db?.collection("config").doc("playerProfiles");
     const teamsRef = db?.collection("config").doc("teamAssignments");
@@ -469,7 +447,7 @@
                     else if (code === 3) { condition = "Overcast"; icon = "fa-cloud"; }
                     else if (code >= 51 && code <= 67) { condition = "Light rain"; icon = "fa-cloud-rain"; }
                     else if (code >= 80 && code <= 99) { condition = "Rain/storm"; icon = "fa-cloud-bolt"; }
-                    weatherData = { temp: `${temp}°C`, condition, icon, rainChance: data.hourly.precipitation_probability[i] || 0, wind: "12 km/h", humidity: "65%" };
+                    weatherData = { temp: `${temp}°C`, condition, icon, rainChance: data.hourly.precipitation_probability[i] || 0 };
                     break;
                 }
             }
@@ -513,8 +491,8 @@
         else playerProfiles[a.player] = { age: '—', position: '—', yearJoined: '—', gamesPlayed: gamesFromAttendance + opening, openingBalanceGames: 0 };
         await saveProfiles();
         await updateCaptainForCurrentWeek();
-        renderAll();
-        updateHeroUI();
+        renderHomePage();
+        renderProfilesPage(); // Update profile counts
     }
     async function saveComment(gameDate, author, text) {
         const comment = { gameDate, author, text, timestamp: Date.now() };
@@ -524,18 +502,6 @@
         renderHistoryPage();
     }
     async function saveCaptainRotation() { if(db && captainRef) await captainRef.set({ index: currentCaptainIndex, captain: weeklyCaptain, lastWeek: lastRotationWeek }); }
-    
-    function autoAssignTeams(weekDate) {
-        const signed = attendance.filter(a => a.gameDate === weekDate && a.status === 'in').map(a => a.player);
-        if (signed.length === 0) return;
-        const shuffled = [...signed];
-        for (let i = shuffled.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; }
-        const mid = Math.ceil(shuffled.length / 2);
-        if (!teamAssignments[weekDate]) teamAssignments[weekDate] = {};
-        shuffled.slice(0, mid).forEach(p => teamAssignments[weekDate][p] = "yellow");
-        shuffled.slice(mid).forEach(p => teamAssignments[weekDate][p] = "orange");
-        saveTeams();
-    }
     
     function loginAsPlayer(name) { currentUser = { name, role: "player" }; isAdminLoggedIn = false; localStorage.setItem("soccer_user", JSON.stringify(currentUser)); renderApp(); }
     function adminLogin(pw) { if(pw === "admin123") { currentUser = { name: "Admin", role: "admin" }; isAdminLoggedIn = true; localStorage.setItem("soccer_user", JSON.stringify(currentUser)); renderApp(); return true; } return false; }
@@ -547,7 +513,6 @@
         await saveAttendance({ player: currentUser.name, gameDate: currentWeek.dateStr, status: status });
     }
     
-    // Profile Edit Modal
     function showEditProfileModal(playerName) {
         const existing = playerProfiles[playerName] || { age: '', position: POSITIONS[0], yearJoined: '', openingBalanceGames: 0 };
         const modalDiv = document.createElement('div'); modalDiv.className = 'modal';
@@ -582,12 +547,34 @@
             }
             await saveProfiles();
             modalDiv.remove();
-            renderAll();
+            renderProfilesPage();
         };
         document.getElementById('cancelBtn').onclick = () => modalDiv.remove();
     }
     
-    // Page Renderers
+    // ========== INDEPENDENT MODULE RENDERERS ==========
+    function renderHomePage() {
+        const nextWeek = getFutureWeeks()[0];
+        const currentStatus = nextWeek ? attendance.find(a => a.gameDate === nextWeek.dateStr && a.player === currentUser?.name)?.status : null;
+        const homeContainer = document.getElementById("homeContainer");
+        if(homeContainer) {
+            homeContainer.innerHTML = `
+                <div class="attendance-card">
+                    <h2><i class="fas fa-futbol"></i> ${nextWeek?.label || "This Monday"} • 8pm</h2>
+                    <div class="venue">Clifton Park, Brunswick</div>
+                    <div class="big-buttons">
+                        <button id="homePlayBtn" class="btn-play-big">✅ I'M PLAYING</button>
+                        <button id="homeSitBtn" class="btn-sit-big">❌ CAN'T PLAY</button>
+                    </div>
+                    <div class="status-text">${currentStatus === 'in' ? '✓ You are PLAYING' : (currentStatus === 'out' ? '✗ You are NOT PLAYING' : 'Tap above to set your attendance')}</div>
+                    <div class="captain-banner"><i class="fas fa-crown"></i> ${weeklyCaptain} is this week's Captain!</div>
+                </div>
+            `;
+            document.getElementById("homePlayBtn")?.addEventListener("click", () => setAttendance("in"));
+            document.getElementById("homeSitBtn")?.addEventListener("click", () => setAttendance("out"));
+        }
+    }
+    
     function renderProfilesPage() {
         let html = `<div class="card"><h2>👤 Player Profiles</h2>`;
         for(let player of players) {
@@ -604,15 +591,16 @@
     function renderScoreboardPage() {
         let stats = new Map();
         players.forEach(p => stats.set(p, { goals: 0, appearances: 0 }));
-        attendance.forEach(a => { if(a.status === 'in') stats.get(a.player).appearances++; });
+        attendance.forEach(a => { if(a.status === 'in' && stats.has(a.player)) stats.get(a.player).appearances++; });
         for(let match of Object.values(matchResults)) if(match.goals) for(let [scorer, count] of Object.entries(match.goals)) if(stats.has(scorer)) stats.get(scorer).goals += count;
         const topGoals = Array.from(stats.entries()).map(([n,s]) => ({ name:n, goals:s.goals })).sort((a,b)=>b.goals - a.goals).slice(0,8);
         const topApps = Array.from(stats.entries()).map(([n,s]) => ({ name:n, apps:s.appearances + (playerProfiles[n]?.openingBalanceGames||0) })).sort((a,b)=>b.apps - a.apps).slice(0,8);
-        document.getElementById("page-scoreboard").innerHTML = `<div class="card"><h2>🏆 Leaderboard</h2><div><h3>⚽ Top Scorers</h3><table class="data-table">${topGoals.map((p,i)=>`<tr><td><strong>${i+1}</strong></td><td>${escapeHtml(p.name)}</td><td><strong>${p.goals}</strong> goals</td>`).join('')}</table></div><div style="margin-top:16px;"><h3>🏃 Most Games</h3><table class="data-table">${topApps.map((p,i)=>`<tr><td><strong>${i+1}</strong></td><td>${escapeHtml(p.name)}</td><td><strong>${p.apps}</strong> games</td>`).join('')}</table></div></div>`;
+        document.getElementById("page-scoreboard").innerHTML = `<div class="card"><h2>🏆 Leaderboard</h2><div><h3>⚽ Top Scorers</h3><table class="data-table">${topGoals.map((p,i)=>`<tr><td>${i+1}</td><td><strong>${escapeHtml(p.name)}</strong></td><td><strong>${p.goals}</strong> goals</td>`).join('')}<table></div><div style="margin-top:16px;"><h3>🏃 Most Games</h3><table class="data-table">${topApps.map((p,i)=>`<tr><td>${i+1}</td><td><strong>${escapeHtml(p.name)}</strong></td><td><strong>${p.apps}</strong> games</td>`).join('')}</tbody></table></div></div>`;
     }
     
     function renderFinancePage() {
-        if (!isAdminLoggedIn) { document.getElementById("page-finance").innerHTML = `<div class="card"><h2>💰 Finance</h2><p>🔒 Admin only</p><button id="adminHintBtn" class="btn-outline" style="margin-top:10px;">Admin Login</button></div>`;
+        if (!isAdminLoggedIn) { 
+            document.getElementById("page-finance").innerHTML = `<div class="card"><h2>💰 Finance</h2><p>🔒 Admin only. Login with admin123</p><button id="adminHintBtn" class="btn-outline" style="margin-top:10px;">Go to Login</button></div>`;
             document.getElementById("adminHintBtn")?.addEventListener("click", () => logout());
             return;
         }
@@ -635,46 +623,9 @@
             }
             html += `</tbody></table>`;
         }
-        html += `<h3>📜 Outstanding Debts</h3><table class="data-table">${debts.map(d=>`<tr><td>${escapeHtml(d.player)}</td><td class="badge-owing">$${d.debt}</td>`).join('')||'<tr><td colspan="2">No debts! 🎉</td></tr>'}</table></div>`;
+        html += `<h3>📜 Outstanding Debts</h3><table class="data-table">${debts.map(d=>`<tr><td>${escapeHtml(d.player)}</td><td class="badge-owing">$${d.debt}</td></tr>`).join('')||'<tr><td colspan="2">No debts! 🎉</td></tr>'}</table></div>`;
         document.getElementById("page-finance").innerHTML = html;
         document.querySelectorAll(".markPaidBtn").forEach(btn => btn.addEventListener("click", async () => { await savePayment({ player: btn.dataset.player, gameDate: btn.dataset.date, amount: 5 }); renderFinancePage(); }));
-    }
-    
-    function renderTeamSelectPage() {
-        const weeks = getFutureWeeks();
-        if (!weeks.length) { document.getElementById("page-teamselect").innerHTML = `<div class="card"><h2>⚽ Team Selection</h2><p>No upcoming games</p></div>`; return; }
-        const week = weeks[0];
-        const signed = attendance.filter(a => a.gameDate === week.dateStr && a.status === 'in').map(a => a.player);
-        let html = `<div class="card"><h2>⚽ Team Selection for ${week.label}</h2><div class="captain-note"><i class="fas fa-crown"></i> Captain: <strong>${weeklyCaptain}</strong><br>Only attending players can be captain</div>`;
-        if(currentUser?.name === weeklyCaptain || isAdminLoggedIn) {
-            html += `<button id="autoAssignBtn" class="btn-outline" style="margin-bottom:12px;">🎲 Auto-Balance Teams</button><div id="teamAssignList"></div><button id="saveTeamsBtn">💾 Save Team Assignments</button>`;
-        } else {
-            const assignments = teamAssignments[week.dateStr] || {};
-            const yellow = Object.keys(assignments).filter(p => assignments[p] === "yellow");
-            const orange = Object.keys(assignments).filter(p => assignments[p] === "orange");
-            html += `<div style="background:#fef3c7; padding:12px; border-radius:16px; margin-bottom:12px;">Only ${weeklyCaptain} or admin can assign teams.</div>
-                <div class="team-row"><div class="team-box"><div class="team-yellow">🟡 YELLOW</div><div class="player-list">${yellow.map(p=>`<span class="player-tag">${escapeHtml(p)}</span>`).join('') || '—'}</div></div>
-                <div class="team-box"><div class="team-orange">🟠 ORANGE</div><div class="player-list">${orange.map(p=>`<span class="player-tag">${escapeHtml(p)}</span>`).join('') || '—'}</div></div></div>`;
-        }
-        html += `</div>`;
-        document.getElementById("page-teamselect").innerHTML = html;
-        if(currentUser?.name === weeklyCaptain || isAdminLoggedIn) {
-            if(!teamAssignments[week.dateStr]) teamAssignments[week.dateStr] = {};
-            const renderList = () => {
-                let listHtml = `<h3 style="margin:12px 0 8px;">Assign Players:</h3>`;
-                for(let player of signed) {
-                    const current = teamAssignments[week.dateStr][player] || "";
-                    listHtml += `<div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0; background:#f1f5f9; border-radius:60px; padding:8px 16px;">
-                        <span><strong>${escapeHtml(player)}</strong></span>
-                        <select class="team-select" data-player="${escapeHtml(player)}" style="width:130px; margin:0;"><option value="">—</option><option value="yellow" ${current==="yellow"?"selected":""}>🟡 Yellow</option><option value="orange" ${current==="orange"?"selected":""}>🟠 Orange</option></select></div>`;
-                }
-                document.getElementById("teamAssignList").innerHTML = listHtml;
-                document.querySelectorAll(".team-select").forEach(sel => sel.addEventListener("change", () => { teamAssignments[week.dateStr][sel.dataset.player] = sel.value; }));
-            };
-            renderList();
-            document.getElementById("autoAssignBtn")?.addEventListener("click", () => { autoAssignTeams(week.dateStr); renderTeamSelectPage(); });
-            document.getElementById("saveTeamsBtn")?.addEventListener("click", async () => { await saveTeams(); alert("Teams saved!"); renderTeamSelectPage(); renderHistoryPage(); });
-        }
     }
     
     async function renderHistoryPage() {
@@ -709,7 +660,7 @@
         const weeks = getFutureWeeks();
         if (!weeks.length) { document.getElementById("page-rsvp").innerHTML = `<div class="card"><h2>📋 RSVP</h2><p>No upcoming matches</p></div>`; return; }
         document.getElementById("page-rsvp").innerHTML = `<div class="card"><h2>📋 RSVP for Next Match</h2><select id="rsvpWeek">${weeks.map(w=>`<option value="${w.dateStr}">${w.label}</option>`)}</select><select id="rsvpPlayer"><option>-- My Name --</option>${players.map(p=>`<option>${escapeHtml(p)}</option>`)}</select><div class="flex-btns"><button id="rsvpYesBtn">✅ I'm Playing</button><button id="rsvpNoBtn">❌ Can't Play</button></div><div id="rsvpMsg"></div></div><div class="card"><h2>Signed Players This Week</h2><div id="attendeesList"></div></div>`;
-        document.getElementById("rsvpYesBtn").onclick = async () => { const p = document.getElementById("rsvpPlayer").value; const w = document.getElementById("rsvpWeek").value; if(p && p !== "-- My Name --") { await saveAttendance({player:p, gameDate:w, status:"in"}); renderRSVPage(); renderProfilesPage(); } };
+        document.getElementById("rsvpYesBtn").onclick = async () => { const p = document.getElementById("rsvpPlayer").value; const w = document.getElementById("rsvpWeek").value; if(p && p !== "-- My Name --") { await saveAttendance({player:p, gameDate:w, status:"in"}); renderRSVPage(); renderProfilesPage(); renderHomePage(); } };
         document.getElementById("rsvpNoBtn").onclick = async () => { const p = document.getElementById("rsvpPlayer").value; const w = document.getElementById("rsvpWeek").value; if(p) { await saveAttendance({player:p, gameDate:w, status:"out"}); renderRSVPage(); } };
         document.getElementById("rsvpWeek").onchange = () => { const week = document.getElementById("rsvpWeek").value; const attending = attendance.filter(a => a.gameDate === week && a.status === 'in').map(a=>a.player); document.getElementById("attendeesList").innerHTML = `<div class="attendee-tags">${attending.map(p=>`<span class="attendee-tag">${escapeHtml(p)}</span>`).join('')||'<span>None'}</div>`; };
         const week = document.getElementById("rsvpWeek")?.value;
@@ -728,48 +679,52 @@
         document.getElementById("chatSendBtn").onclick = async () => { const msg = document.getElementById("chatInput").value.trim(); if(msg && db) { await db.collection("messages").add({ name: currentUser.name, message: msg, timestamp: firebase.firestore.FieldValue.serverTimestamp() }); document.getElementById("chatInput").value = ""; } };
     }
     
-    function renderRulesPage() { document.getElementById("page-rules").innerHTML = `<div class="card"><h2>📜 Rules</h2><ul style="margin-left:20px; font-size:14px; line-height:1.6;"><li>⏰ 8:00pm SHARP kickoff</li><li>💰 $5 weekly fee - Admin collects</li><li>👑 Captain rotates automatically - only attending players eligible</li><li>✅ RSVP is the most important action</li><li>🏆 Opening balance for 17-18 year history</li></ul></div>`; }
+    function renderRulesPage() { document.getElementById("page-rules").innerHTML = `<div class="card"><h2>📜 Rules</h2><ul style="margin-left:20px; font-size:14px; line-height:1.6;"><li>⏰ 8:00pm SHARP kickoff at Clifton Park</li><li>💰 $5 weekly fee - Admin collects</li><li>👑 Captain rotates automatically - only attending players eligible</li><li>✅ RSVP is the most important action</li><li>🏆 Opening balance for 17-18 year history</li></ul></div>`; }
     
-    function updateHeroUI() {
-        const nextWeek = getFutureWeeks()[0];
-        const currentStatus = nextWeek ? attendance.find(a => a.gameDate === nextWeek.dateStr && a.player === currentUser?.name)?.status : null;
-        const heroDiv = document.getElementById("heroContainer");
-        if(heroDiv) {
-            heroDiv.innerHTML = `<div class="attendance-card"><h2><i class="fas fa-futbol"></i> ${nextWeek?.label || "This Monday"} • 8pm</h2><div class="venue">Clifton Park, Brunswick</div><div class="big-buttons"><button id="heroPlayBtn" class="btn-play-big">✅ I'M PLAYING</button><button id="heroSitBtn" class="btn-sit-big">❌ CAN'T PLAY</button></div><div class="status-text">${currentStatus === 'in' ? '✓ You are PLAYING' : (currentStatus === 'out' ? '✗ You are NOT PLAYING' : 'Tap above to set your attendance')}</div></div>`;
-            document.getElementById("heroPlayBtn")?.addEventListener("click", () => setAttendance("in"));
-            document.getElementById("heroSitBtn")?.addEventListener("click", () => setAttendance("out"));
-        }
-        const alertDiv = document.getElementById("alertContainer");
-        if(alertDiv) alertDiv.innerHTML = `<div class="captain-banner"><i class="fas fa-crown"></i> ${weeklyCaptain} is this week's Captain! Only attending players can be captain</div>`;
-    }
-    
-    function renderAll() {
+    function renderAllModules() {
         renderProfilesPage();
         renderScoreboardPage();
-        renderTeamSelectPage();
         renderHistoryPage();
         renderRSVPage();
         renderWeatherPage();
         renderChatPage();
         renderFinancePage();
         renderRulesPage();
-        updateHeroUI();
     }
     
     function initNavigation() {
-        const pages = ["profiles", "scoreboard", "teamselect", "history", "rsvp", "weather", "chat", "finance", "rules"];
-        pages.forEach(pageId => {
-            const btn = document.getElementById(`nav-${pageId}`);
-            if(btn) btn.addEventListener("click", () => {
-                document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-                document.getElementById(`page-${pageId}`).classList.add("active");
-                document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+        const modules = [
+            { id: "home", name: "🏠 HOME" },
+            { id: "profiles", name: "👤 PROFILES" },
+            { id: "scoreboard", name: "🏆 STATS" },
+            { id: "history", name: "📖 HISTORY" },
+            { id: "rsvp", name: "📋 RSVP" },
+            { id: "weather", name: "🌤️ WEATHER" },
+            { id: "chat", name: "💬 CHAT" },
+            { id: "finance", name: "💰 FINANCE" },
+            { id: "rules", name: "📜 RULES" }
+        ];
+        const navBar = document.getElementById("topNavBar");
+        navBar.innerHTML = modules.map(m => `<button class="nav-module" data-module="${m.id}">${m.name}</button>`).join('');
+        
+        document.querySelectorAll(".nav-module").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const moduleId = btn.dataset.module;
+                // Hide all module containers
+                document.querySelectorAll(".module-container").forEach(container => {
+                    container.classList.remove("active-module");
+                });
+                // Show selected module
+                const targetContainer = document.getElementById(`module-${moduleId}`);
+                if(targetContainer) targetContainer.classList.add("active-module");
+                // Update active state
+                document.querySelectorAll(".nav-module").forEach(b => b.classList.remove("active"));
                 btn.classList.add("active");
             });
         });
-        // Default first page
-        const firstBtn = document.getElementById("nav-profiles");
-        if(firstBtn) firstBtn.click();
+        // Default to home
+        const homeBtn = document.querySelector('.nav-module[data-module="home"]');
+        if(homeBtn) homeBtn.click();
     }
     
     function escapeHtml(str) { return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
@@ -784,33 +739,20 @@
                 <h1>MONDAY NIGHT SOCCER</h1>
                 <div class="user-row"><i class="fas fa-user-circle"></i> <strong>${currentUser.role === "admin" ? "ADMIN" : currentUser.name}</strong> <button id="logoutBtnMain">Exit</button></div>
             </div>
-            <div id="heroContainer"></div>
-            <div id="alertContainer"></div>
-            <div class="content" id="contentArea">
-                <div id="page-profiles" class="page"></div>
-                <div id="page-scoreboard" class="page"></div>
-                <div id="page-teamselect" class="page"></div>
-                <div id="page-history" class="page"></div>
-                <div id="page-rsvp" class="page"></div>
-                <div id="page-weather" class="page"></div>
-                <div id="page-chat" class="page"></div>
-                <div id="page-finance" class="page"></div>
-                <div id="page-rules" class="page"></div>
-            </div>
-            <div class="bottom-nav">
-                <button class="nav-item" id="nav-profiles"><i class="fas fa-id-card"></i><span>Profile</span></button>
-                <button class="nav-item" id="nav-scoreboard"><i class="fas fa-trophy"></i><span>Stats</span></button>
-                <button class="nav-item" id="nav-teamselect"><i class="fas fa-users"></i><span>Teams</span></button>
-                <button class="nav-item" id="nav-history"><i class="fas fa-history"></i><span>History</span></button>
-                <button class="nav-item" id="nav-rsvp"><i class="fas fa-calendar"></i><span>RSVP</span></button>
-                <button class="nav-item" id="nav-weather"><i class="fas fa-cloud-sun"></i><span>Weather</span></button>
-                <button class="nav-item" id="nav-chat"><i class="fas fa-comments"></i><span>Chat</span></button>
-                <button class="nav-item" id="nav-finance"><i class="fas fa-dollar-sign"></i><span>Finance</span></button>
-                <button class="nav-item" id="nav-rules"><i class="fas fa-book"></i><span>Rules</span></button>
-            </div>
+            <div class="top-nav" id="topNavBar"></div>
+            <div id="module-home" class="module-container"><div id="homeContainer"></div></div>
+            <div id="module-profiles" class="module-container"><div id="page-profiles"></div></div>
+            <div id="module-scoreboard" class="module-container"><div id="page-scoreboard"></div></div>
+            <div id="module-history" class="module-container"><div id="page-history"></div></div>
+            <div id="module-rsvp" class="module-container"><div id="page-rsvp"></div></div>
+            <div id="module-weather" class="module-container"><div id="page-weather"></div></div>
+            <div id="module-chat" class="module-container"><div id="page-chat"></div></div>
+            <div id="module-finance" class="module-container"><div id="page-finance"></div></div>
+            <div id="module-rules" class="module-container"><div id="page-rules"></div></div>
         `;
         document.getElementById("logoutBtnMain").onclick = logout;
-        renderAll();
+        renderHomePage();
+        renderAllModules();
         initNavigation();
     }
     
