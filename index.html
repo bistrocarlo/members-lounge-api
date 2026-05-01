@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>The Members Lounge & Ballroom | Booking Request</title>
+  <title>The Members Lounge | Staff Booking Tool</title>
   <style>
     * {
       margin: 0;
@@ -12,33 +12,33 @@
     }
 
     body {
-      background: #f1ede8;
+      background: #f5f0ea;
       font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
       padding: 2rem 1rem;
-      color: #1e2a2f;
+      color: #2c2a24;
     }
 
     .container {
-      max-width: 1280px;
+      max-width: 1300px;
       margin: 0 auto;
     }
 
     h1 {
-      font-size: 1.9rem;
+      font-size: 2rem;
       font-weight: 600;
       letter-spacing: -0.3px;
-      border-left: 6px solid #bf8f6b;
-      padding-left: 1rem;
+      border-left: 6px solid #b8865b;
+      padding-left: 1.2rem;
       margin-bottom: 0.25rem;
-      color: #2c3e2f;
+      color: #2f4d2d;
     }
 
     .subhead {
-      color: #5f6c5d;
+      color: #6b5a4a;
       margin-bottom: 2rem;
       margin-top: 0.5rem;
-      padding-left: 1.3rem;
-      font-size: 1rem;
+      padding-left: 1.5rem;
+      font-size: 0.95rem;
     }
 
     /* two-column layout for date sections */
@@ -46,33 +46,32 @@
       display: flex;
       flex-wrap: wrap;
       gap: 2rem;
-      margin-bottom: 2.5rem;
+      margin-bottom: 2rem;
     }
 
     .room-card {
       flex: 1;
-      min-width: 280px;
-      background: #ffffffdd;
-      backdrop-filter: blur(2px);
-      background: #fffef7;
+      min-width: 300px;
+      background: #fffef8;
       border-radius: 32px;
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.02);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05), 0 0 0 1px #e8dfd4;
       overflow: hidden;
       transition: all 0.2s;
     }
 
     .room-header {
-      background: #f4ede4;
+      background: #f7f0e6;
       padding: 1rem 1.5rem;
-      border-bottom: 1px solid #e2d9cf;
+      border-bottom: 1px solid #e5d9cc;
     }
 
     .room-header h2 {
-      font-size: 1.6rem;
+      font-size: 1.5rem;
       font-weight: 600;
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      flex-wrap: wrap;
     }
 
     .badge {
@@ -80,53 +79,63 @@
       color: white;
       font-size: 0.7rem;
       font-weight: 500;
-      padding: 0.2rem 0.7rem;
+      padding: 0.2rem 0.8rem;
       border-radius: 40px;
-      margin-left: 0.75rem;
     }
 
     .date-list {
-      max-height: 460px;
+      max-height: 480px;
       overflow-y: auto;
-      padding: 0.75rem 0.5rem 1rem 1rem;
+      padding: 0.5rem;
     }
 
     .date-option {
       display: flex;
-      align-items: baseline;
+      align-items: center;
       gap: 0.75rem;
-      padding: 0.6rem 0.5rem;
-      border-bottom: 1px solid #efe5db;
+      padding: 0.7rem 0.8rem;
+      margin: 0.2rem 0;
+      border-radius: 60px;
       cursor: pointer;
-      transition: background 0.15s;
-      border-radius: 40px;
+      transition: all 0.15s;
+      border: 1px solid transparent;
     }
 
     .date-option:hover {
-      background: #f9f3ea;
+      background: #fcf6ef;
+    }
+
+    .date-option.selected {
+      background: #f7e9dc;
+      border-color: #d4b48c;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
 
     .date-radio {
-      accent-color: #bf8f6b;
+      accent-color: #b8865b;
       width: 18px;
       height: 18px;
-      margin-top: 2px;
+      margin: 0;
+      cursor: pointer;
     }
 
     .date-text {
       font-weight: 500;
       font-size: 0.95rem;
       color: #2c3a2b;
+      cursor: pointer;
+      flex: 1;
     }
 
     .room-note {
       font-size: 0.7rem;
       color: #8f7a66;
-      margin-left: 1.8rem;
+      margin-left: 2rem;
       margin-top: -0.2rem;
       margin-bottom: 0.3rem;
     }
 
+    /* booking form */
     .booking-form {
       background: white;
       border-radius: 32px;
@@ -137,19 +146,19 @@
     }
 
     .form-title {
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       font-weight: 600;
       margin-bottom: 1rem;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.75rem;
       flex-wrap: wrap;
     }
 
     .selected-room-badge {
       background: #e6d9ce;
       border-radius: 100px;
-      padding: 0.2rem 1rem;
+      padding: 0.3rem 1rem;
       font-size: 0.85rem;
       font-weight: normal;
     }
@@ -174,12 +183,17 @@
       letter-spacing: 0.3px;
     }
 
+    .input-field label .required {
+      color: #c26b3a;
+      margin-left: 3px;
+    }
+
     .input-field input, 
     .input-field select, 
     .input-field textarea {
       padding: 0.7rem 1rem;
       border: 1px solid #dbcfc0;
-      border-radius: 24px;
+      border-radius: 28px;
       font-family: inherit;
       font-size: 0.9rem;
       background: #fefcf8;
@@ -190,8 +204,8 @@
     .input-field select:focus, 
     .input-field textarea:focus {
       outline: none;
-      border-color: #bf8f6b;
-      box-shadow: 0 0 0 2px #bf8f6b30;
+      border-color: #b8865b;
+      box-shadow: 0 0 0 2px #b8865b30;
     }
 
     .guest-row {
@@ -208,7 +222,7 @@
       margin: 1rem 0;
       border: 0;
       height: 1px;
-      background: linear-gradient(to right, #e2d3c4, transparent);
+      background: #e5d9cc;
     }
 
     .action-buttons {
@@ -225,7 +239,7 @@
       border: none;
       color: white;
       font-weight: 600;
-      padding: 0.9rem 2rem;
+      padding: 0.85rem 2rem;
       border-radius: 60px;
       font-size: 1rem;
       cursor: pointer;
@@ -255,7 +269,29 @@
       border-radius: 28px;
       margin-top: 1rem;
       color: #5f5b4f;
-      border-left: 4px solid #bf8f6b;
+      border-left: 4px solid #b8865b;
+    }
+
+    .staff-links {
+      margin-top: 1.2rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .ask-link {
+      background: #eef2ed;
+      padding: 0.5rem 1rem;
+      border-radius: 40px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #2c5e2e;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
     @media (max-width: 780px) {
@@ -263,7 +299,7 @@
         padding: 1.2rem;
       }
       .date-list {
-        max-height: 320px;
+        max-height: 360px;
       }
     }
 
@@ -273,38 +309,46 @@
       font-size: 0.75rem;
       color: #a29381;
     }
+
+    .fallback-copy-area {
+      background: #f4efe6;
+      padding: 0.8rem;
+      border-radius: 20px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.75rem;
+      display: none;
+    }
   </style>
 </head>
 <body>
 <div class="container">
-  <h1>🍾 The Members Lounge</h1>
-  <div class="subhead">Select a date & room → fill guest details → staff sends booking summary via SMS / text</div>
+  <h1>🍾 The Members Lounge &nbsp;|&nbsp; Sala Reggio Ballroom</h1>
+  <div class="subhead">Select a date → fill guest details → copy booking summary & send to manager (SMS / WhatsApp)</div>
 
-  <div class="rooms-grid" id="roomsGrid">
-    <!-- Members Lounge column will be injected -->
-    <!-- Sala Reggio Ballroom column will be injected -->
-  </div>
+  <div class="rooms-grid" id="roomsGrid"></div>
 
-  <!-- Booking form (dynamic based on selection) -->
+  <!-- booking form -->
   <div class="booking-form" id="bookingForm">
     <div class="form-title">
-      📋 Complete reservation request
+      📋 Booking request
       <span class="selected-room-badge" id="selectedRoomBadge">No room selected</span>
     </div>
     <div id="dynamicFormContent">
-      <p style="color: #9c8a78; padding: 0.8rem 0;">👉 First, pick a date from one of the rooms above. The form will appear here.</p>
+      <p style="color: #9c8a78; padding: 0.8rem 0;">👉 Pick a date from one of the rooms above to start.</p>
+    </div>
+    <div class="staff-links" id="staffLinksPanel">
+      <a href="#" id="askManagerLink" class="ask-link" target="_blank">📩 Ask manager a question</a>
+      <a href="#" id="addNoteLink" class="ask-link" style="background:#e3d9cf;">📝 Add internal note (copy with request)</a>
     </div>
   </div>
-  <footer>
-    Staff tool — Once booked, use "Generate request text" to copy & send to manager via SMS / WhatsApp.
-  </footer>
+  <footer>Staff use only — copy & paste into SMS / WhatsApp. All required fields must be filled.</footer>
 </div>
 
 <script>
   // --------------------------------------------------------------
-  // AVAILABLE DATES (confirmed by user)
-  // Members Lounge = "0 1" pattern : dates list from screenshots
-  // Sala Reggio Ballroom = "0 30" pattern
+  // AVAILABLE DATES (based on "0 1" for Members Lounge and "0 30" for Ballroom)
+  // Confirmed from screenshots + user rule
   // --------------------------------------------------------------
   const MEMBERS_LOUNGE_DATES = [
     "Sun 21 Jun 2026", "Fri 26 Jun 2026", "Sat 27 Jun 2026", "Sun 28 Jun 2026",
@@ -329,8 +373,8 @@
     "Sat 19 Dec 2026", "Sun 20 Dec 2026"
   ];
 
-  // state management
-  let selectedRoom = null;        // 'members' or 'ballroom'
+  // current state
+  let selectedRoom = null;     // 'members' or 'ballroom'
   let selectedDate = null;
 
   // DOM elements
@@ -338,7 +382,7 @@
   const selectedRoomBadge = document.getElementById('selectedRoomBadge');
   const dynamicFormContent = document.getElementById('dynamicFormContent');
 
-  // Helper: format date for display
+  // Helper: render room cards and date lists with proper radio grouping
   function renderRoomCards() {
     roomsGrid.innerHTML = '';
 
@@ -348,7 +392,7 @@
     membersCard.innerHTML = `
       <div class="room-header">
         <h2>🍸 The Members Lounge <span class="badge">0 1 · available</span></h2>
-        <p style="font-size:0.8rem; margin-top:4px;">Intimate gatherings · up to 1 table configuration</p>
+        <p style="font-size:0.75rem; margin-top:4px;">Intimate gatherings · max 1 table</p>
       </div>
       <div class="date-list" id="membersDateList"></div>
     `;
@@ -360,50 +404,59 @@
     ballroomCard.innerHTML = `
       <div class="room-header">
         <h2>🎉 Sala Reggio Ballroom <span class="badge">0 30 · available</span></h2>
-        <p style="font-size:0.8rem; margin-top:4px;">Grand celebrations · up to 30 tables</p>
+        <p style="font-size:0.75rem; margin-top:4px;">Grand celebrations · up to 30 tables</p>
       </div>
       <div class="date-list" id="ballroomDateList"></div>
     `;
     roomsGrid.appendChild(ballroomCard);
 
-    // populate Members dates
+    // Populate members dates
     const membersList = document.getElementById('membersDateList');
     MEMBERS_LOUNGE_DATES.forEach(dateStr => {
+      const dateId = `date_member_${dateStr.replace(/[\s]/g, '_')}`;
       const optionDiv = document.createElement('div');
       optionDiv.className = 'date-option';
-      const radioId = `member_${dateStr.replace(/\s/g, '_')}`;
+      optionDiv.dataset.room = 'members';
+      optionDiv.dataset.date = dateStr;
       optionDiv.innerHTML = `
-        <input type="radio" name="roomDate" class="date-radio" value="members|${dateStr}" id="${radioId}">
-        <label for="${radioId}" class="date-text">📅 ${dateStr}</label>
+        <input type="radio" name="globalDate" value="members|${dateStr}" id="${dateId}" class="date-radio">
+        <label for="${dateId}" class="date-text">📅 ${dateStr}</label>
       `;
       const radio = optionDiv.querySelector('input');
       radio.addEventListener('change', (e) => {
         if (e.target.checked) {
+          // clear all selected class
+          document.querySelectorAll('.date-option').forEach(opt => opt.classList.remove('selected'));
+          optionDiv.classList.add('selected');
           selectedRoom = 'members';
           selectedDate = dateStr;
-          updateSelectedDisplay();
+          updateSelectionDisplay();
           renderBookingForm();
         }
       });
       membersList.appendChild(optionDiv);
     });
 
-    // populate Ballroom dates
+    // Populate ballroom dates
     const ballroomList = document.getElementById('ballroomDateList');
     BALLROOM_DATES.forEach(dateStr => {
+      const dateId = `date_ballroom_${dateStr.replace(/[\s]/g, '_')}`;
       const optionDiv = document.createElement('div');
       optionDiv.className = 'date-option';
-      const radioId = `ballroom_${dateStr.replace(/\s/g, '_')}`;
+      optionDiv.dataset.room = 'ballroom';
+      optionDiv.dataset.date = dateStr;
       optionDiv.innerHTML = `
-        <input type="radio" name="roomDate" class="date-radio" value="ballroom|${dateStr}" id="${radioId}">
-        <label for="${radioId}" class="date-text">🎈 ${dateStr}</label>
+        <input type="radio" name="globalDate" value="ballroom|${dateStr}" id="${dateId}" class="date-radio">
+        <label for="${dateId}" class="date-text">🎈 ${dateStr}</label>
       `;
       const radio = optionDiv.querySelector('input');
       radio.addEventListener('change', (e) => {
         if (e.target.checked) {
+          document.querySelectorAll('.date-option').forEach(opt => opt.classList.remove('selected'));
+          optionDiv.classList.add('selected');
           selectedRoom = 'ballroom';
           selectedDate = dateStr;
-          updateSelectedDisplay();
+          updateSelectionDisplay();
           renderBookingForm();
         }
       });
@@ -411,19 +464,42 @@
     });
   }
 
-  function updateSelectedDisplay() {
+  function updateSelectionDisplay() {
     if (selectedRoom === 'members') {
-      selectedRoomBadge.textContent = `The Members Lounge · ${selectedDate || 'date picked'}`;
+      selectedRoomBadge.textContent = `The Members Lounge · ${selectedDate || 'date'}`;
       selectedRoomBadge.style.background = "#e0cfbf";
     } else if (selectedRoom === 'ballroom') {
-      selectedRoomBadge.textContent = `Sala Reggio Ballroom · ${selectedDate || 'date picked'}`;
+      selectedRoomBadge.textContent = `Sala Reggio Ballroom · ${selectedDate || 'date'}`;
       selectedRoomBadge.style.background = "#d9e0d0";
     } else {
       selectedRoomBadge.textContent = 'No room selected';
     }
   }
 
-  // Build the dynamic form with guest fields, child's name, occasion etc.
+  // staff note & question helpers
+  let staffNote = '';
+  function showNotePrompt() {
+    let newNote = prompt('📝 Add an internal note (e.g., special requests, deposit paid, dietary):', staffNote);
+    if (newNote !== null) {
+      staffNote = newNote.trim();
+      alert(staffNote ? '✅ Note saved! It will be included in the booking summary.' : 'Note cleared.');
+      renderBookingForm(); // refresh to show note line if exists
+    }
+  }
+
+  function askManagerQuestion() {
+    const subject = encodeURIComponent('Booking question - Members Lounge');
+    const body = encodeURIComponent(`Hi manager,\n\nI have a question about a potential booking:\nRoom: ${selectedRoom === 'members' ? 'Members Lounge' : (selectedRoom === 'ballroom' ? 'Ballroom' : 'not selected yet')}\nDate: ${selectedDate || '—'}\n\nMy question:\n`);
+    window.open(`mailto:manager@memberslounge.com?subject=${subject}&body=${body}`, '_blank');
+    // also allow direct sms fallback: show a toast
+    const fallbackMsg = document.getElementById('copyMessageArea');
+    if(fallbackMsg) {
+      fallbackMsg.style.display = 'block';
+      fallbackMsg.innerHTML = '📧 Email client opened. If no email, send SMS to manager directly.';
+      setTimeout(() => { if(fallbackMsg) fallbackMsg.style.display = 'none'; }, 3000);
+    }
+  }
+
   function renderBookingForm() {
     if (!selectedRoom || !selectedDate) {
       dynamicFormContent.innerHTML = `<p style="color: #9c8a78; padding: 0.8rem 0;">⚠️ Please select a date from one of the rooms above to start the booking request.</p>`;
@@ -431,57 +507,126 @@
     }
 
     const roomPretty = selectedRoom === 'members' ? 'The Members Lounge' : 'Sala Reggio Ballroom';
+    const noteHtml = staffNote ? `<div class="info-note" style="background:#e9e0d5;">📌 Staff note: ${escapeHtml(staffNote)}</div>` : '';
     const formHtml = `
       <div class="form-grid">
         <div class="input-field">
-          <label>🎂 Child's full name (celebrant / function honoree) *</label>
-          <input type="text" id="childName" placeholder="e.g. Olivia Bennett" autocomplete="off">
-          <small style="font-size:0.7rem; color:#957f66;">Who are we celebrating? (birthday, baptism, graduation...)</small>
+          <label>🎂 Child's full name (celebrant) <span class="required">*</span></label>
+          <input type="text" id="childName" placeholder="e.g. Olivia Bennett" value="">
         </div>
         <div class="input-field">
-          <label>🎉 Occasion / Event type *</label>
-          <input type="text" id="occasion" placeholder="e.g. 1st Birthday, Engagement, Christening">
+          <label>🎉 Occasion / Event type <span class="required">*</span></label>
+          <input type="text" id="occasion" placeholder="e.g. 1st Birthday, Engagement, Baptism" value="">
         </div>
         <div class="input-field">
-          <label>👤 Guest full name (main contact) *</label>
-          <input type="text" id="fullName" placeholder="Full name">
+          <label>👤 Guest full name (main contact) <span class="required">*</span></label>
+          <input type="text" id="fullName" placeholder="Full name" value="">
         </div>
         <div class="input-field">
-          <label>📧 Email address *</label>
-          <input type="email" id="email" placeholder="name@example.com">
+          <label>📧 Email address <span class="required">*</span></label>
+          <input type="email" id="email" placeholder="name@example.com" value="">
         </div>
         <div class="input-field">
-          <label>📞 Telephone number (mobile) *</label>
-          <input type="tel" id="phone" placeholder="+1 234 567 8900">
+          <label>📞 Telephone number (mobile) <span class="required">*</span></label>
+          <input type="tel" id="phone" placeholder="+1 234 567 8900" value="">
         </div>
         <div class="guest-row">
           <div class="input-field">
-            <label>👨‍👩‍👧 Adults (count) </label>
+            <label>👨‍👩‍👧 Adults (count)</label>
             <input type="number" id="adults" min="0" value="0" step="1">
           </div>
           <div class="input-field">
-            <label>🧒 Children (count) </label>
+            <label>🧒 Children (count)</label>
             <input type="number" id="children" min="0" value="0" step="1">
           </div>
         </div>
         <div class="input-field">
           <label>📝 Special requests / notes (optional)</label>
-          <textarea id="notes" rows="2" placeholder="Dietary, accessibility, setup wishes..."></textarea>
+          <textarea id="notes" rows="2" placeholder="Dietary, setup, timing, etc."></textarea>
         </div>
       </div>
+      ${noteHtml}
       <div class="action-buttons">
-        <button class="btn-primary" id="generateTextBtn">📲 Generate request text (copy for manager)</button>
-        <button class="btn-secondary" id="clearFormBtn">⟳ Clear & start over</button>
+        <button class="btn-primary" id="generateTextBtn">📲 Generate & copy booking request</button>
+        <button class="btn-secondary" id="clearFormBtn">⟳ Clear selection & start over</button>
       </div>
-      <div class="info-note" id="copyMessageArea" style="display: none;">✅ Booking summary copied! You can now paste & send via SMS / WhatsApp.</div>
+      <div id="fallbackCopyArea" class="fallback-copy-area"></div>
+      <div id="copyMessageArea" class="info-note" style="display: none; margin-top:1rem;"></div>
     `;
-
     dynamicFormContent.innerHTML = formHtml;
 
     // attach event listeners
-    document.getElementById('generateTextBtn').addEventListener('click', generateBookingText);
-    document.getElementById('clearFormBtn').addEventListener('click', () => {
-      resetFormAndSelection();
+    const genBtn = document.getElementById('generateTextBtn');
+    const clearBtn = document.getElementById('clearFormBtn');
+    if (genBtn) genBtn.addEventListener('click', generateBookingText);
+    if (clearBtn) clearBtn.addEventListener('click', resetFormAndSelection);
+  }
+
+  function generateBookingText() {
+    if (!selectedRoom || !selectedDate) {
+      alert('Please select a date first.');
+      return;
+    }
+
+    const childName = document.getElementById('childName')?.value.trim();
+    const occasion = document.getElementById('occasion')?.value.trim();
+    const fullName = document.getElementById('fullName')?.value.trim();
+    const email = document.getElementById('email')?.value.trim();
+    const phone = document.getElementById('phone')?.value.trim();
+    const adults = document.getElementById('adults')?.value || '0';
+    const children = document.getElementById('children')?.value || '0';
+    const specialNotes = document.getElementById('notes')?.value.trim() || '—';
+
+    // validation
+    if (!fullName) { alert('Please enter guest full name.'); return; }
+    if (!email) { alert('Please enter email address.'); return; }
+    if (!phone) { alert('Please enter telephone number.'); return; }
+    if (!childName) { alert('Please enter the child\'s name (celebrant).'); return; }
+    if (!occasion) { alert('Please enter the occasion (birthday, baptism, etc).'); return; }
+
+    const roomName = selectedRoom === 'members' ? 'The Members Lounge (0 1)' : 'Sala Reggio Ballroom (0 30)';
+    let message = `🏨 *NEW BOOKING REQUEST* 🏨\n`;
+    message += `📅 Date: ${selectedDate}\n`;
+    message += `🏠 Room: ${roomName}\n`;
+    message += `🎉 Occasion: ${occasion}\n`;
+    message += `🎂 Celebrant / Child: ${childName}\n`;
+    message += `👤 Contact: ${fullName}\n`;
+    message += `📧 Email: ${email}\n`;
+    message += `📞 Tel: ${phone}\n`;
+    message += `👥 Guests: ${adults} adults, ${children} children\n`;
+    message += `📝 Special requests: ${specialNotes}\n`;
+    if (staffNote) {
+      message += `📋 *STAFF NOTE*: ${staffNote}\n`;
+    }
+    message += `---\n👩‍💼 Ready to confirm | pending availability`;
+
+    // try clipboard
+    const fallbackDiv = document.getElementById('fallbackCopyArea');
+    const copyMsgDiv = document.getElementById('copyMessageArea');
+    navigator.clipboard.writeText(message).then(() => {
+      if (copyMsgDiv) {
+        copyMsgDiv.style.display = 'block';
+        copyMsgDiv.innerHTML = '✅ Booking summary copied! Paste into SMS / WhatsApp and send to manager.';
+        setTimeout(() => { if(copyMsgDiv) copyMsgDiv.style.display = 'none'; }, 3500);
+      }
+      if(fallbackDiv) fallbackDiv.style.display = 'none';
+    }).catch(() => {
+      // fallback: show textarea
+      if (fallbackDiv) {
+        fallbackDiv.style.display = 'block';
+        fallbackDiv.innerHTML = `<strong>⚠️ Auto-copy blocked. Copy manually:</strong><br><textarea rows="6" style="width:100%; margin-top:6px; border-radius:16px;" readonly>${escapeHtml(message)}</textarea><button id="manualCopyBtn" style="margin-top:8px; background:#b8865b; border:none; padding:6px 12px; border-radius:40px; color:white;">📋 Select & Copy</button>`;
+        const manualBtn = document.getElementById('manualCopyBtn');
+        if (manualBtn) {
+          manualBtn.addEventListener('click', () => {
+            const textarea = fallbackDiv.querySelector('textarea');
+            if(textarea) {
+              textarea.select();
+              document.execCommand('copy');
+              alert('Copied! Now paste to manager.');
+            }
+          });
+        }
+      }
     });
   }
 
@@ -489,87 +634,52 @@
     // uncheck all radios
     const allRadios = document.querySelectorAll('.date-radio');
     allRadios.forEach(radio => radio.checked = false);
+    document.querySelectorAll('.date-option').forEach(opt => opt.classList.remove('selected'));
     selectedRoom = null;
     selectedDate = null;
-    updateSelectedDisplay();
-    renderBookingForm(); // shows empty prompt
-    const msgDiv = document.getElementById('copyMessageArea');
-    if (msgDiv) msgDiv.style.display = 'none';
+    staffNote = '';
+    updateSelectionDisplay();
+    renderBookingForm();
+    const fallbackDiv = document.getElementById('fallbackCopyArea');
+    if (fallbackDiv) fallbackDiv.style.display = 'none';
+    const copyMsgDiv = document.getElementById('copyMessageArea');
+    if (copyMsgDiv) copyMsgDiv.style.display = 'none';
   }
 
-  function generateBookingText() {
-    if (!selectedRoom || !selectedDate) {
-      alert('Please select a date and room before generating the booking request.');
-      return;
-    }
-
-    // gather fields
-    const childName = document.getElementById('childName')?.value.trim() || 'Not specified';
-    const occasion = document.getElementById('occasion')?.value.trim() || 'Not specified';
-    const fullName = document.getElementById('fullName')?.value.trim();
-    const email = document.getElementById('email')?.value.trim();
-    const phone = document.getElementById('phone')?.value.trim();
-    const adults = document.getElementById('adults')?.value || '0';
-    const children = document.getElementById('children')?.value || '0';
-    const notes = document.getElementById('notes')?.value.trim() || '—';
-
-    if (!fullName) {
-      alert('Please enter the main contact full name.');
-      return;
-    }
-    if (!email) {
-      alert('Please enter an email address.');
-      return;
-    }
-    if (!phone) {
-      alert('Please enter a telephone number.');
-      return;
-    }
-
-    const roomName = selectedRoom === 'members' ? 'The Members Lounge (0 1)' : 'Sala Reggio Ballroom (0 30)';
-    const dateStr = selectedDate;
-
-    // Build final text for manager (via SMS / text)
-    let message = `🏨 *NEW BOOKING REQUEST* 🏨\n`;
-    message += `📅 Date: ${dateStr}\n`;
-    message += `🏠 Room: ${roomName}\n`;
-    message += `🎉 Occasion: ${occasion}\n`;
-    message += `🍰 Celebrant / Child's name: ${childName}\n`;
-    message += `👤 Contact: ${fullName}\n`;
-    message += `📧 Email: ${email}\n`;
-    message += `📞 Tel: ${phone}\n`;
-    message += `👥 Guests: ${adults} adults, ${children} children\n`;
-    message += `📝 Notes: ${notes}\n`;
-    message += `---\n*Ready to confirm | Pending availability*`;
-
-    // Copy to clipboard
-    navigator.clipboard.writeText(message).then(() => {
-      const copyMsgDiv = document.getElementById('copyMessageArea');
-      if (copyMsgDiv) {
-        copyMsgDiv.style.display = 'block';
-        copyMsgDiv.textContent = '✅ Booking summary copied! Paste into SMS / WhatsApp / email and send to manager.';
-        setTimeout(() => {
-          copyMsgDiv.style.opacity = '0.9';
-          setTimeout(() => {
-            copyMsgDiv.style.display = 'none';
-          }, 3800);
-        }, 100);
-      } else {
-        alert('Booking text copied to clipboard ✅\n\nShare via SMS with the manager.');
-      }
-    }).catch(() => {
-      alert('⚠️ Could not copy automatically. Please manually select the text below:\n\n' + message);
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+      return c;
     });
-
-    // also show a small console log for fallback
-    console.log("📋 BOOKING REQUEST:\n" + message);
   }
 
-  // initial render
-  renderRoomCards();
-  renderBookingForm(); // empty state
+  // attach global actions for staff note and question link
+  function bindGlobalActions() {
+    const askLink = document.getElementById('askManagerLink');
+    const noteLink = document.getElementById('addNoteLink');
+    if (askLink) {
+      askLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        askManagerQuestion();
+      });
+    }
+    if (noteLink) {
+      noteLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        showNotePrompt();
+      });
+    }
+  }
 
-  // optional: if any radio pre-selected? no, keep empty.
+  // initialization
+  renderRoomCards();
+  renderBookingForm();
+  bindGlobalActions();
 </script>
 </body>
 </html>
