@@ -4,88 +4,79 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Monday Night Soccer | Complete League Hub</title>
+    <title>Monday Night Soccer | Complete League Management System</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: #eef2f5; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px 16px 40px; min-height: 100vh; }
+        body { background: #eef2f5; font-family: 'Inter', -apple-system, sans-serif; padding: 20px 16px 40px; min-height: 100vh; }
         button, .tab-btn, select, input, textarea { cursor: pointer; min-height: 48px; font-size: 16px; }
-        .container { max-width: 900px; margin: 0 auto; }
-        
+        .container { max-width: 1000px; margin: 0 auto; }
         .header { background: #ffffff; border-radius: 28px; padding: 20px 16px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; text-align: center; }
         .logo-icon { width: 56px; height: 56px; background: #1a73e8; border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 10px; }
         .logo-icon i { font-size: 30px; color: white; }
         .header h1 { font-size: 24px; font-weight: 800; color: #1e293b; }
         .user-badge { background: #f1f5f9; padding: 10px 18px; border-radius: 60px; display: inline-flex; align-items: center; gap: 12px; margin-top: 12px; font-weight: 600; font-size: 14px; }
-        .user-badge button { background: #dc3545; border: none; padding: 8px 20px; border-radius: 40px; color: white; font-weight: 600; font-size: 14px; }
-        
+        .user-badge button { background: #dc3545; border: none; padding: 8px 20px; border-radius: 40px; color: white; font-weight: 600; }
         .tab-nav { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
         .tab-btn { background: white; border: 1px solid #cbd5e1; padding: 12px 18px; border-radius: 50px; font-weight: 700; font-size: 14px; color: #475569; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s; }
         .tab-btn.active { background: #1a73e8; color: white; border-color: #1a73e8; box-shadow: 0 4px 12px rgba(26,115,232,0.25); }
         .panel { display: none; }
         .panel.active-panel { display: block; animation: fadeIn 0.25s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        
         .card { background: white; border-radius: 24px; padding: 20px; margin-bottom: 18px; border: 1px solid #e2e8f0; }
         .card h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #0f172a; border-left: 4px solid #1a73e8; padding-left: 12px; }
-        .card h3 { font-size: 16px; font-weight: 600; margin: 12px 0 8px; color: #334155; }
-        
+        .card h3 { font-size: 16px; font-weight: 600; margin: 16px 0 12px; color: #334155; }
         .match-card { background: #ffffff; border-radius: 24px; margin-bottom: 20px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .match-header { background: linear-gradient(135deg, #f8fafc, #f1f5f9); padding: 16px 20px; border-bottom: 2px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
-        .match-date { font-weight: 800; font-size: 18px; color: #1e293b; }
-        .match-result-badge { background: #1a73e8; color: white; padding: 8px 18px; border-radius: 60px; font-weight: 800; font-size: 20px; }
+        .match-date { font-weight: 800; font-size: 18px; }
+        .match-result-badge { background: #1a73e8; color: white; padding: 8px 18px; border-radius: 60px; font-weight: 800; }
         .teams-section { padding: 20px; background: linear-gradient(145deg, #2e7d32, #1b5e20); }
         .teams-flex { display: flex; gap: 16px; flex-wrap: wrap; }
-        .team-card-mini { flex: 1; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); border-radius: 20px; padding: 16px; min-width: 200px; }
-        .team-name-yellow { font-size: 22px; font-weight: 800; text-align: center; padding: 8px; border-radius: 60px; background: #ffc107; color: #2c2c2c; margin-bottom: 12px; }
-        .team-name-orange { font-size: 22px; font-weight: 800; text-align: center; padding: 8px; border-radius: 60px; background: #fd7e14; color: white; margin-bottom: 12px; }
+        .team-card-mini { flex: 1; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); border-radius: 20px; padding: 16px; }
+        .team-name-yellow { background: #ffc107; color: #2c2c2c; font-weight: 800; text-align: center; padding: 8px; border-radius: 60px; margin-bottom: 12px; }
+        .team-name-orange { background: #fd7e14; color: white; font-weight: 800; text-align: center; padding: 8px; border-radius: 60px; margin-bottom: 12px; }
         .player-list-mini { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-        .player-badge-mini { background: rgba(255,255,255,0.2); border-radius: 40px; padding: 6px 12px; font-size: 13px; font-weight: 500; color: white; }
+        .player-badge-mini { background: rgba(255,255,255,0.2); border-radius: 40px; padding: 6px 12px; font-size: 13px; color: white; }
         .score-display-big { text-align: center; margin-top: 16px; font-size: 28px; font-weight: 800; background: rgba(0,0,0,0.6); border-radius: 60px; padding: 12px; color: white; }
-        .goals-section { padding: 16px 20px; background: #fefce8; border-bottom: 1px solid #e2e8f0; }
-        .goals-title { font-weight: 800; font-size: 15px; color: #854d0e; margin-bottom: 12px; }
+        .goals-section { padding: 16px 20px; background: #fefce8; }
         .goals-list { display: flex; flex-wrap: wrap; gap: 12px; }
-        .goal-item { background: white; border-radius: 40px; padding: 8px 16px; font-size: 14px; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 3px solid #eab308; }
-        .comments-section { padding: 16px 20px; background: #ffffff; }
+        .goal-item { background: white; border-radius: 40px; padding: 8px 16px; font-weight: 600; border-left: 3px solid #eab308; }
+        .comments-section { padding: 16px 20px; }
         .add-comment { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
-        .add-comment input { flex: 1; padding: 12px 16px; border-radius: 60px; border: 1.5px solid #e2e8f0; font-size: 14px; }
-        .comment-item { background: #f8fafc; border-radius: 20px; padding: 12px; margin-bottom: 10px; border: 1px solid #e2e8f0; }
-        
-        select, input { width: 100%; padding: 14px 16px; border: 1.5px solid #e2e8f0; border-radius: 60px; background: white; margin: 5px 0; }
-        button { background: #1a73e8; color: white; border: none; padding: 14px 22px; border-radius: 60px; font-weight: 700; font-size: 15px; cursor: pointer; transition: transform 0.1s; }
+        .add-comment input { flex: 1; padding: 12px 16px; border-radius: 60px; border: 1.5px solid #e2e8f0; }
+        .comment-item { background: #f8fafc; border-radius: 20px; padding: 12px; margin-bottom: 10px; }
+        select, input { width: 100%; padding: 14px 16px; border: 1.5px solid #e2e8f0; border-radius: 60px; margin: 5px 0; }
+        button { background: #1a73e8; color: white; border: none; padding: 14px 22px; border-radius: 60px; font-weight: 700; cursor: pointer; transition: transform 0.1s; }
         button:active { transform: scale(0.97); }
         .btn-outline { background: white; color: #1a73e8; border: 2px solid #1a73e8; }
         .flex-btns { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 15px; }
         .stat-card { background: #f8fafc; border-radius: 20px; padding: 18px; text-align: center; }
         .attendee-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-        .attendee-tag { background: #e2e8f0; padding: 8px 16px; border-radius: 40px; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; }
+        .attendee-tag { background: #e2e8f0; padding: 8px 16px; border-radius: 40px; font-size: 14px; }
         .data-table { width: 100%; border-collapse: collapse; }
         .data-table th, .data-table td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
         .profile-grid { display: flex; flex-direction: column; gap: 12px; }
         .profile-item { background: #f8fafc; border-radius: 20px; padding: 16px; border-left: 4px solid #1a73e8; }
-        .profile-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
-        .profile-name { font-weight: 800; font-size: 18px; color: #0f172a; }
+        .profile-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+        .profile-name { font-weight: 800; font-size: 18px; }
         .profile-details { display: flex; flex-wrap: wrap; gap: 12px; margin: 12px 0; }
-        .profile-badge { background: white; border-radius: 30px; padding: 6px 14px; font-size: 13px; font-weight: 600; color: #1e293b; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        .edit-profile-btn { background: #475569; padding: 10px 20px; font-size: 13px; }
-        .financial-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eef2f5; }
-        .badge-paid { background: #28a745; color: white; border-radius: 40px; padding: 4px 12px; font-size: 12px; font-weight: 600; }
+        .profile-badge { background: white; border-radius: 30px; padding: 6px 14px; font-size: 13px; font-weight: 600; }
+        .badge-paid { background: #28a745; color: white; border-radius: 40px; padding: 4px 12px; font-size: 12px; }
         .badge-owing { background: #dc3545; color: white; border-radius: 40px; padding: 4px 12px; font-size: 12px; }
         .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
         .modal-content { background: white; border-radius: 32px; padding: 24px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; }
-        .team-select { width: auto; min-width: 130px; margin: 0; padding: 8px 12px; }
         .rule-box { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; border-radius: 16px; margin-bottom: 16px; }
-        @media (max-width: 550px) { .teams-flex { flex-direction: column; } .profile-header { flex-direction: column; align-items: flex-start; } }
+        @media (max-width: 650px) { .teams-flex { flex-direction: column; } .profile-header { flex-direction: column; align-items: flex-start; } }
     </style>
 </head>
 <body>
 <div class="container" id="appContainer"></div>
 
 <script>
-    // Firebase Config
+    // ==================== FIREBASE CONFIGURATION ====================
     const firebaseConfig = {
         apiKey: "AIzaSyCWlFqDJyENgrUOhiLXCjSEi4Mk_54SA1w",
         authDomain: "monday-night-soccer-hub.firebaseapp.com",
@@ -96,40 +87,44 @@
     };
     
     let db = null;
-    try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); console.log("Firebase ready"); } catch(e) { console.warn("Demo mode"); }
+    try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); console.log("✅ Firebase connected"); } catch(e) { console.warn("⚠️ Demo mode - using localStorage"); }
     
-    // ---------- POSITIONS LIST ----------
+    // ==================== POSITIONS DROPDOWN (Exact list requested) ====================
     const POSITIONS = [
         "Goalkeeper", "Defender", "Defensive Midfielder", "Midfielder Centre",
         "Midfielder Attacking", "Wing Back Right", "Wing Back Left",
         "Attacking Midfielder", "Striker", "Winger Left", "Winger Right"
     ];
     
-    // Data Models
+    // ==================== DATA MODELS ====================
     let players = ["Alex Rowe", "Ali Mekawy", "Carlo", "Charlie", "Chris Del Monaco", "Chris M", "Chris S", "Danny", "Dante", "David", "Dimitri", "Enzo", "Farid", "Faros", "Frank", "George B", "George T", "Ivan", "James Zoumis", "James", "Joe T", "Joey", "Kia", "Leo", "Manoli", "Marco", "Mario", "Maurice", "Nector", "Paul", "Perri", "Peter", "Ralph", "Rocco", "Stav", "Stevan", "Theo", "Tony EH", "Vasilis"].sort();
-    
-    // Player profiles with GAMES PLAYED counter (auto-increments when they RSVP 'in' for a game)
-    let playerProfiles = {}; // { playerName: { age, position, yearJoined, gamesPlayed } }
-    let teamAssignments = {}, matchResults = {}, payments = [], attendance = [], guests = [];
+    let playerProfiles = {};      // { name: { age, position, yearJoined, gamesPlayed } }
+    let teamAssignments = {};     // { gameDate: { playerName: "yellow"/"orange" } }
+    let matchResults = {};        // { gameDate: { yellowScore, orangeScore, goals: { player: count } } }
+    let payments = [];            // { player, gameDate, amount }
+    let attendance = [];          // { player, gameDate, status }
+    let guests = [];
     let matchComments = {};
     let isAdminLoggedIn = false, currentUser = null;
     
-    // Firestore Refs
-    const playersRef = db ? db.collection("config").doc("players") : null;
-    const profilesRef = db ? db.collection("config").doc("playerProfiles") : null;
-    const teamsRef = db ? db.collection("config").doc("teamAssignments") : null;
-    const resultsRef = db ? db.collection("config").doc("matchResults") : null;
-    const paymentsRef = db ? db.collection("payments") : null;
-    const attendanceRef = db ? db.collection("attendance") : null;
-    const messagesRef = db ? db.collection("messages") : null;
-    const guestsRef = db ? db.collection("guests") : null;
-    const commentsRef = db ? db.collection("matchComments") : null;
+    // Firestore References
+    const playersRef = db?.collection("config").doc("players");
+    const profilesRef = db?.collection("config").doc("playerProfiles");
+    const teamsRef = db?.collection("config").doc("teamAssignments");
+    const resultsRef = db?.collection("config").doc("matchResults");
+    const paymentsRef = db?.collection("payments");
+    const attendanceRef = db?.collection("attendance");
+    const messagesRef = db?.collection("messages");
+    const guestsRef = db?.collection("guests");
+    const commentsRef = db?.collection("matchComments");
     
-    // Date Helpers
+    // ==================== DATE HELPERS ====================
     function getCurrentAESTDate() {
-        const now = new Date(); const utc = now.getTime() + (now.getTimezoneOffset() 60000);
+        const now = new Date();
+        const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
         return new Date(utc + (10 * 3600000)).toISOString().split('T')[0];
     }
+    
     function generateAllGameWeeks() {
         const year = new Date().getFullYear();
         let start = new Date(year, 0, 1);
@@ -147,54 +142,54 @@
         return weeks;
     }
     const ALL_GAME_WEEKS = generateAllGameWeeks();
-    function getFutureWeeks() { return ALL_GAME_WEEKS.filter(w => w.dateStr >= getCurrentAESTDate()); }
-    function getPastWeeks() { return ALL_GAME_WEEKS.filter(w => w.dateStr < getCurrentAESTDate()).reverse(); }
+    const getFutureWeeks = () => ALL_GAME_WEEKS.filter(w => w.dateStr >= getCurrentAESTDate());
+    const getPastWeeks = () => ALL_GAME_WEEKS.filter(w => w.dateStr < getCurrentAESTDate()).reverse();
     
+    // ==================== DATA LOADING & SAVING ====================
     async function loadData() {
         if(!db) return;
         try {
-            const pDoc = await playersRef.get(); if(pDoc.exists && pDoc.data().list) players = pDoc.data().list.sort();
-            const profileDoc = await profilesRef.get(); if(profileDoc.exists) playerProfiles = profileDoc.data();
-            const tDoc = await teamsRef.get(); if(tDoc.exists) teamAssignments = tDoc.data();
-            const rDoc = await resultsRef.get(); if(rDoc.exists) matchResults = rDoc.data();
-            const paySnap = await paymentsRef.get(); payments = []; paySnap.forEach(d => payments.push(d.data()));
-            const attSnap = await attendanceRef.get(); attendance = []; attSnap.forEach(d => attendance.push(d.data()));
-            const guestSnap = await guestsRef.get(); guests = []; guestSnap.forEach(d => guests.push(d.data()));
-            const commentsSnap = await commentsRef.get();
+            const pDoc = await playersRef?.get();
+            if(pDoc?.exists && pDoc.data().list) players = pDoc.data().list.sort();
+            const profileDoc = await profilesRef?.get();
+            if(profileDoc?.exists) playerProfiles = profileDoc.data();
+            const tDoc = await teamsRef?.get();
+            if(tDoc?.exists) teamAssignments = tDoc.data();
+            const rDoc = await resultsRef?.get();
+            if(rDoc?.exists) matchResults = rDoc.data();
+            const paySnap = await paymentsRef?.get();
+            payments = []; paySnap?.forEach(d => payments.push(d.data()));
+            const attSnap = await attendanceRef?.get();
+            attendance = []; attSnap?.forEach(d => attendance.push(d.data()));
+            const guestSnap = await guestsRef?.get();
+            guests = []; guestSnap?.forEach(d => guests.push(d.data()));
+            const commentsSnap = await commentsRef?.get();
             matchComments = {};
-            commentsSnap.forEach(doc => { const data = doc.data(); if (!matchComments[data.gameDate]) matchComments[data.gameDate] = []; matchComments[data.gameDate].push(data); });
-            
-            // Auto-calculate gamesPlayed from attendance records
+            commentsSnap?.forEach(doc => {
+                const data = doc.data();
+                if (!matchComments[data.gameDate]) matchComments[data.gameDate] = [];
+                matchComments[data.gameDate].push(data);
+            });
+            // Auto-update gamesPlayed counter based on attendance records
             for (let player of players) {
                 const gamesCount = attendance.filter(a => a.player === player && a.status === 'in').length;
-                if (playerProfiles[player]) {
-                    playerProfiles[player].gamesPlayed = gamesCount;
-                } else {
-                    playerProfiles[player] = { age: '—', position: '—', yearJoined: '—', gamesPlayed: gamesCount };
-                }
+                if (playerProfiles[player]) playerProfiles[player].gamesPlayed = gamesCount;
+                else playerProfiles[player] = { age: '—', position: '—', yearJoined: '—', gamesPlayed: gamesCount };
             }
         } catch(e) { console.warn(e); }
     }
     async function saveProfiles() { if(db && profilesRef) await profilesRef.set(playerProfiles); }
     async function saveTeams() { if(db && teamsRef) await teamsRef.set(teamAssignments); }
     async function saveResults() { if(db && resultsRef) await resultsRef.set(matchResults); }
-    async function savePayment(paymentObj) { 
-        if(db && paymentsRef) await paymentsRef.doc(`${paymentObj.player}_${paymentObj.gameDate}`).set(paymentObj); 
-        const idx = payments.findIndex(p => p.player === paymentObj.player && p.gameDate === paymentObj.gameDate);
-        if(idx !== -1) payments[idx] = paymentObj; else payments.push(paymentObj);
-    }
-    async function saveAttendance(a) { 
-        if(db && attendanceRef) await attendanceRef.doc(`${a.player}_${a.gameDate}`).set(a); 
-        const idx = attendance.findIndex(x=>x.player===a.player&&x.gameDate===a.gameDate); 
-        if(idx!==-1) attendance[idx]=a; else attendance.push(a);
-        
-        // Update gamesPlayed counter for the player
+    async function savePayment(p) { if(db && paymentsRef) await paymentsRef.doc(`${p.player}_${p.gameDate}`).set(p); const idx = payments.findIndex(pay => pay.player === p.player && pay.gameDate === p.gameDate); if(idx !== -1) payments[idx] = p; else payments.push(p); }
+    async function saveAttendance(a) {
+        if(db && attendanceRef) await attendanceRef.doc(`${a.player}_${a.gameDate}`).set(a);
+        const idx = attendance.findIndex(x => x.player === a.player && x.gameDate === a.gameDate);
+        if(idx !== -1) attendance[idx] = a; else attendance.push(a);
+        // Update gamesPlayed counter
         const gamesCount = attendance.filter(att => att.player === a.player && att.status === 'in').length;
-        if (playerProfiles[a.player]) {
-            playerProfiles[a.player].gamesPlayed = gamesCount;
-        } else {
-            playerProfiles[a.player] = { age: '—', position: '—', yearJoined: '—', gamesPlayed: gamesCount };
-        }
+        if (playerProfiles[a.player]) playerProfiles[a.player].gamesPlayed = gamesCount;
+        else playerProfiles[a.player] = { age: '—', position: '—', yearJoined: '—', gamesPlayed: gamesCount };
         await saveProfiles();
     }
     async function saveGuest(g) { if(db && guestsRef) await guestsRef.doc(`${g.guestName}_${g.gameDate}`).set(g); guests.push(g); }
@@ -206,12 +201,12 @@
         renderHistoryPanel();
     }
     
-    // Auth
+    // ==================== AUTHENTICATION ====================
     function loginAsPlayer(name) { currentUser = { name, role: "player" }; isAdminLoggedIn = false; localStorage.setItem("soccer_user", JSON.stringify(currentUser)); renderApp(); }
     function adminLogin(pw) { if(pw === "admin123") { currentUser = { name: "Admin", role: "admin" }; isAdminLoggedIn = true; localStorage.setItem("soccer_user", JSON.stringify(currentUser)); renderApp(); return true; } return false; }
     function logout() { currentUser = null; localStorage.removeItem("soccer_user"); renderLogin(); }
     
-    // Profile Edit Modal
+    // ==================== PLAYER PROFILE EDIT MODAL ====================
     function showEditProfileModal(playerName) {
         const existing = playerProfiles[playerName] || { age: '', position: POSITIONS[0], yearJoined: '', gamesPlayed: 0 };
         const modalDiv = document.createElement('div');
@@ -224,30 +219,23 @@
                 <label>Age</label>
                 <input type="text" id="editAge" placeholder="e.g., 28" value="${escapeHtml(existing.age || '')}">
                 <label>Preferred Position</label>
-                <select id="editPosition">
-                    ${POSITIONS.map(pos => `<option value="${pos}" ${existing.position === pos ? 'selected' : ''}>${pos}</option>`).join('')}
-                </select>
+                <select id="editPosition">${POSITIONS.map(pos => `<option value="${pos}" ${existing.position === pos ? 'selected' : ''}>${pos}</option>`).join('')}</select>
                 <label>Year Joined</label>
                 <input type="text" id="editYear" placeholder="e.g., 2021" value="${escapeHtml(existing.yearJoined || '')}">
                 <div style="background:#f1f5f9; border-radius:16px; padding:12px; margin:12px 0; text-align:center;">
                     <strong>📊 Games Played: ${existing.gamesPlayed || 0}</strong>
-                    <p style="font-size:12px; margin-top:4px;">Automatically updates when you RSVP for games!</p>
+                    <p style="font-size:12px; margin-top:4px;">✨ Automatically increases when you RSVP "I'm Playing"</p>
                 </div>
-                <div class="flex-btns" style="margin-top: 20px;">
-                    <button id="saveProfileBtn" style="flex:1;">💾 Save Changes</button>
-                    <button id="cancelModalBtn" class="btn-outline" style="flex:1;">Cancel</button>
-                </div>
+                <div class="flex-btns"><button id="saveProfileBtn">💾 Save Changes</button><button id="cancelModalBtn" class="btn-outline">Cancel</button></div>
             </div>
         `;
         document.body.appendChild(modalDiv);
-        
         document.getElementById('saveProfileBtn').onclick = async () => {
             const newName = document.getElementById('editName').value.trim();
             const newAge = document.getElementById('editAge').value.trim();
             const newPosition = document.getElementById('editPosition').value;
             const newYear = document.getElementById('editYear').value.trim();
             if (!newName) { alert("Name cannot be empty"); return; }
-            
             const oldGames = playerProfiles[playerName]?.gamesPlayed || 0;
             if (newName !== playerName) {
                 if (players.includes(newName)) { alert("Name already exists"); return; }
@@ -258,7 +246,7 @@
                 if (db && playersRef) await playersRef.set({ list: players });
                 playerProfiles[newName] = { age: newAge || '—', position: newPosition, yearJoined: newYear || '—', gamesPlayed: oldGames };
                 delete playerProfiles[playerName];
-                if (currentUser && currentUser.name === playerName) { currentUser.name = newName; localStorage.setItem("soccer_user", JSON.stringify(currentUser)); }
+                if (currentUser?.name === playerName) { currentUser.name = newName; localStorage.setItem("soccer_user", JSON.stringify(currentUser)); }
             } else {
                 playerProfiles[playerName] = { ...playerProfiles[playerName], age: newAge || '—', position: newPosition, yearJoined: newYear || '—' };
             }
@@ -270,50 +258,47 @@
         document.getElementById('cancelModalBtn').onclick = () => modalDiv.remove();
     }
     
-    // PROFILES PANEL
+    // ==================== PROFILES PANEL ====================
     function renderProfilesPanel() {
-        let html = `<div class="card"><h2><i class="fas fa-id-card"></i> Player Profiles</h2><p style="font-size:13px; margin-bottom:16px;">Edit your name, age, position, and join year. Games played auto-updates from RSVPs.</p><div class="profile-grid">`;
+        let html = `<div class="card"><h2><i class="fas fa-id-card"></i> Player Profiles</h2><p>Each player can edit their Name, Age, Position, and Year Joined. Games Played auto-updates from RSVPs.</p><div class="profile-grid">`;
         for(let player of players) {
-            const profile = playerProfiles[player] || { age: '—', position: '—', yearJoined: '—', gamesPlayed: 0 };
-            const isOwnProfile = (currentUser && currentUser.name === player) || isAdminLoggedIn;
-            html += `<div class="profile-item"><div class="profile-header"><div class="profile-name"><i class="fas fa-futbol" style="color:#1a73e8; margin-right:8px;"></i>${escapeHtml(player)}</div>${isOwnProfile ? `<button class="edit-profile-btn" data-player="${escapeHtml(player)}">✏️ Edit</button>` : ''}</div>
-                <div class="profile-details"><span class="profile-badge">🎂 Age: ${escapeHtml(profile.age)}</span><span class="profile-badge">⚽ Position: ${escapeHtml(profile.position)}</span><span class="profile-badge">📅 Joined: ${escapeHtml(profile.yearJoined)}</span><span class="profile-badge">🏆 Games: ${profile.gamesPlayed || 0}</span></div></div>`;
+            const p = playerProfiles[player] || { age: '—', position: '—', yearJoined: '—', gamesPlayed: 0 };
+            const canEdit = (currentUser?.name === player) || isAdminLoggedIn;
+            html += `<div class="profile-item"><div class="profile-header"><div class="profile-name"><i class="fas fa-futbol"></i> ${escapeHtml(player)}</div>${canEdit ? `<button class="edit-profile-btn" data-player="${escapeHtml(player)}">✏️ Edit</button>` : ''}</div>
+                <div class="profile-details"><span class="profile-badge">🎂 Age: ${escapeHtml(p.age)}</span><span class="profile-badge">⚽ Position: ${escapeHtml(p.position)}</span><span class="profile-badge">📅 Joined: ${escapeHtml(p.yearJoined)}</span><span class="profile-badge">🏆 Games: ${p.gamesPlayed || 0}</span></div></div>`;
         }
         html += `</div></div>`;
         document.getElementById("panel-profiles").innerHTML = html;
         document.querySelectorAll(".edit-profile-btn").forEach(btn => btn.addEventListener("click", () => showEditProfileModal(btn.dataset.player)));
     }
     
-    // FINANCE PANEL (Admin only) - Shows current week signups + payment status
+    // ==================== FINANCE PANEL (Admin Only) ====================
     function renderFinancePanel() {
         if (!isAdminLoggedIn) {
-            document.getElementById("panel-finance").innerHTML = `<div class="card"><h2><i class="fas fa-lock"></i> Financial Ledger</h2><p>Only administrators can manage payments.</p><p style="margin-top:12px; color:#1a73e8;">👑 Login as Admin (password: admin123)</p></div>`;
+            document.getElementById("panel-finance").innerHTML = `<div class="card"><h2>💰 Financial Ledger</h2><p>Only administrators can manage payments.</p><p style="margin-top:12px;">👑 Admin password: admin123</p></div>`;
             return;
         }
-        const futureWeeks = getFutureWeeks();
-        const currentWeek = futureWeeks.length > 0 ? futureWeeks[0] : null;
-        const totalCollected = payments.reduce((sum, p) => sum + (p.amount || 5), 0);
-        let html = `<div class="card"><h2><i class="fas fa-coins"></i> 💰 Financial Rules & Ledger</h2>
-            <div class="rule-box"><strong>📋 Financial Rules:</strong><br>• $5 per player per game • Collected by Admin • Weekly settled after match</div>
+        const currentWeek = getFutureWeeks()[0];
+        const totalCollected = payments.reduce((sum, p) => sum + 5, 0);
+        let html = `<div class="card"><h2><i class="fas fa-coins"></i> Financial Rules & Ledger</h2>
+            <div class="rule-box"><strong>📋 Financial Rules:</strong><br>• $5 per player per game • Collected by Admin • Weekly settlement after match</div>
             <div class="stat-card"><strong>🏦 Total Treasury: $${totalCollected}</strong></div>`;
-        
         if (currentWeek) {
-            const signedPlayers = attendance.filter(a => a.gameDate === currentWeek.dateStr && a.status === 'in').map(a => a.player);
-            html += `<h3>📅 Current Week: ${currentWeek.label}</h3><div class="attendee-tags">${signedPlayers.map(p => `<span class="attendee-tag">${escapeHtml(p)}</span>`).join('') || '<span>No players signed up yet</span>'}</div>
+            const signed = attendance.filter(a => a.gameDate === currentWeek.dateStr && a.status === 'in').map(a => a.player);
+            html += `<h3>📅 Current Week: ${currentWeek.label}</h3><div class="attendee-tags">${signed.map(p => `<span class="attendee-tag">${escapeHtml(p)}</span>`).join('') || '<span>No signups yet</span>'}</div>
             <table class="data-table" style="margin-top:16px;"><thead><tr><th>Player</th><th>Status</th><th>Payment</th><th>Action</th></tr></thead><tbody>`;
-            for (let player of signedPlayers) {
+            for (let player of signed) {
                 const isPaid = payments.some(p => p.player === player && p.gameDate === currentWeek.dateStr);
                 html += `<tr><td><strong>${escapeHtml(player)}</strong></td><td>✓ Playing</td><td>${isPaid ? '<span class="badge-paid">PAID $5</span>' : '<span class="badge-owing">OWING $5</span>'}</td>
-                    <td>${!isPaid ? `<button class="markPaidBtn" data-player="${escapeHtml(player)}" data-date="${currentWeek.dateStr}" style="background:#28a745; padding:6px 16px;">Mark Paid</button>` : '—'}</td></tr>`;
+                    <td>${!isPaid ? `<button class="markPaidBtn" data-player="${escapeHtml(player)}" data-date="${currentWeek.dateStr}">Mark Paid</button>` : '—'}</td></tr>`;
             }
             html += `</tbody></table>`;
-        } else { html += `<p>No upcoming games scheduled.</p>`; }
-        html += `<h3 style="margin-top:20px;">📜 Past Weeks Summary</h3><table class="data-table"><thead><tr><th>Week</th><th>Players</th><th>Collected</th></tr></thead><tbody>`;
-        const pastWeeks = getPastWeeks().slice(0, 6);
-        for (let week of pastWeeks) {
-            const weekPlayers = attendance.filter(a => a.gameDate === week.dateStr && a.status === 'in').map(a => a.player);
+        }
+        html += `<h3>📜 Past Weeks Summary</h3><table class="data-table"><thead><tr><th>Week</th><th>Players</th><th>Collected</th></tr></thead><tbody>`;
+        for (let week of getPastWeeks().slice(0, 8)) {
+            const weekPlayers = attendance.filter(a => a.gameDate === week.dateStr && a.status === 'in').length;
             const weekCollected = payments.filter(p => p.gameDate === week.dateStr).length * 5;
-            html += `<tr><td>${week.label}</td><td>${weekPlayers.length} players</td><td>$${weekCollected}</td></tr>`;
+            html += `<tr><td>${week.label}</td><td>${weekPlayers} players</td><td>$${weekCollected}</td></tr>`;
         }
         html += `</tbody></table></div>`;
         document.getElementById("panel-finance").innerHTML = html;
@@ -324,11 +309,11 @@
         }));
     }
     
-    // ADMIN TEAM ASSIGNMENT PANEL
+    // ==================== ADMIN TEAM ASSIGNMENT ====================
     function renderAdminPanel() {
-        const futureWeeks = getFutureWeeks();
-        if (!futureWeeks.length) { document.getElementById("panel-admin").innerHTML = `<div class="card"><h2>Admin</h2><p>No upcoming games to assign.</p></div>`; return; }
-        let html = `<div class="card"><h2><i class="fas fa-users"></i> Assign Teams for Match Day</h2><select id="assignWeek">${futureWeeks.map(w=>`<option value="${w.dateStr}">${w.label}</option>`)}</select><div id="teamAssignList"></div><button id="saveTeamsBtn" class="btn-outline" style="margin-top:16px;">💾 Save Team Assignments</button></div>`;
+        const weeks = getFutureWeeks();
+        if (!weeks.length) { document.getElementById("panel-admin").innerHTML = `<div class="card"><h2>Admin</h2><p>No upcoming games to assign.</p></div>`; return; }
+        let html = `<div class="card"><h2><i class="fas fa-users"></i> Assign Teams for Match Day</h2><select id="assignWeek">${weeks.map(w => `<option value="${w.dateStr}">${w.label}</option>`)}</select><div id="teamAssignList"></div><button id="saveTeamsBtn" class="btn-outline" style="margin-top:16px;">💾 Save Team Assignments</button></div>`;
         document.getElementById("panel-admin").innerHTML = html;
         document.getElementById("assignWeek").onchange = () => renderTeamAssignList();
         document.getElementById("saveTeamsBtn").onclick = async () => { await saveTeams(); alert("Teams saved!"); renderAdminPanel(); renderHistoryPanel(); };
@@ -337,38 +322,50 @@
     function renderTeamAssignList() {
         const week = document.getElementById("assignWeek")?.value;
         if(!week) return;
-        const signedPlayers = attendance.filter(a => a.gameDate === week && a.status === 'in').map(a => a.player);
+        const signed = attendance.filter(a => a.gameDate === week && a.status === 'in').map(a => a.player);
         if(!teamAssignments[week]) teamAssignments[week] = {};
         let html = `<h3>Assign Yellow vs Orange Teams</h3>`;
-        for(let player of signedPlayers) {
-            const currentTeam = teamAssignments[week][player] || "";
+        for(let player of signed) {
+            const current = teamAssignments[week][player] || "";
             html += `<div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0; background:#f1f5f9; border-radius:60px; padding:8px 16px;"><span><strong>${escapeHtml(player)}</strong></span>
-                <select class="team-select" data-player="${escapeHtml(player)}" style="width:140px;"><option value="">— Select Team —</option><option value="yellow" ${currentTeam==="yellow"?"selected":""}>🟡 Yellow Team</option><option value="orange" ${currentTeam==="orange"?"selected":""}>🟠 Orange Team</option></select></div>`;
+                <select class="team-select" data-player="${escapeHtml(player)}"><option value="">— Select —</option><option value="yellow" ${current==="yellow"?"selected":""}>🟡 Yellow</option><option value="orange" ${current==="orange"?"selected":""}>🟠 Orange</option></select></div>`;
         }
         document.getElementById("teamAssignList").innerHTML = html;
         document.querySelectorAll(".team-select").forEach(sel => sel.addEventListener("change", () => { teamAssignments[week][sel.dataset.player] = sel.value; }));
     }
     
-    // SCOREBOARD PANEL
+    // ==================== SCOREBOARD PANEL ====================
     function renderScoreboardPanel() {
         let stats = new Map();
         players.forEach(p => stats.set(p, { goals: 0, appearances: 0 }));
         attendance.forEach(a => { if(a.status === 'in' && stats.has(a.player)) stats.get(a.player).appearances++; });
-        for(let match of Object.values(matchResults)) {
-            if(match.goals) for(let [scorer, count] of Object.entries(match.goals)) if(stats.has(scorer)) stats.get(scorer).goals += count;
-        }
-        const topScorers = Array.from(stats.entries()).map(([n,s]) => ({ name:n, goals:s.goals, apps:s.appearances })).sort((a,b)=>b.goals - a.goals).slice(0,10);
+        for(let match of Object.values(matchResults)) if(match.goals) for(let [scorer, count] of Object.entries(match.goals)) if(stats.has(scorer)) stats.get(scorer).goals += count;
+        const topGoals = Array.from(stats.entries()).map(([n,s]) => ({ name:n, goals:s.goals })).sort((a,b)=>b.goals - a.goals).slice(0,10);
         const topApps = Array.from(stats.entries()).map(([n,s]) => ({ name:n, apps:s.appearances })).sort((a,b)=>b.apps - a.apps).slice(0,10);
-        document.getElementById("panel-scoreboard").innerHTML = `<div class="card"><h2>🏆 Leaderboard</h2><div style="display:flex; flex-wrap:wrap; gap:20px;"><div style="flex:1;"><h3>⚽ Top Scorers</h3><table class="data-table">${topScorers.map((p,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(p.name)}</td><td><strong>${p.goals}</strong></td></tr>`).join('')}</table></div><div style="flex:1;"><h3>🏃 Most Games</h3><table class="data-table">${topApps.map((p,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(p.name)}</td><td>${p.apps}</td></tr>`).join('')}</table></div></div></div>`;
+        document.getElementById("panel-scoreboard").innerHTML = `<div class="card"><h2>🏆 Leaderboard</h2><div style="display:flex; flex-wrap:wrap; gap:20px;"><div style="flex:1;"><h3>⚽ Top Scorers</h3><table class="data-table">${topGoals.map((p,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(p.name)}</td><td><strong>${p.goals}</strong></td></tr>`).join('')}</table></div><div style="flex:1;"><h3>🏃 Most Games</h3><table class="data-table">${topApps.map((p,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(p.name)}</td><td>${p.apps}</td></tr>`).join('')}</table></div></div></div>`;
     }
     
-    // RSVP PANEL
+    // ==================== RSVP PANEL ====================
     function renderRSVPPanel() {
         const weeks = getFutureWeeks();
         if (!weeks.length) { document.getElementById("panel-rsvp").innerHTML = `<div class="card"><h2>RSVP</h2><p>No upcoming matches</p></div>`; return; }
         document.getElementById("panel-rsvp").innerHTML = `<div class="card"><h2>📋 RSVP for Next Match</h2><select id="rsvpWeek">${weeks.map(w=>`<option value="${w.dateStr}">${w.label}</option>`)}</select><select id="rsvpPlayer"><option>-- My Name --</option>${players.map(p=>`<option>${escapeHtml(p)}</option>`)}</select><div class="flex-btns"><button id="rsvpYesBtn">✅ I'm Playing</button><button id="rsvpNoBtn">❌ Can't Play</button></div><div id="rsvpMsg"></div></div><div class="card"><h2>📋 Signed Players This Week</h2><div id="attendeesList"></div></div>`;
-        document.getElementById("rsvpYesBtn").onclick = async () => { const p = document.getElementById("rsvpPlayer").value; const w = document.getElementById("rsvpWeek").value; if(p && p !== "-- My Name --") { await saveAttendance({player:p, gameDate:w, status:"in"}); renderAttendees(); document.getElementById("rsvpMsg").innerHTML = `<span style="color:green;">✅ ${p} added! Games played count updated.</span>`; setTimeout(()=>document.getElementById("rsvpMsg").innerHTML="",2000); renderProfilesPanel(); } };
-        document.getElementById("rsvpNoBtn").onclick = async () => { const p = document.getElementById("rsvpPlayer").value; const w = document.getElementById("rsvpWeek").value; if(p) { await saveAttendance({player:p, gameDate:w, status:"out"}); renderAttendees(); } };
+        document.getElementById("rsvpYesBtn").onclick = async () => {
+            const p = document.getElementById("rsvpPlayer").value;
+            const w = document.getElementById("rsvpWeek").value;
+            if(p && p !== "-- My Name --") {
+                await saveAttendance({player:p, gameDate:w, status:"in"});
+                renderAttendees();
+                document.getElementById("rsvpMsg").innerHTML = `<span style="color:green;">✅ ${p} added! Games played: ${(playerProfiles[p]?.gamesPlayed || 0)}</span>`;
+                setTimeout(()=>document.getElementById("rsvpMsg").innerHTML="",2000);
+                renderProfilesPanel();
+            }
+        };
+        document.getElementById("rsvpNoBtn").onclick = async () => {
+            const p = document.getElementById("rsvpPlayer").value;
+            const w = document.getElementById("rsvpWeek").value;
+            if(p) { await saveAttendance({player:p, gameDate:w, status:"out"}); renderAttendees(); }
+        };
         document.getElementById("rsvpWeek").onchange = () => renderAttendees();
         renderAttendees();
     }
@@ -379,51 +376,78 @@
         document.getElementById("attendeesList").innerHTML = `<div class="attendee-tags">${attending.map(p=>`<span class="attendee-tag">${escapeHtml(p)}</span>`).join('')||'<span>None yet'}</div>`;
     }
     
-    // HISTORY, CHAT, RULES
+    // ==================== MATCH HISTORY PANEL ====================
     async function renderHistoryPanel() {
-        const pastWeeks = getPastWeeks();
-        if (!pastWeeks.length) { document.getElementById("panel-history").innerHTML = `<div class="card"><h2>Match History</h2><p>No past games yet.</p></div>`; return; }
+        const past = getPastWeeks();
+        if (!past.length) { document.getElementById("panel-history").innerHTML = `<div class="card"><h2>Match History</h2><p>No past games yet.</p></div>`; return; }
         let html = `<div class="card"><h2>📖 Match History</h2></div>`;
-        for (let week of pastWeeks.slice(0, 10)) {
+        for (let week of past.slice(0, 12)) {
             const assignments = teamAssignments[week.dateStr] || {};
             const yellow = Object.keys(assignments).filter(p => assignments[p] === "yellow");
             const orange = Object.keys(assignments).filter(p => assignments[p] === "orange");
             const match = matchResults[week.dateStr] || { yellowScore: 0, orangeScore: 0, goals: {} };
             const goals = match.goals || {};
+            const yellowGoals = [], orangeGoals = [];
+            for (let [player, count] of Object.entries(goals)) {
+                if (count > 0) {
+                    if (yellow.includes(player)) yellowGoals.push({player,count});
+                    else if (orange.includes(player)) orangeGoals.push({player,count});
+                }
+            }
             const comments = matchComments[week.dateStr] || [];
             const safeId = week.dateStr.replace(/-/g, '');
             html += `<div class="match-card"><div class="match-header"><div class="match-date">${week.label}</div><div class="match-result-badge">🟡 ${match.yellowScore} - ${match.orangeScore} 🟠</div></div>
                 <div class="teams-section"><div class="teams-flex"><div class="team-card-mini"><div class="team-name-yellow">🟡 YELLOW</div><div class="player-list-mini">${yellow.map(p=>`<span class="player-badge-mini">${escapeHtml(p)}</span>`).join('')}</div></div>
                 <div class="team-card-mini"><div class="team-name-orange">🟠 ORANGE</div><div class="player-list-mini">${orange.map(p=>`<span class="player-badge-mini">${escapeHtml(p)}</span>`).join('')}</div></div></div><div class="score-display-big">${match.yellowScore} - ${match.orangeScore}</div></div>
-                <div class="comments-section"><div>💬 Comments</div><div id="comments-${safeId}">${comments.map(c=>`<div class="comment-item"><div class="comment-author">${escapeHtml(c.author)}</div><div>${escapeHtml(c.text)}</div></div>`).join('')||'<div>No comments.</div>'}</div>
+                <div class="goals-section"><div class="goals-title">⚽ Goal Scorers</div><div class="goals-list">${yellowGoals.map(g=>`<div class="goal-item">🟡 ${escapeHtml(g.player)} ×${g.count}</div>`).join('')}${orangeGoals.map(g=>`<div class="goal-item">🟠 ${escapeHtml(g.player)} ×${g.count}</div>`).join('')}</div></div>
+                <div class="comments-section"><div>💬 Comments (${comments.length})</div><div id="comments-${safeId}">${comments.map(c=>`<div class="comment-item"><strong>${escapeHtml(c.author)}</strong><div>${escapeHtml(c.text)}</div></div>`).join('')||'<div>No comments yet.</div>'}</div>
                 <div class="add-comment"><input id="commentInput-${safeId}" placeholder="Add comment..."><button onclick="window.addComment('${week.dateStr}')">Comment</button></div></div></div>`;
         }
         document.getElementById("panel-history").innerHTML = html;
     }
     window.addComment = async function(gameDate) {
-        const safeId = gameDate.replace(/-/g, '');
-        const input = document.getElementById(`commentInput-${safeId}`);
+        const input = document.getElementById(`commentInput-${gameDate.replace(/-/g, '')}`);
         if(input?.value.trim()) { await saveComment(gameDate, currentUser.name, input.value.trim()); input.value = ""; renderHistoryPanel(); }
     };
-    function renderChatPanel() {
-        document.getElementById("panel-chat").innerHTML = `<div class="card"><h2>💬 Live Chat</h2><div id="chatMsgs" style="height:350px; overflow-y:auto; background:#f8fafc; border-radius:20px; padding:16px;"></div><div style="display:flex; gap:10px; margin-top:12px;"><input id="chatInput" placeholder="Type..."><button id="chatSendBtn">Send</button></div></div>`;
-        document.getElementById("chatSendBtn").onclick = async () => { const msg = document.getElementById("chatInput").value.trim(); if(msg && messagesRef) { await messagesRef.add({ name: currentUser.name, message: msg, timestamp: firebase.firestore.FieldValue.serverTimestamp() }); document.getElementById("chatInput").value = ""; } };
-        if(messagesRef) messagesRef.orderBy("timestamp","asc").onSnapshot(snap=>{ const c=document.getElementById("chatMsgs"); if(!c) return; let h=""; snap.forEach(d=>{ const m=d.data(); h+=`<div style="margin-bottom:12px;"><strong>${escapeHtml(m.name)}</strong><div style="background:white; border-radius:16px; padding:8px 12px; margin-top:4px;">${escapeHtml(m.message)}</div></div>`; }); c.innerHTML=h||"No messages"; c.scrollTop=c.scrollHeight; });
-    }
-    function renderRulesPanel() { document.getElementById("panel-rules").innerHTML = `<div class="card"><h2>📜 League Rules</h2><ul><li>❌ No dangerous tackles</li><li>🧤 Goalie rotates every 5 min</li><li>💰 $5 weekly fee (collected by Admin)</li><li>✅ RSVP required by Friday</li></ul></div>`; }
     
-    // MAIN APP
+    // ==================== CHAT & RULES ====================
+    function renderChatPanel() {
+        document.getElementById("panel-chat").innerHTML = `<div class="card"><h2>💬 Live Chat</h2><div id="chatMsgs" style="height:350px; overflow-y:auto; background:#f8fafc; border-radius:20px; padding:16px;"></div><div style="display:flex; gap:10px; margin-top:12px;"><input id="chatInput" placeholder="Type message..."><button id="chatSendBtn">Send</button></div></div>`;
+        document.getElementById("chatSendBtn").onclick = async () => {
+            const msg = document.getElementById("chatInput").value.trim();
+            if(msg && messagesRef) {
+                await messagesRef.add({ name: currentUser.name, message: msg, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+                document.getElementById("chatInput").value = "";
+            }
+        };
+        if(messagesRef) messagesRef.orderBy("timestamp","asc").onSnapshot(snap => {
+            const c = document.getElementById("chatMsgs");
+            if(!c) return;
+            let h = "";
+            snap.forEach(d => { const m = d.data(); h += `<div style="margin-bottom:12px;"><strong>${escapeHtml(m.name)}</strong><div style="background:white; border-radius:16px; padding:8px 12px; margin-top:4px;">${escapeHtml(m.message)}</div></div>`; });
+            c.innerHTML = h || "<div>No messages</div>";
+            c.scrollTop = c.scrollHeight;
+        });
+    }
+    function renderRulesPanel() { document.getElementById("panel-rules").innerHTML = `<div class="card"><h2>📜 League Rules</h2><ul><li>❌ No dangerous tackles from behind</li><li>🧤 Goalie rotates every 5 minutes</li><li>💰 $5 weekly fee (Admin collects)</li><li>✅ RSVP required by Friday for team balance</li><li>🎯 Positions can be set in your Profile</li></ul></div>`; }
+    
+    // ==================== MAIN APP RENDERER ====================
     async function renderApp() {
         await loadData();
-        const container = document.getElementById("appContainer");
-        container.innerHTML = `<div class="header"><div class="logo-icon"><i class="fas fa-futbol"></i></div><h1>MONDAY NIGHT SOCCER</h1><p>Complete League Management</p><div class="user-badge"><i class="fas fa-user-circle"></i> ${currentUser.role === "admin" ? "ADMIN" : currentUser.name}<button id="logoutBtn">Exit</button></div></div><div class="tab-nav" id="tabNav"></div><div id="panelContainer"></div>`;
+        document.getElementById("appContainer").innerHTML = `
+            <div class="header"><div class="logo-icon"><i class="fas fa-futbol"></i></div><h1>MONDAY NIGHT SOCCER</h1><p>Complete League Management | Player Profiles | Admin Finance</p><div class="user-badge"><i class="fas fa-user-circle"></i> ${currentUser.role === "admin" ? "ADMIN" : currentUser.name}<button id="logoutBtn">Exit</button></div></div>
+            <div class="tab-nav" id="tabNav"></div><div id="panelContainer"></div>
+        `;
         document.getElementById("logoutBtn").onclick = logout;
-        const tabs = [{ id:"profiles", label:"👤 PROFILES", icon:"fa-id-card"},{ id:"scoreboard", label:"🏆 SCOREBOARD", icon:"fa-chart-simple"},{ id:"history", label:"📖 HISTORY", icon:"fa-history"},{ id:"rsvp", label:"📋 RSVP", icon:"fa-calendar"},{ id:"chat", label:"💬 CHAT", icon:"fa-comments"},{ id:"rules", label:"📜 RULES", icon:"fa-book"},{ id:"finance", label:"💰 FINANCE", icon:"fa-dollar-sign"}];
+        const tabs = [
+            { id:"profiles", label:"👤 PROFILES", icon:"fa-id-card" }, { id:"scoreboard", label:"🏆 SCOREBOARD", icon:"fa-chart-simple" },
+            { id:"history", label:"📖 HISTORY", icon:"fa-history" }, { id:"rsvp", label:"📋 RSVP", icon:"fa-calendar" },
+            { id:"chat", label:"💬 CHAT", icon:"fa-comments" }, { id:"rules", label:"📜 RULES", icon:"fa-book" },
+            { id:"finance", label:"💰 FINANCE", icon:"fa-dollar-sign" }
+        ];
         if (isAdminLoggedIn) tabs.push({ id:"admin", label:"⚙️ TEAM ASSIGN", icon:"fa-users" });
-        const tabNav = document.getElementById("tabNav");
-        tabNav.innerHTML = tabs.map(t => `<button class="tab-btn" data-tab="${t.id}"><i class="fas ${t.icon}"></i> ${t.label}</button>`).join('');
-        const panelContainer = document.getElementById("panelContainer");
-        panelContainer.innerHTML = tabs.map(t => `<div id="panel-${t.id}" class="panel"></div>`).join('');
+        document.getElementById("tabNav").innerHTML = tabs.map(t => `<button class="tab-btn" data-tab="${t.id}"><i class="fas ${t.icon}"></i> ${t.label}</button>`).join('');
+        document.getElementById("panelContainer").innerHTML = tabs.map(t => `<div id="panel-${t.id}" class="panel"></div>`).join('');
         document.querySelectorAll(".tab-btn").forEach(btn => btn.addEventListener("click", function() {
             const id = this.dataset.tab;
             document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
@@ -443,16 +467,28 @@
     }
     
     function escapeHtml(str) { return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
+    
     async function renderLogin() {
         await loadData();
-        document.getElementById("appContainer").innerHTML = `<div style="background:white; border-radius:32px; padding:32px; max-width:380px; margin:60px auto; text-align:center;"><div class="logo-icon" style="margin:0 auto 16px;"><i class="fas fa-futbol"></i></div><h2>Monday Soccer Hub</h2><select id="playerSelect"><option>-- Select Player --</option>${players.map(p=>`<option>${escapeHtml(p)}</option>`)}</select><button id="playerLoginBtn">Enter as Player</button><hr><input type="password" id="adminPw" placeholder="Admin Password"><button id="adminLoginBtn">Admin Login</button><div id="loginErr" style="color:red; margin-top:12px;"></div></div>`;
-        document.getElementById("playerLoginBtn").onclick = () => { const n = document.getElementById("playerSelect").value; if(n && n !== "-- Select Player --") loginAsPlayer(n); else document.getElementById("loginErr").innerText = "Select name"; };
-        document.getElementById("adminLoginBtn").onclick = () => { if(!adminLogin(document.getElementById("adminPw").value)) document.getElementById("loginErr").innerText = "Wrong password"; };
+        document.getElementById("appContainer").innerHTML = `
+            <div style="background:white; border-radius:32px; padding:32px; max-width:380px; margin:60px auto; text-align:center;">
+                <div class="logo-icon" style="margin:0 auto 16px;"><i class="fas fa-futbol"></i></div>
+                <h2>Monday Soccer Hub</h2>
+                <select id="playerSelect"><option>-- Select Player --</option>${players.map(p=>`<option>${escapeHtml(p)}</option>`)}</select>
+                <button id="playerLoginBtn">Enter as Player</button><hr>
+                <input type="password" id="adminPw" placeholder="Admin Password"><button id="adminLoginBtn">Admin Login</button>
+                <div id="loginErr" style="color:red; margin-top:12px;"></div>
+            </div>
+        `;
+        document.getElementById("playerLoginBtn").onclick = () => { const n = document.getElementById("playerSelect").value; if(n && n !== "-- Select Player --") loginAsPlayer(n); else document.getElementById("loginErr").innerText = "Select your name"; };
+        document.getElementById("adminLoginBtn").onclick = () => { if(!adminLogin(document.getElementById("adminPw").value)) document.getElementById("loginErr").innerText = "Wrong password (use: admin123)"; };
     }
     
     (async () => {
         const stored = localStorage.getItem("soccer_user");
-        if(stored) { try { const u = JSON.parse(stored); if(u.role==="admin"){ isAdminLoggedIn=true; currentUser={name:"Admin",role:"admin"}; } else { currentUser={name:u.name,role:"player"}; } await loadData(); renderApp(); return; } catch(e){} }
+        if(stored) {
+            try { const u = JSON.parse(stored); if(u.role==="admin"){ isAdminLoggedIn=true; currentUser={name:"Admin",role:"admin"}; } else { currentUser={name:u.name,role:"player"}; } await loadData(); renderApp(); return; } catch(e){}
+        }
         renderLogin();
     })();
 </script>
