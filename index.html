@@ -30,7 +30,6 @@
         .module-container.active-module { display: block; }
         .card { background: white; border-radius: 24px; padding: 18px; margin-bottom: 14px; border: 1px solid #e2e8f0; }
         .card h2 { font-size: 17px; font-weight: 700; margin-bottom: 14px; border-left: 4px solid #1a73e8; padding-left: 12px; }
-        .card h3 { font-size: 15px; font-weight: 600; margin: 12px 0 8px; }
         .attendance-card { background: linear-gradient(135deg, #1a73e8, #0d5bbf); color: white; border-radius: 28px; padding: 24px 20px; text-align: center; margin-bottom: 16px; }
         .attendance-card h2 { font-size: 22px; margin-bottom: 6px; font-weight: 800; border-left: none; padding-left: 0; }
         .big-buttons { display: flex; gap: 14px; justify-content: center; margin: 16px 0 12px; }
@@ -110,7 +109,7 @@
         db = firebase.firestore(); 
         storage = firebase.storage();
         console.log("Firebase ready");
-    } catch(e) { console.warn("Demo mode - some features limited"); }
+    } catch(e) { console.warn("Demo mode"); }
     
     const POSITIONS = ["Goalkeeper","Defender","Defensive Midfielder","Midfielder Centre","Midfielder Attacking","Wing Back Right","Wing Back Left","Attacking Midfielder","Striker","Winger Left","Winger Right"];
     let players = ["Alex Rowe","Ali Mekawy","Carlo","Charlie","Chris Del Monaco","Chris M","Chris S","Danny","Dante","David","Dimitri","Enzo","Farid","Faros","Frank","George B","George T","Ivan","James Zoumis","James","Joe T","Joey","Kia","Leo","Manoli","Marco","Mario","Maurice","Nector","Paul","Perri","Peter","Ralph","Rocco","Stav","Stevan","Theo","Tony EH","Vasilis"].sort();
@@ -336,7 +335,8 @@
         if (!currentWeek) { alert("No upcoming matches"); return; }
         if (!guestName.trim()) { alert("Please enter a guest name"); return; }
         await saveGuest({ guestName: guestName.trim(), gameDate: currentWeek.dateStr, addedBy: currentUser.name });
-        document.getElementById("guestNameInput") && (document.getElementById("guestNameInput").value = "");
+        const input = document.getElementById("guestNameInput");
+        if(input) input.value = "";
     }
     
     function showEditProfileModal(playerName) {
@@ -358,8 +358,8 @@
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     const preview = document.getElementById('photoPreview');
-                    if (preview.tagName === 'IMG') preview.src = event.target.result;
-                    else preview.innerHTML = `<img src="${event.target.result}" class="photo-preview" style="width:80px; height:80px; border-radius:50%; object-fit:cover;">`;
+                    if (preview && preview.tagName === 'IMG') preview.src = event.target.result;
+                    else if (preview) preview.innerHTML = `<img src="${event.target.result}" class="photo-preview" style="width:80px; height:80px; border-radius:50%; object-fit:cover;">`;
                 };
                 reader.readAsDataURL(e.target.files[0]);
             }
@@ -449,7 +449,7 @@
             return bTotal - aTotal;
         });
         document.getElementById("page-scoreboard").innerHTML = `<div class="card"><h2>🏆 All-Time Leaderboard</h2>
-            <div><h3>⚽ Top Goal Scorers</h3><table class="data-table">${topGoals.map((p,i)=>`<tr><td style="width:40px;"><strong>${i+1}</strong></td><td>${renderPlayerTag(p.name, 24)} ${escapeHtml(p.name)}</td><td>${p.goals} goals</td></tr>`).join('')}</tbody></table></div>
+            <div><h3>⚽ Top Goal Scorers</h3><table class="data-table">${topGoals.map((p,i)=>`<table><td style="width:40px;"><strong>${i+1}</strong></td><td>${renderPlayerTag(p.name, 24)} ${escapeHtml(p.name)}</td><td>${p.goals} goals</td></tr>`).join('')}</tbody></table></div>
             <div style="margin-top:16px;"><h3>🏃 Most Games Played</h3><table class="data-table">${topApps.map((p,i)=>`<tr><td style="width:40px;"><strong>${i+1}</strong></td><td>${renderPlayerTag(p.name, 24)} ${escapeHtml(p.name)}</td><td>${p.appearances + (playerProfiles[p.name]?.openingBalanceGames || 0)} games</td></tr>`).join('')}</tbody></table></div>
         </div>`;
     }
@@ -749,4 +749,38 @@
         await loadData();
         await fetchMelbourneWeather();
         document.getElementById("app").innerHTML = `
-            <div class="header"><div class="logo-icon"><i
+            <div class="header"><div class="logo-icon"><i class="chas-fa-futbol"></i></div><h1>MONDAY NIGHT SOCCER</h1><div class="user-row"><i class="fas fa-user-circle"></i> <strong>${currentUser.role === "admin" ? "ADMIN" : currentUser.name}</strong> <button id="logoutBtnMain">Exit</button></div></div>
+            <div class="top-nav" id="topNavBar"></div>
+            <div id="module-home" class="module-container"><div id="homeContainer"></div></div>
+            <div id="module-profiles" class="module-container"><div id="page-profiles"></div></div>
+            <div id="module-scoreboard" class="module-container"><div id="page-scoreboard"></div></div>
+            <div id="module-teamswk" class="module-container"><div id="page-teamswk"></div></div>
+            <div id="module-history" class="module-container"><div id="page-history"></div></div>
+            <div id="module-weather" class="module-container"><div id="page-weather"></div></div>
+            <div id="module-chat" class="module-container"><div id="page-chat"></div></div>
+            <div id="module-rules" class="module-container"><div id="page-rules"></div></div>
+            <div id="module-admin" class="module-container"><div id="page-admin"></div></div>
+        `;
+        document.getElementById("logoutBtnMain").onclick = logout;
+        renderHomePage();
+        renderAllModules();
+        initNavigation();
+    }
+    
+    async function renderLogin() {
+        await loadData();
+        document.getElementById("app").innerHTML = `<div class="login-box"><div style="width:60px; height:60px; background:#1a73e8; border-radius:24px; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;"><i class="fas fa-futbol" style="font-size:30px; color:white;"></i></div><h2>Monday Night Soccer</h2><p style="margin-bottom:20px; color:#64748b;">8pm Kickoff • Clifton Park</p><select id="playerSelectLogin"><option>-- Select Player --</option>${players.map(p=>`<option>${escapeHtml(p)}</option>`).join('')}</select><button id="playerLoginBtn">Enter as Player</button><hr><input type="password" id="adminPwLogin" placeholder="Admin Password"><button id="adminLoginBtn">Admin Login</button><div id="loginErr" style="color:#dc3545; margin-top:12px;"></div></div>`;
+        document.getElementById("playerLoginBtn").onclick = () => { const n = document.getElementById("playerSelectLogin").value; if(n && n !== "-- Select Player --") loginAsPlayer(n); else document.getElementById("loginErr").innerText = "Select your name"; };
+        document.getElementById("adminLoginBtn").onclick = () => { if(!adminLogin(document.getElementById("adminPwLogin").value)) document.getElementById("loginErr").innerText = "Wrong password (admin123)"; };
+    }
+    
+    (async () => {
+        const stored = localStorage.getItem("soccer_user");
+        if(stored) {
+            try { const u = JSON.parse(stored); if(u.role==="admin"){ isAdminLoggedIn=true; currentUser={name:"Admin",role:"admin"}; } else { currentUser={name:u.name,role:"player"}; } await loadData(); renderApp(); return; } catch(e){}
+        }
+        renderLogin();
+    })();
+</script>
+</body>
+</html>
