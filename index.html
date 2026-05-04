@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Monday Night Soccer | Full App + Goal Assignment</title>
+    <title>Monday Night Soccer | Complete + Goal Fix</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -99,10 +99,13 @@
         .goal-list-preview{background:#f8fafc;border-radius:16px;padding:12px;margin-top:12px;min-height:60px;}
         .goal-tag{display:inline-block;background:#1a73e8;color:white;padding:6px 12px;border-radius:40px;font-size:12px;margin:4px;}
         .goal-tag button{background:#dc3545;padding:2px 8px;margin-left:8px;font-size:10px;border-radius:40px;border:none;color:white;cursor:pointer;}
-        .add-goal-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+        .add-goal-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center;}
         .add-goal-row select{flex:2;margin:0;}
         .add-goal-row select.goal-count{flex:1;}
         .add-goal-row button{flex:1;margin:0;padding:10px;}
+        .add-player-row{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid #e2e8f0;}
+        .add-player-row select{flex:2;margin:0;}
+        .add-player-row button{flex:1;margin:0;padding:10px;background:#28a745;}
     </style>
 </head>
 <body>
@@ -254,7 +257,6 @@
                 }
             }
         } catch(e){}
-        renderWeatherPage();
     }
     
     async function loadData() {
@@ -349,14 +351,13 @@
         if(firebaseReady&&db) await db.collection("chatMessages").add({name:currentUser.name,message:msg.trim(),timestamp:firebase.firestore.FieldValue.serverTimestamp()});
     }
     
-    async function adminAddManualAttendance(playerName) {
-        const nextWeek = getFutureWeeks()[0];
-        if(!nextWeek){alert("No upcoming game week"); return;}
-        if(!players.includes(playerName)){alert(`Player not in roster`); return;}
-        const existing = attendance.find(a=>a.player===playerName&&a.gameDate===nextWeek.dateStr);
-        if(existing?.status==='in'){alert(`${playerName} already playing`); return;}
-        await saveAttendance({player:playerName, gameDate:nextWeek.dateStr, status:'in', manuallyAdded:true});
-        alert(`${playerName} added`);
+    async function adminAddManualAttendance(playerName, gameDate) {
+        if(!players.includes(playerName)){alert(`Player "${playerName}" not in roster. Add them first.`); return;}
+        const existing = attendance.find(a=>a.player===playerName&&a.gameDate===gameDate);
+        if(existing?.status==='in'){alert(`${playerName} already marked as playing for this match`); return;}
+        await saveAttendance({player:playerName, gameDate:gameDate, status:'in', manuallyAdded:true});
+        alert(`${playerName} added to ${gameDate}`);
+        refreshAll();
     }
     
     async function setAttendance(status) {
@@ -466,7 +467,7 @@
         };
     }
     
-    // ========== FIXED GOAL ENTRY WITH 1-10 GOAL SELECTION ==========
+    // ========== FIXED GOAL ENTRY WITH 1-10 GOAL SELECTION + ADD LATE PLAYERS ==========
     function openGoalEntryModal() {
         const pastWeeks = getPastWeeks();
         if(pastWeeks.length === 0) { alert("No past games to record goals for"); return; }
@@ -504,19 +505,25 @@
             
             const participants = getAllParticipants(currentGameDate);
             const assignments = teamAssignments[currentGameDate] || {};
-            yellowPlayersList = [];
+            yellowPlayersList = [...participants.players];
             orangePlayersList = [];
             
             for(let p of participants.players) {
                 const team = assignments[p] || "";
-                if(team === "yellow") yellowPlayersList.push(p);
-                else if(team === "orange") orangePlayersList.push(p);
+                if(team === "yellow") {
+                    if(!yellowPlayersList.includes(p)) yellowPlayersList.push(p);
+                } else if(team === "orange") {
+                    orangePlayersList.push(p);
+                }
             }
             for(let g of participants.guests) {
                 const team = assignments[g.name] || assignments[`guest_${g.name}`] || "";
                 if(team === "yellow") yellowPlayersList.push(g.name + " (Guest)");
                 else if(team === "orange") orangePlayersList.push(g.name + " (Guest)");
             }
+            
+            // Also add all players from master list for late additions
+            const allPlayerOptions = players.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
             
             const existing = matchResults[currentGameDate] || {};
             const existingGoals = existing.goals || {};
@@ -529,6 +536,9 @@
                         yellowGoalsArray.push(player);
                     } else if(orangePlayersList.includes(player) || orangePlayersList.includes(player + " (Guest)")) {
                         orangeGoalsArray.push(player);
+                    } else {
+                        // Player not assigned to a team yet, default to yellow
+                        yellowGoalsArray.push(player);
                     }
                 }
             }
@@ -574,6 +584,10 @@
                         <select id="yellowGoalCount" class="goal-count">${numberOptions}</select>
                         <button id="addYellowGoalBtn">+ Add Goal(s)</button>
                     </div>
+                    <div class="add-player-row">
+                        <select id="lateYellowPlayerSelect"><option value="">-- Add Late Player to Yellow --</option>${allPlayerOptions}</select>
+                        <button id="addLateYellowPlayerBtn">➕ Add Player</button>
+                    </div>
                     <div class="goal-list-preview"><strong>Goals scored:</strong><div id="yellowPreviewList"></div></div>
                 </div>
                 <div class="goal-team-section">
@@ -584,6 +598,10 @@
                         <select id="orangeScorerSelect"><option value="">-- Select Scorer --</option>${orangePlayersList.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('')}</select>
                         <select id="orangeGoalCount" class="goal-count">${numberOptions}</select>
                         <button id="addOrangeGoalBtn">+ Add Goal(s)</button>
+                    </div>
+                    <div class="add-player-row">
+                        <select id="lateOrangePlayerSelect"><option value="">-- Add Late Player to Orange --</option>${allPlayerOptions}</select>
+                        <button id="addLateOrangePlayerBtn">➕ Add Player</button>
                     </div>
                     <div class="goal-list-preview"><strong>Goals scored:</strong><div id="orangePreviewList"></div></div>
                 </div>
@@ -611,6 +629,37 @@
                     for(let i=0; i<goalCount; i++) orangeGoalsArray.push(player);
                     rebuildForm();
                 } else { alert("Select a player first"); }
+            });
+            
+            document.getElementById("addLateYellowPlayerBtn")?.addEventListener("click", async () => {
+                const select = document.getElementById("lateYellowPlayerSelect");
+                const playerName = select.value;
+                if(playerName && playerName !== "") {
+                    await adminAddManualAttendance(playerName, currentGameDate);
+                    // Also add to team assignment for this game
+                    const newAssign = { ...teamAssignments[currentGameDate] };
+                    newAssign[playerName] = "yellow";
+                    await saveTeamAssignments(currentGameDate, newAssign);
+                    refreshAll();
+                    rebuildForm();
+                    select.value = "";
+                    alert(`${playerName} added to Yellow team for this match`);
+                } else { alert("Select a player"); }
+            });
+            
+            document.getElementById("addLateOrangePlayerBtn")?.addEventListener("click", async () => {
+                const select = document.getElementById("lateOrangePlayerSelect");
+                const playerName = select.value;
+                if(playerName && playerName !== "") {
+                    await adminAddManualAttendance(playerName, currentGameDate);
+                    const newAssign = { ...teamAssignments[currentGameDate] };
+                    newAssign[playerName] = "orange";
+                    await saveTeamAssignments(currentGameDate, newAssign);
+                    refreshAll();
+                    rebuildForm();
+                    select.value = "";
+                    alert(`${playerName} added to Orange team for this match`);
+                } else { alert("Select a player"); }
             });
         }
         
@@ -771,6 +820,7 @@
     
     function renderWeatherPage() {
         const c = document.getElementById("page-weather");
+        fetchWeather();
         if(c) c.innerHTML = `<div class="card"><h2>🌤️ Forecast</h2><div class="weather-card"><i class="fas ${weatherData.icon}" style="font-size:56px;"></i><h3>${weatherData.condition}</h3><h1 style="font-size:52px;">${weatherData.temp}</h1><p>Rain: ${weatherData.rainChance}%</p></div></div>`;
     }
     
@@ -803,7 +853,7 @@
         html += `</tbody></table><h3>📜 Outstanding Debts</h3><table class="data-table"><thead><tr><th>Player</th><th>Amount Owed</th></tr></thead><tbody>`;
         if(debts.length) for(let d of debts) html += `<tr><td>${renderMiniAvatar(d.player,24)} ${escapeHtml(d.player)}</td><td class="badge-owing">$${d.debt}</td></tr>`;
         else html += `<tr><td colspan="2" style="text-align:center;">✨ No outstanding debts ✨</td></tr>`;
-        html += `</tbody></table></div><div class="card"><h2>✍️ Manual Attendance</h2><select id="manualPlayerSelect"><option value="">-- Select Player --</option>${players.map(p=>`<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('')}</select><button id="manualAddBtn" class="admin-action-btn">➕ Add to Playing List</button></div><div class="card"><h2>🎭 Manage Guests</h2>`;
+        html += `</tbody></table></div><div class="card"><h2>✍️ Manual Attendance</h2><select id="manualPlayerSelect"><option value="">-- Select Player --</option>${players.map(p=>`<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('')}</select><button id="manualAddBtn" class="admin-action-btn">➕ Add to Playing List (This Week)</button></div><div class="card"><h2>🎭 Manage Guests</h2>`;
         for(let g of parts.guests) html += `<div class="admin-team-item"><span><strong>${escapeHtml(g.name)}</strong> (by ${escapeHtml(g.addedBy)})</span><button class="remove-guest-btn" data-guest="${escapeHtml(g.name)}" data-date="${nextWeek.dateStr}">Remove</button></div>`;
         html += `<div><input id="adminGuestName" placeholder="New guest"><button id="adminAddGuestBtn">+ Add</button></div></div><div class="card"><h2>⚽ Assign Teams</h2>`;
         for(let p of allList){
@@ -814,7 +864,7 @@
         const container = document.getElementById("page-admin");
         if(container) container.innerHTML = html;
         document.querySelectorAll(".markPaidBtn").forEach(btn=>btn.addEventListener("click",()=>markPayment(btn.dataset.player,btn.dataset.date)));
-        document.getElementById("manualAddBtn")?.addEventListener("click",()=>{const p=document.getElementById("manualPlayerSelect")?.value; if(p) adminAddManualAttendance(p);});
+        document.getElementById("manualAddBtn")?.addEventListener("click",()=>{const p=document.getElementById("manualPlayerSelect")?.value; if(p) adminAddManualAttendance(p, nextWeek.dateStr);});
         document.getElementById("adminAddGuestBtn")?.addEventListener("click",async()=>{const gn=document.getElementById("adminGuestName")?.value.trim(); if(gn) await addGuest(gn); document.getElementById("adminGuestName").value=""; renderAdminPage();});
         document.querySelectorAll(".remove-guest-btn").forEach(btn=>btn.addEventListener("click",()=>removeGuest(btn.dataset.guest,btn.dataset.date)));
         document.getElementById("autoBalanceBtn")?.addEventListener("click",()=>{
