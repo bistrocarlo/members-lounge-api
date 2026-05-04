@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Monday Night Soccer | Working Goal Save</title>
+    <title>Monday Night Soccer | Complete Working App</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -479,7 +479,7 @@
         };
     }
     
-    // ========== FIXED GOAL ENTRY - NOW SAVES PROPERLY ==========
+    // FIXED GOAL ENTRY - NOW SAVES PROPERLY
     function openGoalEntryModal() {
         const pastWeeks = getPastWeeks();
         if(pastWeeks.length === 0) { alert("No past games to record goals for"); return; }
@@ -507,6 +507,8 @@
         const saveBtn = document.getElementById("saveGoalsBtn");
         
         let currentGameDate = null;
+        let yellowGoalsArray = [];
+        let orangeGoalsArray = [];
         
         matchSelect.onchange = () => {
             if(matchSelect.value) {
@@ -526,7 +528,6 @@
             const assignments = teamAssignments[gameDate] || {};
             const existing = matchResults[gameDate] || { yellowScore: 0, orangeScore: 0, goals: {} };
             
-            // Build player lists based on team assignments
             let yellowPlayers = [];
             let orangePlayers = [];
             
@@ -541,10 +542,19 @@
                 else if(team === "orange") orangePlayers.push(g.name + " (Guest)");
             }
             
-            // If no players assigned, show all players for selection
             if(yellowPlayers.length === 0 && orangePlayers.length === 0) {
                 yellowPlayers = [...participants.players];
-                orangePlayers = [];
+            }
+            
+            // Load existing goals
+            yellowGoalsArray = [];
+            orangeGoalsArray = [];
+            for(let [player, count] of Object.entries(existing.goals)) {
+                for(let i=0; i<count; i++) {
+                    if(yellowPlayers.includes(player)) yellowGoalsArray.push(player);
+                    else if(orangePlayers.includes(player)) orangeGoalsArray.push(player);
+                    else yellowGoalsArray.push(player);
+                }
             }
             
             const allPlayerOptions = players.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
@@ -583,21 +593,10 @@
                 </div>
             `;
             
-            // Display existing goals
-            const yellowGoalsList = [];
-            const orangeGoalsList = [];
-            for(let [player, count] of Object.entries(existing.goals)) {
-                for(let i=0; i<count; i++) {
-                    if(yellowPlayers.includes(player)) yellowGoalsList.push(player);
-                    else if(orangePlayers.includes(player)) orangeGoalsList.push(player);
-                    else yellowGoalsList.push(player);
-                }
-            }
-            
             function updatePreviews() {
                 const yCount = {}, oCount = {};
-                yellowGoalsList.forEach(p => yCount[p] = (yCount[p] || 0) + 1);
-                orangeGoalsList.forEach(p => oCount[p] = (oCount[p] || 0) + 1);
+                yellowGoalsArray.forEach(p => yCount[p] = (yCount[p] || 0) + 1);
+                orangeGoalsArray.forEach(p => oCount[p] = (oCount[p] || 0) + 1);
                 
                 const yPreview = document.getElementById("yellowPreviewList");
                 const oPreview = document.getElementById("orangePreviewList");
@@ -607,16 +606,16 @@
                 document.querySelectorAll(".remove-yellow").forEach(btn => {
                     btn.onclick = () => {
                         const player = btn.dataset.player;
-                        const idx = yellowGoalsList.lastIndexOf(player);
-                        if(idx !== -1) yellowGoalsList.splice(idx, 1);
+                        const idx = yellowGoalsArray.lastIndexOf(player);
+                        if(idx !== -1) yellowGoalsArray.splice(idx, 1);
                         updatePreviews();
                     };
                 });
                 document.querySelectorAll(".remove-orange").forEach(btn => {
                     btn.onclick = () => {
                         const player = btn.dataset.player;
-                        const idx = orangeGoalsList.lastIndexOf(player);
-                        if(idx !== -1) orangeGoalsList.splice(idx, 1);
+                        const idx = orangeGoalsArray.lastIndexOf(player);
+                        if(idx !== -1) orangeGoalsArray.splice(idx, 1);
                         updatePreviews();
                     };
                 });
@@ -627,14 +626,14 @@
             document.getElementById("addYellowGoalBtn")?.onclick = () => {
                 const player = document.getElementById("yellowScorerSelect").value;
                 const count = parseInt(document.getElementById("yellowGoalCount").value) || 1;
-                if(player) { for(let i=0;i<count;i++) yellowGoalsList.push(player); updatePreviews(); }
+                if(player) { for(let i=0;i<count;i++) yellowGoalsArray.push(player); updatePreviews(); }
                 else alert("Select a player");
             };
             
             document.getElementById("addOrangeGoalBtn")?.onclick = () => {
                 const player = document.getElementById("orangeScorerSelect").value;
                 const count = parseInt(document.getElementById("orangeGoalCount").value) || 1;
-                if(player) { for(let i=0;i<count;i++) orangeGoalsList.push(player); updatePreviews(); }
+                if(player) { for(let i=0;i<count;i++) orangeGoalsArray.push(player); updatePreviews(); }
                 else alert("Select a player");
             };
             
@@ -659,32 +658,15 @@
                     loadMatchData(gameDate);
                 }
             };
-            
-            // Store goals for saving
-            window.currentYellowGoals = yellowGoalsList;
-            window.currentOrangeGoals = orangeGoalsList;
         }
         
         document.getElementById("saveGoalsBtn").onclick = async () => {
             if(!currentGameDate) { alert("Select a match"); return; }
-            
             const yellowScore = parseInt(document.getElementById("yellowScoreInput")?.value) || 0;
             const orangeScore = parseInt(document.getElementById("orangeScoreInput")?.value) || 0;
-            
             const goals = {};
-            if(window.currentYellowGoals) {
-                for(let p of window.currentYellowGoals) {
-                    let clean = p.replace(" (Guest)", "");
-                    goals[clean] = (goals[clean] || 0) + 1;
-                }
-            }
-            if(window.currentOrangeGoals) {
-                for(let p of window.currentOrangeGoals) {
-                    let clean = p.replace(" (Guest)", "");
-                    goals[clean] = (goals[clean] || 0) + 1;
-                }
-            }
-            
+            for(let p of yellowGoalsArray) { let clean = p.replace(" (Guest)", ""); goals[clean] = (goals[clean] || 0) + 1; }
+            for(let p of orangeGoalsArray) { let clean = p.replace(" (Guest)", ""); goals[clean] = (goals[clean] || 0) + 1; }
             await saveMatchResult(currentGameDate, yellowScore, orangeScore, goals);
             modal.remove();
         };
@@ -848,9 +830,7 @@
         let html = `<div class="card"><h2>💰 Financial Ledger</h2><div class="finance-summary"><div class="amount">$${total}</div><p>Total Treasury Balance</p></div><h3>📅 ${nextWeek.label} - Payment Status</h3><table class="data-table"><thead><tr><th>Player</th><th>Status</th><th>Action</th></tr></thead><tbody>`;
         for(let p of parts.players){
             const paid = payments.some(pay=>pay.player===p&&pay.gameDate===nextWeek.dateStr);
-            html += `<tr><td>${renderMiniAvatar(p,24)} ${escapeHtml(p)}
-            html += `<tr><td>${renderMiniAvatar(p,24)} ${escapeHtml(p)}</td><td>${paid?'<span class="badge-paid">✓ PAID</span>':'<span class="badge-owing">❌ OWING</span>'}</td>
-                <td>${!paid?`<button class="markPaidBtn" data-player="${escapeHtml(p)}" data-date="${nextWeek.dateStr}">Record $${WEEKLY_FEE}</button>`:'—'}</td></tr>`;
+            html += `<tr><td>${renderMiniAvatar(p,24)} ${escapeHtml(p)}</td><td>${paid?'<span class="badge-paid">✓ PAID</span>':'<span class="badge-owing">❌ OWING</span>'}</td><td>${!paid?`<button class="markPaidBtn" data-player="${escapeHtml(p)}" data-date="${nextWeek.dateStr}">Record $${WEEKLY_FEE}</button>`:'—'}</td></tr>`;
         }
         html += `</tbody></table><h3>📜 Outstanding Debts</h3><table class="data-table"><thead><tr><th>Player</th><th>Amount Owed</th></tr></thead><tbody>`;
         if(debts.length) for(let d of debts) html += `<tr><td>${renderMiniAvatar(d.player,24)} ${escapeHtml(d.player)}</td><td class="badge-owing">$${d.debt}</td></tr>`;
