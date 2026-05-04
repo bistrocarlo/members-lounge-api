@@ -849,3 +849,87 @@
         for(let p of parts.players){
             const paid = payments.some(pay=>pay.player===p&&pay.gameDate===nextWeek.dateStr);
             html += `<tr><td>${renderMiniAvatar(p,24)} ${escapeHtml(p)}
+            html += `<tr><td>${renderMiniAvatar(p,24)} ${escapeHtml(p)}</td><td>${paid?'<span class="badge-paid">✓ PAID</span>':'<span class="badge-owing">❌ OWING</span>'}</td>
+                <td>${!paid?`<button class="markPaidBtn" data-player="${escapeHtml(p)}" data-date="${nextWeek.dateStr}">Record $${WEEKLY_FEE}</button>`:'—'}</td></tr>`;
+        }
+        html += `</tbody></table><h3>📜 Outstanding Debts</h3><table class="data-table"><thead><tr><th>Player</th><th>Amount Owed</th></tr></thead><tbody>`;
+        if(debts.length) for(let d of debts) html += `<tr><td>${renderMiniAvatar(d.player,24)} ${escapeHtml(d.player)}</td><td class="badge-owing">$${d.debt}</td></tr>`;
+        else html += `<tr><td colspan="2" style="text-align:center;">✨ No outstanding debts ✨</td></tr>`;
+        html += `</tbody></table></div><div class="card"><h2>✍️ Manual Attendance</h2><select id="manualPlayerSelect"><option value="">-- Select Player --</option>${players.map(p=>`<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('')}</select><button id="manualAddBtn" class="admin-action-btn">➕ Add to Playing List (This Week)</button></div><div class="card"><h2>🎭 Manage Guests</h2>`;
+        for(let g of parts.guests) html += `<div class="admin-team-item"><span><strong>${escapeHtml(g.name)}</strong> (by ${escapeHtml(g.addedBy)})</span><button class="remove-guest-btn" data-guest="${escapeHtml(g.name)}" data-date="${nextWeek.dateStr}">Remove</button></div>`;
+        html += `<div><input id="adminGuestName" placeholder="New guest"><button id="adminAddGuestBtn">+ Add</button></div></div><div class="card"><h2>⚽ Assign Teams</h2>`;
+        for(let p of allList){
+            const currTeam = currAssign[p.name] || currAssign[`guest_${p.name}`] || "";
+            html += `<div class="admin-team-item"><div>${renderMiniAvatar(p.name,28)} ${escapeHtml(p.name)} ${p.isGuest?'<span style="background:#28a745;color:white;padding:2px 8px;border-radius:20px;">GUEST</span>':''}</div><select class="team-select" data-name="${escapeHtml(p.name)}" data-isguest="${p.isGuest}"><option value="">— Team —</option><option value="yellow" ${currTeam==="yellow"?"selected":""}>🟡 Yellow</option><option value="orange" ${currTeam==="orange"?"selected":""}>🟠 Orange</option></select></div>`;
+        }
+        html += `<div class="flex-btns"><button id="autoBalanceBtn">🎲 Auto-Balance</button><button id="saveTeamsBtn">💾 Save Teams</button></div></div>`;
+        const container = document.getElementById("page-admin");
+        if(container) container.innerHTML = html;
+        document.querySelectorAll(".markPaidBtn").forEach(btn=>btn.addEventListener("click",()=>markPayment(btn.dataset.player,btn.dataset.date)));
+        document.getElementById("manualAddBtn")?.addEventListener("click",()=>{const p=document.getElementById("manualPlayerSelect")?.value; if(p) adminAddManualAttendance(p, nextWeek.dateStr);});
+        document.getElementById("adminAddGuestBtn")?.addEventListener("click",async()=>{const gn=document.getElementById("adminGuestName")?.value.trim(); if(gn) await addGuest(gn); document.getElementById("adminGuestName").value=""; renderAdminPage();});
+        document.querySelectorAll(".remove-guest-btn").forEach(btn=>btn.addEventListener("click",()=>removeGuest(btn.dataset.guest,btn.dataset.date)));
+        document.getElementById("autoBalanceBtn")?.addEventListener("click",()=>{
+            if(allList.length===0) return;
+            const shuffled=[...allList];
+            for(let i=shuffled.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]];}
+            const mid=Math.ceil(shuffled.length/2);
+            const newAssign={};
+            shuffled.slice(0,mid).forEach(p=>{newAssign[p.isGuest?`guest_${p.name}`:p.name]="yellow";});
+            shuffled.slice(mid).forEach(p=>{newAssign[p.isGuest?`guest_${p.name}`:p.name]="orange";});
+            teamAssignments[nextWeek.dateStr]=newAssign;
+            saveTeamAssignments(nextWeek.dateStr,teamAssignments[nextWeek.dateStr]);
+            renderAdminPage(); renderTeamsPage();
+        });
+        document.getElementById("saveTeamsBtn")?.addEventListener("click",async()=>{
+            const selects=document.querySelectorAll(".team-select");
+            const newAssign={};
+            selects.forEach(sel=>{const name=sel.dataset.name, isGuest=sel.dataset.isguest==="true", team=sel.value; if(team) newAssign[isGuest?`guest_${name}`:name]=team;});
+            teamAssignments[nextWeek.dateStr]=newAssign;
+            await saveTeamAssignments(nextWeek.dateStr,teamAssignments[nextWeek.dateStr]);
+            alert("Teams saved!");
+        });
+    }
+    
+    function initNav() {
+        const mods = [{id:"home",name:"🏠 HOME"},{id:"profiles",name:"👤 PROFILES"},{id:"scoreboard",name:"🏆 STATS"},{id:"teamswk",name:"⚽ THIS WEEK"},{id:"history",name:"📖 HISTORY"},{id:"weather",name:"🌤️ WEATHER"},{id:"timer",name:"⏱️ TIMER"},{id:"chat",name:"💬 CHAT"},{id:"rules",name:"📜 RULES"}];
+        if(isAdminLoggedIn) mods.push({id:"admin",name:"⚙️ ADMIN"});
+        const nav = document.getElementById("topNavBar");
+        if(nav) nav.innerHTML = mods.map(m=>`<button class="nav-module" data-module="${m.id}">${m.name}</button>`).join('');
+        document.querySelectorAll(".nav-module").forEach(btn=>{
+            btn.addEventListener("click",()=>{
+                const id = btn.dataset.module;
+                document.querySelectorAll(".module-container").forEach(c=>c.classList.remove("active-module"));
+                document.getElementById(`module-${id}`)?.classList.add("active-module");
+                document.querySelectorAll(".nav-module").forEach(b=>b.classList.remove("active"));
+                btn.classList.add("active");
+                if(id==="chat") renderChatPage();
+                if(id==="timer") renderTimerPage();
+            });
+        });
+        document.querySelector('.nav-module[data-module="home"]')?.click();
+    }
+    
+    async function renderApp() {
+        await loadData();
+        await fetchWeather();
+        const app = document.getElementById("app");
+        app.innerHTML = `<div class="header"><div class="logo-icon"><i class="fas fa-futbol"></i></div><h1>MONDAY NIGHT SOCCER</h1><div class="user-row"><i class="fas fa-user-circle"></i> <strong>${currentUser?.role==="admin"?"ADMIN":currentUser?.name||"Player"}</strong> <button id="logoutBtnMain">Exit</button></div></div><div class="top-nav" id="topNavBar"></div><div id="module-home" class="module-container"><div id="homeContainer"></div></div><div id="module-profiles" class="module-container"><div id="page-profiles"></div></div><div id="module-scoreboard" class="module-container"><div id="page-scoreboard"></div></div><div id="module-teamswk" class="module-container"><div id="page-teamswk"></div></div><div id="module-history" class="module-container"><div id="page-history"></div></div><div id="module-weather" class="module-container"><div id="page-weather"></div></div><div id="module-timer" class="module-container"><div id="page-timer"></div></div><div id="module-chat" class="module-container"><div id="page-chat"></div></div><div id="module-rules" class="module-container"><div id="page-rules"></div></div>${isAdminLoggedIn ? `<div id="module-admin" class="module-container"><div id="page-admin"></div></div>` : ''}`;
+        document.getElementById("logoutBtnMain").onclick = () => { if(chatUnsubscribe) chatUnsubscribe(); currentUser=null; localStorage.removeItem("soccer_user"); renderLogin(); };
+        renderHomePage(); renderProfilesPage(); renderScoreboardPage(); renderTeamsPage(); renderHistoryPage(); renderWeatherPage(); renderTimerPage(); renderChatPage(); renderRulesPage(); if(isAdminLoggedIn) renderAdminPage();
+        initNav();
+    }
+    
+    async function renderLogin() {
+        await loadData();
+        const app = document.getElementById("app");
+        app.innerHTML = `<div class="login-box"><div class="login-logo"><i class="fas fa-futbol"></i></div><h2>Monday Night Soccer</h2><p>8pm Kickoff • Clifton Park</p><select id="playerSelectLogin"><option value="">-- Select Player --</option>${players.map(p=>`<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('')}</select><button id="playerLoginBtn">Enter as Player</button><hr><input type="password" id="adminPwLogin" placeholder="Admin Password"><button id="adminLoginBtn">Admin Login</button></div>`;
+        document.getElementById("playerLoginBtn").onclick = () => { const n = document.getElementById("playerSelectLogin")?.value; if(n && n!==""){ currentUser={name:n,role:"player"}; isAdminLoggedIn=false; localStorage.setItem("soccer_user",JSON.stringify(currentUser)); renderApp(); } else alert("Select your name"); };
+        document.getElementById("adminLoginBtn").onclick = () => { const pw = document.getElementById("adminPwLogin")?.value; if(pw==="admin123"){ currentUser={name:"Admin",role:"admin"}; isAdminLoggedIn=true; localStorage.setItem("soccer_user",JSON.stringify(currentUser)); renderApp(); } else alert("Wrong password"); };
+    }
+    
+    const stored = localStorage.getItem("soccer_user");
+    if(stored) { try { const u = JSON.parse(stored); if(u.role==="admin"){ isAdminLoggedIn=true; currentUser={name:"Admin",role:"admin"}; } else { currentUser={name:u.name,role:"player"}; } renderApp(); } catch(e){ renderLogin(); } } else { renderLogin(); }
+</script>
+</body>
+</html>
