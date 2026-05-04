@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Monday Night Soccer | Complete + Goal Assignment</title>
+    <title>Monday Night Soccer | Full App + Goal Assignment</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -66,7 +66,7 @@
         .finance-summary{background:linear-gradient(135deg,#1a73e8,#0d5bbf);color:white;border-radius:20px;padding:16px;margin-bottom:16px;text-align:center;}
         .finance-summary .amount{font-size:32px;font-weight:800;}
         .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;}
-        .modal-content{background:white;border-radius:32px;padding:24px;max-width:550px;width:90%;max-height:85vh;overflow-y:auto;}
+        .modal-content{background:white;border-radius:32px;padding:20px;max-width:550px;width:90%;max-height:85vh;overflow-y:auto;}
         .login-box{background:white;border-radius:48px;padding:40px 28px;margin:40px 20px;text-align:center;}
         .login-logo{width:90px;height:90px;background:linear-gradient(135deg,#1a73e8,#0d5bbf);border-radius:32px;display:inline-flex;align-items:center;justify-content:center;margin:0 auto 20px;}
         select,input{width:100%;padding:14px;border:1.5px solid #e2e8f0;border-radius:60px;margin:8px 0;font-size:16px;}
@@ -98,7 +98,7 @@
         .goal-team-header{font-weight:800;font-size:18px;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
         .goal-list-preview{background:#f8fafc;border-radius:16px;padding:12px;margin-top:12px;min-height:60px;}
         .goal-tag{display:inline-block;background:#1a73e8;color:white;padding:6px 12px;border-radius:40px;font-size:12px;margin:4px;}
-        .goal-tag button{background:#dc3545;padding:2px 8px;margin-left:8px;font-size:10px;border-radius:40px;}
+        .goal-tag button{background:#dc3545;padding:2px 8px;margin-left:8px;font-size:10px;border-radius:40px;border:none;color:white;cursor:pointer;}
         .add-goal-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
         .add-goal-row select{flex:2;margin:0;}
         .add-goal-row select.goal-count{flex:1;}
@@ -449,7 +449,7 @@
                 <button id="downloadSheetBtn" style="background: #1a73e8;"><i class="fas fa-download"></i> Save as Image</button>
                 <button id="closeSheetBtn" class="btn-outline">Cancel</button>
             </div>
-            <p style="font-size: 11px; margin-top: 12px; color: #64748b;"><i class="fas fa-info-circle"></i> Save image then share to WhatsApp/Instagram</p>
+            <p style="font-size: 11px; margin-top: 12px; color: #64748b;"><i class="fas fa-info-circle"></i> Save image then share</p>
         </div>`;
         document.body.appendChild(modal);
         document.getElementById("closeSheetBtn").onclick = () => modal.remove();
@@ -466,7 +466,7 @@
         };
     }
     
-    // GOAL ENTRY WITH MULTIPLE GOAL SELECTION (1-10 per player)
+    // ========== FIXED GOAL ENTRY WITH 1-10 GOAL SELECTION ==========
     function openGoalEntryModal() {
         const pastWeeks = getPastWeeks();
         if(pastWeeks.length === 0) { alert("No past games to record goals for"); return; }
@@ -477,7 +477,7 @@
         }
         
         const modal = document.createElement('div'); modal.className='modal';
-        modal.innerHTML = `<div class="modal-content">
+        modal.innerHTML = `<div class="modal-content" style="max-width:550px;">
             <h3>⚽ Record Match Goals</h3>
             <label>Select Match</label>
             <select id="goalMatchSelect">${optionsHtml}</select>
@@ -490,144 +490,117 @@
         document.body.appendChild(modal);
         
         const matchSelect = document.getElementById("goalMatchSelect");
-        const goalForm = document.getElementById("goalEntryForm");
+        const goalFormDiv = document.getElementById("goalEntryForm");
         const saveBtn = document.getElementById("saveGoalsBtn");
         
-        let yellowGoalsList = [];
-        let orangeGoalsList = [];
+        let yellowGoalsArray = [];
+        let orangeGoalsArray = [];
         let currentGameDate = null;
-        let yellowPlayers = [];
-        let orangePlayers = [];
+        let yellowPlayersList = [];
+        let orangePlayersList = [];
         
-        function renderGoalForm() {
+        function rebuildForm() {
             if(!currentGameDate) return;
             
             const participants = getAllParticipants(currentGameDate);
             const assignments = teamAssignments[currentGameDate] || {};
-            const allYellow = [], allOrange = [];
+            yellowPlayersList = [];
+            orangePlayersList = [];
+            
             for(let p of participants.players) {
                 const team = assignments[p] || "";
-                if(team === "yellow") allYellow.push(p);
-                else if(team === "orange") allOrange.push(p);
+                if(team === "yellow") yellowPlayersList.push(p);
+                else if(team === "orange") orangePlayersList.push(p);
             }
             for(let g of participants.guests) {
                 const team = assignments[g.name] || assignments[`guest_${g.name}`] || "";
-                if(team === "yellow") allYellow.push(g.name + " (Guest)");
-                else if(team === "orange") allOrange.push(g.name + " (Guest)");
+                if(team === "yellow") yellowPlayersList.push(g.name + " (Guest)");
+                else if(team === "orange") orangePlayersList.push(g.name + " (Guest)");
             }
-            yellowPlayers = allYellow;
-            orangePlayers = allOrange;
             
             const existing = matchResults[currentGameDate] || {};
             const existingGoals = existing.goals || {};
             
-            // Initialize goal lists from existing data
-            yellowGoalsList = [];
-            orangeGoalsList = [];
+            yellowGoalsArray = [];
+            orangeGoalsArray = [];
             for(let [player, count] of Object.entries(existingGoals)) {
                 for(let i=0; i<count; i++) {
-                    if(yellowPlayers.includes(player) || yellowPlayers.includes(player + " (Guest)")) {
-                        yellowGoalsList.push(player);
-                    } else if(orangePlayers.includes(player) || orangePlayers.includes(player + " (Guest)")) {
-                        orangeGoalsList.push(player);
+                    if(yellowPlayersList.includes(player) || yellowPlayersList.includes(player + " (Guest)")) {
+                        yellowGoalsArray.push(player);
+                    } else if(orangePlayersList.includes(player) || orangePlayersList.includes(player + " (Guest)")) {
+                        orangeGoalsArray.push(player);
                     }
                 }
             }
             
-            function updatePreview() {
+            function updatePreviewLists() {
                 const yellowCount = {};
                 const orangeCount = {};
-                yellowGoalsList.forEach(p => { yellowCount[p] = (yellowCount[p] || 0) + 1; });
-                orangeGoalsList.forEach(p => { orangeCount[p] = (orangeCount[p] || 0) + 1; });
+                yellowGoalsArray.forEach(p => { yellowCount[p] = (yellowCount[p] || 0) + 1; });
+                orangeGoalsArray.forEach(p => { orangeCount[p] = (orangeCount[p] || 0) + 1; });
                 
-                const yellowPreview = document.getElementById("yellowPreview");
-                const orangePreview = document.getElementById("orangePreview");
-                if(yellowPreview) yellowPreview.innerHTML = Object.entries(yellowCount).map(([p,c]) => `<span class="goal-tag">🟡 ${p} ×${c} <button class="remove-yellow-goal" data-player="${escapeHtml(p)}">✖</button></span>`).join('') || '<span style="color:#64748b;">No goals added</span>';
-                if(orangePreview) orangePreview.innerHTML = Object.entries(orangeCount).map(([p,c]) => `<span class="goal-tag">🟠 ${p} ×${c} <button class="remove-orange-goal" data-player="${escapeHtml(p)}">✖</button></span>`).join('') || '<span style="color:#64748b;">No goals added</span>';
-            }
-            
-            function attachRemoveEvents() {
+                const yPreview = document.getElementById("yellowPreviewList");
+                const oPreview = document.getElementById("orangePreviewList");
+                if(yPreview) yPreview.innerHTML = Object.entries(yellowCount).map(([p,c]) => `<span class="goal-tag">🟡 ${p} ×${c} <button class="remove-yellow-goal" data-player="${escapeHtml(p)}">✖</button></span>`).join('') || '<span style="color:#64748b;">No goals added</span>';
+                if(oPreview) oPreview.innerHTML = Object.entries(orangeCount).map(([p,c]) => `<span class="goal-tag">🟠 ${p} ×${c} <button class="remove-orange-goal" data-player="${escapeHtml(p)}">✖</button></span>`).join('') || '<span style="color:#64748b;">No goals added</span>';
+                
                 document.querySelectorAll(".remove-yellow-goal").forEach(btn => {
-                    btn.removeEventListener("click", handleYellowRemove);
-                    btn.addEventListener("click", handleYellowRemove);
+                    btn.onclick = (e) => {
+                        const player = btn.dataset.player;
+                        const idx = yellowGoalsArray.lastIndexOf(player);
+                        if(idx !== -1) yellowGoalsArray.splice(idx, 1);
+                        rebuildForm();
+                    };
                 });
                 document.querySelectorAll(".remove-orange-goal").forEach(btn => {
-                    btn.removeEventListener("click", handleOrangeRemove);
-                    btn.addEventListener("click", handleOrangeRemove);
+                    btn.onclick = (e) => {
+                        const player = btn.dataset.player;
+                        const idx = orangeGoalsArray.lastIndexOf(player);
+                        if(idx !== -1) orangeGoalsArray.splice(idx, 1);
+                        rebuildForm();
+                    };
                 });
             }
             
-            function handleYellowRemove(e) {
-                const player = e.currentTarget.dataset.player;
-                const idx = yellowGoalsList.lastIndexOf(player);
-                if(idx !== -1) yellowGoalsList.splice(idx, 1);
-                renderGoalForm();
-            }
-            
-            function handleOrangeRemove(e) {
-                const player = e.currentTarget.dataset.player;
-                const idx = orangeGoalsList.lastIndexOf(player);
-                if(idx !== -1) orangeGoalsList.splice(idx, 1);
-                renderGoalForm();
-            }
-            
-            // Create number options 1-10
             const numberOptions = '<option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>';
             
-            goalForm.innerHTML = `
+            goalFormDiv.innerHTML = `
                 <div class="goal-team-section">
                     <div class="goal-team-header"><span style="background:#ffc107; width:24px;height:24px;border-radius:50%;display:inline-block;"></span> 🟡 YELLOW TEAM GOALS</div>
                     <label>Final Score:</label>
                     <input type="number" id="yellowScoreInput" value="${existing.yellowScore || 0}" placeholder="Yellow goals" style="margin-bottom:12px;">
                     <div class="add-goal-row">
-                        <select id="yellowScorerSelect">
-                            <option value="">-- Select Scorer --</option>
-                            ${yellowPlayers.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('')}
-                        </select>
+                        <select id="yellowScorerSelect"><option value="">-- Select Scorer --</option>${yellowPlayersList.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('')}</select>
                         <select id="yellowGoalCount" class="goal-count">${numberOptions}</select>
                         <button id="addYellowGoalBtn">+ Add Goal(s)</button>
                     </div>
-                    <div class="goal-list-preview">
-                        <strong>Goals scored:</strong>
-                        <div id="yellowPreview"></div>
-                    </div>
+                    <div class="goal-list-preview"><strong>Goals scored:</strong><div id="yellowPreviewList"></div></div>
                 </div>
                 <div class="goal-team-section">
                     <div class="goal-team-header"><span style="background:#fd7e14; width:24px;height:24px;border-radius:50%;display:inline-block;"></span> 🟠 ORANGE TEAM GOALS</div>
                     <label>Final Score:</label>
                     <input type="number" id="orangeScoreInput" value="${existing.orangeScore || 0}" placeholder="Orange goals" style="margin-bottom:12px;">
                     <div class="add-goal-row">
-                        <select id="orangeScorerSelect">
-                            <option value="">-- Select Scorer --</option>
-                            ${orangePlayers.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('')}
-                        </select>
+                        <select id="orangeScorerSelect"><option value="">-- Select Scorer --</option>${orangePlayersList.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('')}</select>
                         <select id="orangeGoalCount" class="goal-count">${numberOptions}</select>
                         <button id="addOrangeGoalBtn">+ Add Goal(s)</button>
                     </div>
-                    <div class="goal-list-preview">
-                        <strong>Goals scored:</strong>
-                        <div id="orangePreview"></div>
-                    </div>
+                    <div class="goal-list-preview"><strong>Goals scored:</strong><div id="orangePreviewList"></div></div>
                 </div>
             `;
             
             document.getElementById("yellowScoreInput").value = existing.yellowScore || 0;
             document.getElementById("orangeScoreInput").value = existing.orangeScore || 0;
-            updatePreview();
-            attachRemoveEvents();
+            updatePreviewLists();
             
             document.getElementById("addYellowGoalBtn")?.addEventListener("click", () => {
                 const select = document.getElementById("yellowScorerSelect");
                 const player = select.value;
                 const goalCount = parseInt(document.getElementById("yellowGoalCount").value) || 1;
                 if(player && player !== "") {
-                    for(let i=0; i<goalCount; i++) {
-                        yellowGoalsList.push(player);
-                    }
-                    renderGoalForm();
-                } else {
-                    alert("Select a player first");
-                }
+                    for(let i=0; i<goalCount; i++) yellowGoalsArray.push(player);
+                    rebuildForm();
+                } else { alert("Select a player first"); }
             });
             
             document.getElementById("addOrangeGoalBtn")?.addEventListener("click", () => {
@@ -635,24 +608,20 @@
                 const player = select.value;
                 const goalCount = parseInt(document.getElementById("orangeGoalCount").value) || 1;
                 if(player && player !== "") {
-                    for(let i=0; i<goalCount; i++) {
-                        orangeGoalsList.push(player);
-                    }
-                    renderGoalForm();
-                } else {
-                    alert("Select a player first");
-                }
+                    for(let i=0; i<goalCount; i++) orangeGoalsArray.push(player);
+                    rebuildForm();
+                } else { alert("Select a player first"); }
             });
         }
         
         matchSelect.onchange = () => {
             if(matchSelect.value) {
                 currentGameDate = matchSelect.value;
-                goalForm.style.display = "block";
+                goalFormDiv.style.display = "block";
                 saveBtn.style.display = "block";
-                renderGoalForm();
+                rebuildForm();
             } else {
-                goalForm.style.display = "none";
+                goalFormDiv.style.display = "none";
                 saveBtn.style.display = "none";
                 currentGameDate = null;
             }
@@ -660,21 +629,11 @@
         
         document.getElementById("saveGoalsBtn").onclick = async () => {
             if(!currentGameDate) { alert("Select a match"); return; }
-            
             const yellowScore = parseInt(document.getElementById("yellowScoreInput")?.value) || 0;
             const orangeScore = parseInt(document.getElementById("orangeScoreInput")?.value) || 0;
-            
-            // Build goals object - aggregate counts properly
             const goals = {};
-            for(let p of yellowGoalsList) {
-                let cleanName = p.replace(" (Guest)", "");
-                goals[cleanName] = (goals[cleanName] || 0) + 1;
-            }
-            for(let p of orangeGoalsList) {
-                let cleanName = p.replace(" (Guest)", "");
-                goals[cleanName] = (goals[cleanName] || 0) + 1;
-            }
-            
+            for(let p of yellowGoalsArray) { let clean = p.replace(" (Guest)", ""); goals[clean] = (goals[clean] || 0) + 1; }
+            for(let p of orangeGoalsArray) { let clean = p.replace(" (Guest)", ""); goals[clean] = (goals[clean] || 0) + 1; }
             await saveMatchResult(currentGameDate, yellowScore, orangeScore, goals);
             alert(`✅ Goals saved for ${matchSelect.options[matchSelect.selectedIndex]?.text}!`);
             modal.remove();
@@ -716,7 +675,7 @@
     function renderTimerPage() {
         const c = document.getElementById("page-timer");
         if(!c) return;
-        c.innerHTML = `<div class="timer-container"><div class="timer-display" id="timerDisplay">45:00</div><div class="timer-controls"><button class="timer-btn start" id="timerStartBtn"><i class="fas fa-play"></i> Start</button><button class="timer-btn pause" id="timerPauseBtn"><i class="fas fa-pause"></i> Pause</button><button class="timer-btn reset" id="timerResetBtn"><i class="fas fa-undo-alt"></i> Reset</button></div><div class="half-status"><i class="fas fa-hourglass-half"></i> Current Half: <span id="currentHalf">FIRST HALF</span></div><div style="margin-top:12px; font-size:12px; color:#64748b;"><i class="fas fa-info-circle"></i> 45-minute halves with sound alarm</div></div><div class="card"><h2><i class="fas fa-clock"></i> Match Timer</h2><p style="font-size:13px;">• Start at kickoff<br>• Alarm sounds at half time and full time<br>• Reset for next half</p></div>`;
+        c.innerHTML = `<div class="timer-container"><div class="timer-display" id="timerDisplay">45:00</div><div class="timer-controls"><button class="timer-btn start" id="timerStartBtn"><i class="fas fa-play"></i> Start</button><button class="timer-btn pause" id="timerPauseBtn"><i class="fas fa-pause"></i> Pause</button><button class="timer-btn reset" id="timerResetBtn"><i class="fas fa-undo-alt"></i> Reset</button></div><div class="half-status"><i class="fas fa-hourglass-half"></i> Current Half: <span id="currentHalf">FIRST HALF</span></div><div style="margin-top:12px; font-size:12px; color:#64748b;"><i class="fas fa-info-circle"></i> 45-minute halves with alarm</div></div><div class="card"><h2><i class="fas fa-clock"></i> Match Timer</h2><p style="font-size:13px;">• Start at kickoff<br>• Alarm at half time and full time</p></div>`;
         updateTimerDisplay();
         document.getElementById("timerStartBtn")?.addEventListener("click", startTimer);
         document.getElementById("timerPauseBtn")?.addEventListener("click", pauseTimer);
@@ -762,7 +721,7 @@
         const allStats = Array.from(stats.entries()).map(([name, s]) => ({ name, goals: s.goals, gamesPlayed: s.gamesPlayed }));
         const topGames = [...allStats].sort((a, b) => b.gamesPlayed - a.gamesPlayed).slice(0, 10);
         const topGoals = [...allStats].sort((a, b) => b.goals - a.goals).slice(0, 10);
-        c.innerHTML = `<div class="card"><h2>🏆 ALL-TIME LEADERBOARD</h2><div class="leaderboard-note"><i class="fas fa-chart-line"></i> Stats include all games played</div><div style="margin-bottom: 24px;"><h3><i class="fas fa-users"></i> 🏃 MOST GAMES PLAYED</h3><table class="data-table"><thead><tr><th>#</th><th>Player</th><th style="text-align: center;">Games</th></tr></thead><tbody>${topGames.map((p,i)=>`<tr><td style="width:40px;"><strong>${i+1}</strong></td><td>${renderMiniAvatar(p.name,28)} ${escapeHtml(p.name)}</td><td style="text-align: center; font-weight: 700;">${p.gamesPlayed}</td></tr>`).join('')}${topGames.length === 0 ? '<tr><td colspan="3" style="text-align: center;">No games recorded yet</td></tr>' : ''}</tbody></table></div><div><h3><i class="fas fa-futbol"></i> ⚽ TOP GOAL SCORERS</h3><table class="data-table"><thead><tr><th>#</th><th>Player</th><th style="text-align: center;">Goals</th></tr></thead><tbody>${topGoals.map((p,i)=>`<tr><td style="width:40px;"><strong>${i+1}</strong></td><td>${renderMiniAvatar(p.name,28)} ${escapeHtml(p.name)}</td><td style="text-align: center; font-weight: 700;">${p.goals}</td></tr>`).join('')}${topGoals.length === 0 ? '<tr><td colspan="3" style="text-align: center;">No goals recorded yet</td></tr>' : ''}</tbody></table></div></div>`;
+        c.innerHTML = `<div class="card"><h2>🏆 ALL-TIME LEADERBOARD</h2><div class="leaderboard-note"><i class="fas fa-chart-line"></i> Stats include all games</div><div style="margin-bottom: 24px;"><h3>🏃 MOST GAMES PLAYED</h3><table class="data-table"><thead><tr><th>#</th><th>Player</th><th style="text-align: center;">Games</th></tr></thead><tbody>${topGames.map((p,i)=>`<tr><td style="width:40px;"><strong>${i+1}</strong></td><td>${renderMiniAvatar(p.name,28)} ${escapeHtml(p.name)}</td><td style="text-align: center; font-weight: 700;">${p.gamesPlayed}</td></tr>`).join('')}</tbody></table></div><div><h3>⚽ TOP GOAL SCORERS</h3><table class="data-table"><thead><tr><th>#</th><th>Player</th><th style="text-align: center;">Goals</th></tr></thead><tbody>${topGoals.map((p,i)=>`<tr><td style="width:40px;"><strong>${i+1}</strong></td><td>${renderMiniAvatar(p.name,28)} ${escapeHtml(p.name)}</td><td style="text-align: center; font-weight: 700;">${p.goals}</td></tr>`).join('')}</tbody></table></div></div>`;
     }
     
     function renderTeamsPage() {
@@ -799,7 +758,7 @@
             const wg = guests.filter(g=>g.gameDate===w.dateStr);
             const cmts = matchComments[w.dateStr]||[];
             const sid = w.dateStr.replace(/-/g,'');
-            html += `<div class="match-card"><div class="match-header"><div>${w.label}</div><div class="match-result">🟡 ${m.yellowScore} - ${m.orangeScore} 🟠</div></div><div class="teams-section"><div class="team-row"><div class="team-box"><div class="team-yellow">🟡 YELLOW</div><div class="player-list">${yellow.map(p=>`<div class="player-tag">${renderMiniAvatar(p,24)} ${escapeHtml(p)}</div>`).join('')||'—'}</div></div><div class="team-box"><div class="team-orange">🟠 ORANGE</div><div class="player-list">${orange.map(p=>`<div class="player-tag">${renderMiniAvatar(p,24)} ${escapeHtml(p)}</div>`).join('')||'—'}</div></div></div><div class="score-big">${m.yellowScore} - ${m.orangeScore}</div></div><div class="goals-section"><div>⚽ Goal Scorers</div><div class="goals-list">${yg.map(g=>`<div class="goal-badge">🟡 ${g.player} ×${g.count}</div>`).join('')}${og.map(g=>`<div class="goal-badge">🟠 ${g.player} ×${g.count}</div>`).join('')}${yg.length===0 && og.length===0 ? '<div class="goal-badge">No goals recorded</div>' : ''}</div></div>${wg.length?`<div class="goals-section" style="background:#f0fdf4;"><div>🎭 Guests</div><div class="goals-list">${wg.map(g=>`<div class="goal-badge">${escapeHtml(g.guestName)} <small>(${escapeHtml(g.addedBy)})</small></div>`).join('')}</div></div>`:''}<div class="comments-section"><div>💬 Comments (${cmts.length})</div><div id="comments-${sid}">${cmts.map(c=>`<div class="comment-item"><strong>${escapeHtml(c.author)}</strong><br>${escapeHtml(c.text)}</div>`).join('')||'No comments'}</div><div class="add-comment"><input id="commentInput-${sid}" placeholder="Add comment..."><button onclick="window.addCommentToHistory('${w.dateStr}')">Post</button></div></div></div>`;
+            html += `<div class="match-card"><div class="match-header"><div>${w.label}</div><div class="match-result">🟡 ${m.yellowScore} - ${m.orangeScore} 🟠</div></div><div class="teams-section"><div class="team-row"><div class="team-box"><div class="team-yellow">🟡 YELLOW</div><div class="player-list">${yellow.map(p=>`<div class="player-tag">${renderMiniAvatar(p,24)} ${escapeHtml(p)}</div>`).join('')||'—'}</div></div><div class="team-box"><div class="team-orange">🟠 ORANGE</div><div class="player-list">${orange.map(p=>`<div class="player-tag">${renderMiniAvatar(p,24)} ${escapeHtml(p)}</div>`).join('')||'—'}</div></div></div><div class="score-big">${m.yellowScore} - ${m.orangeScore}</div></div><div class="goals-section"><div>⚽ Goal Scorers</div><div class="goals-list">${yg.map(g=>`<div class="goal-badge">🟡 ${g.player} ×${g.count}</div>`).join('')}${og.map(g=>`<div class="goal-badge">🟠 ${g.player} ×${g.count}</div>`).join('')}</div></div>${wg.length?`<div class="goals-section" style="background:#f0fdf4;"><div>🎭 Guests</div><div class="goals-list">${wg.map(g=>`<div class="goal-badge">${escapeHtml(g.guestName)} <small>(${escapeHtml(g.addedBy)})</small></div>`).join('')}</div></div>`:''}<div class="comments-section"><div>💬 Comments (${cmts.length})</div><div id="comments-${sid}">${cmts.map(c=>`<div class="comment-item"><strong>${escapeHtml(c.author)}</strong><br>${escapeHtml(c.text)}</div>`).join('')||'No comments'}</div><div class="add-comment"><input id="commentInput-${sid}" placeholder="Add comment..."><button onclick="window.addCommentToHistory('${w.dateStr}')">Post</button></div></div></div>`;
         }
         c.innerHTML = html;
         if(isAdminLoggedIn) document.getElementById("addGoalsBtn")?.addEventListener("click", openGoalEntryModal);
