@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Monday Night Soccer | Complete + Goal Assignments</title>
+    <title>Monday Night Soccer | Complete + Goal Assignment</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -98,9 +98,10 @@
         .goal-team-header{font-weight:800;font-size:18px;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
         .goal-list-preview{background:#f8fafc;border-radius:16px;padding:12px;margin-top:12px;min-height:60px;}
         .goal-tag{display:inline-block;background:#1a73e8;color:white;padding:6px 12px;border-radius:40px;font-size:12px;margin:4px;}
-        .goal-tag button{background:#dc3545;padding:2px 8px;margin-left:8px;font-size:10px;}
+        .goal-tag button{background:#dc3545;padding:2px 8px;margin-left:8px;font-size:10px;border-radius:40px;}
         .add-goal-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
         .add-goal-row select{flex:2;margin:0;}
+        .add-goal-row select.goal-count{flex:1;}
         .add-goal-row button{flex:1;margin:0;padding:10px;}
     </style>
 </head>
@@ -465,7 +466,7 @@
         };
     }
     
-    // GOAL ENTRY WITH PLAYER SELECTION
+    // GOAL ENTRY WITH MULTIPLE GOAL SELECTION (1-10 per player)
     function openGoalEntryModal() {
         const pastWeeks = getPastWeeks();
         if(pastWeeks.length === 0) { alert("No past games to record goals for"); return; }
@@ -482,7 +483,7 @@
             <select id="goalMatchSelect">${optionsHtml}</select>
             <div id="goalEntryForm" style="display:none; margin-top:16px;"></div>
             <div class="flex-btns" style="margin-top:16px;">
-                <button id="saveGoalsBtn" style="display:none;">Save Goals</button>
+                <button id="saveGoalsBtn" style="display:none;">💾 Save Goals & Results</button>
                 <button id="cancelGoalsBtn" class="btn-outline">Close</button>
             </div>
         </div>`;
@@ -539,28 +540,39 @@
                 yellowGoalsList.forEach(p => { yellowCount[p] = (yellowCount[p] || 0) + 1; });
                 orangeGoalsList.forEach(p => { orangeCount[p] = (orangeCount[p] || 0) + 1; });
                 
-                document.getElementById("yellowPreview").innerHTML = Object.entries(yellowCount).map(([p,c]) => `<span class="goal-tag">🟡 ${p} ×${c} <button class="remove-yellow-goal" data-player="${escapeHtml(p)}">✖</button></span>`).join('') || '<span style="color:#64748b;">No goals added</span>';
-                document.getElementById("orangePreview").innerHTML = Object.entries(orangeCount).map(([p,c]) => `<span class="goal-tag">🟠 ${p} ×${c} <button class="remove-orange-goal" data-player="${escapeHtml(p)}">✖</button></span>`).join('') || '<span style="color:#64748b;">No goals added</span>';
-                
+                const yellowPreview = document.getElementById("yellowPreview");
+                const orangePreview = document.getElementById("orangePreview");
+                if(yellowPreview) yellowPreview.innerHTML = Object.entries(yellowCount).map(([p,c]) => `<span class="goal-tag">🟡 ${p} ×${c} <button class="remove-yellow-goal" data-player="${escapeHtml(p)}">✖</button></span>`).join('') || '<span style="color:#64748b;">No goals added</span>';
+                if(orangePreview) orangePreview.innerHTML = Object.entries(orangeCount).map(([p,c]) => `<span class="goal-tag">🟠 ${p} ×${c} <button class="remove-orange-goal" data-player="${escapeHtml(p)}">✖</button></span>`).join('') || '<span style="color:#64748b;">No goals added</span>';
+            }
+            
+            function attachRemoveEvents() {
                 document.querySelectorAll(".remove-yellow-goal").forEach(btn => {
-                    btn.addEventListener("click", (e) => {
-                        const player = btn.dataset.player;
-                        const idx = yellowGoalsList.lastIndexOf(player);
-                        if(idx !== -1) yellowGoalsList.splice(idx, 1);
-                        updatePreview();
-                        renderGoalForm();
-                    });
+                    btn.removeEventListener("click", handleYellowRemove);
+                    btn.addEventListener("click", handleYellowRemove);
                 });
                 document.querySelectorAll(".remove-orange-goal").forEach(btn => {
-                    btn.addEventListener("click", (e) => {
-                        const player = btn.dataset.player;
-                        const idx = orangeGoalsList.lastIndexOf(player);
-                        if(idx !== -1) orangeGoalsList.splice(idx, 1);
-                        updatePreview();
-                        renderGoalForm();
-                    });
+                    btn.removeEventListener("click", handleOrangeRemove);
+                    btn.addEventListener("click", handleOrangeRemove);
                 });
             }
+            
+            function handleYellowRemove(e) {
+                const player = e.currentTarget.dataset.player;
+                const idx = yellowGoalsList.lastIndexOf(player);
+                if(idx !== -1) yellowGoalsList.splice(idx, 1);
+                renderGoalForm();
+            }
+            
+            function handleOrangeRemove(e) {
+                const player = e.currentTarget.dataset.player;
+                const idx = orangeGoalsList.lastIndexOf(player);
+                if(idx !== -1) orangeGoalsList.splice(idx, 1);
+                renderGoalForm();
+            }
+            
+            // Create number options 1-10
+            const numberOptions = '<option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>';
             
             goalForm.innerHTML = `
                 <div class="goal-team-section">
@@ -572,7 +584,8 @@
                             <option value="">-- Select Scorer --</option>
                             ${yellowPlayers.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('')}
                         </select>
-                        <button id="addYellowGoalBtn">+ Add Goal</button>
+                        <select id="yellowGoalCount" class="goal-count">${numberOptions}</select>
+                        <button id="addYellowGoalBtn">+ Add Goal(s)</button>
                     </div>
                     <div class="goal-list-preview">
                         <strong>Goals scored:</strong>
@@ -588,7 +601,8 @@
                             <option value="">-- Select Scorer --</option>
                             ${orangePlayers.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('')}
                         </select>
-                        <button id="addOrangeGoalBtn">+ Add Goal</button>
+                        <select id="orangeGoalCount" class="goal-count">${numberOptions}</select>
+                        <button id="addOrangeGoalBtn">+ Add Goal(s)</button>
                     </div>
                     <div class="goal-list-preview">
                         <strong>Goals scored:</strong>
@@ -600,13 +614,16 @@
             document.getElementById("yellowScoreInput").value = existing.yellowScore || 0;
             document.getElementById("orangeScoreInput").value = existing.orangeScore || 0;
             updatePreview();
+            attachRemoveEvents();
             
             document.getElementById("addYellowGoalBtn")?.addEventListener("click", () => {
                 const select = document.getElementById("yellowScorerSelect");
                 const player = select.value;
+                const goalCount = parseInt(document.getElementById("yellowGoalCount").value) || 1;
                 if(player && player !== "") {
-                    yellowGoalsList.push(player);
-                    updatePreview();
+                    for(let i=0; i<goalCount; i++) {
+                        yellowGoalsList.push(player);
+                    }
                     renderGoalForm();
                 } else {
                     alert("Select a player first");
@@ -616,9 +633,11 @@
             document.getElementById("addOrangeGoalBtn")?.addEventListener("click", () => {
                 const select = document.getElementById("orangeScorerSelect");
                 const player = select.value;
+                const goalCount = parseInt(document.getElementById("orangeGoalCount").value) || 1;
                 if(player && player !== "") {
-                    orangeGoalsList.push(player);
-                    updatePreview();
+                    for(let i=0; i<goalCount; i++) {
+                        orangeGoalsList.push(player);
+                    }
                     renderGoalForm();
                 } else {
                     alert("Select a player first");
@@ -645,7 +664,7 @@
             const yellowScore = parseInt(document.getElementById("yellowScoreInput")?.value) || 0;
             const orangeScore = parseInt(document.getElementById("orangeScoreInput")?.value) || 0;
             
-            // Build goals object
+            // Build goals object - aggregate counts properly
             const goals = {};
             for(let p of yellowGoalsList) {
                 let cleanName = p.replace(" (Guest)", "");
@@ -657,7 +676,7 @@
             }
             
             await saveMatchResult(currentGameDate, yellowScore, orangeScore, goals);
-            alert(`Goals saved for ${matchSelect.options[matchSelect.selectedIndex]?.text}!`);
+            alert(`✅ Goals saved for ${matchSelect.options[matchSelect.selectedIndex]?.text}!`);
             modal.remove();
         };
         
@@ -823,7 +842,7 @@
             html += `<tr><td>${renderMiniAvatar(p,24)} ${escapeHtml(p)}</td><td>${paid?'<span class="badge-paid">✓ PAID</span>':'<span class="badge-owing">❌ OWING</span>'}</td><td>${!paid?`<button class="markPaidBtn" data-player="${escapeHtml(p)}" data-date="${nextWeek.dateStr}">Record $${WEEKLY_FEE}</button>`:'—'}</td></tr>`;
         }
         html += `</tbody></table><h3>📜 Outstanding Debts</h3><table class="data-table"><thead><tr><th>Player</th><th>Amount Owed</th></tr></thead><tbody>`;
-        if(debts.length) for(let d of debts) html += `<tr><td>${renderMiniAvatar(d.player,24)} ${escapeHtml(d.player)}</td><td class="badge-owing">$${d.debt}<tr></tr>`;
+        if(debts.length) for(let d of debts) html += `<tr><td>${renderMiniAvatar(d.player,24)} ${escapeHtml(d.player)}</td><td class="badge-owing">$${d.debt}</td></tr>`;
         else html += `<tr><td colspan="2" style="text-align:center;">✨ No outstanding debts ✨</td></tr>`;
         html += `</tbody></table></div><div class="card"><h2>✍️ Manual Attendance</h2><select id="manualPlayerSelect"><option value="">-- Select Player --</option>${players.map(p=>`<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('')}</select><button id="manualAddBtn" class="admin-action-btn">➕ Add to Playing List</button></div><div class="card"><h2>🎭 Manage Guests</h2>`;
         for(let g of parts.guests) html += `<div class="admin-team-item"><span><strong>${escapeHtml(g.name)}</strong> (by ${escapeHtml(g.addedBy)})</span><button class="remove-guest-btn" data-guest="${escapeHtml(g.name)}" data-date="${nextWeek.dateStr}">Remove</button></div>`;
