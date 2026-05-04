@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Monday Night Soccer | Complete App</title>
+    <title>Monday Night Soccer | Complete + Goals</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -30,11 +30,12 @@
         .big-buttons{display:flex;gap:14px;margin:16px 0 12px;}
         .btn-play-big{background:#28a745;flex:1;padding:14px;border-radius:60px;font-weight:800;font-size:17px;border:none;color:white;cursor:pointer;}
         .btn-sit-big{background:#dc3545;flex:1;padding:14px;border-radius:60px;font-weight:800;font-size:17px;border:none;color:white;cursor:pointer;}
-        .profile-item{background:#f8fafc;border-radius:20px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;}
+        .profile-item{background:#f8fafc;border-radius:20px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
         .profile-avatar{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:20px;}
         .player-avatar-small{width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:14px;margin-right:4px;}
         .profile-badge{background:white;border-radius:40px;padding:4px 12px;font-size:11px;font-weight:600;display:inline-block;margin-right:6px;margin-bottom:4px;}
         .edit-profile-btn{background:#475569;padding:6px 14px;font-size:12px;border-radius:40px;border:none;color:white;cursor:pointer;}
+        .edit-profile-btn.disabled{background:#cbd5e1;cursor:not-allowed;}
         .match-card{background:white;border-radius:24px;margin-bottom:14px;border:1px solid #e2e8f0;overflow:hidden;}
         .match-header{background:#f8fafc;padding:12px 16px;display:flex;justify-content:space-between;}
         .match-result{background:#1a73e8;color:white;padding:4px 14px;border-radius:40px;font-weight:700;}
@@ -66,7 +67,7 @@
         .finance-summary{background:linear-gradient(135deg,#1a73e8,#0d5bbf);color:white;border-radius:20px;padding:16px;margin-bottom:16px;text-align:center;}
         .finance-summary .amount{font-size:32px;font-weight:800;}
         .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;}
-        .modal-content{background:white;border-radius:32px;padding:24px;max-width:340px;width:90%;}
+        .modal-content{background:white;border-radius:32px;padding:24px;max-width:380px;width:90%;max-height:80vh;overflow-y:auto;}
         .login-box{background:white;border-radius:48px;padding:40px 28px;margin:40px 20px;text-align:center;}
         .login-logo{width:90px;height:90px;background:linear-gradient(135deg,#1a73e8,#0d5bbf);border-radius:32px;display:inline-flex;align-items:center;justify-content:center;margin:0 auto 20px;}
         select,input{width:100%;padding:14px;border:1.5px solid #e2e8f0;border-radius:60px;margin:8px 0;font-size:16px;}
@@ -91,6 +92,12 @@
         .share-btn{background:#25D366;width:100%;padding:14px;border-radius:60px;font-weight:700;font-size:16px;margin-top:8px;text-align:center;cursor:pointer;}
         .share-btn i{margin-right:8px;}
         .loading{text-align:center;padding:40px;color:#64748b;}
+        .profile-info{flex:1;}
+        .profile-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;}
+        .profile-name{font-weight:700;font-size:15px;}
+        .goal-input-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+        .goal-input-row select{flex:2;margin:0;}
+        .goal-input-row button{flex:1;margin:0;padding:10px;}
     </style>
 </head>
 <body>
@@ -325,8 +332,8 @@
         renderHistoryPage();
     }
     
-    async function saveMatchResult(date,yellow,orange,goals) {
-        matchResults[date] = {yellowScore:yellow,orangeScore:orange,goals};
+    async function saveMatchResult(date, yellowScore, orangeScore, goals) {
+        matchResults[date] = { yellowScore, orangeScore, goals };
         if(firebaseReady&&db) await db.collection("config").doc("matchResults").set(matchResults);
         renderHistoryPage(); renderScoreboardPage();
         if(isAdminLoggedIn) renderAdminPage();
@@ -366,9 +373,13 @@
     }
     
     function showEditProfile(name) {
+        if (!isAdminLoggedIn && currentUser?.name !== name) {
+            alert("You can only edit your own profile");
+            return;
+        }
         const ex = playerProfiles[name] || {age:'',position:POSITIONS[0],yearJoined:'',openingBalanceGames:0};
         const modal = document.createElement('div'); modal.className='modal';
-        modal.innerHTML=`<div class="modal-content"><h3>✏️ Edit ${escapeHtml(name)}</h3><label>Age</label><input id="editAge" value="${escapeHtml(ex.age||'')}"><label>Position</label><select id="editPosition">${POSITIONS.map(p=>`<option ${ex.position===p?'selected':''}>${p}</option>`).join('')}</select><label>Year</label><input id="editYear" value="${escapeHtml(ex.yearJoined||'')}"><label>Opening Games</label><input id="editOpeningGames" type="number" value="${ex.openingBalanceGames||0}"><div class="flex-btns"><button id="saveBtn">Save</button><button id="cancelBtn" class="btn-outline">Cancel</button></div></div>`;
+        modal.innerHTML=`<div class="modal-content"><h3>✏️ Edit ${escapeHtml(name)}</h3><label>Age</label><input id="editAge" value="${escapeHtml(ex.age||'')}"><label>Position</label><select id="editPosition">${POSITIONS.map(p=>`<option ${ex.position===p?'selected':''}>${p}</option>`).join('')}</select><label>Year Joined</label><input id="editYear" value="${escapeHtml(ex.yearJoined||'')}"><label>Opening Games (history)</label><input id="editOpeningGames" type="number" value="${ex.openingBalanceGames||0}"><div class="flex-btns"><button id="saveBtn">Save</button><button id="cancelBtn" class="btn-outline">Cancel</button></div></div>`;
         document.body.appendChild(modal);
         document.getElementById('saveBtn').onclick = async()=>{
             const newAge=document.getElementById('editAge').value.trim();
@@ -395,7 +406,6 @@
             const team = assignments[p.name] || assignments[`guest_${p.name}`];
             if(team==="yellow") yellow.push(p); else if(team==="orange") orange.push(p);
         }
-        
         const sheetHTML = `<div style="background: white; padding: 24px; border-radius: 32px; max-width: 500px; font-family: 'Inter', sans-serif;">
             <div style="text-align: center; border-bottom: 3px solid #1a73e8; padding-bottom: 16px; margin-bottom: 20px;">
                 <div style="background: #1a73e8; width: 60px; height: 60px; border-radius: 24px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
@@ -426,7 +436,6 @@
                 <i class="fas fa-calendar-alt"></i> ${nextWeek.label} • 8:00pm • Clifton Park, Brunswick
             </div>
         </div>`;
-        
         const modal = document.createElement('div'); modal.className='modal';
         modal.innerHTML = `<div class="modal-content" style="max-width: 550px; text-align: center;">
             <h3>📸 Share Team Sheet</h3>
@@ -438,7 +447,6 @@
             <p style="font-size: 11px; margin-top: 12px; color: #64748b;"><i class="fas fa-info-circle"></i> Save image then share to WhatsApp/Instagram</p>
         </div>`;
         document.body.appendChild(modal);
-        
         document.getElementById("closeSheetBtn").onclick = () => modal.remove();
         document.getElementById("downloadSheetBtn").onclick = async () => {
             const element = document.getElementById("shareSheetPreview");
@@ -451,6 +459,94 @@
             } catch(e) { alert("Error generating image"); }
             modal.remove();
         };
+    }
+    
+    function openGoalEntryModal() {
+        const pastWeeks = getPastWeeks();
+        if(pastWeeks.length === 0) { alert("No past games to record goals for"); return; }
+        
+        let optionsHtml = '<option value="">-- Select Match --</option>';
+        for(let w of pastWeeks) {
+            optionsHtml += `<option value="${w.dateStr}">${w.label}</option>`;
+        }
+        
+        const modal = document.createElement('div'); modal.className='modal';
+        modal.innerHTML = `<div class="modal-content">
+            <h3>⚽ Record Match Goals</h3>
+            <label>Select Match</label>
+            <select id="goalMatchSelect">${optionsHtml}</select>
+            <div id="goalEntryForm" style="display:none; margin-top:16px;">
+                <label>🟡 Yellow Team Score</label>
+                <input type="number" id="yellowScoreInput" placeholder="Yellow goals" value="0">
+                <label>🟠 Orange Team Score</label>
+                <input type="number" id="orangeScoreInput" placeholder="Orange goals" value="0">
+                <label>🟡 Yellow Goal Scorers (comma separated names)</label>
+                <input type="text" id="yellowScorers" placeholder="e.g., Carlo, Alex, Mario">
+                <label>🟠 Orange Goal Scorers (comma separated names)</label>
+                <input type="text" id="orangeScorers" placeholder="e.g., Charlie, Danny">
+                <div class="flex-btns">
+                    <button id="saveGoalsBtn">Save Goals & Result</button>
+                    <button id="cancelGoalsBtn" class="btn-outline">Cancel</button>
+                </div>
+            </div>
+        </div>`;
+        document.body.appendChild(modal);
+        
+        const matchSelect = document.getElementById("goalMatchSelect");
+        const goalForm = document.getElementById("goalEntryForm");
+        
+        matchSelect.onchange = () => {
+            if(matchSelect.value) {
+                goalForm.style.display = "block";
+                const existing = matchResults[matchSelect.value] || {};
+                document.getElementById("yellowScoreInput").value = existing.yellowScore || 0;
+                document.getElementById("orangeScoreInput").value = existing.orangeScore || 0;
+                document.getElementById("yellowScorers").value = "";
+                document.getElementById("orangeScorers").value = "";
+            } else {
+                goalForm.style.display = "none";
+            }
+        };
+        
+        document.getElementById("saveGoalsBtn").onclick = async () => {
+            const gameDate = matchSelect.value;
+            if(!gameDate) { alert("Select a match"); return; }
+            
+            const yellowScore = parseInt(document.getElementById("yellowScoreInput").value) || 0;
+            const orangeScore = parseInt(document.getElementById("orangeScoreInput").value) || 0;
+            const yellowScorersText = document.getElementById("yellowScorers").value.trim();
+            const orangeScorersText = document.getElementById("orangeScorers").value.trim();
+            
+            let goals = matchResults[gameDate]?.goals || {};
+            
+            if(yellowScorersText) {
+                const yellowNames = yellowScorersText.split(',').map(s => s.trim()).filter(n => n);
+                for(let name of yellowNames) {
+                    if(players.includes(name)) {
+                        goals[name] = (goals[name] || 0) + 1;
+                    } else {
+                        alert(`Warning: "${name}" is not in the player list. Goal not counted.`);
+                    }
+                }
+            }
+            
+            if(orangeScorersText) {
+                const orangeNames = orangeScorersText.split(',').map(s => s.trim()).filter(n => n);
+                for(let name of orangeNames) {
+                    if(players.includes(name)) {
+                        goals[name] = (goals[name] || 0) + 1;
+                    } else {
+                        alert(`Warning: "${name}" is not in the player list. Goal not counted.`);
+                    }
+                }
+            }
+            
+            await saveMatchResult(gameDate, yellowScore, orangeScore, goals);
+            alert("Match result and goals saved!");
+            modal.remove();
+        };
+        
+        document.getElementById("cancelGoalsBtn").onclick = () => modal.remove();
     }
     
     function refreshAll() {
@@ -501,7 +597,7 @@
         const parts = getAllParticipants(CURRENT_GAME_STR);
         const aest = getAESTNow();
         const isAfter = (aest.getDay()===1 && (aest.getHours()>21 || (aest.getHours()===21 && aest.getMinutes()>=30)));
-        c.innerHTML = `<div class="info-bar"><i class="fas fa-clock"></i> AEST: ${aest.toLocaleString('en-AU')}<br>${isAfter ? '🔮 After 9:30pm - Showing NEXT Monday' : '⚽ BEFORE 9:30pm - Showing TONIGHT'}</div><div class="share-card"><div class="share-btn" id="shareTeamBtn"><i class="fab fa-whatsapp"></i> 📸 Share Team Sheet for Social Media</div></div><div class="attendance-card"><h2><i class="fas fa-futbol"></i> ${gameLabel} • 8pm</h2><div>Clifton Park, Brunswick</div><div class="big-buttons"><button id="homePlayBtn" class="btn-play-big">✅ I'M PLAYING</button><button id="homeSitBtn" class="btn-sit-big">❌ CAN'T PLAY</button></div><div>${status === 'in' ? '✓ You are PLAYING' : (status === 'out' ? '✗ You are NOT PLAYING' : 'Tap above to set attendance')}</div></div><div class="playing-list"><div>🟢 Playing (${parts.players.length})</div><div>${parts.players.map(p=>`<span class="attendee-tag">${renderMiniAvatar(p,28)} ${escapeHtml(p)}</span>`).join('')||'None'}</div></div><div class="guest-section"><div>🎭 Guests (${parts.guests.length})</div><div>${parts.guests.map(g=>`<span class="guest-tag"><i class="fas fa-user-plus"></i> ${escapeHtml(g.name)} <small>(${escapeHtml(g.addedBy)})</small></span>`).join('')||'None'}</div><div style="margin-top:12px;"><input id="guestNameInput" placeholder="Guest name"><button id="addGuestBtnPlayer" style="width:100%;margin-top:8px;">➕ Bring a Guest</button></div></div>`;
+        c.innerHTML = `<div class="info-bar"><i class="fas fa-clock"></i> AEST: ${aest.toLocaleString('en-AU')}<br>${isAfter ? '🔮 After 9:30pm - Showing NEXT Monday' : '⚽ BEFORE 9:30pm - Showing TONIGHT'}</div><div class="share-card"><div class="share-btn" id="shareTeamBtn"><i class="fab fa-whatsapp"></i> 📸 Share Team Sheet</div></div><div class="attendance-card"><h2><i class="fas fa-futbol"></i> ${gameLabel} • 8pm</h2><div>Clifton Park, Brunswick</div><div class="big-buttons"><button id="homePlayBtn" class="btn-play-big">✅ I'M PLAYING</button><button id="homeSitBtn" class="btn-sit-big">❌ CAN'T PLAY</button></div><div>${status === 'in' ? '✓ You are PLAYING' : (status === 'out' ? '✗ You are NOT PLAYING' : 'Tap above to set attendance')}</div></div><div class="playing-list"><div>🟢 Playing (${parts.players.length})</div><div>${parts.players.map(p=>`<span class="attendee-tag">${renderMiniAvatar(p,28)} ${escapeHtml(p)}</span>`).join('')||'None'}</div></div><div class="guest-section"><div>🎭 Guests (${parts.guests.length})</div><div>${parts.guests.map(g=>`<span class="guest-tag"><i class="fas fa-user-plus"></i> ${escapeHtml(g.name)} <small>(${escapeHtml(g.addedBy)})</small></span>`).join('')||'None'}</div><div style="margin-top:12px;"><input id="guestNameInput" placeholder="Guest name"><button id="addGuestBtnPlayer" style="width:100%;margin-top:8px;">➕ Bring a Guest</button></div></div>`;
         document.getElementById("homePlayBtn")?.addEventListener("click",()=>setAttendance("in"));
         document.getElementById("homeSitBtn")?.addEventListener("click",()=>setAttendance("out"));
         document.getElementById("addGuestBtnPlayer")?.addEventListener("click",()=>{const gn=document.getElementById("guestNameInput")?.value.trim(); if(gn) addGuest(gn); else alert("Enter name");});
@@ -514,7 +610,8 @@
         let html = `<div class="card"><h2>👤 Player Profiles</h2>`;
         for(let p of players){
             const prof = playerProfiles[p]||{age:'—',position:'—',yearJoined:'—',gamesPlayed:0};
-            html += `<div class="profile-item">${renderAvatar(p,50)}<div><div>⚽ ${escapeHtml(p)} <button class="edit-profile-btn" data-player="${escapeHtml(p)}" style="font-size:10px;padding:4px 10px;">Edit</button></div><div><span class="profile-badge">🎂 ${escapeHtml(prof.age)}</span><span class="profile-badge">⚽ ${escapeHtml(prof.position)}</span><span class="profile-badge">📅 ${escapeHtml(prof.yearJoined)}</span><span class="profile-badge">🏆 ${prof.gamesPlayed||0} games</span></div></div></div>`;
+            const canEdit = (isAdminLoggedIn || currentUser?.name === p);
+            html += `<div class="profile-item">${renderAvatar(p,50)}<div class="profile-info"><div class="profile-header"><div class="profile-name">⚽ ${escapeHtml(p)}</div>${canEdit ? `<button class="edit-profile-btn" data-player="${escapeHtml(p)}">Edit</button>` : ''}</div><div><span class="profile-badge">🎂 ${escapeHtml(prof.age)}</span><span class="profile-badge">⚽ ${escapeHtml(prof.position)}</span><span class="profile-badge">📅 ${escapeHtml(prof.yearJoined)}</span><span class="profile-badge">🏆 ${prof.gamesPlayed||0} games</span></div></div></div>`;
         }
         c.innerHTML = html;
         document.querySelectorAll(".edit-profile-btn").forEach(btn=>btn.addEventListener("click",()=>showEditProfile(btn.dataset.player)));
@@ -531,7 +628,7 @@
         const allStats = Array.from(stats.entries()).map(([name, s]) => ({ name, goals: s.goals, gamesPlayed: s.gamesPlayed }));
         const topGames = [...allStats].sort((a, b) => b.gamesPlayed - a.gamesPlayed).slice(0, 10);
         const topGoals = [...allStats].sort((a, b) => b.goals - a.goals).slice(0, 10);
-        c.innerHTML = `<div class="card"><h2>🏆 ALL-TIME LEADERBOARD</h2><div class="leaderboard-note"><i class="fas fa-chart-line"></i> Stats include all games played since the beginning of the season</div><div style="margin-bottom: 24px;"><h3 style="font-size: 15px; margin-bottom: 12px; background: #e8f0fe; padding: 8px 12px; border-radius: 40px; display: inline-block;"><i class="fas fa-users"></i> 🏃 MOST GAMES PLAYED</h3><table class="data-table"><thead><tr><th>#</th><th>Player</th><th style="text-align: center;">Games</th></tr></thead><tbody>${topGames.map((p,i)=>`<tr><td style="width:40px;"><strong>${i+1}</strong></td><td>${renderMiniAvatar(p.name,28)} ${escapeHtml(p.name)}</td><td style="text-align: center; font-weight: 700;">${p.gamesPlayed}</td></tr>`).join('')}${topGames.length === 0 ? '<tr><td colspan="3" style="text-align: center;">No games recorded yet</td></tr>' : ''}</tbody></table></div><div><h3 style="font-size: 15px; margin-bottom: 12px; background: #fef3c7; padding: 8px 12px; border-radius: 40px; display: inline-block;"><i class="fas fa-futbol"></i> ⚽ TOP GOAL SCORERS</h3><table class="data-table"><thead><tr><th>#</th><th>Player</th><th style="text-align: center;">Goals</th></tr></thead><tbody>${topGoals.map((p,i)=>`<tr><td style="width:40px;"><strong>${i+1}</strong></td><td>${renderMiniAvatar(p.name,28)} ${escapeHtml(p.name)}</td><td style="text-align: center; font-weight: 700;">${p.goals}</td></tr>`).join('')}${topGoals.length === 0 ? '<tr><td colspan="3" style="text-align: center;">No goals recorded yet</td></tr>' : ''}</tbody></table></div></div>`;
+        c.innerHTML = `<div class="card"><h2>🏆 ALL-TIME LEADERBOARD</h2><div class="leaderboard-note"><i class="fas fa-chart-line"></i> Stats include all games played since the beginning of the season</div><div style="margin-bottom: 24px;"><h3 style="font-size: 15px; margin-bottom: 12px; background: #e8f0fe; padding: 8px 12px; border-radius: 40px; display: inline-block;"><i class="fas fa-users"></i> 🏃 MOST GAMES PLAYED</h3><table class="data-table"><thead><tr><th>#</th><th>Player</th><th style="text-align: center;">Games</th></tr></thead><tbody>${topGames.map((p,i)=>`<tr><td style="width:40px;"><strong>${i+1}</strong></td><td>${renderMiniAvatar(p.name,28)} ${escapeHtml(p.name)}</td><td style="text-align: center; font-weight: 700;">${p.gamesPlayed}</td></tr>`).join('')}${topGoals.length === 0 ? '<tr><td colspan="3" style="text-align: center;">No games recorded yet</td></tr>' : ''}</tbody>}</table></div><div><h3 style="font-size: 15px; margin-bottom: 12px; background: #fef3c7; padding: 8px 12px; border-radius: 40px; display: inline-block;"><i class="fas fa-futbol"></i> ⚽ TOP GOAL SCORERS</h3><table class="data-table"><thead><tr><th>#</th><th>Player</th><th style="text-align: center;">Goals</th></tr></thead><tbody>${topGoals.map((p,i)=>`<tr><td style="width:40px;"><strong>${i+1}</strong></td><td>${renderMiniAvatar(p.name,28)} ${escapeHtml(p.name)}</td><td style="text-align: center; font-weight: 700;">${p.goals}</td></tr>`).join('')}${topGoals.length === 0 ? '<tr><td colspan="3" style="text-align: center;">No goals recorded yet</td></tr>' : ''}</tbody></table></div></div>`;
     }
     
     function renderTeamsPage() {
@@ -556,7 +653,7 @@
         if(!c) return;
         const past = getPastWeeks();
         if(past.length===0){c.innerHTML=`<div class="card"><h2>📖 History</h2><p>No past games</p></div>`; return;}
-        let html = `<div class="card"><h2>📖 Match History</h2></div>`;
+        let html = `<div class="card"><h2>📖 Match History</h2>${isAdminLoggedIn ? `<button id="addGoalsBtn" style="margin-top:8px; width:100%;"><i class="fas fa-futbol"></i> + Record Goals for Past Match</button>` : ''}</div>`;
         for(let w of past){
             const a = teamAssignments[w.dateStr]||{};
             const yellow = Object.keys(a).filter(k=>a[k]==="yellow"&&!k.startsWith("guest_"));
@@ -568,9 +665,10 @@
             const wg = guests.filter(g=>g.gameDate===w.dateStr);
             const cmts = matchComments[w.dateStr]||[];
             const sid = w.dateStr.replace(/-/g,'');
-            html += `<div class="match-card"><div class="match-header"><div>${w.label}</div><div class="match-result">🟡 ${m.yellowScore} - ${m.orangeScore} 🟠</div></div><div class="teams-section"><div class="team-row"><div class="team-box"><div class="team-yellow">🟡 YELLOW</div><div class="player-list">${yellow.map(p=>`<div class="player-tag">${renderMiniAvatar(p,24)} ${escapeHtml(p)}</div>`).join('')||'—'}</div></div><div class="team-box"><div class="team-orange">🟠 ORANGE</div><div class="player-list">${orange.map(p=>`<div class="player-tag">${renderMiniAvatar(p,24)} ${escapeHtml(p)}</div>`).join('')||'—'}</div></div></div><div class="score-big">${m.yellowScore} - ${m.orangeScore}</div></div><div class="goals-section"><div>⚽ Scorers</div><div class="goals-list">${yg.map(g=>`<div class="goal-badge">🟡 ${g.player} ×${g.count}</div>`).join('')}${og.map(g=>`<div class="goal-badge">🟠 ${g.player} ×${g.count}</div>`).join('')}</div></div>${wg.length?`<div class="goals-section" style="background:#f0fdf4;"><div>🎭 Guests</div><div class="goals-list">${wg.map(g=>`<div class="goal-badge">${escapeHtml(g.guestName)} <small>(${escapeHtml(g.addedBy)})</small></div>`).join('')}</div></div>`:''}<div class="comments-section"><div>💬 Comments (${cmts.length})</div><div id="comments-${sid}">${cmts.map(c=>`<div class="comment-item"><strong>${escapeHtml(c.author)}</strong><br>${escapeHtml(c.text)}</div>`).join('')||'No comments'}</div><div class="add-comment"><input id="commentInput-${sid}" placeholder="Add comment..."><button onclick="window.addCommentToHistory('${w.dateStr}')">Post</button></div></div></div>`;
+            html += `<div class="match-card"><div class="match-header"><div>${w.label}</div><div class="match-result">🟡 ${m.yellowScore} - ${m.orangeScore} 🟠</div></div><div class="teams-section"><div class="team-row"><div class="team-box"><div class="team-yellow">🟡 YELLOW</div><div class="player-list">${yellow.map(p=>`<div class="player-tag">${renderMiniAvatar(p,24)} ${escapeHtml(p)}</div>`).join('')||'—'}</div></div><div class="team-box"><div class="team-orange">🟠 ORANGE</div><div class="player-list">${orange.map(p=>`<div class="player-tag">${renderMiniAvatar(p,24)} ${escapeHtml(p)}</div>`).join('')||'—'}</div></div></div><div class="score-big">${m.yellowScore} - ${m.orangeScore}</div></div><div class="goals-section"><div>⚽ Goal Scorers</div><div class="goals-list">${yg.map(g=>`<div class="goal-badge">🟡 ${g.player} ×${g.count}</div>`).join('')}${og.map(g=>`<div class="goal-badge">🟠 ${g.player} ×${g.count}</div>`).join('')}${yg.length===0 && og.length===0 ? '<div class="goal-badge">No goals recorded</div>' : ''}</div></div>${wg.length?`<div class="goals-section" style="background:#f0fdf4;"><div>🎭 Guests</div><div class="goals-list">${wg.map(g=>`<div class="goal-badge">${escapeHtml(g.guestName)} <small>(${escapeHtml(g.addedBy)})</small></div>`).join('')}</div></div>`:''}<div class="comments-section"><div>💬 Comments (${cmts.length})</div><div id="comments-${sid}">${cmts.map(c=>`<div class="comment-item"><strong>${escapeHtml(c.author)}</strong><br>${escapeHtml(c.text)}</div>`).join('')||'No comments'}</div><div class="add-comment"><input id="commentInput-${sid}" placeholder="Add comment..."><button onclick="window.addCommentToHistory('${w.dateStr}')">Post</button></div></div></div>`;
         }
         c.innerHTML = html;
+        if(isAdminLoggedIn) document.getElementById("addGoalsBtn")?.addEventListener("click", openGoalEntryModal);
     }
     window.addCommentToHistory = async function(date){
         if(!currentUser) return alert("Login first");
@@ -619,7 +717,7 @@
             const currTeam = currAssign[p.name] || currAssign[`guest_${p.name}`] || "";
             html += `<div class="admin-team-item"><div>${renderMiniAvatar(p.name,28)} ${escapeHtml(p.name)} ${p.isGuest?'<span style="background:#28a745;color:white;padding:2px 8px;border-radius:20px;">GUEST</span>':''}</div><select class="team-select" data-name="${escapeHtml(p.name)}" data-isguest="${p.isGuest}"><option value="">— Team —</option><option value="yellow" ${currTeam==="yellow"?"selected":""}>🟡 Yellow</option><option value="orange" ${currTeam==="orange"?"selected":""}>🟠 Orange</option></select></div>`;
         }
-        html += `<div class="flex-btns"><button id="autoBalanceBtn">🎲 Auto-Balance</button><button id="saveTeamsBtn">💾 Save Teams</button></div></div><div class="card"><h2>🏆 Record Result</h2><select id="pastWeekSelect"><option value="">-- Select Past Week --</option>${getPastWeeks().map(w=>`<option value="${w.dateStr}">${w.label}</option>`).join('')}</select><div id="resultForm" style="display:none;margin-top:12px;"><input type="number" id="yellowScore" placeholder="Yellow Score" style="width:48%;"><input type="number" id="orangeScore" placeholder="Orange Score" style="width:48%;"><button id="saveResultBtn">Save Result</button></div></div>`;
+        html += `<div class="flex-btns"><button id="autoBalanceBtn">🎲 Auto-Balance</button><button id="saveTeamsBtn">💾 Save Teams</button></div></div>`;
         const container = document.getElementById("page-admin");
         if(container) container.innerHTML = html;
         document.querySelectorAll(".markPaidBtn").forEach(btn=>btn.addEventListener("click",()=>markPayment(btn.dataset.player,btn.dataset.date)));
@@ -645,13 +743,6 @@
             teamAssignments[nextWeek.dateStr]=newAssign;
             await saveTeamAssignments(nextWeek.dateStr,teamAssignments[nextWeek.dateStr]);
             alert("Teams saved!");
-        });
-        document.getElementById("pastWeekSelect")?.addEventListener("change",(e)=>{const form=document.getElementById("resultForm"); if(form) form.style.display=e.target.value?"block":"none";});
-        document.getElementById("saveResultBtn")?.addEventListener("click",async()=>{
-            const weekDate=document.getElementById("pastWeekSelect").value;
-            const yellow=parseInt(document.getElementById("yellowScore")?.value)||0;
-            const orange=parseInt(document.getElementById("orangeScore")?.value)||0;
-            if(weekDate){ await saveMatchResult(weekDate,yellow,orange,{}); alert("Result saved!"); renderHistoryPage();}
         });
     }
     
