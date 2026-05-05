@@ -2,65 +2,90 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Monday Night Soccer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Monday Night Soccer | Complete Hub</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
-        :root {
-            --primary: #00f5ff;
-            --yellow: #ffd700;
-            --orange: #ff6b00;
-            --dark: #0a0f1c;
-            --card: #121a2e;
-        }
         *{margin:0;padding:0;box-sizing:border-box;}
-        body{background:var(--dark);font-family:'Inter',sans-serif;color:#e2e8f0;}
-        .app{max-width:500px;margin:0 auto;min-height:100vh;background:var(--dark);box-shadow:0 0 40px rgba(0,245,255,0.15);}
-
-        .header{background:linear-gradient(135deg,#1a2338,#0a0f1c);padding:20px;text-align:center;border-bottom:3px solid var(--primary);position:sticky;top:0;z-index:20;}
-        .logo-icon{width:78px;height:78px;background:linear-gradient(135deg,var(--primary),#00aaff);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin:0 auto 8px;box-shadow:0 0 30px rgba(0,245,255,0.7);animation:pulse-glow 2.5s infinite;}
-        @keyframes pulse-glow{0%,100%{box-shadow:0 0 30px rgba(0,245,255,0.7);}50%{box-shadow:0 0 50px rgba(0,245,255,0.95);}}
-        .header h1{font-size:24px;font-weight:900;letter-spacing:-1px;background:linear-gradient(90deg,#fff,var(--primary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-
-        .user-row{background:rgba(255,255,255,0.08);padding:6px 16px;border-radius:50px;display:inline-flex;align-items:center;gap:8px;font-size:13.5px;}
-
-        .top-nav{background:#111827;padding:10px 8px;display:flex;justify-content:center;gap:6px;flex-wrap:wrap;position:sticky;top:78px;z-index:10;border-bottom:1px solid #1f2937;}
-        .nav-module{background:#1f2937;color:#94a3b8;border:none;padding:10px 14px;border-radius:9999px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px;transition:all 0.25s;}
-        .nav-module.active{background:var(--primary);color:#0a0f1c;transform:scale(1.08);box-shadow:0 0 20px rgba(0,245,255,0.5);}
-
-        .module-container{display:none;padding:16px;}
+        body{background:#eef2f5;font-family:'Inter',sans-serif;}
+        .app{max-width:500px;margin:0 auto;background:#eef2f5;min-height:100vh;padding-bottom:20px;}
+        .header{background:white;padding:14px 20px;text-align:center;border-bottom:1px solid #e2e8f0;}
+        .logo-icon{width:56px;height:56px;background:#1a73e8;border-radius:24px;display:inline-flex;align-items:center;justify-content:center;margin:0 auto 6px;}
+        .logo-icon i{font-size:28px;color:white;}
+        .header h1{font-size:18px;font-weight:800;color:#1e293b;}
+        .user-row{background:#f1f5f9;padding:5px 12px;border-radius:60px;display:inline-flex;align-items:center;gap:8px;margin-top:6px;font-size:12px;}
+        .user-row button{background:#dc3545;border:none;padding:4px 12px;border-radius:40px;color:white;cursor:pointer;}
+        .top-nav{background:white;padding:10px 12px;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;border-bottom:1px solid #e2e8f0;}
+        .nav-module{background:#f8fafc;border:none;padding:8px 14px;border-radius:60px;font-size:12px;font-weight:600;color:#475569;cursor:pointer;}
+        .nav-module.active{background:#1a73e8;color:white;}
+        .module-container{padding:16px;display:none;}
         .module-container.active-module{display:block;}
-
-        .card{background:var(--card);border-radius:28px;padding:20px;margin-bottom:18px;border:1px solid #1e2937;box-shadow:0 15px 25px -10px rgba(0,0,0,0.4);}
-        .card h2{font-size:19px;font-weight:800;margin-bottom:16px;color:var(--primary);border-left:4px solid var(--primary);padding-left:12px;}
-
-        .attendance-card{background:linear-gradient(135deg,#00f5ff,#0099ff);color:#0a0f1c;border-radius:32px;padding:32px 24px;text-align:center;box-shadow:0 0 40px rgba(0,245,255,0.6);margin-bottom:24px;}
-        .big-buttons{display:flex;gap:14px;margin:20px 0;}
-        .btn-play-big,.btn-sit-big{flex:1;padding:18px;border-radius:60px;font-size:19px;font-weight:900;color:white;box-shadow:0 10px 0 rgba(0,0,0,0.3);transition:transform 0.1s;}
-        .btn-play-big{background:#22c55e;}
-        .btn-play-big:active{transform:translateY(4px);}
-        .btn-sit-big{background:#ef4444;}
-
-        .attendee-tag{display:inline-flex;align-items:center;gap:8px;background:#1e2937;padding:8px 14px;border-radius:50px;margin:4px 2px;border:1px solid #334155;}
-        .playing-list,.guest-section{background:var(--card);border-radius:24px;padding:18px;margin-bottom:16px;}
-
-        .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#22c55e;color:white;padding:14px 28px;border-radius:9999px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,0.4);z-index:99999;animation:toastIn 0.4s;}
-        @keyframes toastIn{from{transform:translate(-50%,100px);opacity:0;}to{transform:translateX(-50%);opacity:1;}}
+        .card{background:white;border-radius:24px;padding:18px;margin-bottom:14px;border:1px solid #e2e8f0;}
+        .card h2{font-size:17px;font-weight:700;margin-bottom:14px;border-left:4px solid #1a73e8;padding-left:12px;}
+        .attendance-card{background:linear-gradient(135deg,#1a73e8,#0d5bbf);color:white;border-radius:28px;padding:24px 20px;text-align:center;margin-bottom:16px;}
+        .big-buttons{display:flex;gap:14px;margin:16px 0 12px;}
+        .btn-play-big{background:#28a745;flex:1;padding:14px;border-radius:60px;font-weight:800;font-size:17px;border:none;color:white;cursor:pointer;}
+        .btn-sit-big{background:#dc3545;flex:1;padding:14px;border-radius:60px;font-weight:800;font-size:17px;border:none;color:white;cursor:pointer;}
+        .profile-item{background:#f8fafc;border-radius:20px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;}
+        .profile-avatar{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:20px;}
+        .player-avatar-small{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:13px;margin-right:4px;}
+        .profile-badge{background:white;border-radius:40px;padding:4px 12px;font-size:11px;font-weight:600;display:inline-block;margin:2px;}
+        .match-card{background:white;border-radius:24px;margin-bottom:14px;border:1px solid #e2e8f0;overflow:hidden;}
+        .match-header{background:#f8fafc;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;}
+        .match-result{background:#1a73e8;color:white;padding:4px 14px;border-radius:40px;font-weight:700;}
+        .guest-tag{background:#d4edda;color:#155724;border-radius:40px;padding:6px 12px;font-size:13px;display:inline-flex;align-items:center;gap:6px;}
+        .playing-list,.guest-section{background:#e8f0fe;border-radius:20px;padding:16px;margin-bottom:14px;}
+        .guest-section{background:#f0fdf4;}
+        .attendee-tag{display:inline-flex;align-items:center;gap:6px;background:#e2e8f0;padding:6px 12px;border-radius:40px;font-size:13px;margin:4px;}
+        .data-table{width:100%;border-collapse:collapse;font-size:13px;}
+        .data-table th,.data-table td{padding:10px;text-align:left;border-bottom:1px solid #e2e8f0;}
+        .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;}
+        .modal-content{background:white;border-radius:32px;padding:24px;max-width:380px;width:90%;}
+        .login-box{background:white;border-radius:48px;padding:40px 28px;margin:40px 20px;text-align:center;}
+        .login-logo{width:90px;height:90px;background:linear-gradient(135deg,#1a73e8,#0d5bbf);border-radius:32px;display:inline-flex;align-items:center;justify-content:center;margin:0 auto 20px;}
+        select,input{width:100%;padding:14px;border:1.5px solid #e2e8f0;border-radius:60px;margin:8px 0;font-size:16px;}
+        button{background:#1a73e8;color:white;border:none;padding:12px 20px;border-radius:60px;font-weight:700;cursor:pointer;}
+        .flex-btns{display:flex;gap:12px;margin-top:12px;}
+        .chat-message{margin-bottom:12px;}
+        .chat-bubble{background:#f1f5f9;padding:10px 14px;border-radius:18px;font-size:14px;}
+        .chat-name{font-weight:700;font-size:12px;color:#1a73e8;}
+        .info-bar{background:#e8f0fe;border-radius:16px;padding:12px;font-size:12px;margin-bottom:16px;text-align:center;}
+        .timer-container{background:linear-gradient(135deg,#1e293b,#0f172a);border-radius:28px;padding:20px;text-align:center;}
+        .timer-display{font-size:56px;font-weight:800;font-family:monospace;color:#10b981;background:#00000030;border-radius:20px;padding:12px;margin-bottom:16px;}
+        .timer-controls{display:flex;gap:12px;justify-content:center;}
+        .timer-btn{padding:10px 20px;border-radius:60px;font-weight:700;font-size:14px;border:none;cursor:pointer;}
+        .timer-btn.start{background:#10b981;color:white;}
+        .timer-btn.pause{background:#f59e0b;color:white;}
+        .timer-btn.reset{background:#ef4444;color:white;}
+        .half-status{font-size:14px;margin-top:12px;}
+        .loading{text-align:center;padding:40px;color:#64748b;}
+        .admin-team-item{display:flex;justify-content:space-between;align-items:center;margin:8px 0;background:#f1f5f9;border-radius:60px;padding:8px 16px;flex-wrap:wrap;}
+        .weather-card{background:linear-gradient(135deg,#0f2027,#203a43);color:white;border-radius:24px;padding:20px;text-align:center;}
+        .stat-highlight{background:linear-gradient(135deg,#f59e0b,#ea580c);color:white;border-radius:20px;padding:12px;text-align:center;margin-bottom:16px;}
+        .stat-highlight .number{font-size:32px;font-weight:800;}
+        .password-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:1001;}
+        .password-modal-content{background:white;border-radius:32px;padding:28px;max-width:340px;width:90%;text-align:center;}
+        .goal-entry{background:#eef2ff;border-radius:20px;padding:12px;margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+        .game-selector{background:#f1f5f9;border-radius:60px;padding:12px 16px;margin-bottom:16px;display:flex;gap:10px;align-items:center;}
+        .game-selector select{flex:2;margin:0;padding:10px;}
     </style>
 </head>
 <body>
-<div class="app" id="app"><div class="loading" style="padding:100px 20px;text-align:center;color:#64748b;"><i class="fas fa-futbol fa-spin" style="font-size:60px;"></i><br>Loading Monday Night Soccer...</div></div>
+<div class="app" id="app"><div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading...</div></div>
 
 <script>
-(function() {
-    // ====================== PLAYER ROSTER ======================
-    var DEFAULT_PLAYERS = ["Alex Rowe","Ali Mekawy","Carlo","Charlie","Chris Del Monaco","Chris M","Chris S","Danny","Dante","David","Dimitri","Enzo","Farid","Faros","Frank","George B","George T","Ivan","James Zoumis","James","Joe T","Joey","Kia","Leo","Manoli","Marco","Mario","Maurice","Nector","Paul","Perri","Peter","Ralph","Rocco","Stav","Stevan","Theo","Tony EH","Vasilis"].sort();
-
-    // ====================== FIREBASE ======================
-    var firebaseConfig = {
+(function(){
+    // ============================================
+    // CONFIGURATION
+    // ============================================
+    const CARLO_PASSWORD = "carlo123";
+    const DEFAULT_PLAYERS = ["Alex Rowe","Ali Mekawy","Carlo","Charlie","Chris Del Monaco","Chris M","Chris S","Danny","Dante","David","Dimitri","Enzo","Farid","Faros","Frank","George B","George T","Ivan","James Zoumis","James","Joe T","Joey","Kia","Leo","Manoli","Marco","Mario","Maurice","Nector","Paul","Perri","Peter","Ralph","Rocco","Stav","Stevan","Theo","Tony EH","Vasilis"].sort();
+    
+    // Firebase
+    const firebaseConfig = {
         apiKey: "AIzaSyCWlFqDJyENgrUOhiLXCjSEi4Mk_54SA1w",
         authDomain: "monday-night-soccer-hub.firebaseapp.com",
         projectId: "monday-night-soccer-hub",
@@ -68,246 +93,262 @@
         messagingSenderId: "634335208908",
         appId: "1:634335208908:web:dca705b65fc52de0606969"
     };
-    var db = null, firebaseReady = false;
-    try {
-        firebase.initializeApp(firebaseConfig);
-        db = firebase.firestore();
-        firebaseReady = true;
-    } catch(e) { console.warn("Firebase demo mode"); }
-
-    // ====================== DATA ======================
-    var players = DEFAULT_PLAYERS.slice();
-    var playerProfiles = {};
-    var teamAssignments = {};
-    var matchResults = {};
-    var attendance = [];
-    var guests = [];
-    var isAdminLoggedIn = false;
-    var currentUser = null;
-    var weeklyCaptain = "Carlo";
-    var weatherData = { temp: "18°C", condition: "Clear", icon: "fa-sun", rainChance: 10 };
-    var chatUnsubscribe = null;
-    var currentAdminGameDate = null;
-
-    // ====================== TIMER ======================
-    var timerInterval = null, currentHalf = 1, timeLeft = 45 * 60;
-    function formatTime(sec) { var m = Math.floor(sec/60); var s = sec % 60; return (m<10?'0'+m:m)+':'+(s<10?'0'+s:s); }
-    function updateTimerDisplay() {
-        var d = document.getElementById("timerDisplay"); if(d) d.textContent = formatTime(timeLeft);
-        var hs = document.getElementById("currentHalf"); if(hs) hs.textContent = currentHalf===1 ? "FIRST HALF" : "SECOND HALF";
-    }
-    function playAlarm() { try { var a = new (window.AudioContext||window.webkitAudioContext)(); var o = a.createOscillator(); var g = a.createGain(); o.connect(g); g.connect(a.destination); o.frequency.value = 880; g.gain.value = 0.5; o.start(); g.gain.exponentialRampToValueAtTime(0.00001, a.currentTime+1.5); o.stop(a.currentTime+1.5); } catch(e){} }
-    function timerTick() { if(timeLeft <= 0) { if(timerInterval) clearInterval(timerInterval); playAlarm(); if(currentHalf===1){currentHalf=2;timeLeft=45*60;}else{currentHalf=1;timeLeft=45*60;} updateTimerDisplay(); return; } timeLeft--; updateTimerDisplay(); }
-    function startTimer() { if(timerInterval) clearInterval(timerInterval); timerInterval = setInterval(timerTick, 1000); }
+    
+    let db = null, firebaseReady = false;
+    try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); firebaseReady = true; } catch(e) {}
+    
+    // Data
+    let players = [...DEFAULT_PLAYERS];
+    let playerProfiles = {};
+    let teamAssignments = {};
+    let matchResults = {};
+    let attendance = [];
+    let guests = [];
+    let isAdminLoggedIn = false;
+    let currentUser = null;
+    let weeklyCaptain = "Carlo";
+    let weatherData = { temp: "18°C", condition: "Clear", icon: "fa-sun", rainChance: 10 };
+    let chatUnsubscribe = null;
+    let currentAdminGameDate = null;
+    
+    // Timer
+    let timerInterval = null, currentHalf = 1, timeLeft = 45 * 60;
+    function formatTime(s) { let m = Math.floor(s/60); let sec = s%60; return (m<10?'0'+m:m)+':'+(sec<10?'0'+sec:sec); }
+    function updateTimerDisplay() { let d = document.getElementById("timerDisplay"); if(d) d.textContent = formatTime(timeLeft); let hs = document.getElementById("currentHalf"); if(hs) hs.textContent = currentHalf===1?"FIRST HALF":"SECOND HALF"; }
+    function playAlarm() { try { let a = new (window.AudioContext||window.webkitAudioContext)(); let o = a.createOscillator(); let g = a.createGain(); o.connect(g); g.connect(a.destination); o.frequency.value=880; g.gain.value=0.5; o.start(); g.gain.exponentialRampToValueAtTime(0.00001,a.currentTime+1.5); o.stop(a.currentTime+1.5); } catch(e){} }
+    function timerTick() { if(timeLeft<=0) { if(timerInterval) clearInterval(timerInterval); playAlarm(); if(currentHalf===1) { alert("HALF TIME! Start second half?"); currentHalf=2; timeLeft=45*60; updateTimerDisplay(); } else { alert("FULL TIME! Match ended."); currentHalf=1; timeLeft=45*60; updateTimerDisplay(); } return; } timeLeft--; updateTimerDisplay(); }
+    function startTimer() { if(timerInterval) clearInterval(timerInterval); timerInterval = setInterval(timerTick,1000); }
     function pauseTimer() { if(timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
     function resetTimer() { pauseTimer(); currentHalf=1; timeLeft=45*60; updateTimerDisplay(); }
-
-    // ====================== DATE ======================
-    function getAustralianTime() { var now = new Date(); var utc = now.getTime() + (now.getTimezoneOffset()*60000); return new Date(utc + (10*3600000)); }
+    
+    // Australian Time (AEST)
+    function getAustralianTime() { let now = new Date(); let utc = now.getTime() + (now.getTimezoneOffset()*60000); return new Date(utc + (10*3600000)); }
     function getNextMondayGameDate() {
-        var now = getAustralianTime();
-        var day = now.getDay(), hour = now.getHours();
-        var daysUntil = (1 - day + 7) % 7;
-        if (day === 1 && hour >= 20) daysUntil = 7;
-        var d = new Date(now); d.setDate(now.getDate() + daysUntil); d.setHours(0,0,0,0);
+        let now = getAustralianTime();
+        let day = now.getDay();
+        let hour = now.getHours();
+        let days;
+        if(day===1 && hour>=20) days = 7;
+        else if(day===1) days = 0;
+        else if(day===0) days = 1;
+        else days = (8-day)%7;
+        let d = new Date(now);
+        d.setDate(now.getDate() + days);
+        d.setHours(0,0,0,0);
         return d;
     }
-    var CURRENT_GAME_STR = getNextMondayGameDate().toISOString().split('T')[0];
-
+    function getCurrentGameLabel() { let d = getNextMondayGameDate(); return 'Mon ' + d.toLocaleDateString('en-AU',{day:'numeric',month:'long'}); }
+    let CURRENT_GAME_STR = getNextMondayGameDate().toISOString().split('T')[0];
+    
     function getAllGameWeeks() {
-        var weeks = [], current = getNextMondayGameDate();
-        for(var i = -24; i <= 4; i++) {
-            var d = new Date(current); d.setDate(current.getDate() + (i * 7));
-            if(d >= new Date(2024,0,1)) weeks.push({ dateStr: d.toISOString().split('T')[0], label: 'Mon ' + d.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) });
+        let weeks = [];
+        let current = getNextMondayGameDate();
+        for(let i=-20; i<=4; i++) {
+            let d = new Date(current);
+            d.setDate(current.getDate() + (i*7));
+            if(d >= new Date(2024,0,1)) weeks.push({ dateStr: d.toISOString().split('T')[0], label: 'Mon '+d.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) });
         }
-        return weeks.sort((a,b)=>a.dateStr.localeCompare(b.dateStr));
+        weeks.sort((a,b)=>a.dateStr.localeCompare(b.dateStr));
+        return weeks;
     }
-    var ALL_WEEKS = getAllGameWeeks();
+    let ALL_WEEKS = getAllGameWeeks();
     currentAdminGameDate = CURRENT_GAME_STR;
-
-    // ====================== PREMIUM HELPERS ======================
-    function showToast(msg, color = "#22c55e") {
-        var t = document.createElement('div'); t.className='toast'; t.style.background=color; t.textContent=msg;
-        document.body.appendChild(t); setTimeout(()=>t.remove(), 2800);
+    
+    function getAllParticipants(gameDate) {
+        let playersList = [], guestsList = [];
+        for(let a of attendance) if(a.gameDate===gameDate && a.status==='in') playersList.push(a.player);
+        for(let g of guests) if(g.gameDate===gameDate) guestsList.push({ name: g.guestName, addedBy: g.addedBy });
+        return { players: playersList, guests: guestsList };
     }
-    function launchConfetti() {
-        const canvas = document.createElement('canvas');
-        canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:99999;pointer-events:none;';
-        document.body.appendChild(canvas);
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        const colors = ['#00f5ff','#ffd700','#ff6b00','#22c55e','#a855f7'];
-        let particles = [];
-        class Particle {
-            constructor() {
-                this.x = Math.random()*canvas.width;
-                this.y = Math.random()*canvas.height - canvas.height;
-                this.size = Math.random()*14 + 8;
-                this.speed = Math.random()*8 + 5;
-                this.color = colors[Math.floor(Math.random()*colors.length)];
-                this.angle = Math.random()*360;
-                this.spin = Math.random()*0.3 - 0.15;
+    
+    function getPlayersAndGuestsForGame(gameDate) {
+        let parts = getAllParticipants(gameDate);
+        let result = [];
+        for(let p of parts.players) result.push({ name: p, isGuest: false, displayName: p });
+        for(let g of parts.guests) result.push({ name: g.name, isGuest: true, displayName: g.name + ' (Guest)' });
+        return result;
+    }
+    
+    function getTeamForPlayer(gameDate, playerName, isGuest) {
+        let assign = teamAssignments[gameDate] || {};
+        let key = isGuest ? 'guest_' + playerName : playerName;
+        return assign[key] || null;
+    }
+    
+    // Helpers
+    function escapeHtml(s) { if(!s) return ''; return String(s).replace(/[&<>]/g, m=>m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
+    function getInitials(n) { return n.split(' ').map(x=>x[0]).join('').toUpperCase().substring(0,2); }
+    function getAvatarColor(n) { let c = ['#1a73e8','#28a745','#dc3545','#fd7e14','#6f42c1']; let h=0; for(let i=0;i<n.length;i++) h=((h<<5)-h)+n.charCodeAt(i); return c[Math.abs(h)%c.length]; }
+    function renderAvatar(n,s) { s=s||50; return '<div class="profile-avatar" style="background:'+getAvatarColor(n)+';width:'+s+'px;height:'+s+'px;font-size:'+(s/2.5)+'px;">'+getInitials(n)+'</div>'; }
+    function renderMiniAvatar(n,s) { s=s||28; return '<div class="player-avatar-small" style="background:'+getAvatarColor(n)+';width:'+s+'px;height:'+s+'px;font-size:'+(s/2)+'px;">'+getInitials(n)+'</div>'; }
+    
+    // Weather
+    async function fetchWeather() {
+        try {
+            let r = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-37.77&longitude=144.97&hourly=temperature_2m,precipitation_probability,weathercode&timezone=Australia/Melbourne&forecast_days=3');
+            let d = await r.json();
+            let gameDate = getNextMondayGameDate();
+            let targetStr = gameDate.toISOString().split('T')[0];
+            for(let i=0; i<d.hourly.time.length; i++) {
+                let hDate = d.hourly.time[i].split('T')[0];
+                let hour = parseInt(d.hourly.time[i].split('T')[1].substring(0,2));
+                if(hDate===targetStr && hour===20) {
+                    weatherData.temp = Math.round(d.hourly.temperature_2m[i]) + '°C';
+                    let code = d.hourly.weathercode[i];
+                    if(code===0) { weatherData.condition="Clear"; weatherData.icon="fa-sun"; }
+                    else if(code<=2) { weatherData.condition="Partly cloudy"; weatherData.icon="fa-cloud-sun"; }
+                    else if(code<=3) { weatherData.condition="Overcast"; weatherData.icon="fa-cloud"; }
+                    else { weatherData.condition="Rain possible"; weatherData.icon="fa-cloud-rain"; }
+                    weatherData.rainChance = d.hourly.precipitation_probability[i]||0;
+                    break;
+                }
             }
-            update(){ this.y += this.speed; this.angle += this.spin; this.speed += 0.08; }
-            draw(){
-                ctx.save(); ctx.translate(this.x,this.y); ctx.rotate(this.angle*Math.PI/180);
-                ctx.fillStyle = this.color; ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size*0.7); ctx.restore();
-            }
+        } catch(e) {}
+        renderWeatherPage();
+    }
+    
+    // Firebase Operations
+    async function loadData() {
+        if(!firebaseReady||!db) return;
+        try {
+            let pDoc = await db.collection("config").doc("players").get();
+            let profDoc = await db.collection("config").doc("playerProfiles").get();
+            let tDoc = await db.collection("config").doc("teamAssignments").get();
+            let rDoc = await db.collection("config").doc("matchResults").get();
+            let attSnap = await db.collection("attendance").get();
+            let guestSnap = await db.collection("guests").get();
+            if(pDoc.exists) players = pDoc.data().list.sort();
+            if(profDoc.exists) playerProfiles = profDoc.data();
+            if(tDoc.exists) teamAssignments = tDoc.data();
+            if(rDoc.exists) matchResults = rDoc.data();
+            attendance = attSnap.docs.map(d=>d.data());
+            guests = guestSnap.docs.map(d=>d.data());
+            for(let p of players) if(!playerProfiles[p]) playerProfiles[p] = { age:'—', position:'—', yearJoined:'—', gamesPlayed:0 };
+        } catch(e) {}
+    }
+    
+    async function saveAttendance(a) { if(firebaseReady&&db) await db.collection("attendance").doc(a.player+'_'+a.gameDate).set(a); let idx = attendance.findIndex(x=>x.player===a.player&&x.gameDate===a.gameDate); if(idx!==-1) attendance[idx]=a; else attendance.push(a); refreshAll(); }
+    async function saveGuest(g) { if(firebaseReady&&db) await db.collection("guests").doc(g.guestName+'_'+g.gameDate).set(g); guests.push(g); refreshAll(); }
+    async function removeGuest(name,date) { if(!confirm('Remove guest?')) return; if(firebaseReady&&db) await db.collection("guests").doc(name+'_'+date).delete(); guests = guests.filter(g=>!(g.guestName===name&&g.gameDate===date)); if(teamAssignments[date]){ delete teamAssignments[date][name]; delete teamAssignments[date]['guest_'+name]; if(firebaseReady&&db) await db.collection("config").doc("teamAssignments").set(teamAssignments); } refreshAll(); }
+    async function saveTeamAssignments(date,assign) { teamAssignments[date] = assign; if(firebaseReady&&db) await db.collection("config").doc("teamAssignments").set(teamAssignments); refreshAll(); }
+    async function saveMatchResult(date,yellow,orange,goals,assists,injuries) { matchResults[date] = { yellowScore:yellow, orangeScore:orange, goals:goals||{}, assists:assists||{}, injuries:injuries||[] }; if(firebaseReady&&db) await db.collection("config").doc("matchResults").set(matchResults); renderHistoryPage(); renderScoreboardPage(); if(isAdminLoggedIn) renderAdminPage(); }
+    async function saveChatMessage(msg) { if(!currentUser||!msg.trim()) return; if(firebaseReady&&db) await db.collection("chatMessages").add({ name:currentUser.name, message:msg.trim(), timestamp:firebase.firestore.FieldValue.serverTimestamp() }); }
+    async function setAttendance(status) { if(!currentUser){ alert("Login required"); return; } await saveAttendance({ player:currentUser.name, gameDate:CURRENT_GAME_STR, status:status }); alert(status==='in'?"You're playing Monday!":"Sorry you can't make it"); }
+    async function addGuest(name) { if(guests.some(g=>g.gameDate===CURRENT_GAME_STR&&g.guestName===name.trim())){ alert("Guest exists"); return; } await saveGuest({ guestName:name.trim(), gameDate:CURRENT_GAME_STR, addedBy:currentUser?currentUser.name:"Admin" }); let inp=document.getElementById("guestNameInput"); if(inp) inp.value=""; alert("Guest added!"); }
+    
+    // Profile edit - only own profile
+    function showEditProfile(name) {
+        if(!currentUser || currentUser.name !== name) { alert("You can only edit your own profile!"); return; }
+        let ex = playerProfiles[name] || { age:'', position:'Midfielder', yearJoined:'', gamesPlayed:0 };
+        let modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = '<div class="modal-content"><h3>Edit Your Profile: '+escapeHtml(name)+'</h3><label>Age</label><input id="editAge" value="'+escapeHtml(ex.age)+'"><label>Position</label><select id="editPosition"><option>Goalkeeper</option><option>Defender</option><option>Midfielder</option><option>Striker</option><option>Winger</option></select><label>Year Joined</label><input id="editYear" value="'+escapeHtml(ex.yearJoined)+'"><div class="flex-btns"><button id="saveBtn">Save</button><button id="cancelBtn">Cancel</button></div></div>';
+        document.body.appendChild(modal);
+        document.getElementById('saveBtn').onclick = async function() {
+            playerProfiles[name] = { age:document.getElementById('editAge').value||'—', position:document.getElementById('editPosition').value, yearJoined:document.getElementById('editYear').value||'—', gamesPlayed:ex.gamesPlayed||0 };
+            if(firebaseReady&&db) await db.collection("config").doc("playerProfiles").set(playerProfiles);
+            modal.remove();
+            renderProfilesPage();
+            alert("Profile updated!");
+        };
+        document.getElementById('cancelBtn').onclick = function() { modal.remove(); };
+    }
+    
+    function refreshAll() { renderHomePage(); renderTeamsPage(); renderHistoryPage(); renderProfilesPage(); renderScoreboardPage(); if(isAdminLoggedIn) renderAdminPage(); }
+    
+    // Match Report Generator
+    function generateMatchReport(resultData, gameLabel) {
+        let y = resultData.yellowScore||0, o = resultData.orangeScore||0, goals = resultData.goals||{}, assists = resultData.assists||{}, injuries = resultData.injuries||[];
+        let entries = [];
+        for(let s in goals) if(goals.hasOwnProperty(s)) entries.push({ player:s, goals:goals[s], assists:assists[s]||0 });
+        entries.sort((a,b)=>b.goals - a.goals);
+        let goalLines = '';
+        for(let g of entries) goalLines += '⚽ '+g.player+': '+g.goals+' goal'+(g.goals!==1?'s':'')+(g.assists>0?' ('+g.assists+' assist'+(g.assists!==1?'s':'')+')':'')+'\n';
+        if(!goalLines) goalLines = 'No goals recorded\n';
+        let injuryLine = '\nNo injuries reported.';
+        if(injuries.length>0) { injuryLine = '\nINJURIES:\n'; for(let i of injuries) injuryLine += '• '+i.player+' - '+(i.detail||'knock')+'\n'; }
+        return 'MONDAY NIGHT SOCCER MATCH REPORT\n'+gameLabel+' | Clifton Park\n'+weatherData.condition+', '+weatherData.temp+', rain '+weatherData.rainChance+'%\n\nYELLOW '+y+' - '+o+' ORANGE\n\n'+goalLines+'\n'+injuryLine+'\n\nGreat game! #MondayNightSoccer';
+    }
+    
+    // Render Functions
+    function renderHomePage() { let c = document.getElementById("homeContainer"); if(!c) return; let status = null; for(let a of attendance) if(a.gameDate===CURRENT_GAME_STR && a.player===currentUser?.name) status = a.status; let parts = getAllParticipants(CURRENT_GAME_STR); let t = getAustralianTime(); c.innerHTML = '<div class="info-bar"><i class="fas fa-clock"></i> AEST: '+t.toLocaleTimeString('en-AU')+'<br>NEXT: '+getCurrentGameLabel()+'</div><div class="attendance-card"><h2>'+getCurrentGameLabel()+'</h2><div>Clifton Park</div><div class="big-buttons"><button id="homePlayBtn" class="btn-play-big">I\'M PLAYING</button><button id="homeSitBtn" class="btn-sit-big">CAN\'T PLAY</button></div><div>'+(status==='in'?'✓ PLAYING':(status==='out'?'✗ NOT PLAYING':'Tap above'))+'</div></div><div class="playing-list"><div>Playing ('+parts.players.length+')</div><div>'+parts.players.map(p=>'<span class="attendee-tag">'+renderMiniAvatar(p,28)+' '+escapeHtml(p)+'</span>').join('')||'None'+'</div></div><div class="guest-section"><div>Guests ('+parts.guests.length+')</div><div>'+parts.guests.map(g=>'<span class="guest-tag">'+escapeHtml(g.name)+'</span>').join('')||'None'+'</div><div><input id="guestNameInput" placeholder="Guest name"><button id="addGuestBtnPlayer">Bring Guest</button></div></div>'; document.getElementById("homePlayBtn")?.onclick=()=>setAttendance("in"); document.getElementById("homeSitBtn")?.onclick=()=>setAttendance("out"); document.getElementById("addGuestBtnPlayer")?.onclick=()=>{ let gn=document.getElementById("guestNameInput"); if(gn?.value.trim()) addGuest(gn.value.trim()); else alert("Enter name"); }; }
+    
+    function renderProfilesPage() { let c = document.getElementById("page-profiles"); if(!c) return; let html = '<div class="card"><h2>Player Profiles</h2>'; for(let p of players) { let prof = playerProfiles[p]||{ age:'—', position:'—', yearJoined:'—', gamesPlayed:0 }; html += '<div class="profile-item">'+renderAvatar(p,50)+'<div><div>'+escapeHtml(p)+' '; if(currentUser && currentUser.name===p) html += '<button class="edit-profile-btn" data-player="'+escapeHtml(p)+'" style="font-size:10px;">Edit Your Profile</button>'; else html += '<span style="font-size:10px;color:#64748b;">(Only you can edit)</span>'; html += '</div><div><span class="profile-badge">Age: '+escapeHtml(prof.age)+'</span><span class="profile-badge">Pos: '+escapeHtml(prof.position)+'</span><span class="profile-badge">Since: '+escapeHtml(prof.yearJoined)+'</span><span class="profile-badge">Games: '+(prof.gamesPlayed||0)+'</span></div></div></div>'; } c.innerHTML = html; document.querySelectorAll(".edit-profile-btn").forEach(btn=>btn.addEventListener("click",()=>showEditProfile(btn.dataset.player))); }
+    
+    function renderScoreboardPage() { let c = document.getElementById("page-scoreboard"); if(!c) return; let stats = new Map(); for(let p of players) stats.set(p,{ goals:0, assists:0, apps:0 }); for(let a of attendance) if(a.status==='in'&&stats.has(a.player)) stats.get(a.player).apps++; for(let date in matchResults) { let m = matchResults[date]; if(m.goals) for(let s in m.goals) if(stats.has(s)) stats.get(s).goals += m.goals[s]; if(m.assists) for(let a2 in m.assists) if(stats.has(a2)) stats.get(a2).assists += m.assists[a2]; } let all = Array.from(stats.entries()).map(([n,st])=>({ name:n, goals:st.goals, assists:st.assists })); all.sort((a,b)=>b.goals - a.goals); let topGoals = all.slice(0,10); let topAssists = [...all].sort((a,b)=>b.assists - a.assists).slice(0,10); let totalGoals = all.reduce((s,p)=>s+p.goals,0); c.innerHTML = '<div class="card"><h2>All-Time Stats</h2><div class="stat-highlight"><div class="number">'+totalGoals+'</div><div>Total Goals</div></div><div><h3>Top Scorers</h3><table class="data-table"><tr><th>#</th><th>Player</th><th>Goals</th></tr>'+topGoals.map((p,i)=>'<tr><td><strong>'+(i+1)+'</strong></td><td>'+renderMiniAvatar(p.name,24)+' '+escapeHtml(p.name)+'</td><td><strong>'+p.goals+'</strong></td></tr>').join('')+'}</table></div><div><h3>Top Assists</h3><table class="data-table"><tr><th>#</th><th>Player</th><th>Assists</th></tr>'+topAssists.map((p,i)=>'<tr><td><strong>'+(i+1)+'</strong></td><td>'+renderMiniAvatar(p.name,24)+' '+escapeHtml(p.name)+'</td><td><strong>'+p.assists+'</strong></td></tr>').join('')+'}</table></div></div>'; }
+    
+    function renderTeamsPage() { let c = document.getElementById("page-teamswk"); if(!c) return; let parts = getAllParticipants(CURRENT_GAME_STR); let allList = [...parts.players.map(p=>({name:p,isG:false})), ...parts.guests.map(g=>({name:g.name,isG:true}))]; let assign = teamAssignments[CURRENT_GAME_STR]||{}; let yellow = [], orange = []; for(let p of allList) { let team = assign[p.name]||assign['guest_'+p.name]; if(team==="yellow") yellow.push(p); else if(team==="orange") orange.push(p); } c.innerHTML = '<div class="card"><div style="display:flex;gap:12px;"><div style="flex:1;background:rgba(0,0,0,0.65);border-radius:18px;padding:12px;"><div style="background:#ffc107;color:#2c2c2c;text-align:center;padding:6px;border-radius:60px;">YELLOW ('+yellow.length+')</div><div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;">'+yellow.map(p=>'<div style="background:rgba(255,255,255,0.2);border-radius:40px;padding:4px 10px;font-size:11px;color:white;">'+renderMiniAvatar(p.name,24)+' '+escapeHtml(p.name)+(p.isG?' Guest':'')+'</div>').join('')||'—'+'</div></div><div style="flex:1;background:rgba(0,0,0,0.65);border-radius:18px;padding:12px;"><div style="background:#fd7e14;color:white;text-align:center;padding:6px;border-radius:60px;">ORANGE ('+orange.length+')</div><div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;">'+orange.map(p=>'<div style="background:rgba(255,255,255,0.2);border-radius:40px;padding:4px 10px;font-size:11px;color:white;">'+renderMiniAvatar(p.name,24)+' '+escapeHtml(p.name)+(p.isG?' Guest':'')+'</div>').join('')||'—'+'</div></div></div><div style="text-align:center;margin-top:12px;">Captain: '+weeklyCaptain+'</div></div>'; }
+    
+    function renderHistoryPage() { let c = document.getElementById("page-history"); if(!c) return; let weeks = ALL_WEEKS.filter(w=>w.dateStr<CURRENT_GAME_STR).reverse(); if(weeks.length===0){ c.innerHTML='<div class="card"><h2>History</h2><p>No past games</p></div>'; return; } let html = '<div class="card"><h2>Match History</h2></div>'; for(let w of weeks) { let m = matchResults[w.dateStr]||{ yellowScore:0, orangeScore:0, goals:{}, assists:{} }; let goalsDisplay = Object.entries(m.goals||{}).map(([p,c])=>'⚽ '+p+' x'+c).join(' · '); let assistsDisplay = Object.entries(m.assists||{}).map(([p,c])=>'🎯 '+p+' x'+c).join(' · '); html += '<div class="match-card"><div class="match-header"><div>'+w.label+'</div><div class="match-result">YELLOW '+m.yellowScore+' - '+m.orangeScore+' ORANGE</div></div><div class="card" style="margin:0;border-radius:0;"><strong>Goals:</strong> '+(goalsDisplay||'None')+'<br><strong>Assists:</strong> '+(assistsDisplay||'None')+'</div></div>'; } c.innerHTML = html; }
+    
+    function renderWeatherPage() { let c = document.getElementById("page-weather"); if(c) c.innerHTML = '<div class="card"><h2>Monday Forecast</h2><div class="weather-card"><i class="fas '+weatherData.icon+'"></i><h3>'+weatherData.condition+'</h3><h1>'+weatherData.temp+'</h1><p>Rain: '+weatherData.rainChance+'%</p><p>Clifton Park<br>Monday 8pm AEST</p></div></div>'; }
+    function renderRulesPage() { let c = document.getElementById("page-rules"); if(c) c.innerHTML = '<div class="card"><h2>Rules</h2><div><strong>KICKOFF</strong><p>8pm SHARP AEST • Clifton Park</p></div><div><strong>RSVP</strong><p>Mandatory by Sunday 6pm</p></div><div><strong>FORMAT</strong><p>2x45min • No slide tackles</p></div></div>'; }
+    
+    function renderChatPage() { let c = document.getElementById("page-chat"); if(!c) return; c.innerHTML = '<div class="card"><h2>Team Chat</h2><div id="chatMessagesList" style="height:400px;overflow-y:auto;background:#f8fafc;border-radius:20px;padding:12px;"></div><div style="display:flex;gap:8px;"><input id="chatInput" placeholder="Type..." style="flex:1;"><button id="chatSendBtn">Send</button></div></div>'; if(firebaseReady&&db){ if(chatUnsubscribe) chatUnsubscribe(); chatUnsubscribe = db.collection("chatMessages").orderBy("timestamp","asc").onSnapshot(snap=>{ let div = document.getElementById("chatMessagesList"); if(!div) return; let html = ""; snap.forEach(doc=>{ let msg = doc.data(); let time = msg.timestamp?new Date(msg.timestamp.toDate()).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}):""; html += '<div class="chat-message"><div class="chat-name">'+escapeHtml(msg.name)+' <span style="font-size:10px;">'+time+'</span></div><div class="chat-bubble">'+escapeHtml(msg.message)+'</div></div>'; }); div.innerHTML = html || "<div>No messages</div>"; div.scrollTop = div.scrollHeight; }); } document.getElementById("chatSendBtn")?.addEventListener("click",async()=>{ let inp = document.getElementById("chatInput"); if(inp?.value.trim()){ await saveChatMessage(inp.value.trim()); inp.value = ""; } }); }
+    
+    function renderTimerPage() { let c = document.getElementById("page-timer"); if(!c) return; c.innerHTML = '<div class="timer-container"><div class="timer-display" id="timerDisplay">45:00</div><div class="timer-controls"><button class="timer-btn start" id="timerStartBtn">Start</button><button class="timer-btn pause" id="timerPauseBtn">Pause</button><button class="timer-btn reset" id="timerResetBtn">Reset</button></div><div class="half-status">Half: <span id="currentHalf">FIRST HALF</span></div></div>'; updateTimerDisplay(); document.getElementById("timerStartBtn")?.addEventListener("click",startTimer); document.getElementById("timerPauseBtn")?.addEventListener("click",pauseTimer); document.getElementById("timerResetBtn")?.addEventListener("click",resetTimer); }
+    
+    // Admin Page
+    function renderAdminPage() {
+        if(!isAdminLoggedIn) { 
+            let ac = document.getElementById("page-admin"); 
+            if(ac) ac.innerHTML = '<div class="card"><h2>Admin Access</h2><button id="showAdminLoginBtn" style="background:#dc3545;">Admin Login</button></div>'; 
+            document.getElementById("showAdminLoginBtn")?.addEventListener("click", showAdminPasswordModal);
+            return; 
         }
-        for(let i=0;i<180;i++) particles.push(new Particle());
-        let frame=0;
-        function animate(){
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            for(let i=particles.length-1;i>=0;i--){
-                particles[i].update(); particles[i].draw();
-                if(particles[i].y > canvas.height) particles.splice(i,1);
+        let ac = document.getElementById("page-admin");
+        if(ac) ac.innerHTML = '<div class="card"><h2>Admin Panel</h2><p>Welcome Administrator!</p><button id="logoutAdminBtn" style="background:#dc3545;">Logout Admin</button><div><h3>Quick Links</h3><p>• Use "Teams" to assign players<br>• Use "History" to view reports</p></div></div>';
+        document.getElementById("logoutAdminBtn")?.addEventListener("click", () => { isAdminLoggedIn = false; renderAdminPage(); renderApp(); });
+    }
+    
+    function showAdminPasswordModal() {
+        let modal = document.createElement('div');
+        modal.className = 'password-modal';
+        modal.innerHTML = '<div class="password-modal-content"><i class="fas fa-lock"></i><h3>Admin Authorization</h3><input type="password" id="adminPasswordInput" placeholder="Enter password"><div id="adminPasswordError" style="color:#dc3545;"></div><div class="flex-btns"><button id="submitAdminBtn">Verify</button><button id="cancelAdminBtn">Cancel</button></div></div>';
+        document.body.appendChild(modal);
+        document.getElementById('submitAdminBtn').onclick = function() {
+            if(document.getElementById('adminPasswordInput').value === CARLO_PASSWORD) {
+                isAdminLoggedIn = true;
+                modal.remove();
+                renderAdminPage();
+                renderApp();
+            } else {
+                document.getElementById('adminPasswordError').textContent = 'Incorrect password';
             }
-            if(particles.length>0 && frame<200){ requestAnimationFrame(animate); frame++; } else canvas.remove();
-        }
-        animate();
+        };
+        document.getElementById('cancelAdminBtn').onclick = function() { modal.remove(); };
     }
-
-    function getInitials(n){ return n.split(' ').map(x=>x[0]).join('').toUpperCase().substring(0,2); }
-    function getAvatarColor(n){
-        const c = ['#00f5ff','#ffd700','#ff6b00','#22c55e','#a855f7'];
-        let h=0; for(let i=0;i<n.length;i++) h=((h<<5)-h)+n.charCodeAt(i);
-        return c[Math.abs(h)%c.length];
-    }
-    function renderAvatar(n,s=52){
-        return `<div style="width:${s}px;height:${s}px;border-radius:50%;background:${getAvatarColor(n)};display:flex;align-items:center;justify-content:center;color:#0a0f1c;font-weight:900;font-size:${s/2.3}px;border:3px solid #1e2937;box-shadow:0 0 15px rgba(0,245,255,0.4);">${getInitials(n)}</div>`;
-    }
-    function renderMiniAvatar(n,s=28){
-        return `<div style="width:${s}px;height:${s}px;border-radius:50%;background:${getAvatarColor(n)};display:inline-flex;align-items:center;justify-content:center;color:#0a0f1c;font-weight:700;font-size:${s/2}px;border:2px solid #1e2937;">${getInitials(n)}</div>`;
-    }
-
-    // ====================== DATA FUNCTIONS ======================
-    async function loadData() { if(!firebaseReady || !db) return; try { console.log("Data loaded"); } catch(e){} }
-    async function saveAttendance(a){ /* your full logic here */ refreshAll(); }
-    async function saveGuest(g){ /* your full logic */ refreshAll(); }
-    async function removeGuest(name,date){ /* your logic */ refreshAll(); }
-    async function saveTeamAssignments(date,assign){ teamAssignments[date] = assign; if(firebaseReady&&db) await db.collection("config").doc("teamAssignments").set(teamAssignments); refreshAll(); }
-    async function saveMatchResult(date,y,o,g,a,i){ matchResults[date] = {yellowScore:y,orangeScore:o,goals:g||{},assists:a||{},injuries:i||[]}; if(firebaseReady&&db) await db.collection("config").doc("matchResults").set(matchResults); refreshAll(); }
-    async function setAttendance(status){ if(!currentUser) return; await saveAttendance({player:currentUser.name,gameDate:CURRENT_GAME_STR,status}); showToast(status==='in'?"You're locked in! 🔥":"Noted"); }
-    async function addGuest(name){ /* your logic */ refreshAll(); }
-
-    function refreshAll() {
-        renderHomePage(); renderTeamsPage(); renderHistoryPage(); renderProfilesPage(); renderScoreboardPage(); if(isAdminLoggedIn) renderAdminPage();
-    }
-
-    function getAllParticipants(gameDate){ return {players:[],guests:[]}; } // Replace with full logic from your original
-    function getCurrentGameLabel(){ return 'Mon ' + getNextMondayGameDate().toLocaleDateString('en-AU',{day:'numeric',month:'long'}) + ', 8pm'; }
-
-    // ====================== RENDER PAGES ======================
-    function renderHomePage() {
-        var c = document.getElementById("homeContainer"); if(!c) return;
-        c.innerHTML = `
-            <div class="attendance-card">
-                <h2>${getCurrentGameLabel()}</h2>
-                <div>Clifton Park, Brunswick • 8:00pm</div>
-                <div class="big-buttons">
-                    <button id="playBtn" class="btn-play-big">I'M PLAYING 🔥</button>
-                    <button id="sitBtn" class="btn-sit-big">CAN'T PLAY</button>
-                </div>
-            </div>
-            <div class="card"><h2>Playing Tonight</h2><div id="playingList" style="display:flex;flex-wrap:wrap;gap:8px;"></div></div>
-        `;
-        document.getElementById("playBtn").onclick = () => { setAttendance("in"); launchConfetti(); };
-        document.getElementById("sitBtn").onclick = () => setAttendance("out");
-    }
-
-    function renderProfilesPage() { var c = document.getElementById("page-profiles"); if(c) c.innerHTML = '<div class="card"><h2>Player Profiles</h2><p>Premium profiles coming soon...</p></div>'; }
-    function renderScoreboardPage() { var c = document.getElementById("page-scoreboard"); if(c) c.innerHTML = '<div class="card"><h2>All-Time Stats</h2><p>Leaderboard with neon highlights</p></div>'; }
-    function renderTeamsPage() { var c = document.getElementById("page-teamswk"); if(c) c.innerHTML = '<div class="card"><h2>This Week Teams</h2><p>Yellow vs Orange with glowing badges</p></div>'; }
-    function renderHistoryPage() { var c = document.getElementById("page-history"); if(c) c.innerHTML = '<div class="card"><h2>Match History</h2><p>Past results with confetti on wins</p></div>'; }
-    function renderWeatherPage() { var c = document.getElementById("page-weather"); if(c) c.innerHTML = '<div class="card"><h2>Weather</h2><p>Premium forecast card</p></div>'; }
-    function renderTimerPage() { var c = document.getElementById("page-timer"); if(c) c.innerHTML = '<div class="card"><h2>Match Timer</h2><div class="timer-display" id="timerDisplay">45:00</div><button onclick="startTimer()">Start</button></div>'; }
-    function renderChatPage() { var c = document.getElementById("page-chat"); if(c) c.innerHTML = '<div class="card"><h2>Team Chat</h2><p>Live chat ready</p></div>'; }
-    function renderRulesPage() { var c = document.getElementById("page-rules"); if(c) c.innerHTML = '<div class="card"><h2>Rules</h2><p>Full rules here</p></div>'; }
-    function renderAdminPage() { var c = document.getElementById("page-admin"); if(c) c.innerHTML = '<div class="card"><h2>Admin Panel</h2><p>Full control panel</p></div>'; }
-
+    
+    // Navigation
     function initNav() {
-        var mods = [
-            { id: "home", name: "🏠 HOME" }, { id: "profiles", name: "👤 PROFILES" },
-            { id: "scoreboard", name: "🏆 STATS" }, { id: "teamswk", name: "⚽ THIS WEEK" },
-            { id: "history", name: "📖 HISTORY" }, { id: "weather", name: "🌤️ WEATHER" },
-            { id: "timer", name: "⏱️ TIMER" }, { id: "chat", name: "💬 CHAT" },
-            { id: "rules", name: "📜 RULES" }
-        ];
-        if(isAdminLoggedIn) mods.push({ id: "admin", name: "⚙️ ADMIN" });
-        var nav = document.getElementById("topNavBar");
-        if(nav) nav.innerHTML = mods.map(m => `<button class="nav-module" data-module="${m.id}">${m.name}</button>`).join('');
-        document.querySelectorAll(".nav-module").forEach(btn => {
-            btn.onclick = () => {
-                document.querySelectorAll(".module-container").forEach(m => m.classList.remove("active-module"));
-                document.getElementById("module-"+btn.dataset.module).classList.add("active-module");
-                document.querySelectorAll(".nav-module").forEach(b => b.classList.remove("active"));
-                btn.classList.add("active");
-            };
-        });
-        document.querySelector('.nav-module[data-module="home"]').click();
+        let mods = [{id:"home",name:"HOME"},{id:"profiles",name:"PROFILES"},{id:"scoreboard",name:"STATS"},{id:"teamswk",name:"THIS WEEK"},{id:"history",name:"HISTORY"},{id:"weather",name:"WEATHER"},{id:"timer",name:"TIMER"},{id:"chat",name:"CHAT"},{id:"rules",name:"RULES"}];
+        if(isAdminLoggedIn) mods.push({id:"admin",name:"ADMIN"});
+        let nav = document.getElementById("topNavBar");
+        if(nav) nav.innerHTML = mods.map(m=>`<button class="nav-module" data-module="${m.id}">${m.name}</button>`).join('');
+        document.querySelectorAll(".nav-module").forEach(btn=>{ btn.onclick = function(){ let id = this.dataset.module; document.querySelectorAll(".module-container").forEach(c=>c.classList.remove("active-module")); document.getElementById(`module-${id}`)?.classList.add("active-module"); document.querySelectorAll(".nav-module").forEach(b=>b.classList.remove("active")); this.classList.add("active"); if(id==="chat") renderChatPage(); if(id==="timer") renderTimerPage(); }; });
+        document.querySelector('.nav-module[data-module="home"]')?.click();
     }
-
+    
     async function renderApp() {
-        await loadData();
-        var app = document.getElementById("app");
-        app.innerHTML = `
-            <div class="header">
-                <div class="logo-icon"><i class="fas fa-futbol" style="font-size:38px;color:#0a0f1c;"></i></div>
-                <h1>MONDAY NIGHT SOCCER</h1>
-                <div class="user-row"><i class="fas fa-user"></i> <strong>${currentUser ? currentUser.name : "Player"}</strong> <button id="logoutBtn">Exit</button></div>
-            </div>
-            <div class="top-nav" id="topNavBar"></div>
-            <div id="module-home" class="module-container active-module"><div id="homeContainer"></div></div>
-            <div id="module-profiles" class="module-container"><div id="page-profiles"></div></div>
-            <div id="module-scoreboard" class="module-container"><div id="page-scoreboard"></div></div>
-            <div id="module-teamswk" class="module-container"><div id="page-teamswk"></div></div>
-            <div id="module-history" class="module-container"><div id="page-history"></div></div>
-            <div id="module-weather" class="module-container"><div id="page-weather"></div></div>
-            <div id="module-timer" class="module-container"><div id="page-timer"></div></div>
-            <div id="module-chat" class="module-container"><div id="page-chat"></div></div>
-            <div id="module-rules" class="module-container"><div id="page-rules"></div></div>
-            ${isAdminLoggedIn ? `<div id="module-admin" class="module-container"><div id="page-admin"></div></div>` : ''}
-        `;
-        document.getElementById("logoutBtn").onclick = () => location.reload();
-        renderHomePage(); renderProfilesPage(); renderScoreboardPage(); renderTeamsPage();
-        renderHistoryPage(); renderWeatherPage(); renderTimerPage(); renderChatPage(); renderRulesPage();
+        await loadData(); await fetchWeather();
+        let app = document.getElementById("app");
+        app.innerHTML = '<div class="header"><div class="logo-icon"><i class="fas fa-futbol"></i></div><h1>MONDAY NIGHT SOCCER</h1><div class="user-row"><i class="fas fa-user-circle"></i> <strong>'+(currentUser?.name||"Player")+'</strong> <button id="logoutBtnMain">Exit</button></div></div><div class="top-nav" id="topNavBar"></div><div id="module-home" class="module-container"><div id="homeContainer"></div></div><div id="module-profiles" class="module-container"><div id="page-profiles"></div></div><div id="module-scoreboard" class="module-container"><div id="page-scoreboard"></div></div><div id="module-teamswk" class="module-container"><div id="page-teamswk"></div></div><div id="module-history" class="module-container"><div id="page-history"></div></div><div id="module-weather" class="module-container"><div id="page-weather"></div></div><div id="module-timer" class="module-container"><div id="page-timer"></div></div><div id="module-chat" class="module-container"><div id="page-chat"></div></div><div id="module-rules" class="module-container"><div id="page-rules"></div></div>'+(isAdminLoggedIn?'<div id="module-admin" class="module-container"><div id="page-admin"></div></div>':'')+'</div>';
+        document.getElementById("logoutBtnMain").onclick = () => { if(chatUnsubscribe) chatUnsubscribe(); currentUser = null; isAdminLoggedIn = false; localStorage.removeItem("soccer_user"); renderLogin(); };
+        renderHomePage(); renderProfilesPage(); renderScoreboardPage(); renderTeamsPage(); renderHistoryPage(); renderWeatherPage(); renderTimerPage(); renderChatPage(); renderRulesPage();
         if(isAdminLoggedIn) renderAdminPage();
         initNav();
     }
-
-    // ====================== LOGIN ======================
-    function renderLogin() {
-        var app = document.getElementById("app");
-        app.innerHTML = `<div style="padding:80px 20px;text-align:center;">
-            <div class="logo-icon" style="margin:0 auto 30px"><i class="fas fa-futbol" style="font-size:48px;color:#0a0f1c"></i></div>
-            <h2 style="font-size:28px">Monday Night Soccer</h2>
-            <select id="playerSelectLogin" style="width:100%;padding:16px;border-radius:60px;background:#1e2937;color:white;border:none;margin:20px 0;font-size:17px;"></select>
-            <button id="playerLoginBtn" style="width:100%;padding:16px;background:var(--primary);color:#0a0f1c;border:none;border-radius:60px;font-weight:800;font-size:18px;">ENTER AS PLAYER</button>
-            <hr style="margin:30px 0;border-color:#334155">
-            <input type="password" id="adminPwLogin" placeholder="Admin Password" style="width:100%;padding:16px;border-radius:60px;background:#1e2937;color:white;border:none;">
-            <button id="adminLoginBtn" style="width:100%;padding:16px;background:#ef4444;color:white;border:none;border-radius:60px;margin-top:12px;">ADMIN LOGIN</button>
-        </div>`;
-        document.getElementById("playerLoginBtn").onclick = () => {
-            var n = document.getElementById("playerSelectLogin").value;
-            if(n) { currentUser = {name:n,role:"player"}; localStorage.setItem("soccer_user", JSON.stringify(currentUser)); renderApp(); }
-        };
-        document.getElementById("adminLoginBtn").onclick = () => {
-            if(document.getElementById("adminPwLogin").value === "admin123") {
-                currentUser = {name:"Admin",role:"admin"}; isAdminLoggedIn = true;
-                localStorage.setItem("soccer_user", JSON.stringify(currentUser)); renderApp();
-            }
-        };
+    
+    async function renderLogin() {
+        await loadData();
+        let app = document.getElementById("app");
+        app.innerHTML = '<div class="login-box"><div class="login-logo"><i class="fas fa-futbol"></i></div><h2>Monday Night Soccer</h2><p>8pm • Clifton Park</p><select id="playerSelectLogin"><option value="">-- Select Your Name --</option>'+players.map(p=>`<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('')+'</select><button id="playerLoginBtn">Enter as Player</button><hr><input type="password" id="adminPwLogin" placeholder="Admin Password"><button id="adminLoginBtn">Admin Login</button></div>';
+        document.getElementById("playerLoginBtn").onclick = function() { let n = document.getElementById("playerSelectLogin").value; if(n && n!=="") { currentUser = { name:n, role:"player" }; isAdminLoggedIn = false; localStorage.setItem("soccer_user", JSON.stringify(currentUser)); renderApp(); } else alert("Select your name"); };
+        document.getElementById("adminLoginBtn").onclick = function() { let pw = document.getElementById("adminPwLogin").value; if(pw === CARLO_PASSWORD) { currentUser = { name:"Admin", role:"admin" }; isAdminLoggedIn = true; localStorage.setItem("soccer_user", JSON.stringify(currentUser)); renderApp(); } else { alert("Wrong password"); document.getElementById("adminPwLogin").value = ""; } };
     }
-
-    // ====================== START ======================
-    var stored = localStorage.getItem("soccer_user");
-    if(stored) {
-        try {
-            var u = JSON.parse(stored);
-            currentUser = u; isAdminLoggedIn = u.role === "admin";
-            renderApp();
-        } catch(e){ renderLogin(); }
-    } else renderLogin();
+    
+    let stored = localStorage.getItem("soccer_user");
+    if(stored) { try { let u = JSON.parse(stored); if(u.role==="admin") { isAdminLoggedIn=true; currentUser={ name:"Admin", role:"admin" }; } else { currentUser={ name:u.name, role:"player" }; } renderApp(); } catch(e){ renderLogin(); } } else { renderLogin(); }
 })();
 </script>
 </body>
