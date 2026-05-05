@@ -2,393 +2,601 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monday Night Soccer</title>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Monday Night Soccer | Complete Hub</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
         body{background:#eef2f5;font-family:Arial,sans-serif;}
-        .app{max-width:500px;margin:0 auto;padding:16px;}
-        .card{background:white;border-radius:24px;padding:18px;margin-bottom:14px;}
-        button{background:#1a73e8;color:white;border:none;padding:12px;border-radius:60px;cursor:pointer;width:100%;margin:5px 0;}
-        select,.input{width:100%;padding:14px;border-radius:60px;border:1px solid #ddd;margin:8px 0;}
-        .big-buttons{display:flex;gap:12px;}
-        .btn-green{background:#28a745;}
-        .btn-red{background:#dc3545;}
+        .app{max-width:500px;margin:0 auto;background:#eef2f5;min-height:100vh;padding-bottom:20px;}
+        .header{background:white;padding:14px;text-align:center;border-bottom:1px solid #ddd;}
+        .logo-icon{width:56px;height:56px;background:#1a73e8;border-radius:24px;display:inline-flex;align-items:center;justify-content:center;margin:0 auto 6px;}
+        .logo-icon i{font-size:28px;color:white;}
+        h1{font-size:18px;margin-top:6px;}
+        .user-row{background:#f1f5f9;padding:5px 12px;border-radius:60px;display:inline-flex;align-items:center;gap:8px;margin-top:6px;font-size:12px;}
+        .user-row button{background:#dc3545;border:none;padding:4px 12px;border-radius:40px;color:white;cursor:pointer;}
+        .top-nav{background:white;padding:10px;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;border-bottom:1px solid #ddd;}
+        .nav-module{background:#f8fafc;border:none;padding:8px 14px;border-radius:60px;font-size:12px;font-weight:600;color:#475569;cursor:pointer;}
+        .nav-module.active{background:#1a73e8;color:white;}
+        .module-container{padding:16px;display:none;}
+        .module-container.active-module{display:block;}
+        .card{background:white;border-radius:24px;padding:18px;margin-bottom:14px;border:1px solid #ddd;}
+        .card h2{font-size:17px;font-weight:700;margin-bottom:14px;border-left:4px solid #1a73e8;padding-left:12px;}
+        .attendance-card{background:linear-gradient(135deg,#1a73e8,#0d5bbf);color:white;border-radius:28px;padding:24px;text-align:center;margin-bottom:16px;}
+        .big-buttons{display:flex;gap:14px;margin:16px 0;}
+        .btn-play-big{background:#28a745;flex:1;padding:14px;border-radius:60px;font-weight:800;border:none;color:white;cursor:pointer;}
+        .btn-sit-big{background:#dc3545;flex:1;padding:14px;border-radius:60px;font-weight:800;border:none;color:white;cursor:pointer;}
+        .profile-item{background:#f8fafc;border-radius:20px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;}
+        .profile-avatar{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:20px;}
+        .player-avatar-small{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:13px;margin-right:4px;}
+        .profile-badge{background:white;border-radius:40px;padding:4px 12px;font-size:11px;font-weight:600;display:inline-block;margin:2px;}
+        .edit-profile-btn{background:#475569;padding:6px 14px;font-size:12px;border-radius:40px;border:none;color:white;cursor:pointer;}
+        .login-box{background:white;border-radius:48px;padding:40px;margin:40px 20px;text-align:center;}
+        .login-logo{width:90px;height:90px;background:linear-gradient(135deg,#1a73e8,#0d5bbf);border-radius:32px;display:inline-flex;align-items:center;justify-content:center;margin:0 auto 20px;}
+        select,input{width:100%;padding:14px;border:1.5px solid #ddd;border-radius:60px;margin:8px 0;font-size:16px;}
+        button{background:#1a73e8;color:white;border:none;padding:12px;border-radius:60px;font-weight:700;cursor:pointer;width:100%;}
+        .flex-btns{display:flex;gap:12px;margin-top:12px;}
+        .playing-list,.guest-section{background:#e8f0fe;border-radius:20px;padding:16px;margin-bottom:14px;}
+        .guest-section{background:#f0fdf4;border:1px solid #bbf7d0;}
+        .attendee-tag{display:inline-flex;align-items:center;gap:6px;background:#e2e8f0;padding:6px 12px;border-radius:40px;font-size:13px;margin:4px;}
+        .guest-tag{background:#d4edda;color:#155724;border-radius:40px;padding:6px 12px;font-size:13px;display:inline-flex;align-items:center;gap:6px;}
+        .info-bar{background:#e8f0fe;border-radius:16px;padding:12px;font-size:12px;margin-bottom:16px;text-align:center;}
+        .loading{text-align:center;padding:40px;color:#64748b;}
+        .data-table{width:100%;border-collapse:collapse;font-size:13px;}
+        .data-table th,.data-table td{padding:10px;text-align:left;border-bottom:1px solid #ddd;}
+        .stat-highlight{background:linear-gradient(135deg,#f59e0b,#ea580c);color:white;border-radius:20px;padding:12px;text-align:center;margin-bottom:16px;}
+        .stat-highlight .number{font-size:32px;font-weight:800;}
+        .timer-container{background:linear-gradient(135deg,#1e293b,#0f172a);color:white;border-radius:28px;padding:20px;text-align:center;margin-bottom:16px;}
+        .timer-display{font-size:56px;font-weight:800;font-family:monospace;color:#10b981;background:#00000030;border-radius:20px;padding:12px;margin-bottom:16px;}
+        .timer-controls{display:flex;gap:12px;justify-content:center;}
+        .timer-btn{padding:10px 20px;border-radius:60px;font-weight:700;font-size:14px;border:none;cursor:pointer;}
+        .timer-btn.start{background:#10b981;color:white;}
+        .timer-btn.pause{background:#f59e0b;color:white;}
+        .timer-btn.reset{background:#ef4444;color:white;}
+        .half-status{font-size:14px;margin-top:12px;}
+        .chat-message{margin-bottom:12px;}
+        .chat-bubble{background:#f1f5f9;padding:10px 14px;border-radius:18px;font-size:14px;}
+        .chat-name{font-weight:700;font-size:12px;color:#1a73e8;margin-bottom:4px;}
+        .weather-card{background:linear-gradient(135deg,#0f2027,#203a43);color:white;border-radius:24px;padding:20px;text-align:center;}
+        .admin-team-item{display:flex;justify-content:space-between;align-items:center;margin:8px 0;background:#f1f5f9;border-radius:60px;padding:8px 16px;flex-wrap:wrap;gap:8px;}
+        .team-row{display:flex;gap:12px;margin-bottom:16px;}
+        .team-box{flex:1;background:rgba(0,0,0,0.65);border-radius:18px;padding:12px;}
+        .team-yellow{background:#ffc107;color:#2c2c2c;text-align:center;padding:6px;border-radius:60px;margin-bottom:8px;font-weight:800;}
+        .team-orange{background:#fd7e14;color:white;text-align:center;padding:6px;border-radius:60px;margin-bottom:8px;font-weight:800;}
+        .player-list{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;}
+        .player-tag{background:rgba(255,255,255,0.2);border-radius:40px;padding:4px 10px;font-size:11px;color:white;display:inline-flex;align-items:center;gap:6px;}
+        .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;}
+        .modal-content{background:white;border-radius:32px;padding:24px;max-width:380px;width:90%;}
+        .match-card{background:white;border-radius:24px;margin-bottom:14px;border:1px solid #ddd;overflow:hidden;}
+        .match-header{background:#f8fafc;padding:12px 16px;display:flex;justify-content:space-between;}
+        .match-result{background:#1a73e8;color:white;padding:4px 14px;border-radius:40px;font-weight:700;font-size:12px;}
+        .goals-section{padding:12px 16px;background:#fefce8;}
+        .goal-badge{background:white;border-radius:40px;padding:5px 12px;font-size:12px;font-weight:600;border-left:3px solid #eab308;display:inline-block;margin:4px;}
+        .rule-item{background:#f8fafc;border-radius:16px;padding:12px;margin-bottom:10px;border-left:3px solid #1a73e8;}
+        .rule-time{font-weight:700;color:#1a73e8;}
+        .password-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:1001;}
+        .password-modal-content{background:white;border-radius:32px;padding:28px;max-width:340px;width:90%;text-align:center;}
+        .goal-entry{background:#eef2ff;border-radius:20px;padding:12px;margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+        .goal-entry-own{background:#fee2e2;border-left:4px solid #dc3545;}
+        .game-selector{background:#f1f5f9;border-radius:60px;padding:12px 16px;margin-bottom:16px;display:flex;gap:10px;align-items:center;}
+        .game-selector select{flex:2;margin:0;padding:10px;}
         .flex{display:flex;gap:8px;flex-wrap:wrap;}
-        .tag{background:#e2e8f0;padding:6px 12px;border-radius:40px;margin:4px;display:inline-block;}
-        .header{background:white;padding:14px;text-align:center;border-radius:24px;margin-bottom:16px;}
-        .nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
-        .nav-btn{background:#f8fafc;padding:8px 14px;border-radius:60px;font-size:12px;}
-        .nav-btn.active{background:#1a73e8;color:white;}
         .hidden{display:none;}
-        h2{font-size:16px;margin-bottom:12px;}
+        .text-center{text-align:center;}
+        .mt-2{margin-top:12px;}
+        .w-100{width:100%;}
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 </head>
 <body>
-<div class="app" id="app">Loading...</div>
+<div class="app" id="app"><div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading Monday Night Soccer...</div></div>
 
 <script>
-// FIREBASE CONFIG
-const firebaseConfig = {
-    apiKey: "AIzaSyCWlFqDJyENgrUOhiLXCjSEi4Mk_54SA1w",
-    authDomain: "monday-night-soccer-hub.firebaseapp.com",
-    projectId: "monday-night-soccer-hub",
-    storageBucket: "monday-night-soccer-hub.firebasestorage.app",
-    messagingSenderId: "634335208908",
-    appId: "1:634335208908:web:dca705b65fc52de0606969"
-};
-
-let db = null;
-try {
-    firebase.initializeApp(firebaseConfig);
-    db = firebase.firestore();
-} catch(e) { console.log("Firebase error"); }
-
-// PLAYERS
-const PLAYERS = ["Alex Rowe","Ali Mekawy","Carlo","Charlie","Chris Del Monaco","Chris M","Chris S","Danny","Dante","David","Dimitri","Enzo","Farid","Faros","Frank","George B","George T","Ivan","James Zoumis","James","Joe T","Joey","Kia","Leo","Manoli","Marco","Mario","Maurice","Nector","Paul","Perri","Peter","Ralph","Rocco","Stav","Stevan","Theo","Tony EH","Vasilis"].sort();
-
-let currentUser = null;
-let isAdmin = false;
-let attendance = [];
-let guests = [];
-let matchResults = {};
-let teamAssignments = {};
-let playerProfiles = {};
-
-// Get next Monday (AEST)
-function getNextMonday() {
-    let d = new Date();
-    let day = d.getDay();
-    let days = (day === 1 ? 0 : (day === 0 ? 1 : 8 - day));
-    d.setDate(d.getDate() + days);
-    return d;
-}
-
-function getGameLabel() {
-    let d = getNextMonday();
-    return 'Mon ' + d.toLocaleDateString('en-AU', {day:'numeric', month:'long'});
-}
-
-let CURRENT_GAME = getNextMonday().toISOString().split('T')[0];
-
-// Load data
-async function loadData() {
-    if(!db) return;
-    let attSnap = await db.collection("attendance").get();
-    let guestSnap = await db.collection("guests").get();
-    let teamSnap = await db.collection("config").doc("teamAssignments").get();
-    let resultSnap = await db.collection("config").doc("matchResults").get();
-    let profSnap = await db.collection("config").doc("playerProfiles").get();
+(function() {
+    // ============================================
+    // SECRET ADMIN PASSWORD
+    // ============================================
+    const CARLO_PASSWORD = "carlo123";
     
-    attendance = attSnap.docs.map(d => d.data());
-    guests = guestSnap.docs.map(d => d.data());
-    if(teamSnap.exists) teamAssignments = teamSnap.data();
-    if(resultSnap.exists) matchResults = resultSnap.data();
-    if(profSnap.exists) playerProfiles = profSnap.data();
+    // ============================================
+    // PLAYER ROSTER
+    // ============================================
+    const DEFAULT_PLAYERS = ["Alex Rowe","Ali Mekawy","Carlo","Charlie","Chris Del Monaco","Chris M","Chris S","Danny","Dante","David","Dimitri","Enzo","Farid","Faros","Frank","George B","George T","Ivan","James Zoumis","James","Joe T","Joey","Kia","Leo","Manoli","Marco","Mario","Maurice","Nector","Paul","Perri","Peter","Ralph","Rocco","Stav","Stevan","Theo","Tony EH","Vasilis"].sort();
     
-    for(let p of PLAYERS) if(!playerProfiles[p]) playerProfiles[p] = {age:'-',position:'-',games:0};
-}
-
-async function saveAttendance(p, status) {
-    if(!db) return;
-    await db.collection("attendance").doc(p+'_'+CURRENT_GAME).set({player:p, gameDate:CURRENT_GAME, status:status});
-    let idx = attendance.findIndex(x => x.player===p && x.gameDate===CURRENT_GAME);
-    if(idx>=0) attendance[idx] = {player:p, gameDate:CURRENT_GAME, status:status};
-    else attendance.push({player:p, gameDate:CURRENT_GAME, status:status});
-    renderHome();
-}
-
-async function addGuest(name) {
-    if(!db) return;
-    await db.collection("guests").doc(name+'_'+CURRENT_GAME).set({guestName:name, gameDate:CURRENT_GAME, addedBy:currentUser});
-    guests.push({guestName:name, gameDate:CURRENT_GAME, addedBy:currentUser});
-    renderHome();
-}
-
-async function saveTeams(assign) {
-    if(!db) return;
-    await db.collection("config").doc("teamAssignments").set(assign);
-    teamAssignments = assign;
-    renderTeams();
-}
-
-function getParticipants() {
-    let players = attendance.filter(a => a.gameDate===CURRENT_GAME && a.status==='in').map(a => a.player);
-    let guestList = guests.filter(g => g.gameDate===CURRENT_GAME).map(g => g.guestName);
-    return {players, guests:guestList};
-}
-
-function renderHome() {
-    let parts = getParticipants();
-    let myStatus = attendance.find(a => a.player===currentUser && a.gameDate===CURRENT_GAME)?.status;
-    document.getElementById("home").innerHTML = `
-        <div class="card">
-            <h2>${getGameLabel()} • 8pm</h2>
-            <p>Clifton Park, Brunswick</p>
-            <div class="big-buttons">
-                <button class="btn-green" onclick="setAtt('in')">✅ PLAYING</button>
-                <button class="btn-red" onclick="setAtt('out')">❌ CAN'T PLAY</button>
-            </div>
-            <p>${myStatus === 'in' ? '✓ You are PLAYING' : (myStatus === 'out' ? '✗ You are NOT PLAYING' : 'Tap above')}</p>
-        </div>
-        <div class="card">
-            <h3>Playing (${parts.players.length})</h3>
-            <div class="flex">${parts.players.map(p => `<span class="tag">${p}</span>`).join('') || 'None'}</div>
-        </div>
-        <div class="card">
-            <h3>Guests (${parts.guests.length})</h3>
-            <div class="flex">${parts.guests.map(g => `<span class="tag">${g}</span>`).join('') || 'None'}</div>
-            <input type="text" id="guestName" class="input" placeholder="Guest name">
-            <button onclick="addGuestBtn()">➕ Bring Guest</button>
-        </div>
-    `;
-}
-
-function renderTeams() {
-    let parts = getParticipants();
-    let all = [...parts.players.map(p=>({name:p,isG:false})), ...parts.guests.map(g=>({name:g,isG:true}))];
-    let assign = teamAssignments[CURRENT_GAME] || {};
-    let yellow = all.filter(p => assign[p.name] === 'yellow' || assign['guest_'+p.name] === 'yellow');
-    let orange = all.filter(p => assign[p.name] === 'orange' || assign['guest_'+p.name] === 'orange');
-    document.getElementById("teams").innerHTML = `
-        <div class="card">
-            <div class="flex">
-                <div style="flex:1;background:#f5c542;border-radius:18px;padding:12px">
-                    <h3>YELLOW (${yellow.length})</h3>
-                    ${yellow.map(p => `<span class="tag">${p.name}${p.isG?' Guest':''}</span>`).join('') || '—'}
-                </div>
-                <div style="flex:1;background:#f5a542;border-radius:18px;padding:12px">
-                    <h3>ORANGE (${orange.length})</h3>
-                    ${orange.map(p => `<span class="tag">${p.name}${p.isG?' Guest':''}</span>`).join('') || '—'}
-                </div>
-            </div>
-            <p style="text-align:center;margin-top:12px">Captain: Carlo</p>
-        </div>
-    `;
-}
-
-function renderAdmin() {
-    if(!isAdmin) {
-        document.getElementById("admin").innerHTML = `<div class="card"><h2>Admin Login</h2><input type="password" id="adminPw" class="input" placeholder="Password"><button onclick="adminLogin()">Login</button></div>`;
-        return;
+    // ============================================
+    // DATA STORES (localStorage only - guaranteed to work)
+    // ============================================
+    let players = [...DEFAULT_PLAYERS];
+    let playerProfiles = JSON.parse(localStorage.getItem("mns_profiles") || "{}");
+    let teamAssignments = JSON.parse(localStorage.getItem("mns_teams") || "{}");
+    let matchResults = JSON.parse(localStorage.getItem("mns_results") || "{}");
+    let attendance = JSON.parse(localStorage.getItem("mns_attendance") || "{}");
+    let guests = JSON.parse(localStorage.getItem("mns_guests") || "{}");
+    let isAdminLoggedIn = false;
+    let currentUser = null;
+    let weeklyCaptain = "Carlo";
+    let weatherData = { temp: "18C", condition: "Clear", icon: "fa-sun", rainChance: 10 };
+    
+    // Initialize profiles
+    for(let p of players) {
+        if(!playerProfiles[p]) playerProfiles[p] = { age: '-', position: '-', yearJoined: '-', gamesPlayed: 0 };
     }
-    let parts = getParticipants();
-    let all = [...parts.players.map(p=>({name:p,isG:false})), ...parts.guests.map(g=>({name:g,isG:true}))];
-    let assign = teamAssignments[CURRENT_GAME] || {};
-    document.getElementById("admin").innerHTML = `
-        <div class="card">
-            <h2>Assign Teams</h2>
-            ${all.map(p => `
-                <div style="display:flex;justify-content:space-between;margin:8px 0">
-                    <span>${p.name}${p.isG?' (Guest)':''}</span>
-                    <select id="team_${p.name.replace(/ /g,'_')}" data-name="${p.name}" data-guest="${p.isG}">
-                        <option value="">—</option>
-                        <option value="yellow" ${(assign[p.name]==='yellow'||assign['guest_'+p.name]==='yellow')?'selected':''}>🟡 Yellow</option>
-                        <option value="orange" ${(assign[p.name]==='orange'||assign['guest_'+p.name]==='orange')?'selected':''}>🟠 Orange</option>
-                    </select>
-                </div>
-            `).join('')}
-            <button onclick="saveTeamsFromAdmin()">Save Teams</button>
-        </div>
-        <div class="card">
-            <h2>Add Guest</h2>
-            <input type="text" id="adminGuest" class="input" placeholder="Guest name">
-            <button onclick="adminAddGuest()">Add Guest</button>
-        </div>
-        <div class="card">
-            <h2>Record Result</h2>
-            <div class="flex"><input type="number" id="yellowScore" placeholder="Yellow" style="flex:1"><input type="number" id="orangeScore" placeholder="Orange" style="flex:1"></div>
-            <button onclick="saveResult()">Save Result</button>
-        </div>
-        <div class="card">
-            <button class="btn-red" onclick="logout()">Logout Admin</button>
-        </div>
-    `;
-}
-
-function renderStats() {
-    let stats = {};
-    for(let p of PLAYERS) stats[p] = {goals:0, games:0};
-    for(let a of attendance) if(a.status==='in') stats[a.player].games++;
-    for(let date in matchResults) {
-        let m = matchResults[date];
-        if(m.goals) for(let s in m.goals) if(stats[s]) stats[s].goals += m.goals[s];
+    
+    // ============================================
+    // TIMER
+    // ============================================
+    let timerInterval = null, currentHalf = 1, timeLeft = 45 * 60;
+    function formatTime(s) { let m = Math.floor(s/60); let sec = s%60; return (m<10?'0'+m:m)+':'+(sec<10?'0'+sec:sec); }
+    function updateTimerDisplay() { let d = document.getElementById("timerDisplay"); if(d) d.textContent = formatTime(timeLeft); let h = document.getElementById("currentHalf"); if(h) h.textContent = currentHalf===1?"FIRST HALF":"SECOND HALF"; }
+    function playAlarm() { try { let a = new (window.AudioContext||window.webkitAudioContext)(); let o = a.createOscillator(); let g = a.createGain(); o.connect(g); g.connect(a.destination); o.frequency.value=880; g.gain.value=0.5; o.start(); g.gain.exponentialRampToValueAtTime(0.00001,a.currentTime+1.5); o.stop(a.currentTime+1.5); } catch(e){} }
+    function timerTick() { if(timeLeft<=0) { if(timerInterval) clearInterval(timerInterval); playAlarm(); if(currentHalf===1) { alert("HALF TIME! Start second half?"); currentHalf=2; timeLeft=45*60; updateTimerDisplay(); } else { alert("FULL TIME! Match ended."); currentHalf=1; timeLeft=45*60; updateTimerDisplay(); } return; } timeLeft--; updateTimerDisplay(); }
+    function startTimer() { if(timerInterval) clearInterval(timerInterval); timerInterval = setInterval(timerTick,1000); }
+    function pauseTimer() { if(timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
+    function resetTimer() { pauseTimer(); currentHalf=1; timeLeft=45*60; updateTimerDisplay(); }
+    
+    // ============================================
+    // AUSTRALIAN TIME - NEXT MONDAY (May 11, 2026)
+    // ============================================
+    function getAustralianTime() { let now = new Date(); let utc = now.getTime() + (now.getTimezoneOffset()*60000); return new Date(utc + (10*3600000)); }
+    function getNextMondayGameDate() {
+        let now = getAustralianTime();
+        let day = now.getDay();
+        let hour = now.getHours();
+        let days;
+        if(day === 1 && hour >= 20) days = 7;
+        else if(day === 1) days = 0;
+        else if(day === 0) days = 1;
+        else days = (8 - day) % 7;
+        let d = new Date(now);
+        d.setDate(now.getDate() + days);
+        d.setHours(0,0,0,0);
+        return d;
     }
-    let sorted = Object.entries(stats).sort((a,b)=>b[1].goals - a[1].goals).slice(0,10);
-    document.getElementById("stats").innerHTML = `
-        <div class="card">
-            <h2>Top Scorers</h2>
-            ${sorted.map(([n,d],i)=>`<div><strong>${i+1}.</strong> ${n} - ${d.goals} goals</div>`).join('')}
-        </div>
-    `;
-}
-
-function renderRules() {
-    document.getElementById("rules").innerHTML = `
-        <div class="card">
-            <h2>Rules</h2>
-            <p>• 8:00pm SHARP AEST • Clifton Park</p>
-            <p>• RSVP mandatory by Sunday 6pm</p>
-            <p>• Max 2 guests per game</p>
-            <p>• 2 x 45 minute halves • No slide tackles</p>
-        </div>
-    `;
-}
-
-function renderChat() {
-    document.getElementById("chat").innerHTML = `
-        <div class="card">
-            <h2>Chat</h2>
-            <div id="chatMsgs" style="height:300px;overflow-y:auto;background:#f8fafc;border-radius:20px;padding:12px;margin-bottom:12px"></div>
-            <div class="flex"><input type="text" id="chatInput" style="flex:1;padding:12px;border-radius:60px;border:1px solid #ddd"><button onclick="sendChat()">Send</button></div>
-        </div>
-    `;
-    if(db) {
-        db.collection("chatMessages").orderBy("timestamp").onSnapshot(snap => {
-            let div = document.getElementById("chatMsgs");
-            if(!div) return;
-            div.innerHTML = snap.docs.map(doc => {
-                let m = doc.data();
-                return `<div><strong>${m.name}</strong>: ${m.message}</div>`;
-            }).join('') || "No messages";
+    function getCurrentGameLabel() { let d = getNextMondayGameDate(); return 'Mon ' + d.toLocaleDateString('en-AU',{day:'numeric',month:'long'}) + ' 8pm'; }
+    let CURRENT_GAME_STR = getNextMondayGameDate().toISOString().split('T')[0];
+    
+    function getAllGameWeeks() {
+        let weeks = [];
+        let current = getNextMondayGameDate();
+        for(let i = -20; i <= 4; i++) {
+            let d = new Date(current);
+            d.setDate(current.getDate() + (i * 7));
+            if(d >= new Date(2024,0,1)) weeks.push({ dateStr: d.toISOString().split('T')[0], label: 'Mon ' + d.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) });
+        }
+        weeks.sort((a,b) => a.dateStr.localeCompare(b.dateStr));
+        return weeks;
+    }
+    let ALL_WEEKS = getAllGameWeeks();
+    let currentAdminGameDate = CURRENT_GAME_STR;
+    
+    function getAllParticipants(gameDate) {
+        let playersList = [], guestsList = [];
+        for(let p in attendance) {
+            if(attendance[p] === 'in') playersList.push(p);
+        }
+        if(guests[gameDate]) {
+            for(let g of guests[gameDate]) guestsList.push({ name: g, addedBy: "Player" });
+        }
+        return { players: playersList, guests: guestsList };
+    }
+    
+    function getPlayersAndGuestsForGame(gameDate) {
+        let parts = getAllParticipants(gameDate);
+        let result = [];
+        for(let p of parts.players) result.push({ name: p, isGuest: false, displayName: p });
+        for(let g of parts.guests) result.push({ name: g.name, isGuest: true, displayName: g.name + ' (Guest)' });
+        return result;
+    }
+    
+    function getTeamForPlayer(gameDate, playerName, isGuest) {
+        let assign = teamAssignments[gameDate] || {};
+        let key = isGuest ? 'guest_' + playerName : playerName;
+        return assign[key] || null;
+    }
+    
+    // ============================================
+    // HELPER FUNCTIONS
+    // ============================================
+    function escapeHtml(s) { if(!s) return ''; return String(s).replace(/[&<>]/g, function(m) { if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m; }); }
+    function getInitials(n) { return n.split(' ').map(function(x){ return x[0]; }).join('').toUpperCase().substring(0,2); }
+    function getAvatarColor(n) { let c = ['#1a73e8','#28a745','#dc3545','#fd7e14','#6f42c1']; let h=0; for(let i=0;i<n.length;i++) h=((h<<5)-h)+n.charCodeAt(i); return c[Math.abs(h)%c.length]; }
+    function renderAvatar(n,s) { s=s||50; return '<div class="profile-avatar" style="background:'+getAvatarColor(n)+';width:'+s+'px;height:'+s+'px;font-size:'+(s/2.5)+'px;">'+getInitials(n)+'</div>'; }
+    function renderMiniAvatar(n,s) { s=s||28; return '<div class="player-avatar-small" style="background:'+getAvatarColor(n)+';width:'+s+'px;height:'+s+'px;font-size:'+(s/2)+'px;">'+getInitials(n)+'</div>'; }
+    
+    function saveToLocalStorage() {
+        localStorage.setItem("mns_profiles", JSON.stringify(playerProfiles));
+        localStorage.setItem("mns_teams", JSON.stringify(teamAssignments));
+        localStorage.setItem("mns_results", JSON.stringify(matchResults));
+        localStorage.setItem("mns_attendance", JSON.stringify(attendance));
+        localStorage.setItem("mns_guests", JSON.stringify(guests));
+    }
+    
+    function setAttendance(status) {
+        if(!currentUser){ alert("Login required"); return; }
+        attendance[currentUser] = status;
+        saveToLocalStorage();
+        refreshAll();
+        alert(status === 'in' ? "You're playing Monday!" : "Sorry you can't make it");
+    }
+    
+    function addGuest(name) {
+        if(!guests[CURRENT_GAME_STR]) guests[CURRENT_GAME_STR] = [];
+        if(guests[CURRENT_GAME_STR].includes(name.trim())) { alert("Guest already exists"); return; }
+        guests[CURRENT_GAME_STR].push(name.trim());
+        saveToLocalStorage();
+        refreshAll();
+        alert("Guest added!");
+    }
+    
+    function removeGuest(name, date) {
+        if(!confirm('Remove guest "'+name+'"?')) return;
+        if(guests[date]) {
+            guests[date] = guests[date].filter(g => g !== name);
+            saveToLocalStorage();
+        }
+        if(teamAssignments[date]) {
+            delete teamAssignments[date][name];
+            delete teamAssignments[date]['guest_'+name];
+            saveToLocalStorage();
+        }
+        refreshAll();
+    }
+    
+    function showEditProfile(name) {
+        if(!currentUser || currentUser !== name) {
+            alert("You can only edit your own profile!");
+            return;
+        }
+        let ex = playerProfiles[name] || { age: '', position: 'Midfielder', yearJoined: '', gamesPlayed: 0 };
+        let modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = '<div class="modal-content"><h3>Edit Your Profile: ' + escapeHtml(name) + '</h3><label>Age</label><input id="editAge" value="' + escapeHtml(ex.age) + '"><label>Position</label><select id="editPosition"><option>Goalkeeper</option><option>Defender</option><option>Midfielder</option><option>Striker</option><option>Winger</option></select><label>Year Joined</label><input id="editYear" value="' + escapeHtml(ex.yearJoined) + '"><div class="flex-btns"><button id="saveBtn">Save</button><button id="cancelBtn">Cancel</button></div></div>';
+        document.body.appendChild(modal);
+        document.getElementById('saveBtn').onclick = function() {
+            playerProfiles[name] = { age: document.getElementById('editAge').value || '-', position: document.getElementById('editPosition').value, yearJoined: document.getElementById('editYear').value || '-', gamesPlayed: ex.gamesPlayed || 0 };
+            saveToLocalStorage();
+            modal.remove();
+            renderProfilesPage();
+            alert("Profile updated!");
+        };
+        document.getElementById('cancelBtn').onclick = function() { modal.remove(); };
+    }
+    
+    function refreshAll() { renderHomePage(); renderTeamsPage(); renderHistoryPage(); renderProfilesPage(); renderScoreboardPage(); if(isAdminLoggedIn) renderAdminPage(); }
+    
+    function generateMatchReport(resultData, gameLabel) {
+        let y = resultData.yellowScore||0, o = resultData.orangeScore||0, goals = resultData.goals||{}, assists = resultData.assists||{}, injuries = resultData.injuries||[];
+        let entries = [];
+        for(let s in goals) { if(goals.hasOwnProperty(s)) entries.push({ player: s, goals: goals[s], assists: assists[s]||0 }); }
+        entries.sort(function(a,b){ return b.goals - a.goals; });
+        let goalLines = '';
+        for(let g of entries) { goalLines += '⚽ ' + g.player + ': ' + g.goals + ' goal' + (g.goals!==1?'s':'') + (g.assists>0?' (' + g.assists + ' assists)':'') + '\n'; }
+        if(!goalLines) goalLines = 'No goals recorded\n';
+        let injuryLine = '\nNo injuries reported.';
+        if(injuries.length > 0) { injuryLine = '\nINJURIES:\n'; for(let i of injuries) injuryLine += '• ' + i.player + ' - ' + (i.detail||'knock') + '\n'; }
+        return 'MONDAY NIGHT SOCCER MATCH REPORT\n' + gameLabel + ' | Clifton Park\n' + weatherData.condition + ', ' + weatherData.temp + ', rain ' + weatherData.rainChance + '%\n\nYELLOW ' + y + ' - ' + o + ' ORANGE\n\n' + goalLines + '\n' + injuryLine + '\n\nGreat game! #MondayNightSoccer';
+    }
+    
+    // ============================================
+    // RENDER FUNCTIONS
+    // ============================================
+    function renderHomePage() {
+        let c = document.getElementById("homeContainer");
+        if(!c) return;
+        let status = attendance[currentUser];
+        let parts = getAllParticipants(CURRENT_GAME_STR);
+        let t = getAustralianTime();
+        c.innerHTML = '<div class="info-bar"><i class="fas fa-clock"></i> AEST: ' + t.toLocaleTimeString('en-AU') + '<br>NEXT GAME: ' + getCurrentGameLabel() + '</div><div class="attendance-card"><h2>' + getCurrentGameLabel() + '</h2><div>Clifton Park, Brunswick</div><div class="big-buttons"><button id="homePlayBtn" class="btn-play-big">I\'M PLAYING</button><button id="homeSitBtn" class="btn-sit-big">CAN\'T PLAY</button></div><div>' + (status==='in' ? 'You are PLAYING' : (status==='out' ? 'You are NOT PLAYING' : 'Tap above')) + '</div></div><div class="playing-list"><div>Playing (' + parts.players.length + ')</div><div class="flex">' + parts.players.map(function(p){ return '<span class="attendee-tag">' + renderMiniAvatar(p,28) + ' ' + escapeHtml(p) + '</span>'; }).join('') || 'None' + '</div></div><div class="guest-section"><div>Guests (' + parts.guests.length + ')</div><div class="flex">' + parts.guests.map(function(g){ return '<span class="guest-tag"><i class="fas fa-user-plus"></i> ' + escapeHtml(g.name) + '</span>'; }).join('') || 'None' + '</div><div><input id="guestNameInput" placeholder="Guest name"><button id="addGuestBtnPlayer">Bring Guest</button></div></div>';
+        document.getElementById("homePlayBtn")?.onclick = function(){ setAttendance("in"); };
+        document.getElementById("homeSitBtn")?.onclick = function(){ setAttendance("out"); };
+        document.getElementById("addGuestBtnPlayer")?.onclick = function(){ var gn = document.getElementById("guestNameInput"); if(gn && gn.value.trim()) addGuest(gn.value.trim()); else alert("Enter name"); };
+    }
+    
+    function renderProfilesPage() {
+        let c = document.getElementById("page-profiles");
+        if(!c) return;
+        let html = '<div class="card"><h2>Player Profiles</h2>';
+        for(let p of players) {
+            let prof = playerProfiles[p] || { age: '-', position: '-', yearJoined: '-', gamesPlayed: 0 };
+            html += '<div class="profile-item">' + renderAvatar(p,50) + '<div><div>' + escapeHtml(p) + ' ';
+            if(currentUser && currentUser === p) {
+                html += '<button class="edit-profile-btn" data-player="' + escapeHtml(p) + '" style="font-size:10px;">Edit Your Profile</button>';
+            } else {
+                html += '<span style="font-size:10px;color:#64748b;">(Only you can edit)</span>';
+            }
+            html += '</div><div><span class="profile-badge">Age: ' + escapeHtml(prof.age) + '</span><span class="profile-badge">Pos: ' + escapeHtml(prof.position) + '</span><span class="profile-badge">Since: ' + escapeHtml(prof.yearJoined) + '</span><span class="profile-badge">Games: ' + (prof.gamesPlayed||0) + '</span></div></div></div>';
+        }
+        c.innerHTML = html;
+        document.querySelectorAll(".edit-profile-btn").forEach(function(btn){ btn.addEventListener("click",function(){ showEditProfile(btn.dataset.player); }); });
+    }
+    
+    function renderScoreboardPage() {
+        let c = document.getElementById("page-scoreboard");
+        if(!c) return;
+        let stats = new Map();
+        for(let p of players) stats.set(p,{ goals:0, assists:0, apps:0 });
+        for(let p in attendance) if(attendance[p] === 'in') if(stats.has(p)) stats.get(p).apps++;
+        for(let date in matchResults) {
+            let m = matchResults[date];
+            if(m.goals) for(let s in m.goals) if(stats.has(s)) stats.get(s).goals += m.goals[s];
+            if(m.assists) for(let a in m.assists) if(stats.has(a)) stats.get(a).assists += m.assists[a];
+        }
+        let all = [];
+        for(let [n,st] of stats.entries()) { all.push({ name: n, goals: st.goals, assists: st.assists }); }
+        all.sort(function(a,b){ return b.goals - a.goals; });
+        let topGoals = all.slice(0,10);
+        let topAssists = [...all].sort(function(a,b){ return b.assists - a.assists; }).slice(0,10);
+        let totalGoals = 0;
+        for(let k=0;k<all.length;k++) totalGoals += all[k].goals;
+        c.innerHTML = '<div class="card"><h2>All-Time Stats</h2><div class="stat-highlight"><div class="number">' + totalGoals + '</div><div>Total Goals</div></div><div><h3>Top Scorers</h3><table class="data-table"><tr><th>#</th><th>Player</th><th>Goals</th></tr>' + topGoals.map(function(p,i){ return '<table><td style="width:40px;"><strong>' + (i+1) + '</strong></td><td>' + renderMiniAvatar(p.name,24) + ' ' + escapeHtml(p.name) + '</td><td><strong>' + p.goals + '</strong></td></tr>'; }).join('') + '</table></div><div style="margin-top:16px;"><h3>Top Assists</h3><table class="data-table"><tr><th>#</th><th>Player</th><th>Assists</th></tr>' + topAssists.map(function(p,i){ return '<tr><td style="width:40px;"><strong>' + (i+1) + '</strong></td><td>' + renderMiniAvatar(p.name,24) + ' ' + escapeHtml(p.name) + '</td><td><strong>' + p.assists + '</strong></td></tr>'; }).join('') + '</table></div></div>';
+    }
+    
+    function renderTeamsPage() {
+        let c = document.getElementById("page-teamswk");
+        if(!c) return;
+        let parts = getAllParticipants(CURRENT_GAME_STR);
+        let allList = [];
+        for(let p of parts.players) allList.push({ name: p, isG: false });
+        for(let g of parts.guests) allList.push({ name: g.name, isG: true });
+        let assign = teamAssignments[CURRENT_GAME_STR] || {};
+        let yellow = [], orange = [];
+        for(let p of allList) {
+            let team = assign[p.name] || assign['guest_' + p.name];
+            if(team === "yellow") yellow.push(p);
+            else if(team === "orange") orange.push(p);
+        }
+        c.innerHTML = '<div class="card"><div class="team-row"><div class="team-box"><div class="team-yellow">YELLOW (' + yellow.length + ')</div><div class="player-list">' + yellow.map(function(p){ return '<div class="player-tag">' + renderMiniAvatar(p.name,24) + ' ' + escapeHtml(p.name) + (p.isG ? ' Guest' : '') + '</div>'; }).join('') || '-' + '</div></div><div class="team-box"><div class="team-orange">ORANGE (' + orange.length + ')</div><div class="player-list">' + orange.map(function(p){ return '<div class="player-tag">' + renderMiniAvatar(p.name,24) + ' ' + escapeHtml(p.name) + (p.isG ? ' Guest' : '') + '</div>'; }).join('') || '-' + '</div></div></div><div class="text-center mt-2">Captain: ' + weeklyCaptain + '</div></div>';
+    }
+    
+    function renderHistoryPage() {
+        let c = document.getElementById("page-history");
+        if(!c) return;
+        let weeks = ALL_WEEKS.filter(function(w){ return w.dateStr < CURRENT_GAME_STR; }).reverse();
+        if(weeks.length === 0){ c.innerHTML = '<div class="card"><h2>History</h2><p>No past games</p></div>'; return; }
+        let html = '<div class="card"><h2>Match History</h2></div>';
+        for(let w of weeks) {
+            let m = matchResults[w.dateStr] || { yellowScore:0, orangeScore:0, goals:{}, assists:{} };
+            let goalsDisplay = [];
+            for(let s in m.goals) { if(m.goals.hasOwnProperty(s)) goalsDisplay.push(s + ' x' + m.goals[s]); }
+            let assistsDisplay = [];
+            for(let a in m.assists) { if(m.assists.hasOwnProperty(a)) assistsDisplay.push(a + ' x' + m.assists[a]); }
+            html += '<div class="match-card"><div class="match-header"><div>' + w.label + '</div><div class="match-result">YELLOW ' + m.yellowScore + ' - ' + m.orangeScore + ' ORANGE</div></div><div class="goals-section"><strong>Goals:</strong> ' + (goalsDisplay.join(' · ') || 'None') + '<br><strong>Assists:</strong> ' + (assistsDisplay.join(' · ') || 'None') + '</div></div>';
+        }
+        c.innerHTML = html;
+    }
+    
+    function renderWeatherPage() {
+        let c = document.getElementById("page-weather");
+        if(c) c.innerHTML = '<div class="card"><h2>Monday Forecast</h2><div class="weather-card"><i class="fas ' + weatherData.icon + '"></i><h3>' + weatherData.condition + '</h3><h1>' + weatherData.temp + '</h1><p>Rain: ' + weatherData.rainChance + '%</p><p>Clifton Park<br>Monday 8pm AEST</p></div></div>';
+    }
+    
+    function renderRulesPage() {
+        let c = document.getElementById("page-rules");
+        if(c) c.innerHTML = '<div class="card"><h2>Rules</h2><div class="rule-item"><div class="rule-time">KICKOFF TIME</div><p>8:00pm SHARP AEST • Clifton Park, Brunswick</p></div><div class="rule-item"><div class="rule-time">RSVP MANDATORY</div><p>Confirm attendance by Sunday 6pm</p></div><div class="rule-item"><div class="rule-time">GUESTS</div><p>Welcome, max 2 per game</p></div><div class="rule-item"><div class="rule-time">MATCH FORMAT</div><p>2 x 45 minute halves • No slide tackles</p></div><div class="rule-item"><div class="rule-time">CAPTAIN</div><p>Rotates weekly • Brings the match ball</p></div></div>';
+    }
+    
+    function renderChatPage() {
+        let c = document.getElementById("page-chat");
+        if(!c) return;
+        let chatMessages = JSON.parse(localStorage.getItem("mns_chat") || "[]");
+        let html = '<div class="card"><h2>Team Chat</h2><div id="chatMessagesList" style="height:400px;overflow-y:auto;background:#f8fafc;border-radius:20px;padding:12px;margin-bottom:12px;">';
+        for(let msg of chatMessages) {
+            html += '<div class="chat-message"><div class="chat-name">' + escapeHtml(msg.name) + '</div><div class="chat-bubble">' + escapeHtml(msg.message) + '</div></div>';
+        }
+        html += '</div><div class="flex"><input id="chatInput" placeholder="Type..." style="flex:1;padding:12px;border-radius:60px;border:1px solid #ddd"><button id="chatSendBtn" style="width:auto;padding:12px 20px;">Send</button></div></div>';
+        c.innerHTML = html;
+        document.getElementById("chatSendBtn")?.addEventListener("click", function(){
+            let inp = document.getElementById("chatInput");
+            if(inp && inp.value.trim() && currentUser) {
+                let msgs = JSON.parse(localStorage.getItem("mns_chat") || "[]");
+                msgs.push({ name: currentUser, message: inp.value.trim(), time: new Date().toISOString() });
+                localStorage.setItem("mns_chat", JSON.stringify(msgs));
+                inp.value = "";
+                renderChatPage();
+            }
         });
     }
-}
-
-async function sendChat() {
-    let inp = document.getElementById("chatInput");
-    if(inp && inp.value.trim() && db) {
-        await db.collection("chatMessages").add({name:currentUser, message:inp.value.trim(), timestamp:new Date()});
-        inp.value = "";
+    
+    function renderTimerPage() {
+        let c = document.getElementById("page-timer");
+        if(!c) return;
+        c.innerHTML = '<div class="timer-container"><div class="timer-display" id="timerDisplay">45:00</div><div class="timer-controls"><button class="timer-btn start" id="timerStartBtn">Start</button><button class="timer-btn pause" id="timerPauseBtn">Pause</button><button class="timer-btn reset" id="timerResetBtn">Reset</button></div><div class="half-status">Half: <span id="currentHalf">FIRST HALF</span></div></div>';
+        updateTimerDisplay();
+        document.getElementById("timerStartBtn")?.addEventListener("click", startTimer);
+        document.getElementById("timerPauseBtn")?.addEventListener("click", pauseTimer);
+        document.getElementById("timerResetBtn")?.addEventListener("click", resetTimer);
     }
-}
-
-// Global functions for buttons
-window.setAtt = async function(s) { await saveAttendance(currentUser, s); };
-window.addGuestBtn = async function() { let inp = document.getElementById("guestName"); if(inp.value.trim()) await addGuest(inp.value.trim()); inp.value = ""; renderHome(); };
-window.adminAddGuest = async function() { let inp = document.getElementById("adminGuest"); if(inp.value.trim()) await addGuest(inp.value.trim()); inp.value = ""; renderAdmin(); };
-window.saveTeamsFromAdmin = async function() {
-    let selects = document.querySelectorAll("[id^='team_']");
-    let newAssign = {};
-    selects.forEach(sel => {
-        let name = sel.dataset.name;
-        let isGuest = sel.dataset.guest === "true";
-        let val = sel.value;
-        if(val) newAssign[isGuest ? 'guest_'+name : name] = val;
-    });
-    await saveTeams({...teamAssignments, [CURRENT_GAME]: newAssign});
-    renderTeams();
-    renderAdmin();
-};
-window.saveResult = async function() {
-    let y = parseInt(document.getElementById("yellowScore").value) || 0;
-    let o = parseInt(document.getElementById("orangeScore").value) || 0;
-    await db.collection("config").doc("matchResults").set({...matchResults, [CURRENT_GAME]:{yellowScore:y, orangeScore:o, goals:{}}});
-    alert("Result saved");
-};
-window.adminLogin = function() {
-    let pw = document.getElementById("adminPw").value;
-    if(pw === "carlo123") {
-        isAdmin = true;
-        renderAdmin();
-    } else alert("Wrong password");
-};
-window.logout = function() { isAdmin = false; currentUser = null; localStorage.removeItem("mns_user"); renderLogin(); };
-
-function renderLogin() {
-    document.getElementById("app").innerHTML = `
-        <div class="login-box">
-            <h2>Monday Night Soccer</h2>
-            <p>8pm • Clifton Park</p>
-            <select id="playerSelect" class="input">
-                <option value="">-- Select Name --</option>
-                ${PLAYERS.map(p => `<option value="${p}">${p}</option>`).join('')}
-            </select>
-            <button onclick="loginPlayer()">Enter as Player</button>
-            <hr style="margin:16px 0">
-            <button onclick="showAdminLogin()">Admin Login</button>
-        </div>
-    `;
-}
-
-window.loginPlayer = function() {
-    let n = document.getElementById("playerSelect").value;
-    if(n) {
-        currentUser = n;
-        isAdmin = false;
-        localStorage.setItem("mns_user", JSON.stringify({name:n}));
-        renderApp();
+    
+    // ============================================
+    // ADMIN PAGE
+    // ============================================
+    function renderAdminPage() {
+        if(!isAdminLoggedIn) {
+            let ac = document.getElementById("page-admin");
+            if(ac) ac.innerHTML = '<div class="card"><h2>Admin Access</h2><button id="showAdminLoginBtn" style="background:#dc3545;">Admin Login</button></div>';
+            document.getElementById("showAdminLoginBtn")?.addEventListener("click", showAdminPasswordModal);
+            return;
+        }
+        
+        let selectedDate = currentAdminGameDate;
+        let selectedWeek = ALL_WEEKS.find(w=>w.dateStr===selectedDate) || { label: getCurrentGameLabel() };
+        let participants = getPlayersAndGuestsForGame(selectedDate);
+        let currAssign = teamAssignments[selectedDate] || {};
+        
+        let html = '<div class="card"><h2>Admin Control Panel</h2><div class="game-selector"><select id="gameDateSelect">';
+        for(let w of ALL_WEEKS) {
+            html += '<option value="'+w.dateStr+'"'+(w.dateStr===selectedDate?' selected':'')+'>'+w.label+'</option>';
+        }
+        html += '</select><button id="loadGameBtn">Load Game</button></div>';
+        html += '<div class="admin-team-item"><label>Captain: <input id="captainEdit" value="'+weeklyCaptain+'" style="width:120px;"></label><button id="updateCaptainBtn">Set</button></div></div>';
+        
+        html += '<div class="card"><h2>Manage Guests ('+selectedWeek.label+')</h2>';
+        let currentGuests = getAllParticipants(selectedDate).guests;
+        for(let g of currentGuests) {
+            html += '<div class="admin-team-item"><span>' + escapeHtml(g.name) + '</span><button class="remove-guest" data-guest="'+escapeHtml(g.name)+'">Remove</button></div>';
+        }
+        html += '<input id="newGuestName" placeholder="Guest name"><button id="addGuestAdminBtn">Add Guest</button></div>';
+        
+        html += '<div class="card"><h2>Assign Teams</h2>';
+        for(let part of participants) {
+            let team = getTeamForPlayer(selectedDate, part.name, part.isGuest);
+            html += '<div class="admin-team-item"><div>' + renderMiniAvatar(part.name,28) + ' ' + escapeHtml(part.displayName) + '</div><select class="teamSelect" data-name="'+escapeHtml(part.name)+'" data-guest="'+part.isGuest+'"><option value="">—</option><option value="yellow"'+(team==='yellow'?' selected':'')+'>Yellow</option><option value="orange"'+(team==='orange'?' selected':'')+'>Orange</option></select></div>';
+        }
+        html += '<div class="flex-btns"><button id="autoBalanceBtn">Auto-Balance</button><button id="saveTeamsBtn">Save Teams</button></div></div>';
+        
+        let currentResult = matchResults[selectedDate] || { yellowScore:0, orangeScore:0, goals:{}, assists:{}, injuries:[] };
+        let goalEntries = [];
+        for(let s in currentResult.goals) { goalEntries.push({ player: s, goals: currentResult.goals[s], assists: (currentResult.assists||{})[s]||0 }); }
+        let injuriesArr = currentResult.injuries || [];
+        
+        html += '<div class="card" style="border:2px solid #28a745;"><h2>Match Report ('+selectedWeek.label+')</h2><div class="flex"><input type="number" id="yellowScore" placeholder="Yellow Score" value="'+(currentResult.yellowScore||0)+'" style="flex:1"><input type="number" id="orangeScore" placeholder="Orange Score" value="'+(currentResult.orangeScore||0)+'" style="flex:1"></div>';
+        html += '<div><strong>GOALS & ASSISTS</strong><div id="goalsContainer"></div><div class="flex-btns"><button id="addGoalBtn">Add Goal/Assist</button><button id="addOwnGoalBtn" style="background:#dc3545;">+ Own Goal</button></div></div>';
+        html += '<div><strong>INJURIES</strong><div id="injuriesContainer"></div><button id="addInjuryBtn">Add Injury</button></div>';
+        html += '<div class="flex-btns"><button id="saveReportBtn" style="background:#28a745;">Save Report</button><button id="shareBtn" style="background:#25D366;">Share via WhatsApp</button></div>';
+        html += '<div id="reportPreview" style="background:#f0fdf4;border-radius:16px;padding:12px;margin-top:12px;font-size:11px;"><strong>Preview:</strong> Fill in details</div></div>';
+        
+        let ac = document.getElementById("page-admin");
+        if(ac) ac.innerHTML = html;
+        
+        document.getElementById("loadGameBtn")?.addEventListener("click", function() { let s = document.getElementById("gameDateSelect").value; if(s) { currentAdminGameDate = s; renderAdminPage(); } });
+        document.getElementById("updateCaptainBtn")?.addEventListener("click", function() { let c = document.getElementById("captainEdit").value.trim(); if(c) weeklyCaptain = c; renderAdminPage(); renderTeamsPage(); });
+        document.getElementById("addGuestAdminBtn")?.addEventListener("click", function() { let gn = document.getElementById("newGuestName")?.value.trim(); if(gn) { if(!guests[selectedDate]) guests[selectedDate] = []; guests[selectedDate].push(gn); saveToLocalStorage(); renderAdminPage(); renderHomePage(); } });
+        document.querySelectorAll(".remove-guest").forEach(btn => btn.addEventListener("click", function() { removeGuest(btn.dataset.guest, selectedDate); }));
+        
+        document.getElementById("autoBalanceBtn")?.addEventListener("click", function() {
+            if(participants.length === 0) return;
+            let shuffled = [...participants];
+            for(let i=shuffled.length-1;i>0;i--) { let j = Math.floor(Math.random()*(i+1)); [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; }
+            let mid = Math.ceil(shuffled.length/2);
+            let na = {};
+            for(let t=0;t<mid;t++) { let key = shuffled[t].isGuest ? 'guest_'+shuffled[t].name : shuffled[t].name; na[key] = "yellow"; }
+            for(let t2=mid;t2<shuffled.length;t2++) { let key2 = shuffled[t2].isGuest ? 'guest_'+shuffled[t2].name : shuffled[t2].name; na[key2] = "orange"; }
+            teamAssignments[selectedDate] = na;
+            saveToLocalStorage();
+            renderAdminPage(); renderTeamsPage();
+        });
+        
+        document.getElementById("saveTeamsBtn")?.addEventListener("click", function() {
+            let selects = document.querySelectorAll(".teamSelect");
+            let na = {};
+            selects.forEach(sel => { let name = sel.dataset.name; let isGuest = sel.dataset.guest === "true"; let val = sel.value; if(val) na[isGuest ? 'guest_'+name : name] = val; });
+            teamAssignments[selectedDate] = na;
+            saveToLocalStorage();
+            alert("Teams saved!");
+            renderAdminPage(); renderTeamsPage();
+        });
+        
+        function refreshGoalsUI() {
+            let div = document.getElementById("goalsContainer");
+            if(!div) return;
+            let h = '';
+            for(let i=0;i<goalEntries.length;i++) {
+                let g = goalEntries[i];
+                h += '<div class="goal-entry"><select class="goalPlayer" data-idx="'+i+'">'+participants.map(p=>'<option '+(p.name===g.player?'selected':'')+' value="'+escapeHtml(p.name)+'">'+escapeHtml(p.displayName)+'</option>').join('')+'</select><input type="number" class="goalCount" data-idx="'+i+'" value="'+g.goals+'" style="width:60px;" placeholder="G"><input type="number" class="assistCount" data-idx="'+i+'" value="'+g.assists+'" style="width:60px;" placeholder="A"><button class="removeGoal" data-idx="'+i+'" style="background:#dc3545;">X</button></div>';
+            }
+            if(goalEntries.length===0) h = '<div style="color:gray;padding:12px;">No goals recorded</div>';
+            div.innerHTML = h;
+            document.querySelectorAll(".goalPlayer").forEach(sel => sel.onchange = function() { let idx = parseInt(this.dataset.idx); goalEntries[idx].player = this.value; updatePreview(); });
+            document.querySelectorAll(".goalCount").forEach(inp => inp.onchange = function() { let idx = parseInt(this.dataset.idx); goalEntries[idx].goals = parseInt(this.value)||0; updatePreview(); });
+            document.querySelectorAll(".assistCount").forEach(inp => inp.onchange = function() { let idx = parseInt(this.dataset.idx); goalEntries[idx].assists = parseInt(this.value)||0; updatePreview(); });
+            document.querySelectorAll(".removeGoal").forEach(btn => btn.onclick = function() { let idx = parseInt(this.dataset.idx); goalEntries.splice(idx,1); refreshGoalsUI(); updatePreview(); });
+        }
+        
+        function refreshInjuriesUI() {
+            let div = document.getElementById("injuriesContainer");
+            if(!div) return;
+            let h = '';
+            for(let i=0;i<injuriesArr.length;i++) {
+                let inj = injuriesArr[i];
+                h += '<div class="goal-entry" style="background:#ffe8e8;"><select class="injuryPlayer" data-idx="'+i+'">'+participants.map(p=>'<option '+(p.name===inj.player?'selected':'')+'>'+escapeHtml(p.displayName)+'</option>').join('')+'</select><input type="text" class="injuryDetail" data-idx="'+i+'" value="'+escapeHtml(inj.detail||'injury')+'" placeholder="injury" style="flex:2;"><button class="removeInjury" data-idx="'+i+'" style="background:#dc3545;">X</button></div>';
+            }
+            if(injuriesArr.length===0) h = '<div style="color:gray;padding:12px;">No injuries</div>';
+            div.innerHTML = h;
+            document.querySelectorAll(".injuryPlayer").forEach(sel => sel.onchange = function() { let idx = parseInt(this.dataset.idx); injuriesArr[idx].player = this.value; updatePreview(); });
+            document.querySelectorAll(".injuryDetail").forEach(inp => inp.onchange = function() { let idx = parseInt(this.dataset.idx); injuriesArr[idx].detail = this.value; updatePreview(); });
+            document.querySelectorAll(".removeInjury").forEach(btn => btn.onclick = function() { let idx = parseInt(this.dataset.idx); injuriesArr.splice(idx,1); refreshInjuriesUI(); updatePreview(); });
+        }
+        
+        function updatePreview() {
+            let previewDiv = document.getElementById("reportPreview");
+            if(!previewDiv) return;
+            let y = parseInt(document.getElementById("yellowScore")?.value)||0;
+            let o = parseInt(document.getElementById("orangeScore")?.value)||0;
+            let goals = {}, assists = {};
+            for(let g of goalEntries) { if(g.goals>0) goals[g.player] = g.goals; if(g.assists>0) assists[g.player] = g.assists; }
+            let txt = generateMatchReport({ yellowScore: y, orangeScore: o, goals: goals, assists: assists, injuries: injuriesArr }, selectedWeek.label);
+            previewDiv.innerHTML = '<strong>Preview:</strong><br><pre style="white-space:pre-wrap;font-size:11px;">'+escapeHtml(txt)+'</pre>';
+        }
+        
+        document.getElementById("addGoalBtn")?.addEventListener("click", function() { let dp = participants.length>0 ? participants[0].name : players[0]; goalEntries.push({ player: dp, goals: 0, assists: 0 }); refreshGoalsUI(); updatePreview(); });
+        document.getElementById("addOwnGoalBtn")?.addEventListener("click", function() { let dp = participants.length>0 ? participants[0].name : players[0]; goalEntries.push({ player: dp+" (OWN GOAL)", goals: 1, assists: 0 }); refreshGoalsUI(); updatePreview(); alert("Own goal added"); });
+        document.getElementById("addInjuryBtn")?.addEventListener("click", function() { let dp = participants.length>0 ? participants[0].name : players[0]; injuriesArr.push({ player: dp, detail: "injury" }); refreshInjuriesUI(); updatePreview(); });
+        document.getElementById("saveReportBtn")?.addEventListener("click", function() { let y = parseInt(document.getElementById("yellowScore").value)||0; let o = parseInt(document.getElementById("orangeScore").value)||0; let goals={}, assists={}; for(let g of goalEntries) { if(g.goals>0) goals[g.player]=g.goals; if(g.assists>0) assists[g.player]=g.assists; } matchResults[selectedDate] = { yellowScore: y, orangeScore: o, goals: goals, assists: assists, injuries: injuriesArr }; saveToLocalStorage(); alert("Report saved!"); renderHistoryPage(); renderScoreboardPage(); renderAdminPage(); });
+        document.getElementById("shareBtn")?.addEventListener("click", function() { let y = parseInt(document.getElementById("yellowScore").value)||0; let o = parseInt(document.getElementById("orangeScore").value)||0; let goals={}, assists={}; for(let g of goalEntries) { if(g.goals>0) goals[g.player]=g.goals; if(g.assists>0) assists[g.player]=g.assists; } let txt = generateMatchReport({ yellowScore: y, orangeScore: o, goals: goals, assists: assists, injuries: injuriesArr }, selectedWeek.label); window.open('https://wa.me/?text='+encodeURIComponent(txt), '_blank'); });
+        
+        refreshGoalsUI();
+        refreshInjuriesUI();
+        updatePreview();
+        document.getElementById("yellowScore")?.addEventListener("input", updatePreview);
+        document.getElementById("orangeScore")?.addEventListener("input", updatePreview);
     }
-};
-
-window.showAdminLogin = function() {
-    document.getElementById("app").innerHTML = `
-        <div class="login-box">
-            <h2>Admin Login</h2>
-            <input type="password" id="adminPw" class="input" placeholder="Password">
-            <button onclick="adminLogin()">Login</button>
-            <button onclick="renderLogin()">Back</button>
-        </div>
-    `;
-};
-
-function renderApp() {
-    document.getElementById("app").innerHTML = `
-        <div class="header">
-            <div class="logo-icon"><i class="fas fa-futbol"></i></div>
-            <h1>MONDAY NIGHT SOCCER</h1>
-            <div class="user-row"><i class="fas fa-user-circle"></i> ${currentUser} <button onclick="logout()">Exit</button></div>
-        </div>
-        <div class="nav" id="navBar"></div>
-        <div id="home" class="module"></div>
-        <div id="teams" class="module hidden"></div>
-        <div id="stats" class="module hidden"></div>
-        <div id="history" class="module hidden"></div>
-        <div id="rules" class="module hidden"></div>
-        <div id="chat" class="module hidden"></div>
-        <div id="admin" class="module hidden"></div>
-    `;
     
-    const modules = [
-        {id:"home", name:"HOME"}, {id:"teams", name:"TEAMS"}, {id:"stats", name:"STATS"},
-        {id:"history", name:"HISTORY"}, {id:"rules", name:"RULES"}, {id:"chat", name:"CHAT"}
-    ];
-    if(isAdmin) modules.push({id:"admin", name:"ADMIN"});
+    function showAdminPasswordModal() {
+        let modal = document.createElement('div');
+        modal.className = 'password-modal';
+        modal.innerHTML = '<div class="password-modal-content"><i class="fas fa-lock"></i><h3>Admin Authorization</h3><input type="password" id="adminPasswordInput" placeholder="Enter password"><div id="adminPasswordError" style="color:#dc3545;"></div><div class="flex-btns"><button id="submitAdminBtn">Verify</button><button id="cancelAdminBtn">Cancel</button></div></div>';
+        document.body.appendChild(modal);
+        document.getElementById('submitAdminBtn').onclick = function() {
+            if(document.getElementById('adminPasswordInput').value === CARLO_PASSWORD) {
+                isAdminLoggedIn = true;
+                modal.remove();
+                renderAdminPage();
+                let nav = document.querySelector('.nav-module[data-module="admin"]');
+                if(nav) nav.click();
+            } else {
+                document.getElementById('adminPasswordError').textContent = 'Incorrect password';
+            }
+        };
+        document.getElementById('cancelAdminBtn').onclick = function() { modal.remove(); };
+    }
     
-    document.getElementById("navBar").innerHTML = modules.map(m => `<button class="nav-btn" onclick="showModule('${m.id}')">${m.name}</button>`).join('');
+    // ============================================
+    // NAVIGATION & APP INIT
+    // ============================================
+    function initNav() {
+        let mods = [{id:"home",name:"HOME"},{id:"profiles",name:"PROFILES"},{id:"scoreboard",name:"STATS"},{id:"teamswk",name:"THIS WEEK"},{id:"history",name:"HISTORY"},{id:"weather",name:"WEATHER"},{id:"timer",name:"TIMER"},{id:"chat",name:"CHAT"},{id:"rules",name:"RULES"}];
+        if(isAdminLoggedIn) mods.push({id:"admin",name:"ADMIN"});
+        let nav = document.getElementById("topNavBar");
+        if(nav) nav.innerHTML = mods.map(m=>`<button class="nav-module" data-module="${m.id}">${m.name}</button>`).join('');
+        document.querySelectorAll(".nav-module").forEach(btn=>{ btn.onclick = function(){ let id = this.dataset.module; document.querySelectorAll(".module-container").forEach(c=>c.classList.remove("active-module")); document.getElementById(`module-${id}`)?.classList.add("active-module"); document.querySelectorAll(".nav-module").forEach(b=>b.classList.remove("active")); this.classList.add("active"); if(id==="chat") renderChatPage(); if(id==="timer") renderTimerPage(); }; });
+        document.querySelector('.nav-module[data-module="home"]')?.click();
+    }
     
-    window.showModule = function(id) {
-        document.querySelectorAll(".module").forEach(m => m.classList.add("hidden"));
-        document.getElementById(id).classList.remove("hidden");
-        document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
-        event.target.classList.add("active");
-        if(id === "home") renderHome();
-        if(id === "teams") renderTeams();
-        if(id === "stats") renderStats();
-        if(id === "history") document.getElementById("history").innerHTML = '<div class="card"><h2>History</h2><p>Match history will appear here</p></div>';
-        if(id === "rules") renderRules();
-        if(id === "chat") renderChat();
-        if(id === "admin") renderAdmin();
-    };
+    function renderApp() {
+        let app = document.getElementById("app");
+        app.innerHTML = '<div class="header"><div class="logo-icon"><i class="fas fa-futbol"></i></div><h1>MONDAY NIGHT SOCCER</h1><div class="user-row"><i class="fas fa-user-circle"></i> <strong>'+(currentUser || "Player")+'</strong> <button id="logoutBtnMain">Exit</button></div></div><div class="top-nav" id="topNavBar"></div><div id="module-home" class="module-container"><div id="homeContainer"></div></div><div id="module-profiles" class="module-container"><div id="page-profiles"></div></div><div id="module-scoreboard" class="module-container"><div id="page-scoreboard"></div></div><div id="module-teamswk" class="module-container"><div id="page-teamswk"></div></div><div id="module-history" class="module-container"><div id="page-history"></div></div><div id="module-weather" class="module-container"><div id="page-weather"></div></div><div id="module-timer" class="module-container"><div id="page-timer"></div></div><div id="module-chat" class="module-container"><div id="page-chat"></div></div><div id="module-rules" class="module-container"><div id="page-rules"></div></div>'+(isAdminLoggedIn?'<div id="module-admin" class="module-container"><div id="page-admin"></div></div>':'')+'</div>';
+        document.getElementById("logoutBtnMain").onclick = function() { currentUser = null; isAdminLoggedIn = false; localStorage.removeItem("mns_user"); renderLogin(); };
+        renderHomePage(); renderProfilesPage(); renderScoreboardPage(); renderTeamsPage(); renderHistoryPage(); renderWeatherPage(); renderTimerPage(); renderChatPage(); renderRulesPage();
+        if(isAdminLoggedIn) renderAdminPage();
+        initNav();
+    }
     
-    showModule("home");
-}
-
-async function init() {
-    await loadData();
+    function renderLogin() {
+        let app = document.getElementById("app");
+        app.innerHTML = '<div class="login-box"><div class="login-logo"><i class="fas fa-futbol"></i></div><h2>Monday Night Soccer</h2><p>8pm • Clifton Park</p><select id="playerSelectLogin"><option value="">-- Select Your Name --</option>'+players.map(p=>`<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('')+'</select><button id="playerLoginBtn">Enter as Player</button><hr><input type="password" id="adminPwLogin" placeholder="Admin Password"><button id="adminLoginBtn">Admin Login</button></div>';
+        document.getElementById("playerLoginBtn").onclick = function() { let n = document.getElementById("playerSelectLogin").value; if(n && n!=="") { currentUser = n; isAdminLoggedIn = false; localStorage.setItem("mns_user", JSON.stringify({name:n})); renderApp(); } else alert("Select your name"); };
+        document.getElementById("adminLoginBtn").onclick = function() { let pw = document.getElementById("adminPwLogin").value; if(pw === CARLO_PASSWORD) { currentUser = "Admin"; isAdminLoggedIn = true; localStorage.setItem("mns_user", JSON.stringify({name:"Admin",isAdmin:true})); renderApp(); } else { alert("Wrong password"); document.getElementById("adminPwLogin").value = ""; } };
+    }
+    
     let stored = localStorage.getItem("mns_user");
     if(stored) {
         try {
             let u = JSON.parse(stored);
             currentUser = u.name;
+            isAdminLoggedIn = u.isAdmin || false;
             renderApp();
         } catch(e) { renderLogin(); }
     } else { renderLogin(); }
-}
-
-init();
+})();
 </script>
 </body>
 </html>
