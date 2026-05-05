@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Monday Night Soccer | Complete Match Hub</title>
+    <title>Monday Night Soccer | Complete Hub</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -77,7 +77,7 @@
         .share-wa-btn{background:#25D366;color:white;}
         .rule-item{background:#f8fafc;border-radius:16px;padding:12px;margin-bottom:10px;border-left:3px solid #1a73e8;}
         .rule-time{font-weight:700;color:#1a73e8;}
-        .report-preview{background:#f0fdf4;border-radius:16px;padding:12px;margin-top:12px;font-size:12px;white-space:pre-line;border:1px solid #bbf7d0;}
+        .report-preview{background:#f0fdf4;border-radius:16px;padding:12px;margin-top:12px;font-size:12px;white-space:pre-line;border:1px solid #bbf7d0;max-height:200px;overflow-y:auto;}
     </style>
 </head>
 <body>
@@ -91,7 +91,7 @@
     const DEFAULT_PLAYERS = ["Alex Rowe","Ali Mekawy","Carlo","Charlie","Chris Del Monaco","Chris M","Chris S","Danny","Dante","David","Dimitri","Enzo","Farid","Faros","Frank","George B","George T","Ivan","James Zoumis","James","Joe T","Joey","Kia","Leo","Manoli","Marco","Mario","Maurice","Nector","Paul","Perri","Peter","Ralph","Rocco","Stav","Stevan","Theo","Tony EH","Vasilis"].sort();
     
     // ============================================================
-    // 2. FIREBASE CONFIG (existing project)
+    // 2. FIREBASE CONFIG
     // ============================================================
     const firebaseConfig = {
         apiKey: "AIzaSyCWlFqDJyENgrUOhiLXCjSEi4Mk_54SA1w",
@@ -117,10 +117,9 @@
     let players = [...DEFAULT_PLAYERS];
     let playerProfiles = {};
     let teamAssignments = {};
-    let matchResults = {};      // { dateStr: { yellowScore, orangeScore, goals, assists, injuries } }
+    let matchResults = {};
     let attendance = [];
     let guests = [];
-    let matchComments = {};
     let isAdminLoggedIn = false;
     let currentUser = null;
     let weeklyCaptain = "Carlo";
@@ -128,7 +127,7 @@
     let chatUnsubscribe = null;
     
     // ============================================================
-    // 4. MATCH TIMER (45min halves)
+    // 4. MATCH TIMER
     // ============================================================
     let timerInterval = null;
     let currentHalf = 1;
@@ -188,55 +187,55 @@
     function resetTimer() { pauseTimer(); currentHalf = 1; timeLeft = 45 * 60; updateTimerDisplay(); }
     
     // ============================================================
-    // 5. AUSTRALIAN TIMEZONE (AEST / AEDT) - CRITICAL FIX
+    // 5. AUSTRALIAN TIMEZONE (AEST) - CORRECTED FOR MAY 11th
     // ============================================================
     function getAustralianTime() {
         let now = new Date();
         let year = now.getFullYear();
-        // AEST is UTC+10, AEDT is UTC+11
-        // Daylight saving: Oct first Sunday to April first Sunday
-        let october = new Date(year, 9, 1);
-        let april = new Date(year, 3, 1);
-        let dstStart = new Date(year, 9, 1);
-        dstStart.setDate(1 + (7 - dstStart.getDay()) % 7);
-        let dstEnd = new Date(year, 3, 1);
-        dstEnd.setDate(1 + (7 - dstEnd.getDay()) % 7);
-        let isDST = (now >= dstStart && now < dstEnd);
-        let offset = isDST ? 11 : 10;
+        // AEST is UTC+10 (no daylight saving until October)
+        let offset = 10;
         let utc = now.getTime() + (now.getTimezoneOffset() * 60000);
         return new Date(utc + (offset * 3600000));
     }
     
-    // Get the upcoming or current Monday game date at 8pm AEST/AEDT
-    function getCurrentGameDate() {
+    // Get the NEXT Monday game date (upcoming Monday, not past)
+    function getNextMondayGameDate() {
         let australianNow = getAustralianTime();
-        let day = australianNow.getDay(); // 0=Sun, 1=Mon
-        let hour = australianNow.getHours();
-        let minutes = australianNow.getMinutes();
+        let day = australianNow.getDay(); // 0=Sun, 1=Mon, 2=Tue...
+        let daysUntilMonday;
         
-        // Calculate days until Monday
-        let daysToMonday = (day === 0 ? 6 : day - 1);
-        let gameDate = new Date(australianNow);
-        gameDate.setDate(australianNow.getDate() - daysToMonday);
-        gameDate.setHours(0, 0, 0, 0);
-        
-        // If it's Monday after 8pm, the game is NEXT Monday
-        if(day === 1 && (hour > 20 || (hour === 20 && minutes >= 0))) {
-            gameDate.setDate(gameDate.getDate() + 7);
+        if(day === 1) {
+            // Today is Monday - if before 8pm, game is today; if after 8pm, game is next Monday
+            let hour = australianNow.getHours();
+            if(hour < 20) {
+                daysUntilMonday = 0;
+            } else {
+                daysUntilMonday = 7;
+            }
+        } else if(day === 0) {
+            // Sunday - game is tomorrow
+            daysUntilMonday = 1;
+        } else {
+            // Tuesday through Saturday
+            daysUntilMonday = (8 - day) % 7;
         }
+        
+        let gameDate = new Date(australianNow);
+        gameDate.setDate(australianNow.getDate() + daysUntilMonday);
+        gameDate.setHours(0, 0, 0, 0);
         return gameDate;
     }
     
     function getCurrentGameLabel() {
-        let d = getCurrentGameDate();
-        return 'Mon ' + d.toLocaleDateString('en-AU', {day:'numeric',month:'short'});
+        let d = getNextMondayGameDate();
+        return 'Mon ' + d.toLocaleDateString('en-AU', {day:'numeric',month:'long'});
     }
     
-    let CURRENT_GAME_STR = getCurrentGameDate().toISOString().split('T')[0];
+    let CURRENT_GAME_STR = getNextMondayGameDate().toISOString().split('T')[0];
     
     function getPastWeeks() {
         let weeks = [];
-        let currentGame = getCurrentGameDate();
+        let currentGame = getNextMondayGameDate();
         for(let i = 1; i <= 12; i++) {
             let pastDate = new Date(currentGame);
             pastDate.setDate(currentGame.getDate() - (i * 7));
@@ -298,7 +297,7 @@
         try {
             let r = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-37.77&longitude=144.97&hourly=temperature_2m,precipitation_probability,weathercode&timezone=Australia/Melbourne&forecast_days=3');
             let d = await r.json();
-            let gameDate = getCurrentGameDate();
+            let gameDate = getNextMondayGameDate();
             let targetStr = gameDate.toISOString().split('T')[0];
             for(let i = 0; i < d.hourly.time.length; i++) {
                 let hDate = d.hourly.time[i].split('T')[0];
@@ -433,7 +432,7 @@
     }
     
     // ============================================================
-    // 9. MATCH REPORT GENERATOR (WhatsApp ready)
+    // 9. MATCH REPORT GENERATOR
     // ============================================================
     function generateMatchReport(resultData, gameLabel) {
         let yellowScore = resultData.yellowScore || 0;
@@ -470,7 +469,7 @@
         
         return `⚽ *MONDAY NIGHT SOCCER MATCH REPORT* ⚽
 📅 ${gameLabel} | Clifton Park, Brunswick
-⏰ 8:00pm kickoff AEST/AEDT
+⏰ 8:00pm kickoff AEST
 🌦️ ${weatherText}
 
 🟡 YELLOW ${yellowScore} - ${orangeScore} 🟠 ORANGE
@@ -483,7 +482,7 @@ ${injuryLine}
     }
     
     // ============================================================
-    // 10. RENDER FUNCTIONS (Home, Profiles, Stats, Teams, History, Weather, Timer, Chat, Rules)
+    // 10. RENDER FUNCTIONS
     // ============================================================
     function renderHomePage() {
         let c = document.getElementById("homeContainer");
@@ -493,7 +492,7 @@ ${injuryLine}
         let australianTime = getAustralianTime();
         let timeDisplay = australianTime.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         
-        c.innerHTML = `<div class="info-bar"><i class="fas fa-clock"></i> Australian Time (AEST/AEDT): ${timeDisplay}<br>⚽ Next Game: ${getCurrentGameLabel()} • 8:00pm SHARP</div>
+        c.innerHTML = `<div class="info-bar"><i class="fas fa-clock"></i> Australian Time (AEST): ${timeDisplay}<br>⚽ Next Game: ${getCurrentGameLabel()} • 8:00pm SHARP</div>
         <div class="attendance-card"><h2>⚽ ${getCurrentGameLabel()} • 8pm</h2><div>Clifton Park, Brunswick</div><div class="big-buttons"><button id="homePlayBtn" class="btn-play-big">✅ I'M PLAYING</button><button id="homeSitBtn" class="btn-sit-big">❌ CAN'T PLAY</button></div><div>${status === 'in' ? '✓ You are PLAYING' : (status === 'out' ? '✗ You are NOT PLAYING' : 'Tap above to set attendance')}</div></div>
         <div class="playing-list"><div>🟢 Playing (${parts.players.length})</div><div>${parts.players.map(p => '<span class="attendee-tag">' + renderMiniAvatar(p,28) + ' ' + escapeHtml(p) + '</span>').join('') || 'None'}</div></div>
         <div class="guest-section"><div>🎭 Guests (${parts.guests.length})</div><div>${parts.guests.map(g => '<span class="guest-tag"><i class="fas fa-user-plus"></i> ' + escapeHtml(g.name) + ' <small>(' + escapeHtml(g.addedBy) + ')</small></span>').join('') || 'None'}</div><div><input id="guestNameInput" placeholder="Guest name"><button id="addGuestBtnPlayer" style="width:100%;margin-top:8px;">➕ Bring a Guest</button></div></div>`;
@@ -530,7 +529,7 @@ ${injuryLine}
         let all = Array.from(stats.entries()).map(([n,st]) => ({ name: n, goals: st.goals, apps: st.apps }));
         all.sort((a,b) => b.goals - a.goals);
         let topGoals = all.slice(0,10);
-        let html = `<div class="card"><h2>🏆 All-Time Stats</h2><div><h3>⚽ Top Goal Scorers</h3><table class="data-table">${topGoals.map((p,i) => `<tr><td><strong>${i+1}</strong></td><td>${renderMiniAvatar(p.name,24)} ${escapeHtml(p.name)}</td><td><strong>${p.goals}</strong> goals</td></tr>`).join('')}</table></div></div>`;
+        let html = `<div class="card"><h2>🏆 All-Time Stats</h2><div><h3>⚽ Top Goal Scorers</h3><table class="data-table">${topGoals.map((p,i) => `<tr><td style="width:40px;"><strong>${i+1}</strong></td><td>${renderMiniAvatar(p.name,24)} ${escapeHtml(p.name)}</td><td><strong>${p.goals}</strong> goals</td></tr>`).join('')}</table></div></div>`;
         c.innerHTML = html;
     }
     
@@ -566,14 +565,14 @@ ${injuryLine}
     
     function renderWeatherPage() {
         let c = document.getElementById("page-weather");
-        if(c) c.innerHTML = `<div class="card"><h2>🌤️ Match Forecast</h2><div class="weather-card"><i class="fas ${weatherData.icon}" style="font-size:56px;"></i><h3>${weatherData.condition}</h3><h1>${weatherData.temp}</h1><p>Rain Chance: ${weatherData.rainChance}%</p><p>📍 Clifton Park, Brunswick<br>⏰ Monday 8:00pm AEST/AEDT</p></div></div>`;
+        if(c) c.innerHTML = `<div class="card"><h2>🌤️ Match Forecast</h2><div class="weather-card"><i class="fas ${weatherData.icon}" style="font-size:56px;"></i><h3>${weatherData.condition}</h3><h1>${weatherData.temp}</h1><p>Rain Chance: ${weatherData.rainChance}%</p><p>📍 Clifton Park, Brunswick<br>⏰ Monday 8:00pm AEST</p></div></div>`;
     }
     
     function renderRulesPage() {
         let c = document.getElementById("page-rules");
         if(c) c.innerHTML = `<div class="card"><h2>📜 Monday Night Soccer Rules</h2>
-        <div class="rule-item"><div class="rule-time">⏰ KICKOFF TIME</div><p>• 8:00pm SHARP at Clifton Park, Brunswick<br>• Australian Eastern Time (AEST October-April / AEDT April-October)<br>• Please arrive by 7:45pm for warm-up</p></div>
-        <div class="rule-item"><div class="rule-time">👑 CAPTAIN ROTATION</div><p>• Weekly captain rotates<br>• Captain organizes teams and collects fees<br>• Captain brings the match ball</p></div>
+        <div class="rule-item"><div class="rule-time">⏰ KICKOFF TIME</div><p>• 8:00pm SHARP at Clifton Park, Brunswick<br>• Australian Eastern Standard Time (AEST) UTC+10<br>• Please arrive by 7:45pm for warm-up</p></div>
+        <div class="rule-item"><div class="rule-time">👑 CAPTAIN ROTATION</div><p>• Weekly captain rotates<br>• Captain organizes teams<br>• Captain brings the match ball</p></div>
         <div class="rule-item"><div class="rule-time">✅ RSVP IS MANDATORY</div><p>• Must confirm attendance by Sunday 6pm<br>• Use the HOME tab to mark PLAYING or CAN'T PLAY</p></div>
         <div class="rule-item"><div class="rule-time">🎭 GUESTS</div><p>• Guests welcome but must be registered<br>• Max 2 guests per game</p></div>
         <div class="rule-item"><div class="rule-time">⚽ MATCH FORMAT</div><p>• 2 x 45 minute halves<br>• Yellow vs Orange teams (balanced each week)<br>• No slide tackles from behind</p></div>
@@ -613,32 +612,39 @@ ${injuryLine}
     }
     
     // ============================================================
-    // 11. ADMIN PAGE WITH MATCH REPORT BUILDER (Goals, Assists, Injuries)
+    // 11. ADMIN PAGE - FULL TEAM MANAGEMENT + MATCH REPORT
     // ============================================================
     function renderAdminPage() {
         if(!isAdminLoggedIn) {
             let adminContainer = document.getElementById("page-admin");
-            if(adminContainer) adminContainer.innerHTML = '<div class="card"><h2>🔒 Admin Access</h2><p>Login with admin password to access match reports.</p><p><strong>Demo password: admin123</strong></p></div>';
+            if(adminContainer) adminContainer.innerHTML = '<div class="card"><h2>🔒 Admin Access</h2><p>Login with admin password to access team management and match reports.</p><p><strong>Demo password: admin123</strong></p></div>';
             return;
         }
         
-        let pastGames = getPastWeeks();
-        let targetWeek = pastGames.length > 0 ? pastGames[0] : { dateStr: CURRENT_GAME_STR, label: getCurrentGameLabel() };
+        let targetWeek = { dateStr: CURRENT_GAME_STR, label: getCurrentGameLabel() };
         let parts = getAllParticipants(targetWeek.dateStr);
         let allList = [...parts.players.map(p => ({ name: p, isGuest: false })), ...parts.guests.map(g => ({ name: g.name, isGuest: true, addedBy: g.addedBy }))];
         let currAssign = teamAssignments[targetWeek.dateStr] || {};
         let currentResult = matchResults[targetWeek.dateStr] || { yellowScore: 0, orangeScore: 0, goals: {}, assists: {}, injuries: [] };
         
-        let html = `<div class="card"><h2>⚙️ Admin Control Panel</h2><p><strong>📅 Editing Game:</strong> ${targetWeek.label}</p><div class="admin-team-item"><label>👑 Captain: <input type="text" id="captainEdit" value="${weeklyCaptain}" style="width:150px;padding:8px;"></label><button id="updateCaptainBtn">Set Captain</button></div></div>
+        let html = `<div class="card"><h2>⚙️ Admin Control Panel</h2><p><strong>📅 Managing Game:</strong> ${targetWeek.label}</p>
+        <div class="admin-team-item"><label>👑 Weekly Captain: <input type="text" id="captainEdit" value="${weeklyCaptain}" style="width:150px;padding:8px;"></label><button id="updateCaptainBtn">Set Captain</button></div></div>
+        
         <div class="card"><h2>🎭 Manage Guests</h2>`;
         for(let g of parts.guests) html += `<div class="admin-team-item"><span>${escapeHtml(g.name)} (by ${escapeHtml(g.addedBy)})</span><button class="remove-guest-btn" data-guest="${escapeHtml(g.name)}" data-date="${targetWeek.dateStr}">Remove</button></div>`;
         html += `<div><input id="adminGuestName" placeholder="New guest name"><button id="adminAddGuestBtn">+ Add Guest</button></div></div>
-        <div class="card"><h2>⚽ Assign Teams</h2>`;
+        
+        <div class="card"><h2>⚽ Assign Teams (Yellow vs Orange)</h2>`;
         for(let p of allList) {
             let currTeam = currAssign[p.name] || currAssign['guest_' + p.name] || "";
-            html += `<div class="admin-team-item"><div>${renderMiniAvatar(p.name,28)} ${escapeHtml(p.name)} ${p.isGuest ? '<span class="guest-tag">GUEST</span>' : ''}</div><select class="team-select" data-name="${escapeHtml(p.name)}" data-isguest="${p.isGuest}"><option value="">— Team —</option><option value="yellow"${currTeam === "yellow" ? ' selected' : ''}>🟡 Yellow</option><option value="orange"${currTeam === "orange" ? ' selected' : ''}>🟠 Orange</option></select></div>`;
+            html += `<div class="admin-team-item"><div>${renderMiniAvatar(p.name,28)} ${escapeHtml(p.name)} ${p.isGuest ? '<span class="guest-tag">GUEST</span>' : ''}</div>
+            <select class="team-select" data-name="${escapeHtml(p.name)}" data-isguest="${p.isGuest}">
+                <option value="">— Select Team —</option>
+                <option value="yellow"${currTeam === "yellow" ? ' selected' : ''}>🟡 Yellow Team</option>
+                <option value="orange"${currTeam === "orange" ? ' selected' : ''}>🟠 Orange Team</option>
+            </select></div>`;
         }
-        html += `<div class="flex-btns"><button id="autoBalanceBtn">🎲 Auto-Balance</button><button id="saveTeamsBtn">💾 Save Teams</button></div></div>`;
+        html += `<div class="flex-btns"><button id="autoBalanceBtn">🎲 Auto-Balance Teams</button><button id="saveTeamsBtn">💾 Save Team Assignments</button></div></div>`;
         
         // Match Report Builder
         let goalEntries = Object.entries(currentResult.goals || {}).map(([p,c]) => ({ player: p, goals: c, assists: (currentResult.assists && currentResult.assists[p]) || 0 }));
@@ -649,7 +655,7 @@ ${injuryLine}
         <div><strong>⚽ GOALS & ASSISTS</strong><div id="goalsAssistsContainer"></div><button id="addGoalBtn" style="background:#1a73e8;margin-top:6px;">+ Add Goal Scorer</button></div>
         <div style="margin-top:16px;"><strong>🤕 INJURIES</strong><div id="injuriesContainer"></div><button id="addInjuryBtn" style="background:#dc3545;">+ Record Injury</button></div>
         <div class="flex-btns" style="margin-top:20px;"><button id="saveReportBtn" style="background:#28a745;">💾 Save Match Report</button><button id="shareWhatsAppBtn" style="background:#25D366;"><i class="fab fa-whatsapp"></i> Share via WhatsApp</button></div>
-        <div class="report-preview" id="reportPreview"><strong>Preview:</strong> Fill in details above to generate match report</div></div>`;
+        <div class="report-preview" id="reportPreview"><strong>📱 Preview:</strong> Fill in details above to generate match report</div></div>`;
         
         let container = document.getElementById("page-admin");
         if(container) container.innerHTML = html;
@@ -657,6 +663,7 @@ ${injuryLine}
         // Event bindings
         document.getElementById("adminAddGuestBtn")?.addEventListener("click", async () => { let gn = document.getElementById("adminGuestName"); if(gn && gn.value.trim()) await addGuest(gn.value.trim()); if(gn) gn.value = ""; renderAdminPage(); });
         document.querySelectorAll(".remove-guest-btn").forEach(btn => btn.addEventListener("click", () => removeGuest(btn.dataset.guest, btn.dataset.date)));
+        
         document.getElementById("autoBalanceBtn")?.addEventListener("click", () => {
             if(allList.length === 0) return;
             let shuffled = [...allList];
@@ -668,14 +675,16 @@ ${injuryLine}
             saveTeamAssignments(targetWeek.dateStr, teamAssignments[targetWeek.dateStr]);
             renderAdminPage(); renderTeamsPage();
         });
+        
         document.getElementById("saveTeamsBtn")?.addEventListener("click", async () => {
             let selects = document.querySelectorAll(".team-select");
             let newAssign = {};
             selects.forEach(sel => { let name = sel.dataset.name, isGuest = sel.dataset.isguest === "true", team = sel.value; if(team) newAssign[isGuest ? 'guest_' + name : name] = team; });
             teamAssignments[targetWeek.dateStr] = newAssign;
             await saveTeamAssignments(targetWeek.dateStr, teamAssignments[targetWeek.dateStr]);
-            alert("Teams saved!");
+            alert("Teams saved successfully!");
         });
+        
         document.getElementById("updateCaptainBtn")?.addEventListener("click", () => { let newCap = document.getElementById("captainEdit").value.trim(); if(newCap) weeklyCaptain = newCap; renderAdminPage(); renderTeamsPage(); });
         
         function refreshGoalUI() {
@@ -755,7 +764,7 @@ ${injuryLine}
     }
     
     // ============================================================
-    // 12. NAVIGATION & APP INITIALIZATION
+    // 12. NAVIGATION & APP INIT
     // ============================================================
     function initNav() {
         let mods = [
