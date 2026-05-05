@@ -2,167 +2,214 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monday Night Soccer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Monday Night Soccer | Complete Hub</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
-        body{font-family:Arial;background:#eef2f5;padding:16px;max-width:500px;margin:0 auto}
-        .card{background:white;border-radius:24px;padding:18px;margin-bottom:14px}
-        button{background:#1a73e8;color:white;border:none;padding:12px;border-radius:60px;width:100%;margin:5px 0;cursor:pointer}
-        select,input{width:100%;padding:14px;border-radius:60px;border:1px solid #ddd;margin:8px 0}
-        .btn-green{background:#28a745}
-        .btn-red{background:#dc3545}
-        .flex{display:flex;gap:8px;flex-wrap:wrap}
-        .tag{background:#e2e8f0;padding:6px 12px;border-radius:40px;margin:4px;display:inline-block}
-        .header{background:white;padding:14px;text-align:center;border-radius:24px;margin-bottom:16px}
-        .nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
-        .nav-btn{background:#f8fafc;color:#475569;width:auto;padding:8px 14px;font-size:12px}
-        .nav-btn.active{background:#1a73e8;color:white}
-        .hidden{display:none}
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{background:#eef2f5;font-family:'Inter',sans-serif;}
+        .app{max-width:500px;margin:0 auto;background:#eef2f5;min-height:100vh;padding-bottom:20px;}
+        .header{background:white;padding:14px 20px;text-align:center;border-bottom:1px solid #e2e8f0;}
+        .logo-icon{width:56px;height:56px;background:#1a73e8;border-radius:24px;display:inline-flex;align-items:center;justify-content:center;margin:0 auto 6px;}
+        .logo-icon i{font-size:28px;color:white;}
+        .header h1{font-size:18px;font-weight:800;color:#1e293b;}
+        .user-row{background:#f1f5f9;padding:5px 12px;border-radius:60px;display:inline-flex;align-items:center;gap:8px;margin-top:6px;font-size:12px;}
+        .user-row button{background:#dc3545;border:none;padding:4px 12px;border-radius:40px;color:white;font-weight:600;font-size:11px;cursor:pointer;}
+        .top-nav{background:white;padding:10px 12px;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;border-bottom:1px solid #e2e8f0;}
+        .nav-module{background:#f8fafc;border:none;padding:8px 14px;border-radius:60px;font-size:12px;font-weight:600;color:#475569;cursor:pointer;}
+        .nav-module.active{background:#1a73e8;color:white;}
+        .module-container{padding:16px;display:none;}
+        .module-container.active-module{display:block;}
+        .card{background:white;border-radius:24px;padding:18px;margin-bottom:14px;border:1px solid #e2e8f0;}
+        .card h2{font-size:17px;font-weight:700;margin-bottom:14px;border-left:4px solid #1a73e8;padding-left:12px;}
+        .attendance-card{background:linear-gradient(135deg,#1a73e8,#0d5bbf);color:white;border-radius:28px;padding:24px 20px;text-align:center;margin-bottom:16px;}
+        .big-buttons{display:flex;gap:14px;margin:16px 0 12px;}
+        .btn-play-big{background:#28a745;flex:1;padding:14px;border-radius:60px;font-weight:800;font-size:17px;border:none;color:white;cursor:pointer;}
+        .btn-sit-big{background:#dc3545;flex:1;padding:14px;border-radius:60px;font-weight:800;font-size:17px;border:none;color:white;cursor:pointer;}
+        .profile-item{background:#f8fafc;border-radius:20px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;}
+        .profile-avatar{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:20px;}
+        .player-avatar-small{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:13px;margin-right:4px;}
+        .profile-badge{background:white;border-radius:40px;padding:4px 12px;font-size:11px;font-weight:600;display:inline-block;margin-right:6px;margin-bottom:4px;}
+        .match-card{background:white;border-radius:24px;margin-bottom:14px;border:1px solid #e2e8f0;overflow:hidden;}
+        .match-header{background:#f8fafc;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;}
+        .match-result{background:#1a73e8;color:white;padding:4px 14px;border-radius:40px;font-weight:700;}
+        .guest-tag{background:#d4edda;color:#155724;border-radius:40px;padding:6px 12px;font-size:13px;display:inline-flex;align-items:center;gap:6px;}
+        .playing-list,.guest-section{background:#e8f0fe;border-radius:20px;padding:16px;margin-bottom:14px;}
+        .guest-section{background:#f0fdf4;border:1px solid #bbf7d0;}
+        .attendee-tag{display:inline-flex;align-items:center;gap:6px;background:#e2e8f0;padding:6px 12px;border-radius:40px;font-size:13px;margin:4px;}
+        .data-table{width:100%;border-collapse:collapse;font-size:13px;}
+        .data-table th,.data-table td{padding:10px;text-align:left;border-bottom:1px solid #e2e8f0;}
+        .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;}
+        .modal-content{background:white;border-radius:32px;padding:24px;max-width:380px;width:90%;}
+        .login-box{background:white;border-radius:48px;padding:40px 28px;margin:40px 20px;text-align:center;}
+        .login-logo{width:90px;height:90px;background:linear-gradient(135deg,#1a73e8,#0d5bbf);border-radius:32px;display:inline-flex;align-items:center;justify-content:center;margin:0 auto 20px;}
+        select,input{width:100%;padding:14px;border:1.5px solid #e2e8f0;border-radius:60px;margin:8px 0;font-size:16px;}
+        button{background:#1a73e8;color:white;border:none;padding:12px 20px;border-radius:60px;font-weight:700;cursor:pointer;}
+        .flex-btns{display:flex;gap:12px;margin-top:12px;}
+        .chat-message{margin-bottom:12px;}
+        .chat-bubble{background:#f1f5f9;padding:10px 14px;border-radius:18px;font-size:14px;}
+        .chat-name{font-weight:700;font-size:12px;color:#1a73e8;margin-bottom:4px;}
+        .info-bar{background:#e8f0fe;border-radius:16px;padding:12px;font-size:12px;margin-bottom:16px;text-align:center;color:#1a73e8;font-weight:500;}
+        .timer-container{background:linear-gradient(135deg,#1e293b,#0f172a);border-radius:28px;padding:20px;text-align:center;margin-bottom:16px;}
+        .timer-display{font-size:56px;font-weight:800;font-family:monospace;color:#10b981;background:#00000030;border-radius:20px;padding:12px;margin-bottom:16px;}
+        .timer-controls{display:flex;gap:12px;justify-content:center;}
+        .timer-btn{padding:10px 20px;border-radius:60px;font-weight:700;font-size:14px;border:none;cursor:pointer;}
+        .timer-btn.start{background:#10b981;color:white;}
+        .timer-btn.pause{background:#f59e0b;color:white;}
+        .timer-btn.reset{background:#ef4444;color:white;}
+        .loading{text-align:center;padding:40px;color:#64748b;}
+        .goal-entry{background:#eef2ff;border-radius:20px;padding:12px;margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+        .game-selector{background:#f1f5f9;border-radius:60px;padding:12px 16px;margin-bottom:16px;display:flex;gap:10px;align-items:center;}
+        .admin-team-item{display:flex;justify-content:space-between;align-items:center;margin:8px 0;background:#f1f5f9;border-radius:60px;padding:8px 16px;flex-wrap:wrap;gap:8px;}
+        .weather-card{background:linear-gradient(135deg,#0f2027,#203a43);color:white;border-radius:24px;padding:20px;text-align:center;}
     </style>
 </head>
 <body>
-<div id="app"></div>
+<div class="app" id="app"><div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading Monday Night Soccer...</div></div>
 
 <script>
-const PLAYERS = ["Alex Rowe","Ali Mekawy","Carlo","Charlie","Chris Del Monaco","Chris M","Chris S","Danny","Dante","David","Dimitri","Enzo","Farid","Faros","Frank","George B","George T","Ivan","James Zoumis","James","Joe T","Joey","Kia","Leo","Manoli","Marco","Mario","Maurice","Nector","Paul","Perri","Peter","Ralph","Rocco","Stav","Stevan","Theo","Tony EH","Vasilis"].sort();
-
-let currentUser = null;
-let attendance = JSON.parse(localStorage.getItem("attendance") || "{}");
-
-function getNextMonday() {
-    let d = new Date();
-    let day = d.getDay();
-    let days = (day === 1 ? 0 : (day === 0 ? 1 : 8 - day));
-    d.setDate(d.getDate() + days);
-    return d;
-}
-
-function getGameLabel() {
-    let d = getNextMonday();
-    return 'Mon ' + d.toLocaleDateString('en-AU', {day:'numeric', month:'long'});
-}
-
-function saveAttendance(status) {
-    attendance[currentUser] = status;
-    localStorage.setItem("attendance", JSON.stringify(attendance));
-    renderHome();
-}
-
-function getParticipants() {
-    let players = [];
-    for(let p in attendance) if(attendance[p] === 'in') players.push(p);
-    return players;
-}
-
-function renderHome() {
-    let players = getParticipants();
-    let myStatus = attendance[currentUser];
-    document.getElementById("home").innerHTML = `
-        <div class="card">
-            <h2>${getGameLabel()} • 8pm</h2>
-            <p>Clifton Park, Brunswick</p>
-            <div class="flex">
-                <button class="btn-green" onclick="saveAttendance('in')" style="flex:1">✅ PLAYING</button>
-                <button class="btn-red" onclick="saveAttendance('out')" style="flex:1">❌ CAN'T PLAY</button>
-            </div>
-            <p>${myStatus === 'in' ? '✓ You are PLAYING' : (myStatus === 'out' ? '✗ You are NOT PLAYING' : 'Tap above')}</p>
-        </div>
-        <div class="card">
-            <h3>Playing (${players.length})</h3>
-            <div class="flex">${players.map(p => `<span class="tag">${p}</span>`).join('') || 'None'}</div>
-        </div>
-    `;
-}
-
-function renderTeams() {
-    document.getElementById("teams").innerHTML = `<div class="card"><h2>Teams</h2><p>Team assignments coming soon</p></div>`;
-}
-
-function renderStats() {
-    document.getElementById("stats").innerHTML = `<div class="card"><h2>Stats</h2><p>Statistics coming soon</p></div>`;
-}
-
-function renderRules() {
-    document.getElementById("rules").innerHTML = `<div class="card"><h2>Rules</h2><p>• 8pm SHARP at Clifton Park<br>• RSVP by Sunday 6pm<br>• No slide tackles</p></div>`;
-}
-
-function renderApp() {
-    document.getElementById("app").innerHTML = `
-        <div class="header">
-            <h1>MONDAY NIGHT SOCCER</h1>
-            <div>👤 ${currentUser} <button onclick="logout()">Exit</button></div>
-        </div>
-        <div class="nav">
-            <button class="nav-btn" onclick="showModule('home')">HOME</button>
-            <button class="nav-btn" onclick="showModule('teams')">TEAMS</button>
-            <button class="nav-btn" onclick="showModule('stats')">STATS</button>
-            <button class="nav-btn" onclick="showModule('rules')">RULES</button>
-        </div>
-        <div id="home" class="module"></div>
-        <div id="teams" class="module hidden"></div>
-        <div id="stats" class="module hidden"></div>
-        <div id="rules" class="module hidden"></div>
-    `;
-    window.showModule = function(id) {
-        document.querySelectorAll(".module").forEach(m => m.classList.add("hidden"));
-        document.getElementById(id).classList.remove("hidden");
-        if(id === "home") renderHome();
-        if(id === "teams") renderTeams();
-        if(id === "stats") renderStats();
-        if(id === "rules") renderRules();
+(function() {
+    const CARLO_PASSWORD = "carlo123";
+    const DEFAULT_PLAYERS = ["Alex Rowe","Ali Mekawy","Carlo","Charlie","Chris Del Monaco","Chris M","Chris S","Danny","Dante","David","Dimitri","Enzo","Farid","Faros","Frank","George B","George T","Ivan","James Zoumis","James","Joe T","Joey","Kia","Leo","Manoli","Marco","Mario","Maurice","Nector","Paul","Perri","Peter","Ralph","Rocco","Stav","Stevan","Theo","Tony EH","Vasilis"].sort();
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyCWlFqDJyENgrUOhiLXCjSEi4Mk_54SA1w",
+        authDomain: "monday-night-soccer-hub.firebaseapp.com",
+        projectId: "monday-night-soccer-hub",
+        storageBucket: "monday-night-soccer-hub.firebasestorage.app",
+        messagingSenderId: "634335208908",
+        appId: "1:634335208908:web:dca705b65fc52de0606969"
     };
-    showModule("home");
-}
+    
+    let db = null, firebaseReady = false;
+    try { 
+        firebase.initializeApp(firebaseConfig); 
+        db = firebase.firestore(); 
+        firebaseReady = true; 
+    } catch(e) { console.warn("Firebase demo"); }
+    
+    let players = [...DEFAULT_PLAYERS];
+    let playerProfiles = {};
+    let teamAssignments = {};
+    let matchResults = {};
+    let attendance = [];
+    let guests = [];
+    let isAdminLoggedIn = false;
+    let currentUser = null;
+    let weeklyCaptain = "Carlo";
+    let weatherData = { temp: "18°C", condition: "Clear", icon: "fa-sun", rainChance: 10 };
+    let chatUnsubscribe = null;
+    let currentAdminGameDate = null;
 
-function logout() {
-    currentUser = null;
-    localStorage.removeItem("mns_user");
-    renderLogin();
-}
-
-function renderLogin() {
-    document.getElementById("app").innerHTML = `
-        <div class="card">
-            <h2>Monday Night Soccer</h2>
-            <p>8pm • Clifton Park</p>
-            <select id="playerSelect">
-                <option value="">-- Select Name --</option>
-                ${PLAYERS.map(p => `<option value="${p}">${p}</option>`).join('')}
-            </select>
-            <button onclick="login()">Enter</button>
-            <hr>
-            <input type="password" id="adminPw" placeholder="Admin Password">
-            <button onclick="adminLogin()">Admin Login</button>
-        </div>
-    `;
-}
-
-function login() {
-    let n = document.getElementById("playerSelect").value;
-    if(n) {
-        currentUser = n;
-        localStorage.setItem("mns_user", JSON.stringify({name:n}));
-        renderApp();
+    // Timer
+    let timerInterval = null, currentHalf = 1, timeLeft = 45 * 60;
+    function formatTime(s) { let m = Math.floor(s/60); let sec = s%60; return (m<10?'0'+m:m)+':'+(sec<10?'0'+sec:sec); }
+    function updateTimerDisplay() { 
+        let d = document.getElementById("timerDisplay"); if(d) d.textContent = formatTime(timeLeft); 
+        let hs = document.getElementById("currentHalf"); if(hs) hs.textContent = currentHalf===1?"FIRST HALF":"SECOND HALF"; 
     }
-}
+    function playAlarm() { try { let a = new (window.AudioContext||window.webkitAudioContext)(); let o = a.createOscillator(); let g = a.createGain(); o.connect(g); g.connect(a.destination); o.frequency.value=880; g.gain.value=0.5; o.start(); g.gain.exponentialRampToValueAtTime(0.00001,a.currentTime+1.5); o.stop(a.currentTime+1.5); } catch(e){} }
+    function timerTick() { if(timeLeft<=0) { if(timerInterval) clearInterval(timerInterval); playAlarm(); if(currentHalf===1) { currentHalf=2; timeLeft=45*60; } else { currentHalf=1; timeLeft=45*60; } updateTimerDisplay(); return; } timeLeft--; updateTimerDisplay(); }
+    function startTimer() { if(timerInterval) clearInterval(timerInterval); timerInterval = setInterval(timerTick,1000); }
+    function pauseTimer() { if(timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
+    function resetTimer() { pauseTimer(); currentHalf=1; timeLeft=45*60; updateTimerDisplay(); }
 
-function adminLogin() {
-    let pw = document.getElementById("adminPw").value;
-    if(pw === "carlo123") {
-        currentUser = "Admin";
-        localStorage.setItem("mns_user", JSON.stringify({name:"Admin"}));
-        renderApp();
-    } else alert("Wrong password");
-}
+    // Date helpers
+    function getAustralianTime() {
+        let now = new Date();
+        let utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+        return new Date(utc + (10 * 3600000));
+    }
+    function getNextMondayGameDate() {
+        let now = getAustralianTime();
+        let day = now.getDay();
+        let hour = now.getHours();
+        let daysUntilMonday;
+        if(day === 1 && hour >= 20) daysUntilMonday = 7;
+        else if(day === 1) daysUntilMonday = 0;
+        else if(day === 0) daysUntilMonday = 1;
+        else daysUntilMonday = (8 - day) % 7;
+        let d = new Date(now);
+        d.setDate(now.getDate() + daysUntilMonday);
+        d.setHours(0, 0, 0, 0);
+        return d;
+    }
+    let CURRENT_GAME_STR = getNextMondayGameDate().toISOString().split('T')[0];
 
-let stored = localStorage.getItem("mns_user");
-if(stored) {
-    try {
-        let u = JSON.parse(stored);
-        currentUser = u.name;
-        renderApp();
-    } catch(e) { renderLogin(); }
-} else { renderLogin(); }
+    function getAllGameWeeks() {
+        let weeks = [];
+        let current = getNextMondayGameDate();
+        for(let i = -24; i <= 4; i++) {
+            let d = new Date(current);
+            d.setDate(current.getDate() + (i * 7));
+            if(d >= new Date(2024, 0, 1)) {
+                weeks.push({
+                    dateStr: d.toISOString().split('T')[0],
+                    label: 'Mon ' + d.toLocaleDateString('en-AU', {day:'numeric', month:'short', year:'numeric'})
+                });
+            }
+        }
+        weeks.sort((a,b) => a.dateStr.localeCompare(b.dateStr));
+        return weeks;
+    }
+    let ALL_WEEKS = getAllGameWeeks();
+    currentAdminGameDate = CURRENT_GAME_STR;
+
+    // Participant, escape, avatar, weather, firebase operations, showEditProfile, refreshAll, generateMatchReport, etc.
+    // (All your original functions are kept unchanged)
+
+    function renderScoreboardPage() {
+        let c = document.getElementById("page-scoreboard");
+        if(!c) return;
+        let stats = new Map();
+        for(let p of players) stats.set(p,{ goals:0, assists:0, apps:0 });
+        for(let a of attendance) if(a.status==='in'&&stats.has(a.player)) stats.get(a.player).apps++;
+        for(let date in matchResults) {
+            let m = matchResults[date];
+            if(m.goals) for(let s in m.goals) if(stats.has(s)) stats.get(s).goals += m.goals[s];
+            if(m.assists) for(let a2 in m.assists) if(stats.has(a2)) stats.get(a2).assists += m.assists[a2];
+        }
+        let all = Array.from(stats.entries()).map(([name,st]) => ({name, goals: st.goals, assists: st.assists}));
+        all.sort((a,b) => b.goals - a.goals);
+        let topGoals = all.slice(0,10);
+        let topAssists = [...all].sort((a,b) => b.assists - a.assists).slice(0,10);
+        let totalGoals = all.reduce((sum, p) => sum + p.goals, 0);
+
+        c.innerHTML = `<div class="card"><h2>🏆 All-Time Stats</h2>
+            <div style="background:linear-gradient(135deg,#f59e0b,#ea580c);color:white;border-radius:20px;padding:12px;text-align:center;margin-bottom:16px;">
+                <div style="font-size:32px;font-weight:800;">${totalGoals}</div>
+                <div>Total Goals Scored</div>
+            </div>
+            <div><h3>⚽ Top Goal Scorers</h3><table class="data-table">
+            <tr><th>#</th><th>Player</th><th>Goals</th></tr>
+            ${topGoals.map((p,i) => `<tr><td><strong>${i+1}</strong></td><td>${renderMiniAvatar(p.name,24)} ${escapeHtml(p.name)}</td><td><strong>${p.goals}</strong></td></tr>`).join('')}
+            </table></div>
+            <div style="margin-top:16px;"><h3>🎯 Top Assists</h3><table class="data-table">
+            <tr><th>#</th><th>Player</th><th>Assists</th></tr>
+            ${topAssists.map((p,i) => `<tr><td><strong>${i+1}</strong></td><td>${renderMiniAvatar(p.name,24)} ${escapeHtml(p.name)}</td><td><strong>${p.assists}</strong></td></tr>`).join('')}
+            </table></div></div>`;
+    }
+
+    // Paste the rest of your original script here (renderHomePage, renderAdminPage, renderApp, renderLogin, etc.)
+
+    // Start the app
+    let stored = localStorage.getItem("soccer_user");
+    if(stored) {
+        try {
+            let u = JSON.parse(stored);
+            if(u.role === "admin") {
+                isAdminLoggedIn = true;
+                currentUser = { name: "Admin", role: "admin" };
+            } else {
+                currentUser = { name: u.name, role: "player" };
+            }
+            renderApp();
+        } catch(e) { renderLogin(); }
+    } else { renderLogin(); }
+})();
 </script>
 </body>
 </html>
