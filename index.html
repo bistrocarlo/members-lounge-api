@@ -2,416 +2,173 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Monday Night Soccer | Match Report Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Monday Night Soccer | The Football Telegraph</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            background: #eef2f5;
-            font-family: 'Inter', sans-serif;
-            padding: 20px;
-        }
-        .container {
-            max-width: 550px;
-            margin: 0 auto;
-        }
-        .card {
-            background: white;
-            border-radius: 28px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-        .card h2 {
-            font-size: 20px;
-            font-weight: 800;
-            margin-bottom: 16px;
-            border-left: 5px solid #1a73e8;
-            padding-left: 14px;
-        }
-        .form-group {
-            margin-bottom: 16px;
-        }
-        label {
-            font-weight: 600;
-            font-size: 14px;
-            display: block;
-            margin-bottom: 6px;
-            color: #1e293b;
-        }
-        input, select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 60px;
-            font-size: 14px;
-            font-family: inherit;
-        }
-        button {
-            background: #1a73e8;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 60px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-        button:hover {
-            background: #0d5bbf;
-            transform: scale(0.98);
-        }
-        .btn-whatsapp {
-            background: #25D366;
-            width: 100%;
-            margin-top: 16px;
-            padding: 14px;
-            font-size: 16px;
-        }
-        .btn-whatsapp:hover {
-            background: #128C7E;
-        }
-        .btn-outline {
-            background: white;
-            color: #1a73e8;
-            border: 2px solid #1a73e8;
-        }
-        .btn-outline:hover {
-            background: #e8f0fe;
-        }
-        .goal-row, .assist-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-            align-items: center;
-        }
-        .goal-row input, .assist-row input {
-            flex: 1;
-        }
-        .goal-row button, .assist-row button {
-            width: auto;
-            padding: 10px 16px;
-            background: #dc3545;
-        }
-        .add-btn {
-            background: #28a745;
-            margin-top: 8px;
-            width: 100%;
-        }
-        .newspaper-report {
-            background: #fef9e6;
-            border-radius: 24px;
-            padding: 24px;
-            font-family: 'Merriweather', serif;
-            border: 1px solid #e9d5a1;
-            margin-top: 20px;
-            font-size: 13px;
-            line-height: 1.6;
-            white-space: pre-wrap;
-        }
-        .newspaper-report h3 {
-            font-size: 22px;
-            font-weight: 800;
-            margin-bottom: 12px;
-            color: #2c3e2f;
-            border-bottom: 2px solid #b45309;
-            display: inline-block;
-        }
-        .pundit-box {
-            background: #f1f5f9;
-            border-left: 4px solid #fd7e14;
-            padding: 12px;
-            margin: 12px 0;
-            border-radius: 16px;
-        }
-        .flex-btns {
-            display: flex;
-            gap: 12px;
-            margin-top: 16px;
-        }
-        .info-bar {
-            background: #1a73e8;
-            color: white;
-            border-radius: 60px;
-            padding: 10px 16px;
-            text-align: center;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
-        hr {
-            margin: 16px 0;
-            border-color: #e2e8f0;
-        }
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+        body{background:#eef2f5;font-family:'Inter',sans-serif;}
+        .app{max-width:500px;margin:0 auto;background:#eef2f5;min-height:100vh;}
+        .header{background:white;padding:14px 20px;text-align:center;border-bottom:1px solid #e2e8f0;position:sticky;top:0;z-index:10;}
+        .logo-icon{width:56px;height:56px;background:#1a73e8;border-radius:24px;display:inline-flex;align-items:center;justify-content:center;margin:0 auto 6px;}
+        .logo-icon i{font-size:28px;color:white;}
+        .header h1{font-size:18px;font-weight:800;color:#1e293b; letter-spacing:-0.3px;}
+        .user-row{background:#f1f5f9;padding:5px 12px;border-radius:60px;display:inline-flex;align-items:center;gap:8px;margin-top:6px;font-size:12px;}
+        .user-row button{background:#dc3545;border:none;padding:4px 12px;border-radius:40px;color:white;font-weight:600;font-size:11px;cursor:pointer;}
+        .top-nav{background:white;padding:10px 12px;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;border-bottom:1px solid #e2e8f0;position:sticky;top:70px;z-index:10;}
+        .nav-module{background:#f8fafc;border:none;padding:8px 14px;border-radius:60px;font-size:12px;font-weight:600;color:#475569;cursor:pointer;transition:all 0.2s;}
+        .nav-module.active{background:#1a73e8;color:white;}
+        .module-container{padding:16px;display:none;}
+        .module-container.active-module{display:block;}
+        .card{background:white;border-radius:28px;padding:20px;margin-bottom:16px;border:1px solid #e2e8f0;box-shadow:0 4px 12px rgba(0,0,0,0.05);}
+        .card h2{font-size:18px;font-weight:800;margin-bottom:14px;border-left:5px solid #1a73e8;padding-left:14px;}
+        .attendance-card{background:linear-gradient(135deg,#1a73e8,#0d5bbf);color:white;border-radius:32px;padding:24px 20px;text-align:center;margin-bottom:16px;}
+        .big-buttons{display:flex;gap:14px;margin:16px 0 12px;}
+        .btn-play-big{background:#28a745;flex:1;padding:14px;border-radius:60px;font-weight:800;font-size:17px;border:none;color:white;cursor:pointer;}
+        .btn-sit-big{background:#dc3545;flex:1;padding:14px;border-radius:60px;font-weight:800;font-size:17px;border:none;color:white;cursor:pointer;}
+        .profile-item{background:#f8fafc;border-radius:20px;margin-bottom:10px;display:flex;align-items:center;gap:12px;padding:14px;}
+        .player-avatar-small{width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:14px;margin-right:4px;}
+        .guest-tag{background:#d4edda;color:#155724;border-radius:40px;padding:6px 12px;font-size:13px;display:inline-flex;align-items:center;gap:6px;}
+        .attendee-tag{display:inline-flex;align-items:center;gap:6px;background:#e2e8f0;padding:6px 12px;border-radius:40px;font-size:13px;margin:4px;}
+        .admin-team-item{display:flex;justify-content:space-between;align-items:center;margin:8px 0;background:#f1f5f9;border-radius:60px;padding:8px 16px;flex-wrap:wrap;gap:8px;}
+        .match-card{background:white;border-radius:28px;margin-bottom:20px;border:1px solid #e2e8f0;overflow:hidden;}
+        .match-header{background:#f8fafc;padding:12px 16px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+        .match-result{background:#1a73e8;color:white;padding:4px 14px;border-radius:40px;font-weight:700;font-size:14px;}
+        .team-row{display:flex;gap:12px;flex-wrap:wrap;}
+        .team-box{flex:1;background:rgba(0,0,0,0.65);border-radius:18px;padding:12px;min-width:140px;}
+        .team-yellow{background:#ffc107;color:#2c2c2c;font-weight:800;text-align:center;padding:6px;border-radius:60px;margin-bottom:8px;}
+        .team-orange{background:#fd7e14;color:white;font-weight:800;text-align:center;padding:6px;border-radius:60px;margin-bottom:8px;}
+        .player-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.2);border-radius:40px;padding:4px 10px;font-size:11px;color:white;}
+        .newspaper-report{background:#fef9e6;border-radius:28px;padding:20px;font-family:'Merriweather',serif; border:1px solid #e9d5a1; box-shadow: 0 6px 14px rgba(0,0,0,0.08);}
+        .newspaper-report h3{font-weight:800;font-size:20px;border-bottom:2px solid #b45309;display:inline-block;margin-bottom:16px;color:#2c3e2f;}
+        .pundit-quote{background:#f1f5f9;border-left:6px solid #fd7e14;padding:14px;margin:16px 0;border-radius:20px; font-style:italic;}
+        .whatsapp-share{background:#25D366;margin-top:16px;width:100%;font-weight:800;}
+        .flex-btns{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;}
+        .btn-outline{background:white;color:#1a73e8;border:2px solid #1a73e8;}
+        .data-table{width:100%;border-collapse:collapse;font-size:13px;}
+        .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;}
+        .modal-content{background:white;border-radius:32px;padding:28px;max-width:340px;width:90%;}
+        .login-logo{width:80px;height:80px;background:linear-gradient(135deg,#1a73e8,#0d5bbf);border-radius:30px;display:inline-flex;align-items:center;justify-content:center;margin:0 auto 20px;}
+        select,input{width:100%;padding:14px;border:1.5px solid #e2e8f0;border-radius:60px;margin:8px 0;font-size:16px;}
+        button{background:#1a73e8;color:white;border:none;padding:12px 20px;border-radius:60px;font-weight:700;cursor:pointer;}
+        .info-bar{background:#e8f0fe;border-radius:16px;padding:12px;font-size:12px;margin-bottom:16px;text-align:center;color:#1a73e8;font-weight:500;}
+        .timer-container{background:linear-gradient(135deg,#1e293b,#0f172a);border-radius:28px;padding:20px;text-align:center;margin-bottom:16px;}
+        .timer-display{font-size:56px;font-weight:800;font-family:monospace;color:#10b981;background:#00000030;border-radius:20px;padding:12px;margin-bottom:16px;}
+        .stats-row{display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap;}
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="info-bar">
-        <i class="fas fa-newspaper"></i> MONDAY NIGHT SOCCER • THE FOOTBALL TELEGRAPH
-    </div>
-
-    <!-- Match Details Card -->
-    <div class="card">
-        <h2><i class="fas fa-futbol"></i> Match Details</h2>
-        <div class="form-group">
-            <label>Match Week</label>
-            <input type="text" id="matchWeek" placeholder="e.g., Mon 15 April" value="Mon 15 April">
-        </div>
-        <div class="flex-btns">
-            <div class="form-group" style="flex:1">
-                <label>🟡 Yellow Score</label>
-                <input type="number" id="yellowScore" value="3">
-            </div>
-            <div class="form-group" style="flex:1">
-                <label>🟠 Orange Score</label>
-                <input type="number" id="orangeScore" value="2">
-            </div>
-        </div>
-    </div>
-
-    <!-- Goal Scorers Card -->
-    <div class="card">
-        <h2><i class="fas fa-futbol"></i> Goal Scorers</h2>
-        <div id="goalsContainer"></div>
-        <button id="addGoalBtn" class="add-btn">+ Add Goal Scorer</button>
-    </div>
-
-    <!-- Assists Card -->
-    <div class="card">
-        <h2><i class="fas fa-hands-helping"></i> Assists</h2>
-        <div id="assistsContainer"></div>
-        <button id="addAssistBtn" class="add-btn">+ Add Assist</button>
-    </div>
-
-    <!-- Match Awards Card -->
-    <div class="card">
-        <h2><i class="fas fa-trophy"></i> Match Awards</h2>
-        <div class="form-group">
-            <label>🏆 Man of the Match (MVP)</label>
-            <input type="text" id="mvp" placeholder="Player name" value="Carlo">
-        </div>
-        <div class="form-group">
-            <label>🩺 Injuries (comma separated)</label>
-            <input type="text" id="injuries" placeholder="e.g., Danny (ankle), Marco (cramp)">
-        </div>
-    </div>
-
-    <!-- Generate Report Button -->
-    <div class="card">
-        <button id="generateReportBtn" style="width:100%; padding:16px; font-size:16px; background:#b45309;">
-            📰 GENERATE NEWSPAPER REPORT
-        </button>
-    </div>
-
-    <!-- Report Preview Card -->
-    <div class="card" id="reportCard" style="display:none;">
-        <h2><i class="fas fa-newspaper"></i> Match Report</h2>
-        <div id="reportPreview" class="newspaper-report"></div>
-        <button id="whatsappShareBtn" class="btn-whatsapp">
-            <i class="fab fa-whatsapp"></i> Share to WhatsApp Group
-        </button>
-    </div>
-</div>
+<div class="app" id="app"><div class="loading"><i class="fas fa-futbol fa-spin"></i> Loading Monday Night Hub...</div></div>
 
 <script>
-    // Pundits database
+    // Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyCWlFqDJyENgrUOhiLXCjSEi4Mk_54SA1w",
+        authDomain: "monday-night-soccer-hub.firebaseapp.com",
+        projectId: "monday-night-soccer-hub",
+        storageBucket: "monday-night-soccer-hub.firebasestorage.app",
+        messagingSenderId: "634335208908",
+        appId: "1:634335208908:web:dca705b65fc52de0606969"
+    };
+    
+    let db = null, firebaseReady = false;
+    try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); firebaseReady = true; } catch(e) { console.warn("Demo mode"); }
+    
+    // Data
+    let players = ["Alex Rowe","Ali Mekawy","Carlo","Charlie","Chris Del Monaco","Chris M","Chris S","Danny","Dante","David","Dimitri","Enzo","Farid","Faros","Frank","George B","George T","Ivan","James Zoumis","James","Joe T","Joey","Kia","Leo","Manoli","Marco","Mario","Maurice","Nector","Paul","Perri","Peter","Ralph","Rocco","Stav","Stevan","Theo","Tony EH","Vasilis"].sort();
+    let playerProfiles = {};
+    let teamAssignments = {};
+    let matchResults = {};
+    let attendance = [];
+    let guests = [];
+    let matchComments = {};
+    let isAdminLoggedIn = false, currentUser = null;
+    let chatUnsubscribe = null;
+    let timerInterval = null, currentHalf = 1, timeLeft = 45 * 60;
+    
+    // Helper functions
+    function escapeHtml(s){ return String(s).replace(/[&<>]/g, m=> ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
+    function getInitials(n){ return n.split(' ').map(x=>x[0]).join('').toUpperCase().substring(0,2); }
+    function getAvatarColor(n){ const c=['#1a73e8','#28a745','#dc3545','#fd7e14','#6f42c1','#20c997']; let h=0; for(let i=0;i<n.length;i++) h=((h<<5)-h)+n.charCodeAt(i); return c[Math.abs(h)%c.length]; }
+    function renderMiniAvatar(n,s=28){ return `<div class="player-avatar-small" style="background:${getAvatarColor(n)};width:${s}px;height:${s}px;font-size:${s/2}px;">${getInitials(n)}</div>`; }
+    function formatTime(s){ return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`; }
+    function playAlarm(){ try { const ctx = new (window.AudioContext || window.webkitAudioContext)(); const o = ctx.createOscillator(), g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value = 880; g.gain.value = 0.3; o.start(); g.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 1.5); o.stop(ctx.currentTime + 1.5); } catch(e){} }
+    function updateTimerDisplay(){ let d = document.getElementById("timerDisplay"); if(d) d.textContent = formatTime(timeLeft); let hs = document.getElementById("currentHalf"); if(hs) hs.textContent = currentHalf === 1 ? "FIRST HALF" : "SECOND HALF"; }
+    function timerTick(){ if(timeLeft <= 0){ if(timerInterval) clearInterval(timerInterval); playAlarm(); if(currentHalf === 1){ alert("🔔 HALF TIME! Start second half."); currentHalf = 2; timeLeft = 45 * 60; updateTimerDisplay(); startTimer(); } else { alert("🔔 FULL TIME! Match ended."); timerInterval = null; } return; } timeLeft--; updateTimerDisplay(); }
+    function startTimer(){ if(timerInterval) clearInterval(timerInterval); timerInterval = setInterval(timerTick, 1000); }
+    function pauseTimer(){ if(timerInterval){ clearInterval(timerInterval); timerInterval = null; } }
+    function resetTimer(){ pauseTimer(); currentHalf = 1; timeLeft = 45 * 60; updateTimerDisplay(); }
+    
+    function getNextMondayGame() { const now = new Date(); const utc = now.getTime() + (now.getTimezoneOffset() * 60000); const aestNow = new Date(utc + (10 * 3600000)); const day = aestNow.getDay(), hour = aestNow.getHours(); let daysUntilMonday; if (day === 1 && hour >= 20) daysUntilMonday = 7; else if (day === 1) daysUntilMonday = 0; else if (day === 0) daysUntilMonday = 1; else daysUntilMonday = (8 - day) % 7; const nextMonday = new Date(aestNow); nextMonday.setDate(aestNow.getDate() + daysUntilMonday); nextMonday.setHours(20,0,0,0); return nextMonday; }
+    function getCurrentGameWeekStr(){ return getNextMondayGame().toISOString().split('T')[0]; }
+    function getCurrentGameLabel(){ const m = getNextMondayGame(); return `Mon ${m.toLocaleDateString('en-AU',{day:'numeric',month:'short'})}`; }
+    function getAllGameWeeks() { const year = new Date().getFullYear(); let start = new Date(year, 0, 1); while(start.getDay() !== 1) start.setDate(start.getDate() + 1); let weeks = [], cur = new Date(start); let dec31 = new Date(year, 11, 31); let lastMon = new Date(dec31); while(lastMon.getDay() !== 1) lastMon.setDate(lastMon.getDate() - 1); let secondLast = new Date(lastMon); secondLast.setDate(secondLast.getDate() - 7); while(cur <= secondLast) { weeks.push({ dateStr: cur.toISOString().split('T')[0], label: `Mon ${cur.toLocaleDateString('en-AU',{day:'numeric',month:'short'})}` }); cur.setDate(cur.getDate() + 7); } return weeks; }
+    const ALL_WEEKS = getAllGameWeeks();
+    const CURRENT_GAME_STR = getCurrentGameWeekStr();
+    function getPastWeeks(){ return ALL_WEEKS.filter(w => w.dateStr < CURRENT_GAME_STR).reverse(); }
+    function getAllParticipants(gameDate){ const playersIn = attendance.filter(a => a.gameDate === gameDate && a.status === 'in').map(a => a.player); const guestsIn = guests.filter(g => g.gameDate === gameDate).map(g => ({ name: g.guestName, isGuest: true, addedBy: g.addedBy })); return { players: playersIn, guests: guestsIn }; }
+    
+    // ========== NEWSPAPER STYLE MATCH REPORT WITH RANDOM PUNDITS ==========
     const pundits = [
-        { name: "Ned Zelic", quote: "The transition play was absolutely breathtaking! The way Yellow moved the ball through the lines... pure poetry." },
-        { name: "Craig Foster", quote: "This is what Monday night football is all about. Passion, commitment, and that never-say-die attitude. Magnificent contest!" },
-        { name: "Lucy Zelic", quote: "Unbelievable drama under the lights at Clifton Park! The crowd was electric, the tackles were flying, and we got a classic." },
-        { name: "Mark Bosnich", quote: "The goalkeeper tonight was a human wall. Those reflex saves in the 70th minute changed the entire complexion of the game." },
-        { name: "Tara Rushton", quote: "Clifton Park was ROCKING! You could feel the intensity from the first whistle. This rivalry just keeps delivering." },
-        { name: "Simon Hill", quote: "A tactical masterclass from both benches. The substitutions timed perfectly, the shape disciplined. Proper football." },
-        { name: "Grace Gill", quote: "The energy levels were immense. No one wanted to lose this one. That's the beauty of Monday nights." }
+        { name: "Ned Zelic (ex-Socceroo)", style: "tactical", catchphrase: "The transition play was breathtaking!" },
+        { name: "Craig Foster (analyst)", style: "passionate", catchphrase: "That's the beautiful game at its purest." },
+        { name: "Lucy Zelic (host)", style: "dramatic", catchphrase: "Unbelievable drama under the lights!" },
+        { name: "Mark Bosnich (legend)", style: "keeper", catchphrase: "The goalkeeper was a wall tonight." },
+        { name: "Tara Rushton (commentator)", style: "colorful", catchphrase: "Clifton Park was rocking!" }
     ];
-
-    // Fun facts database
-    const funFacts = [
-        "🎲 Attendance: 37 brave souls braved the Melbourne chill!",
-        "🚀 Most shots off target: Someone's aiming for the moon this week!",
-        "📸 The post was hit 2 times — so close to glory!",
-        "🎉 Best celebration: A knee-slide that turned into a belly flop. Iconic.",
-        "💨 Fastest player recorded: clocked at 32km/h sprinting down the wing!",
-        "🍻 Post-match drinks: 3 jugs of beer consumed in record time.",
-        "🎙️ Loudest cheer: When the final whistle blew — pure relief and joy!"
-    ];
-
-    let goals = [];
-    let assists = [];
-
-    // Add goal scorer UI
-    function renderGoals() {
-        const container = document.getElementById('goalsContainer');
-        if (!container) return;
-        container.innerHTML = goals.map((g, idx) => `
-            <div class="goal-row">
-                <input type="text" placeholder="Player name" value="${escapeHtml(g.player)}" data-goal-idx="${idx}" class="goal-player">
-                <input type="number" placeholder="Goals" value="${g.count}" data-goal-count="${idx}" class="goal-count" style="width:80px;">
-                <button onclick="removeGoal(${idx})">✖</button>
-            </div>
-        `).join('');
+    
+    function generateNewspaperReport(weekLabel, yellowScore, orangeScore, goals, assists, mvp, injuries, ownGoals, yellowTeamList = [], orangeTeamList = []) {
+        const winner = yellowScore > orangeScore ? "YELLOW" : (orangeScore > yellowScore ? "ORANGE" : "STALEMATE");
+        const winnerEmoji = yellowScore > orangeScore ? "🟡" : (orangeScore > yellowScore ? "🟠" : "⚖️");
+        const winningMargin = Math.abs(yellowScore - orangeScore);
+        const isThriller = (yellowScore + orangeScore) >= 5;
+        const isCagey = (yellowScore + orangeScore) <= 2;
         
-        // Attach event listeners
-        document.querySelectorAll('.goal-player').forEach(inp => {
-            inp.addEventListener('change', (e) => {
-                const idx = parseInt(e.target.dataset.goalIdx);
-                if (goals[idx]) goals[idx].player = e.target.value;
-            });
-        });
-        document.querySelectorAll('.goal-count').forEach(inp => {
-            inp.addEventListener('change', (e) => {
-                const idx = parseInt(e.target.dataset.goalCount);
-                if (goals[idx]) goals[idx].count = parseInt(e.target.value) || 1;
-            });
-        });
-    }
-
-    function renderAssists() {
-        const container = document.getElementById('assistsContainer');
-        if (!container) return;
-        container.innerHTML = assists.map((a, idx) => `
-            <div class="assist-row">
-                <input type="text" placeholder="Player name" value="${escapeHtml(a.player)}" data-assist-idx="${idx}" class="assist-player">
-                <input type="number" placeholder="Assists" value="${a.count}" data-assist-count="${idx}" style="width:80px;">
-                <button onclick="removeAssist(${idx})">✖</button>
-            </div>
-        `).join('');
+        // Build goal details
+        let goalText = "";
+        const allGoals = {...goals};
+        if(ownGoals && ownGoals.length){ ownGoals.forEach(og => { allGoals[`⚠️ OWN GOAL (${og.player})`] = (allGoals[`⚠️ OWN GOAL (${og.player})`] || 0) + 1; }); }
+        const goalEntries = Object.entries(allGoals);
+        if(goalEntries.length){ goalText = goalEntries.map(([p,c]) => `⚽ ${p} — ${c} goal${c>1?'s':''}`).join('\n'); } else { goalText = "⚽ No goals scored — a rare blank night."; }
         
-        document.querySelectorAll('.assist-player').forEach(inp => {
-            inp.addEventListener('change', (e) => {
-                const idx = parseInt(e.target.dataset.assistIdx);
-                if (assists[idx]) assists[idx].player = e.target.value;
-            });
-        });
-        document.querySelectorAll('[data-assist-count]').forEach(inp => {
-            inp.addEventListener('change', (e) => {
-                const idx = parseInt(e.target.dataset.assistCount);
-                if (assists[idx]) assists[idx].count = parseInt(e.target.value) || 1;
-            });
-        });
-    }
-
-    window.removeGoal = (idx) => {
-        goals.splice(idx, 1);
-        renderGoals();
-    };
-
-    window.removeAssist = (idx) => {
-        assists.splice(idx, 1);
-        renderAssists();
-    };
-
-    document.getElementById('addGoalBtn')?.addEventListener('click', () => {
-        goals.push({ player: '', count: 1 });
-        renderGoals();
-    });
-
-    document.getElementById('addAssistBtn')?.addEventListener('click', () => {
-        assists.push({ player: '', count: 1 });
-        renderAssists();
-    });
-
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-
-    // Generate newspaper-style report
-    function generateNewspaperReport() {
-        const weekLabel = document.getElementById('matchWeek').value || 'Monday Night';
-        const yellowScore = parseInt(document.getElementById('yellowScore').value) || 0;
-        const orangeScore = parseInt(document.getElementById('orangeScore').value) || 0;
-        const mvp = document.getElementById('mvp').value.trim() || 'The Whole Squad';
-        const injuriesInput = document.getElementById('injuries').value;
-        const injuries = injuriesInput ? injuriesInput.split(',').map(i => i.trim()).filter(i => i) : [];
+        let assistText = "";
+        if(assists && Object.keys(assists).length){ assistText = Object.entries(assists).map(([a,c]) => `🎯 ${a} — ${c} assist${c>1?'s':''}`).join('\n'); } else { assistText = "🎯 Creative spark missing in the final third."; }
         
-        // Build goal text
-        let goalText = '';
-        const goalMap = {};
-        goals.forEach(g => {
-            if (g.player && g.count > 0) {
-                goalMap[g.player] = (goalMap[g.player] || 0) + g.count;
-            }
-        });
-        const goalEntries = Object.entries(goalMap);
-        if (goalEntries.length > 0) {
-            goalText = goalEntries.map(([p, c]) => `⚽ ${p} — ${c} goal${c > 1 ? 's' : ''}`).join('\n');
-        } else {
-            goalText = '⚽ NO GOALS SCORED — A rare defensive masterclass!';
-        }
+        // Random pundit 1 (analysis)
+        const pundit1 = pundits[Math.floor(Math.random() * pundits.length)];
+        const pundit2 = pundits[Math.floor(Math.random() * pundits.length)];
+        const pundit3 = pundits[Math.floor(Math.random() * pundits.length)];
         
-        // Build assist text
-        let assistText = '';
-        const assistMap = {};
-        assists.forEach(a => {
-            if (a.player && a.count > 0) {
-                assistMap[a.player] = (assistMap[a.player] || 0) + a.count;
-            }
-        });
-        const assistEntries = Object.entries(assistMap);
-        if (assistEntries.length > 0) {
-            assistText = assistEntries.map(([p, c]) => `🎯 ${p} — ${c} assist${c > 1 ? 's' : ''}`).join('\n');
-        } else {
-            assistText = '🎯 Creative spark missing in the final third.';
-        }
+        let matchNarrative = "";
+        if (winner === "STALEMATE") matchNarrative = "A tense tactical battle ended with honours even. Both sides had chances but couldn't find the killer instinct.";
+        else if (winningMargin >= 3) matchNarrative = `A dominant display from the ${winner} side. They overwhelmed their opponents with relentless attacking waves.`;
+        else if (isThriller) matchNarrative = `GOAL GLUT! Fans were treated to a five-star thriller as both teams exchanged blows in an end-to-end contest.`;
+        else if (isCagey) matchNarrative = `A defensive masterclass at Clifton Park. Space was at a premium, and every tackle mattered.`;
+        else matchNarrative = `A hard-fought contest where the ${winner} did just enough to snatch the three points (metaphorically). Grit over glamour.`;
         
-        // Determine match narrative
-        const winner = yellowScore > orangeScore ? 'YELLOW' : (orangeScore > yellowScore ? 'ORANGE' : 'STALEMATE');
-        const winnerEmoji = yellowScore > orangeScore ? '🟡' : (orangeScore > yellowScore ? '🟠' : '⚖️');
-        const margin = Math.abs(yellowScore - orangeScore);
-        const totalGoals = yellowScore + orangeScore;
-        
-        let narrative = '';
-        if (winner === 'STALEMATE') {
-            narrative = 'A tense tactical battle ended with honours even. Both sides had chances but couldn\'t find the killer instinct. The defences stood tall when it mattered most.';
-        } else if (margin >= 3) {
-            narrative = `A DOMINANT DISPLAY from the ${winner} side! They overwhelmed their opponents with relentless attacking waves and clinical finishing. A statement performance.`;
-        } else if (totalGoals >= 5) {
-            narrative = `GOAL GLUT at Clifton Park! Fans were treated to a five-star thriller as both teams exchanged blows in an end-to-end contest. Entertainment guaranteed!`;
-        } else if (totalGoals <= 1) {
-            narrative = `A DEFENSIVE MASTERCLASS. Space was at a premium, every tackle mattered, and both keepers earned their clean sheets (or close to it). Grit over glamour.`;
-        } else {
-            narrative = `A hard-fought contest where the ${winner} side did just enough to snatch the victory. Grit, determination, and a moment of magic decided this one.`;
-        }
-        
-        // Pick 3 random pundits
-        const shuffled = [...pundits];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-        const selectedPundits = shuffled.slice(0, 3);
-        
-        // Random fun fact
+        // Fun fact & quirky analysis
+        const funFacts = [
+            `Attendance record: ${Math.floor(20 + Math.random() * 30)} passionate souls braved the Melbourne chill.`,
+            `Most shots off target: Someone's aiming for the moon 🚀`,
+            `The post was hit ${Math.floor(Math.random() * 3)} times — so close!`,
+            `VAR (imaginary) had a quiet night, no controversies.`,
+            `Best celebration: A knee-slide that went wrong but became iconic.`
+        ];
         const randomFact = funFacts[Math.floor(Math.random() * funFacts.length)];
         
-        // Build injury text
-        let injuryText = '🔸 Clean bill of health — all players survived the battle';
-        if (injuries.length > 0) {
-            injuryText = injuries.map(i => `🔸 ${i}`).join('\n');
-        }
+        const yellowLineup = yellowTeamList.slice(0,5).map(p => p.name || p).join(", ");
+        const orangeLineup = orangeTeamList.slice(0,5).map(p => p.name || p).join(", ");
         
-        // Full newspaper report
+        // Full newspaper style report
         const report = `📰 *THE MONDAY NIGHT TELEGRAPH* 📰
 📍 *CLIFTON PARK, BRUNSWICK* | ${weekLabel}
 ━━━━━━━━━━━━━━━━━━━━━━━
 
 🎙️ *MATCH REPORT*
-${narrative}
+${matchNarrative}
 
 📊 *FINAL SCORE*
 🟡 YELLOW ${yellowScore} — ${orangeScore} 🟠
@@ -420,75 +177,155 @@ ${narrative}
 ⚽ *GOAL SCORERS*
 ${goalText}
 
-${assistText ? '🎯 *ASSISTS*\n' + assistText : ''}
+${assistText}
 
 ⭐ *MAN OF THE MATCH*
-🏅 ${mvp} ${mvp !== 'The Whole Squad' ? '— match-winning contribution!' : ''}
+🏅 ${mvp || "The Whole Squad"} (tireless performance)
 
 🩺 *INJURY WATCH*
-${injuryText}
+${injuries?.length ? injuries.map(i => `🔸 ${i}`).join('\n') : "🔸 Clean bill of health — all players survived"}
 
 ━━━━━━━━━━━━━━━━━━━━━━━
 🎙️ *EXPERT ANALYSIS*
 
-🗣️ *${selectedPundits[0].name}*:
-"${selectedPundits[0].quote}"
+🗣️ *${pundit1.name}*:
+"${pundit1.catchphrase} The ${yellowScore === orangeScore ? 'balance' : 'intensity'} was outstanding. ${yellowScore + orangeScore > 0 ? 'The finishing quality in the box decided the tie.' : 'Defences completely on top tonight.'}"
 
-🗣️ *${selectedPundits[1].name}*:
-"${selectedPundits[1].quote}"
+🗣️ *${pundit2.name}*:
+"I loved the commitment from both benches. Clifton Park always delivers drama. ${mvp ? mvp.split(' ')[0] : 'The captain'} led by example."
 
-🗣️ *${selectedPundits[2].name}*:
-"${selectedPundits[2].quote}"
+🗣️ *${pundit3.name}* (pundit):
+"${Math.random() > 0.5 ? 'The tempo in the second half was electric — proper Monday night football.' : 'A moment of magic changed the game; that's why we love this league.'}"
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-✨ *FUN CORNER*
-${randomFact}
+📋 *LINEUP SNAPSHOT*
+🟡 Yellow (selected): ${yellowLineup || "gritty warriors"}
+🟠 Orange (selected): ${orangeLineup || "brave hearts"}
 
-📅 *NEXT WEEK*
-Monday 8pm SHARP at Clifton Park. New battles await!
+✨ *FUN CORNER*
+🎲 ${randomFact}
+📅 Next Monday: 8pm sharp — keep the rivalry alive!
 
 #MondayNightSoccer #CliftonParkChronicle #MNSFamily`;
 
         return report;
     }
-
-    // Generate and display report
-    document.getElementById('generateReportBtn')?.addEventListener('click', () => {
-        const report = generateNewspaperReport();
-        const reportPreview = document.getElementById('reportPreview');
-        const reportCard = document.getElementById('reportCard');
-        
-        if (reportPreview) {
-            // Convert line breaks to HTML for display
-            reportPreview.innerHTML = report.replace(/\n/g, '<br>');
-            reportCard.style.display = 'block';
-        }
-        
-        // Store report for WhatsApp sharing
-        window.currentReport = report;
-    });
     
-    // WhatsApp share
-    document.getElementById('whatsappShareBtn')?.addEventListener('click', () => {
-        if (window.currentReport) {
-            const encodedText = encodeURIComponent(window.currentReport);
-            window.open(`https://wa.me/?text=${encodedText}`, '_blank');
-        } else {
-            alert('Please generate a report first');
-        }
-    });
+    // Firebase CRUD (simplified but real)
+    async function loadData(){
+        if(!firebaseReady || !db) return;
+        try{
+            const [pDoc,profDoc,tDoc,rDoc,attSnap,guestSnap,commentsSnap] = await Promise.all([
+                db.collection("config").doc("players").get(),
+                db.collection("config").doc("playerProfiles").get(),
+                db.collection("config").doc("teamAssignments").get(),
+                db.collection("config").doc("matchResults").get(),
+                db.collection("attendance").get(),
+                db.collection("guests").get(),
+                db.collection("matchComments").get()
+            ]);
+            if(pDoc.exists) players = pDoc.data().list.sort();
+            if(profDoc.exists) playerProfiles = profDoc.data();
+            if(tDoc.exists) teamAssignments = tDoc.data();
+            if(rDoc.exists) matchResults = rDoc.data();
+            attendance = attSnap.docs.map(d=>d.data());
+            guests = guestSnap.docs.map(d=>d.data());
+            matchComments = {};
+            commentsSnap.docs.forEach(doc=>{ const d=doc.data(); if(!matchComments[d.gameDate]) matchComments[d.gameDate]=[]; matchComments[d.gameDate].push(d); });
+        } catch(e){ console.warn(e); }
+        refreshAll();
+    }
+    async function saveAttendance(a){ if(firebaseReady&&db) await db.collection("attendance").doc(`${a.player}_${a.gameDate}`).set(a); const idx = attendance.findIndex(x=>x.player===a.player && x.gameDate===a.gameDate); if(idx!==-1) attendance[idx]=a; else attendance.push(a); refreshAll(); }
+    async function saveGuest(g){ if(firebaseReady&&db) await db.collection("guests").doc(`${g.guestName}_${g.gameDate}`).set(g); guests.push(g); refreshAll(); }
+    async function removeGuest(n,d){ if(!confirm(`Remove guest "${n}"?`)) return; if(firebaseReady&&db) await db.collection("guests").doc(`${n}_${d}`).delete(); guests = guests.filter(g=>!(g.guestName===n && g.gameDate===d)); refreshAll(); }
+    async function saveTeamAssignments(date,assign){ teamAssignments[date] = assign; if(firebaseReady&&db) await db.collection("config").doc("teamAssignments").set(teamAssignments); refreshAll(); }
+    async function saveComment(date,author,text){ const c={ gameDate:date, author, text, timestamp:Date.now() }; if(firebaseReady&&db) await db.collection("matchComments").add(c); if(!matchComments[date]) matchComments[date]=[]; matchComments[date].push(c); renderHistoryPage(); }
+    async function saveMatchResult(date,yellow,orange,goals,assists,mvp,injuries,ownGoals){ matchResults[date] = { yellowScore:yellow, orangeScore:orange, goals, assists:assists||{}, mvp, injuries:injuries||[], ownGoals:ownGoals||[], timestamp:Date.now() }; if(firebaseReady&&db) await db.collection("config").doc("matchResults").set(matchResults); renderHistoryPage(); renderScoreboardPage(); if(isAdminLoggedIn) renderAdminPage(); }
+    async function setAttendance(status){ if(!currentUser) return alert("Login required"); await saveAttendance({ player:currentUser.name, gameDate:CURRENT_GAME_STR, status:status }); }
+    async function addGuest(name){ if(!currentUser) return alert("Login first"); if(guests.some(g=>g.gameDate===CURRENT_GAME_STR && g.guestName===name.trim())) return alert("Guest exists"); await saveGuest({ guestName:name.trim(), gameDate:CURRENT_GAME_STR, addedBy:currentUser.name }); document.getElementById("guestNameInput") && (document.getElementById("guestNameInput").value=""); alert(`Guest "${name}" added!`); }
+    function refreshAll(){ renderHomePage(); renderTeamsPage(); renderHistoryPage(); renderProfilesPage(); renderScoreboardPage(); if(isAdminLoggedIn) renderAdminPage(); }
     
-    // Initialize with sample data
-    goals = [
-        { player: 'Carlo', count: 2 },
-        { player: 'Danny', count: 1 }
-    ];
-    assists = [
-        { player: 'Mario', count: 1 },
-        { player: 'Frank', count: 1 }
-    ];
-    renderGoals();
-    renderAssists();
+    // Renderers (abridged but fully functional)
+    function renderHomePage(){ const c=document.getElementById("homeContainer"); if(!c) return; const gl=getCurrentGameLabel(); const status=attendance.find(a=>a.gameDate===CURRENT_GAME_STR && a.player===currentUser?.name)?.status; const parts=getAllParticipants(CURRENT_GAME_STR); c.innerHTML=`<div class="info-bar"><i class="fas fa-calendar-alt"></i> Next Match: ${gl} • 8:00pm Clifton Park</div><div class="attendance-card"><h2><i class="fas fa-futbol"></i> ${gl} • 8pm</h2><div>Clifton Park, Brunswick</div><div class="big-buttons"><button id="homePlayBtn" class="btn-play-big">✅ I'M PLAYING</button><button id="homeSitBtn" class="btn-sit-big">❌ CAN'T PLAY</button></div><div>${status==='in'?'✓ You are PLAYING':(status==='out'?'✗ You are NOT PLAYING':'Tap above to set attendance')}</div></div><div class="playing-list"><div>🟢 Players (${parts.players.length})</div><div>${parts.players.map(p=>`<span class="attendee-tag">${renderMiniAvatar(p,28)} ${escapeHtml(p)}</span>`).join('')||'None'}</div></div><div class="guest-section"><div>🎭 Guests (${parts.guests.length})</div><div>${parts.guests.map(g=>`<span class="guest-tag"><i class="fas fa-user-plus"></i> ${escapeHtml(g.name)} <small>(${escapeHtml(g.addedBy)})</small></span>`).join('')||'None'}</div><div style="margin-top:12px;"><input id="guestNameInput" placeholder="Guest name"><button id="addGuestBtnPlayer" style="width:100%;margin-top:8px;">➕ Bring a Guest</button></div></div>`; document.getElementById("homePlayBtn")?.addEventListener("click",()=>setAttendance("in")); document.getElementById("homeSitBtn")?.addEventListener("click",()=>setAttendance("out")); document.getElementById("addGuestBtnPlayer")?.addEventListener("click",()=>{ const gn=document.getElementById("guestNameInput")?.value.trim(); if(gn) addGuest(gn); else alert("Enter guest name"); }); }
+    function renderTeamsPage(){ const c=document.getElementById("page-teamswk"); if(!c) return; const gl=getCurrentGameLabel(); const parts=getAllParticipants(CURRENT_GAME_STR); const allList=[...parts.players.map(p=>({ name:p, isG:false })), ...parts.guests.map(g=>({ name:g.name, isG:true }))]; const assign=teamAssignments[CURRENT_GAME_STR]||{}; const yellow=[], orange=[]; for(let p of allList){ const t=assign[p.name] || assign[`guest_${p.name}`]; if(t==="yellow") yellow.push(p); else if(t==="orange") orange.push(p); } c.innerHTML=`<div class="info-bar">${gl} • 8pm Clifton Park</div><div class="card"><div class="team-row"><div class="team-box"><div class="team-yellow">🟡 YELLOW (${yellow.length})</div><div class="player-list">${yellow.map(p=>`<div class="player-tag">${renderMiniAvatar(p.name,24)} ${escapeHtml(p.name)}${p.isG?' 🎭':''}</div>`).join('')||'—'}</div></div><div class="team-box"><div class="team-orange">🟠 ORANGE (${orange.length})</div><div class="player-list">${orange.map(p=>`<div class="player-tag">${renderMiniAvatar(p.name,24)} ${escapeHtml(p.name)}${p.isG?' 🎭':''}</div>`).join('')||'—'}</div></div></div></div>`; }
+    function renderHistoryPage(){ const c=document.getElementById("page-history"); if(!c) return; const past=getPastWeeks(); let h=`<div class="card"><h2>📰 Match Archives</h2></div>`; for(let w of past){ const m=matchResults[w.dateStr]||{ yellowScore:0, orangeScore:0, goals:{}, mvp:'', injuries:[] }; h+=`<div class="match-card"><div class="match-header"><div>${w.label}</div><div class="match-result">🟡 ${m.yellowScore} - ${m.orangeScore} 🟠</div></div><div class="goals-section"><div>⚽ Scorers: ${Object.entries(m.goals||{}).map(([p,c])=>`${p}(${c})`).join(', ') || 'none'}</div><div>🏆 MVP: ${m.mvp || '—'}</div></div><div class="comments-section"><div>💬 Memories</div><div id="comments-${w.dateStr.replace(/-/g,'')}">${(matchComments[w.dateStr]||[]).map(c=>`<div class="comment-item"><strong>${escapeHtml(c.author)}</strong><br>${escapeHtml(c.text)}</div>`).join('')||'No comments'}</div><div class="add-comment"><input id="commentInput-${w.dateStr.replace(/-/g,'')}" placeholder="Add comment..."><button onclick="window.addCommentToHistory('${w.dateStr}')">Post</button></div></div></div>`; } c.innerHTML=h; }
+    window.addCommentToHistory = async function(date){ if(!currentUser) return alert("Login first"); const inp=document.getElementById(`commentInput-${date.replace(/-/g,'')}`); if(inp?.value.trim()){ await saveComment(date,currentUser.name,inp.value.trim()); inp.value=""; renderHistoryPage(); } };
+    function renderProfilesPage(){ const c=document.getElementById("page-profiles"); if(!c) return; let h=`<div class="card"><h2>👤 Player Profiles</h2>`; for(let p of players){ const prof=playerProfiles[p]||{ age:'—', position:'—', yearJoined:'—', gamesPlayed:0 }; h+=`<div class="profile-item">${renderMiniAvatar(p,40)}<div><div>⚽ ${escapeHtml(p)}</div><div><span class="profile-badge">🎂 ${prof.age}</span><span class="profile-badge">⚽ ${prof.position}</span><span class="profile-badge">🏆 ${prof.gamesPlayed} games</span></div></div></div>`; } c.innerHTML=h; }
+    function renderScoreboardPage(){ const c=document.getElementById("page-scoreboard"); if(!c) return; let stats = new Map(); for(let p of players) stats.set(p, { goals:0, gamesPlayed:0, assists:0 }); attendance.forEach(a => { if(a.status === 'in') stats.get(a.player).gamesPlayed++; }); for(let match of Object.values(matchResults)){ if(match.goals){ for(let [scorer, count] of Object.entries(match.goals)){ if(stats.has(scorer)) stats.get(scorer).goals += count; } } } const topGoals = Array.from(stats.entries()).map(([n,s])=>({name:n,goals:s.goals})).sort((a,b)=>b.goals - a.goals).slice(0,10); c.innerHTML=`<div class="card"><h2>🏆 Golden Boot</h2>${topGoals.map((p,i)=>`<div class="admin-team-item"><span>${i+1}. ${renderMiniAvatar(p.name,24)} ${escapeHtml(p.name)}</span><span>⚽ ${p.goals}</span></div>`).join('')}</div>`; }
+    function renderTimerPage(){ const c=document.getElementById("page-timer"); if(c) c.innerHTML=`<div class="timer-container"><div class="timer-display" id="timerDisplay">45:00</div><div class="timer-controls"><button class="timer-btn start" id="timerStartBtn">Start</button><button class="timer-btn pause" id="timerPauseBtn">Pause</button><button class="timer-btn reset" id="timerResetBtn">Reset</button></div><div class="half-status">Half: <span id="currentHalf">FIRST HALF</span></div></div>`; updateTimerDisplay(); document.getElementById("timerStartBtn")?.addEventListener("click",startTimer); document.getElementById("timerPauseBtn")?.addEventListener("click",pauseTimer); document.getElementById("timerResetBtn")?.addEventListener("click",resetTimer); }
+    function renderChatPage(){ const c=document.getElementById("page-chat"); if(!c) return; c.innerHTML=`<div class="card"><h2>💬 Team Chat</h2><div id="chatMessagesList" style="height:350px;overflow-y:auto;background:#f8fafc;border-radius:20px;padding:12px;"></div><div style="display:flex;gap:8px;margin-top:12px;"><input id="chatInput" placeholder="Type message..." style="flex:1;"><button id="chatSendBtn">Send</button></div></div>`; if(firebaseReady&&db){ if(chatUnsubscribe) chatUnsubscribe(); chatUnsubscribe = db.collection("chatMessages").orderBy("timestamp","asc").onSnapshot(snap=>{ const div=document.getElementById("chatMessagesList"); if(!div) return; let h=""; snap.forEach(doc=>{ const m=doc.data(); const t=m.timestamp?new Date(m.timestamp.toDate()).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):""; h+=`<div class="chat-message"><div class="chat-name">${escapeHtml(m.name)} <span style="font-size:10px;">${t}</span></div><div class="chat-bubble">${escapeHtml(m.message)}</div></div>`; }); div.innerHTML=h||"<div style='text-align:center;'>No messages</div>"; div.scrollTop=div.scrollHeight; }); } document.getElementById("chatSendBtn")?.addEventListener("click",async()=>{ const inp=document.getElementById("chatInput"); if(inp?.value.trim() && currentUser){ if(firebaseReady&&db) await db.collection("chatMessages").add({ name:currentUser.name, message:inp.value.trim(), timestamp:firebase.firestore.FieldValue.serverTimestamp() }); inp.value=""; } }); }
+    function renderWeatherPage(){ const c=document.getElementById("page-weather"); if(c) c.innerHTML=`<div class="card"><h2>🌤️ Clifton Park Forecast</h2><div style="background:#0f2027;color:white;border-radius:24px;padding:20px;text-align:center;"><i class="fas fa-sun fa-3x"></i><h3>Clear night</h3><p>Perfect for football 🌙</p></div></div>`; }
+    function renderRulesPage(){ const c=document.getElementById("page-rules"); if(c) c.innerHTML=`<div class="card"><h2>📜 Code of Conduct</h2><ul style="margin-left:20px;"><li>⚡ 8pm sharp at Clifton Park</li><li>✅ RSVP before Sunday</li><li>🎭 Respect guests & ref</li><li>📰 Post-match report gets shared on WhatsApp!</li></ul></div>`; }
+    
+    // Admin page with NEWSPAPER report generator
+    function renderAdminPage(){
+        if(!isAdminLoggedIn){ const c=document.getElementById("page-admin"); if(c) c.innerHTML=`<div class="card"><h2>🔒 Admin Corner</h2><button id="adminLoginBtn">Admin Login</button></div>`; document.getElementById("adminLoginBtn")?.addEventListener("click",()=>{ const pw=prompt("Enter admin password:"); if(pw==="admin123"){ isAdminLoggedIn=true; renderAdminPage(); refreshAll(); } else alert("Wrong password"); }); return; }
+        const gameDate=CURRENT_GAME_STR, gameLabel=getCurrentGameLabel();
+        const parts=getAllParticipants(gameDate);
+        const allList=[...parts.players.map(p=>({ name:p, isGuest:false })), ...parts.guests.map(g=>({ name:g.name, isGuest:true }))];
+        const currAssign=teamAssignments[gameDate]||{};
+        const pastWeeks=getPastWeeks();
+        let html = `<div class="info-bar">🔐 ADMIN • NEWSPAPER MODE</div>
+        <div class="card"><h2>📋 Match Report Studio</h2><select id="reportWeekSelect"><option value="">-- Select Match Week --</option>${pastWeeks.map(w=>`<option value="${w.dateStr}">${w.label}</option>`).join('')}</select>
+        <div id="matchReportForm" style="display:none;margin-top:12px;">
+            <div style="display:flex;gap:12px;"><input type="number" id="reportYellowScore" placeholder="Yellow Score" style="flex:1;"><input type="number" id="reportOrangeScore" placeholder="Orange Score" style="flex:1;"></div>
+            <div><label>⚽ Goal Scorers (Player:Goals)</label><div id="goalsList"></div><button id="addGoalBtn" type="button">+ Add Goal</button></div>
+            <div><label>🎯 Assists (Player:Assists)</label><div id="assistsList"></div><button id="addAssistBtn">+ Add Assist</button></div>
+            <div><label>🏆 MVP</label><select id="mvpSelect"></select></div>
+            <div><label>🩺 Injuries (comma)</label><input id="injuriesInput"></div>
+            <button id="generateNewspaperBtn" style="background:#b45309;">📰 GENERATE NEWSPAPER REPORT</button>
+            <div id="newspaperPreview" class="newspaper-report" style="margin-top:20px;display:none;"></div>
+            <button id="whatsappShareFinal" class="whatsapp-share" style="display:none;"><i class="fab fa-whatsapp"></i> Share Report to WhatsApp</button>
+        </div></div>
+        <div class="card"><h2>⚽ Assign Teams</h2>${allList.map(p=>{ const ct=currAssign[p.name] || ""; return `<div class="admin-team-item"><div>${renderMiniAvatar(p.name,28)} ${escapeHtml(p.name)}</div><select class="team-select" data-name="${escapeHtml(p.name)}"><option value="">— Team —</option><option value="yellow" ${ct==="yellow"?"selected":""}>🟡 Yellow</option><option value="orange" ${ct==="orange"?"selected":""}>🟠 Orange</option></select></div>`; }).join('')}<div class="flex-btns"><button id="saveTeamsBtn">💾 Save Teams</button></div></div>`;
+        const container=document.getElementById("page-admin"); if(container) container.innerHTML=html;
+        let goals = [], assists = [];
+        function updateFormFields(week){
+            const participants = getAllParticipants(week);
+            const allPlayers = [...participants.players, ...participants.guests.map(g=>g.name)];
+            const mvpSel = document.getElementById("mvpSelect");
+            if(mvpSel) mvpSel.innerHTML = `<option value="">-- Select MVP --</option>${allPlayers.map(p=>`<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('')}`;
+            const goalsDiv = document.getElementById("goalsList"); if(goalsDiv) goalsDiv.innerHTML = goals.map((g,idx)=>`<div class="stats-row"><select class="goal-select" data-idx="${idx}"><option value="">Player</option>${allPlayers.map(p=>`<option value="${escapeHtml(p)}" ${g.player===p?'selected':''}>${escapeHtml(p)}</option>`).join('')}</select><input type="number" class="goal-count" data-idx="${idx}" value="${g.count||1}" style="width:80px;"><button class="remove-goal" data-idx="${idx}" style="background:#dc3545;">✖</button></div>`).join('');
+            const assistsDiv = document.getElementById("assistsList"); if(assistsDiv) assistsDiv.innerHTML = assists.map((a,idx)=>`<div class="stats-row"><select class="assist-select" data-idx="${idx}"><option value="">Player</option>${allPlayers.map(p=>`<option value="${escapeHtml(p)}" ${a.player===p?'selected':''}>${escapeHtml(p)}</option>`).join('')}</select><input type="number" class="assist-count" data-idx="${idx}" value="${a.count||1}" style="width:80px;"><button class="remove-assist" data-idx="${idx}" style="background:#dc3545;">✖</button></div>`).join('');
+        }
+        const weekSelect = document.getElementById("reportWeekSelect");
+        weekSelect?.addEventListener("change",(e)=>{
+            const week = e.target.value; const form = document.getElementById("matchReportForm");
+            if(week){ form.style.display="block"; goals=[]; assists=[]; const existing=matchResults[week]; if(existing){ document.getElementById("reportYellowScore").value=existing.yellowScore||0; document.getElementById("reportOrangeScore").value=existing.orangeScore||0; if(existing.goals) goals=Object.entries(existing.goals).map(([p,c])=>({player:p,count:c})); if(existing.assists) assists=Object.entries(existing.assists).map(([p,c])=>({player:p,count:c})); document.getElementById("injuriesInput").value=existing.injuries?.join(', ')||''; if(existing.mvp) document.getElementById("mvpSelect").value=existing.mvp; } updateFormFields(week); document.getElementById("newspaperPreview").style.display="none"; document.getElementById("whatsappShareFinal").style.display="none"; } else form.style.display="none";
+        });
+        document.getElementById("addGoalBtn")?.addEventListener("click",()=>{ const week=weekSelect.value; if(week){ goals.push({player:'',count:1}); updateFormFields(week); } });
+        document.getElementById("addAssistBtn")?.addEventListener("click",()=>{ const week=weekSelect.value; if(week){ assists.push({player:'',count:1}); updateFormFields(week); } });
+        document.addEventListener("click",(e)=>{ if(e.target.classList.contains("remove-goal")){ const idx=parseInt(e.target.dataset.idx); goals.splice(idx,1); updateFormFields(weekSelect.value); } if(e.target.classList.contains("remove-assist")){ const idx=parseInt(e.target.dataset.idx); assists.splice(idx,1); updateFormFields(weekSelect.value); } });
+        document.addEventListener("change",(e)=>{ if(e.target.classList.contains("goal-select")){ const idx=e.target.dataset.idx; if(goals[idx]) goals[idx].player=e.target.value; } if(e.target.classList.contains("goal-count")){ const idx=e.target.dataset.idx; if(goals[idx]) goals[idx].count=parseInt(e.target.value)||1; } if(e.target.classList.contains("assist-select")){ const idx=e.target.dataset.idx; if(assists[idx]) assists[idx].player=e.target.value; } if(e.target.classList.contains("assist-count")){ const idx=e.target.dataset.idx; if(assists[idx]) assists[idx].count=parseInt(e.target.value)||1; } });
+        document.getElementById("generateNewspaperBtn")?.addEventListener("click",async()=>{ const week=weekSelect.value; if(!week) return alert("Select week"); const y=parseInt(document.getElementById("reportYellowScore").value)||0; const o=parseInt(document.getElementById("reportOrangeScore").value)||0; const goalObj={}; for(let g of goals) if(g.player && g.count>0) goalObj[g.player]=(goalObj[g.player]||0)+g.count; const assistObj={}; for(let a of assists) if(a.player && a.count>0) assistObj[a.player]=(assistObj[a.player]||0)+a.count; const mvp=document.getElementById("mvpSelect").value||""; const injuries=document.getElementById("injuriesInput").value.split(',').map(i=>i.trim()).filter(i=>i); await saveMatchResult(week,y,o,goalObj,assistObj,mvp,injuries,[]);
+            const participants = getAllParticipants(week); const yellowTeamRaw = teamAssignments[week] ? Object.keys(teamAssignments[week]).filter(k=>teamAssignments[week][k]==='yellow' && !k.startsWith('guest_')).map(name=>({name})) : []; const orangeTeamRaw = teamAssignments[week] ? Object.keys(teamAssignments[week]).filter(k=>teamAssignments[week][k]==='orange' && !k.startsWith('guest_')).map(name=>({name})) : [];
+            const weekLabel = ALL_WEEKS.find(w=>w.dateStr===week)?.label||week;
+            const newspaperReport = generateNewspaperReport(weekLabel, y, o, goalObj, assistObj, mvp, injuries, [], yellowTeamRaw, orangeTeamRaw);
+            const previewDiv = document.getElementById("newspaperPreview"); const reportTextDiv = document.getElementById("newspaperPreview");
+            if(previewDiv){ previewDiv.innerHTML = `<pre style="white-space:pre-wrap;font-family:'Merriweather',serif; font-size:13px;">${escapeHtml(newspaperReport)}</pre>`; previewDiv.style.display="block"; }
+            const shareBtn = document.getElementById("whatsappShareFinal"); if(shareBtn){ shareBtn.style.display="block"; shareBtn.onclick = ()=>{ window.open(`https://wa.me/?text=${encodeURIComponent(newspaperReport)}`,'_blank'); }; }
+            renderHistoryPage();
+        });
+        document.getElementById("saveTeamsBtn")?.addEventListener("click",async()=>{ const newAssign={}; document.querySelectorAll(".team-select").forEach(sel=>{ const name=sel.dataset.name; const val=sel.value; if(val && name) newAssign[name]=val; }); await saveTeamAssignments(gameDate,newAssign); renderAdminPage(); renderTeamsPage(); });
+    }
+    
+    function showLoginModal(){
+        const modal=document.createElement('div'); modal.className='modal'; let playerOptions=players.map(p=>`<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
+        modal.innerHTML=`<div class="modal-content"><div class="login-logo"><i class="fas fa-futbol fa-3x"></i></div><h3>Monday Night Soccer</h3><select id="loginNameSelect"><option value="">Select your name</option>${playerOptions}</select><button id="loginBtn">Login / Join</button><div style="margin-top:12px;"><button id="adminSwitchBtn" class="btn-outline" style="width:100%;">🔐 Admin Access</button></div></div>`;
+        document.body.appendChild(modal);
+        document.getElementById("loginBtn").onclick=()=>{ const sel=document.getElementById("loginNameSelect"); const name=sel?.value; if(name && players.includes(name)){ currentUser={name}; isAdminLoggedIn=false; modal.remove(); document.getElementById("userNameDisplay").innerText=name; document.getElementById("logoutBtn").style.display="inline-block"; refreshAll(); renderChatPage(); } else alert("Please select your name"); };
+        document.getElementById("adminSwitchBtn").onclick=()=>{ const pw=prompt("Admin password:"); if(pw==="admin123"){ isAdminLoggedIn=true; currentUser={name:"Admin"}; document.getElementById("userNameDisplay").innerText="Admin"; document.getElementById("logoutBtn").style.display="inline-block"; modal.remove(); refreshAll(); renderAdminPage(); } else alert("Wrong password"); };
+    }
+    function logout(){ currentUser=null; isAdminLoggedIn=false; document.getElementById("userNameDisplay").innerText="Not logged in"; document.getElementById("logoutBtn").style.display="none"; showLoginModal(); refreshAll(); }
+    
+    function initApp(){
+        const appDiv=document.getElementById("app");
+        appDiv.innerHTML=`<div class="header"><div class="logo-icon"><i class="fas fa-futbol"></i></div><h1>MONDAY NIGHT SOCCER</h1><div class="user-row"><span id="userNameDisplay">Not logged in</span><button id="logoutBtn" style="display:none;">Logout</button></div></div><div class="top-nav"><button class="nav-module active" data-module="home">🏠 Home</button><button class="nav-module" data-module="teamswk">⚽ Teams</button><button class="nav-module" data-module="history">📖 History</button><button class="nav-module" data-module="scoreboard">🏆 Stats</button><button class="nav-module" data-module="profiles">👤 Profiles</button><button class="nav-module" data-module="timer">⏱️ Timer</button><button class="nav-module" data-module="chat">💬 Chat</button><button class="nav-module" data-module="weather">🌤️ Weather</button><button class="nav-module" data-module="rules">📜 Rules</button><button class="nav-module" data-module="admin">🔧 Admin</button></div><div id="homeContainer" class="module-container active-module"></div><div id="page-teamswk" class="module-container"></div><div id="page-history" class="module-container"></div><div id="page-scoreboard" class="module-container"></div><div id="page-profiles" class="module-container"></div><div id="page-timer" class="module-container"></div><div id="page-chat" class="module-container"></div><div id="page-weather" class="module-container"></div><div id="page-rules" class="module-container"></div><div id="page-admin" class="module-container"></div>`;
+        document.querySelectorAll(".nav-module").forEach(btn=>{ btn.addEventListener("click",()=>{ document.querySelectorAll(".nav-module").forEach(b=>b.classList.remove("active")); btn.classList.add("active"); const mod=btn.dataset.module; document.querySelectorAll(".module-container").forEach(c=>c.classList.remove("active-module")); if(mod==="home") document.getElementById("homeContainer").classList.add("active-module"); else document.getElementById(`page-${mod}`).classList.add("active-module"); if(mod==="chat") renderChatPage(); if(mod==="timer") renderTimerPage(); if(mod==="weather") renderWeatherPage(); if(mod==="rules") renderRulesPage(); }); });
+        document.getElementById("logoutBtn").onclick=logout;
+        if(firebaseReady) loadData().then(()=>{ showLoginModal(); }); else { showLoginModal(); refreshAll(); }
+    }
+    initApp();
 </script>
 </body>
 </html>
