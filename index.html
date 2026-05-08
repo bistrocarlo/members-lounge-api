@@ -39,11 +39,15 @@
         .calendar-day { background: #f8fafc; border-radius: 12px; min-height: 100px; padding: 8px; position: relative; cursor: pointer; transition: all 0.2s; border: 1px solid #e2e8f0; }
         .calendar-day:hover { background: #f1f5f9; transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         .calendar-day.empty { background: #f1f5f9; opacity: 0.5; cursor: default; }
-        .calendar-day.available { border-left: 4px solid #10b981; }
+        /* Status colors */
+        .calendar-day.available { border-left: 4px solid #10b981; background: #ecfdf5; }
+        .calendar-day.partial { border-left: 4px solid #f59e0b; background: #fffbeb; }
         .calendar-day.booked { border-left: 4px solid #ef4444; background: #fef2f2; }
         .day-number { font-weight: 700; font-size: 16px; margin-bottom: 8px; }
         .booking-badge { background: #ef4444; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; display: inline-block; margin-top: 5px; }
+        .partial-badge { background: #f59e0b; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; display: inline-block; margin-top: 5px; }
         .booking-name { font-size: 11px; color: #1e293b; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .seats-left { font-size: 9px; color: #f59e0b; margin-top: 3px; font-weight: 500; }
         
         .bookings-list { max-height: 500px; overflow-y: auto; }
         .booking-card { background: #f8fafc; border-radius: 12px; padding: 15px; margin-bottom: 12px; border: 1px solid #e2e8f0; }
@@ -107,6 +111,11 @@
         .event-type-select { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
         .event-type-btn { padding: 6px 12px; background: #e2e8f0; border: none; border-radius: 20px; cursor: pointer; font-size: 12px; }
         .event-type-btn.selected { background: #3b82f6; color: white; }
+        
+        .capacity-bar { background: #e2e8f0; border-radius: 10px; height: 6px; margin-top: 8px; overflow: hidden; }
+        .capacity-fill { background: #10b981; height: 100%; border-radius: 10px; transition: width 0.3s; }
+        .capacity-fill.partial { background: #f59e0b; }
+        .capacity-fill.full { background: #ef4444; }
         
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
         @media (max-width: 900px) { .main-layout { flex-direction: column; } }
@@ -210,7 +219,7 @@
                 <option value="ottimo">Ottimo Private Dining Room</option>
                 <option value="sala_regio">Sala Reggio Ballroom</option>
                 <option value="members_lounge">Members Lounge Restaurant</option>
-                <option value="bistroteca">Bistroteca</option>
+                <option value="bistroteca">Bistroteca (Max 150 seats)</option>
             </select>
             <input type="date" id="newEventDate">
             <input type="time" id="newEventTime">
@@ -235,7 +244,7 @@
                 <option value="ottimo">Ottimo Private Dining Room</option>
                 <option value="sala_regio">Sala Reggio Ballroom</option>
                 <option value="members_lounge">Members Lounge Restaurant</option>
-                <option value="bistroteca">Bistroteca</option>
+                <option value="bistroteca">Bistroteca (Max 150 seats)</option>
             </select>
             <input type="date" id="editEventDate">
             <input type="time" id="editEventTime">
@@ -260,6 +269,14 @@
     </div>
 
     <script>
+        // ROOM CAPACITIES
+        const ROOM_CAPACITIES = {
+            'ottimo': 50,
+            'sala_regio': 200,
+            'members_lounge': 80,
+            'bistroteca': 150
+        };
+
         // STAFF LIST
         const STAFF = [
             { name: 'Enza', role: 'staff' }, { name: 'Maria', role: 'staff' },
@@ -270,22 +287,19 @@
 
         // Room configuration
         const ROOMS = [
-            { id: 'ottimo', name: 'Ottimo Private Dining Room', keywords: ['Ottimo', 'Ottimo Private Dining Room'] },
-            { id: 'sala_regio', name: 'Sala Reggio Ballroom', keywords: ['Sala Reggio Ballroom', 'Sala Reggio', 'Ballroom'] },
-            { id: 'members_lounge', name: 'Members Lounge Restaurant', keywords: ['Members Lounge', 'Members Lounge Restaurant'] },
-            { id: 'bistroteca', name: 'Bistroteca', keywords: ['Bistroteca'] }
+            { id: 'ottimo', name: 'Ottimo Private Dining Room', capacity: 50, keywords: ['Ottimo', 'Ottimo Private Dining Room'] },
+            { id: 'sala_regio', name: 'Sala Reggio Ballroom', capacity: 200, keywords: ['Sala Reggio Ballroom', 'Sala Reggio', 'Ballroom'] },
+            { id: 'members_lounge', name: 'Members Lounge Restaurant', capacity: 80, keywords: ['Members Lounge', 'Members Lounge Restaurant'] },
+            { id: 'bistroteca', name: 'Bistroteca', capacity: 150, keywords: ['Bistroteca'] }
         ];
 
-        // Event types
         let selectedEventType = '';
 
         function selectEventType(type) {
             selectedEventType = type;
             document.querySelectorAll('.event-type-btn').forEach(btn => {
                 btn.classList.remove('selected');
-                if (btn.getAttribute('data-type') === type) {
-                    btn.classList.add('selected');
-                }
+                if (btn.getAttribute('data-type') === type) btn.classList.add('selected');
             });
             const customInput = document.getElementById('newEventTypeCustom');
             if (type === 'Other') {
@@ -305,6 +319,7 @@
         let selectedDate = null;
         let currentNoteContext = null;
         let currentEditContext = null;
+        let pendingDelete = null;
         let lastMessageCount = 0;
 
         function loadData() {
@@ -347,14 +362,7 @@
         }
 
         function addNotification(message, type, relatedTo = null) {
-            const notification = {
-                id: Date.now(),
-                message: message,
-                type: type,
-                relatedTo: relatedTo,
-                time: Date.now(),
-                read: false
-            };
+            const notification = { id: Date.now(), message, type, relatedTo, time: Date.now(), read: false };
             notifications.unshift(notification);
             saveData();
             showStatus(message, 'notification');
@@ -368,7 +376,28 @@
             setTimeout(() => { if (div.innerHTML.includes(msg)) div.innerHTML = ''; }, 4000);
         }
 
-        // Parse CSV with all fields
+        // Calculate total tickets for a room on a specific date
+        function getTotalTicketsForDate(roomId, dateStr) {
+            const dateBookings = bookings[roomId]?.[dateStr] || [];
+            let total = 0;
+            for (const booking of dateBookings) {
+                total += booking.ticketCount || 1;
+            }
+            return total;
+        }
+
+        // Get capacity status for a room on a date
+        function getCapacityStatus(roomId, dateStr) {
+            const capacity = ROOM_CAPACITIES[roomId] || 999;
+            const totalTickets = getTotalTicketsForDate(roomId, dateStr);
+            const remaining = capacity - totalTickets;
+            
+            if (totalTickets === 0) return { status: 'available', remaining, totalTickets, capacity, color: '#10b981', bgClass: 'available' };
+            if (totalTickets >= capacity) return { status: 'full', remaining, totalTickets, capacity, color: '#ef4444', bgClass: 'booked' };
+            return { status: 'partial', remaining, totalTickets, capacity, color: '#f59e0b', bgClass: 'partial' };
+        }
+
+        // Parse CSV
         async function handleCSV(file) {
             if (!file) return;
             showStatus(`Processing ${file.name}...`, 'success');
@@ -390,7 +419,6 @@
             }
             
             const headers = parseCSVLine(lines[headerLine]);
-            
             let orderDateIdx = -1, eventNameIdx = -1, eventStartIdx = -1, nameIdx = -1, emailIdx = -1, phoneIdx = -1;
             
             for (let i = 0; i < headers.length; i++) {
@@ -511,12 +539,11 @@
             return `${year}-${months[month]}-${day.padStart(2, '0')}`;
         }
 
-        // Render calendar
         function renderRoomTabs() {
             const container = document.getElementById('roomTabs');
             container.innerHTML = ROOMS.map(room => `
                 <button class="room-tab ${currentRoom === room.id ? 'active' : ''}" onclick="switchRoom('${room.id}')">
-                    🏠 ${room.name}
+                    🏠 ${room.name} ${room.id === 'bistroteca' ? '(Max 150)' : ''}
                 </button>
             `).join('');
         }
@@ -527,7 +554,7 @@
             renderCalendar();
             selectedDate = null;
             const room = ROOMS.find(r => r.id === currentRoom);
-            document.getElementById('selectedRoomTitle').textContent = `📋 ${room?.name} - Bookings & Details`;
+            document.getElementById('selectedRoomTitle').textContent = `📋 ${room?.name} - Bookings & Details ${room?.id === 'bistroteca' ? '(Max 150 seats)' : ''}`;
             document.getElementById('bookingsList').innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8;">Click on a date to view bookings</div>';
         }
         
@@ -550,34 +577,47 @@
             
             for (let i = 0; i < startOffset; i++) gridHtml += `<div class="calendar-day empty"></div>`;
             
-            const roomBookings = bookings[currentRoom] || {};
-            
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const dateBookings = roomBookings[dateStr] || [];
-                const isBooked = dateBookings.length > 0;
+                const capacityStatus = getCapacityStatus(currentRoom, dateStr);
                 const cellDate = new Date(year, month, day);
                 const isPast = cellDate < today;
                 
                 let statusClass = 'available';
-                if (isPast) statusClass = 'empty';
-                else if (isBooked) statusClass = 'booked';
+                let statusText = '';
+                let badgeHtml = '';
+                let capacityHtml = '';
                 
-                let bookingHtml = '';
-                if (isBooked && !isPast) {
-                    bookingHtml = `<div class="booking-badge">${dateBookings.length} booking${dateBookings.length > 1 ? 's' : ''}</div>`;
-                    bookingHtml += `<div class="booking-name" title="${dateBookings[0].customerName}">${dateBookings[0].customerName.split(' ')[0]}</div>`;
-                    if (dateBookings[0].guestOfHonour) {
-                        bookingHtml += `<div class="staff-assigned">🎉 ${dateBookings[0].guestOfHonour.split(' ')[0]}</div>`;
-                    }
-                } else if (!isPast && !isBooked) {
-                    bookingHtml = `<div style="font-size:10px; color:#10b981; margin-top:5px;">✓ Available</div>`;
+                if (isPast) {
+                    statusClass = 'empty';
+                } else if (capacityStatus.status === 'full') {
+                    statusClass = 'booked';
+                    badgeHtml = `<div class="booking-badge">FULL</div>`;
+                } else if (capacityStatus.status === 'partial') {
+                    statusClass = 'partial';
+                    badgeHtml = `<div class="partial-badge">${capacityStatus.remaining} seats left</div>`;
+                    capacityHtml = `<div class="seats-left">🪑 ${capacityStatus.totalTickets}/${capacityStatus.capacity} booked</div>`;
+                } else if (capacityStatus.status === 'available') {
+                    statusClass = 'available';
+                    badgeHtml = `<div style="font-size:10px; color:#10b981; margin-top:5px;">✓ ${capacityStatus.capacity} seats available</div>`;
+                }
+                
+                // Show first booking name if exists
+                const roomBookings = bookings[currentRoom]?.[dateStr] || [];
+                if (roomBookings.length > 0 && !isPast && capacityStatus.status !== 'full') {
+                    badgeHtml = `<div class="partial-badge">${capacityStatus.remaining} seats left</div>
+                                 <div class="booking-name" title="${roomBookings[0].customerName}">${roomBookings[0].customerName.split(' ')[0]}</div>
+                                 <div class="seats-left">🎟️ ${capacityStatus.totalTickets} booked</div>`;
+                } else if (roomBookings.length > 0 && !isPast) {
+                    badgeHtml = `<div class="booking-badge">FULL</div>
+                                 <div class="booking-name">${roomBookings.length} booking(s)</div>`;
                 }
                 
                 gridHtml += `
-                    <div class="calendar-day ${statusClass}" onclick="selectDate('${dateStr}')">
+                    <div class="calendar-day ${statusClass}" onclick="${!isPast ? `selectDate('${dateStr}')` : ''}">
                         <div class="day-number">${day}</div>
-                        ${bookingHtml}
+                        ${badgeHtml}
+                        ${capacityHtml}
                     </div>
                 `;
             }
@@ -588,13 +628,14 @@
         function selectDate(dateStr) {
             selectedDate = dateStr;
             const room = ROOMS.find(r => r.id === currentRoom);
-            document.getElementById('selectedRoomTitle').textContent = `📋 ${room?.name} - ${dateStr}`;
+            const capacityStatus = getCapacityStatus(currentRoom, dateStr);
+            document.getElementById('selectedRoomTitle').textContent = `📋 ${room?.name} - ${dateStr} (${capacityStatus.totalTickets}/${capacityStatus.capacity} seats booked)`;
             
             const bookingsList = bookings[currentRoom]?.[dateStr] || [];
             
             const container = document.getElementById('bookingsList');
             if (bookingsList.length === 0) {
-                container.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8;">✅ No bookings for this date<br>Room is available</div>';
+                container.innerHTML = `<div style="text-align:center; padding:30px; color:#94a3b8;">✅ No bookings for this date<br>${capacityStatus.capacity} seats available</div>`;
                 return;
             }
             
@@ -637,7 +678,6 @@
             `).join('');
         }
         
-        // Quick Booking
         function openBookingModal() {
             document.getElementById('bookingModal').style.display = 'flex';
             document.getElementById('newEventDate').valueAsDate = new Date();
@@ -645,9 +685,7 @@
             document.querySelectorAll('.event-type-btn').forEach(btn => btn.classList.remove('selected'));
         }
         
-        function closeBookingModal() {
-            document.getElementById('bookingModal').style.display = 'none';
-        }
+        function closeBookingModal() { document.getElementById('bookingModal').style.display = 'none'; }
         
         function createQuickBooking() {
             const customerName = document.getElementById('newCustomerName').value.trim();
@@ -656,14 +694,22 @@
             const eventDate = document.getElementById('newEventDate').value;
             if (!eventDate) { showStatus('Event date required', 'error'); return; }
             
-            let eventType = selectedEventType;
-            if (eventType === 'Other') {
-                eventType = document.getElementById('newEventTypeCustom').value;
+            const roomId = document.getElementById('newRoom').value;
+            const capacityStatus = getCapacityStatus(roomId, eventDate);
+            const newTicketCount = parseInt(document.getElementById('newTicketCount').value) || 1;
+            
+            // Check capacity
+            if (capacityStatus.totalTickets + newTicketCount > ROOM_CAPACITIES[roomId]) {
+                showStatus(`❌ Cannot add ${newTicketCount} guests. Only ${capacityStatus.remaining} seats available for ${ROOMS.find(r=>r.id===roomId)?.name} on this date.`, 'error');
+                return;
             }
             
+            let eventType = selectedEventType;
+            if (eventType === 'Other') eventType = document.getElementById('newEventTypeCustom').value;
+            
             const newBooking = {
-                roomId: document.getElementById('newRoom').value,
-                roomName: ROOMS.find(r => r.id === document.getElementById('newRoom').value)?.name,
+                roomId: roomId,
+                roomName: ROOMS.find(r => r.id === roomId)?.name,
                 customerName: customerName,
                 customerEmail: document.getElementById('newCustomerEmail').value || `${customerName.toLowerCase().replace(/\s/g, '.')}@guest.com`,
                 customerPhone: document.getElementById('newCustomerPhone').value,
@@ -672,11 +718,10 @@
                 eventDate: eventDate,
                 eventTime: document.getElementById('newEventTime').value || 'Time TBD',
                 orderDate: new Date().toISOString().split('T')[0],
-                ticketCount: parseInt(document.getElementById('newTicketCount').value) || 1,
+                ticketCount: newTicketCount,
                 notes: []
             };
             
-            const roomId = newBooking.roomId;
             if (!bookings[roomId]) bookings[roomId] = {};
             if (!bookings[roomId][eventDate]) bookings[roomId][eventDate] = [];
             bookings[roomId][eventDate].push(newBooking);
@@ -685,11 +730,10 @@
             closeBookingModal();
             renderCalendar();
             if (currentRoom === roomId && selectedDate === eventDate) selectDate(eventDate);
-            addNotification(`New booking: ${customerName} on ${eventDate}`, 'success');
-            showStatus('✅ Booking created successfully', 'success');
+            addNotification(`New booking: ${customerName} (${newTicketCount} guests) on ${eventDate}`, 'success');
+            showStatus(`✅ Booking created. ${capacityStatus.remaining - newTicketCount} seats remaining.`, 'success');
         }
         
-        // Edit Booking
         function openEditModal(roomId, dateStr, bookingIndex) {
             const booking = bookings[roomId][dateStr][bookingIndex];
             currentEditContext = { roomId, dateStr, bookingIndex };
@@ -707,10 +751,7 @@
             document.getElementById('editModal').style.display = 'flex';
         }
         
-        function closeEditModal() {
-            document.getElementById('editModal').style.display = 'none';
-            currentEditContext = null;
-        }
+        function closeEditModal() { document.getElementById('editModal').style.display = 'none'; currentEditContext = null; }
         
         function saveBookingEdit() {
             if (!currentEditContext) return;
@@ -718,6 +759,16 @@
             
             const newRoomId = document.getElementById('editRoom').value;
             const newDate = document.getElementById('editEventDate').value;
+            const newTicketCount = parseInt(document.getElementById('editTicketCount').value) || 1;
+            
+            // Check capacity for new room/date
+            if (newRoomId !== roomId || newDate !== dateStr) {
+                const newCapacityStatus = getCapacityStatus(newRoomId, newDate);
+                if (newCapacityStatus.totalTickets + newTicketCount > ROOM_CAPACITIES[newRoomId]) {
+                    showStatus(`❌ Cannot move booking. Only ${newCapacityStatus.remaining} seats available at ${ROOMS.find(r=>r.id===newRoomId)?.name} on ${newDate}`, 'error');
+                    return;
+                }
+            }
             
             let booking = { ...bookings[roomId][dateStr][bookingIndex] };
             booking.customerName = document.getElementById('editCustomerName').value;
@@ -727,15 +778,15 @@
             booking.eventType = document.getElementById('editEventType').value;
             booking.eventDate = newDate;
             booking.eventTime = document.getElementById('editEventTime').value || 'Time TBD';
-            booking.ticketCount = parseInt(document.getElementById('editTicketCount').value) || 1;
+            booking.ticketCount = newTicketCount;
             booking.roomId = newRoomId;
             booking.roomName = ROOMS.find(r => r.id === newRoomId)?.name;
             
-            // Remove from old location
+            // Remove from old
             bookings[roomId][dateStr].splice(bookingIndex, 1);
             if (bookings[roomId][dateStr].length === 0) delete bookings[roomId][dateStr];
             
-            // Add to new location
+            // Add to new
             if (!bookings[newRoomId]) bookings[newRoomId] = {};
             if (!bookings[newRoomId][newDate]) bookings[newRoomId][newDate] = [];
             bookings[newRoomId][newDate].push(booking);
@@ -747,17 +798,13 @@
             showStatus('✅ Booking updated', 'success');
         }
         
-        // Notes
         function openNoteModal(roomId, dateStr, bookingIndex) {
             currentNoteContext = { roomId, dateStr, bookingIndex };
             document.getElementById('noteText').value = '';
             document.getElementById('noteModal').style.display = 'flex';
         }
         
-        function closeNoteModal() {
-            document.getElementById('noteModal').style.display = 'none';
-            currentNoteContext = null;
-        }
+        function closeNoteModal() { document.getElementById('noteModal').style.display = 'none'; currentNoteContext = null; }
         
         function addNoteToBooking() {
             if (!currentNoteContext) return;
@@ -784,7 +831,6 @@
             showStatus('✅ Note added', 'success');
         }
         
-        // Delete
         function confirmDeleteBooking(roomId, dateStr, bookingIndex) {
             pendingDelete = { roomId, dateStr, bookingIndex };
             document.getElementById('deleteModal').style.display = 'flex';
@@ -802,12 +848,8 @@
             showStatus('✅ Booking deleted', 'success');
         }
         
-        function closeDeleteModal() {
-            document.getElementById('deleteModal').style.display = 'none';
-            pendingDelete = null;
-        }
+        function closeDeleteModal() { document.getElementById('deleteModal').style.display = 'none'; pendingDelete = null; }
         
-        // Chat
         function renderChat() {
             const container = document.getElementById('chatMessages');
             if (chatMessages.length === 0) {
@@ -862,7 +904,6 @@
         function goToToday() { currentDate = new Date(); renderCalendar(); }
         function escapeHtml(s) { if (!s) return ''; return s.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
         
-        // Initialize
         loadData();
         renderRoomTabs();
         renderCalendar();
