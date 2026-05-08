@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Portal - Repaired Safe Version</title>
+    <title>Staff Portal - Backend CSV Ready</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -86,8 +86,11 @@
                     <button onclick="showAddBookingModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700">
                         <i class="fas fa-plus"></i> Add Booking
                     </button>
+                    <button onclick="loadCSVFromBackend()" class="px-4 py-2 border border-gray-300 rounded-lg flex items-center gap-2 hover:bg-gray-50">
+                        <i class="fas fa-cloud-download-alt"></i> Load CSV from Backend
+                    </button>
                     <button onclick="importCSV()" class="px-4 py-2 border border-gray-300 rounded-lg flex items-center gap-2 hover:bg-gray-50">
-                        <i class="fas fa-file-csv"></i> Import CSV
+                        <i class="fas fa-file-csv"></i> Import Local CSV
                     </button>
                 </div>
             </div>
@@ -181,7 +184,6 @@
                 return;
             }
             
-            // DEMO ONLY - Replace with real Firebase Auth
             if (password !== 'demo123') {
                 alert('Invalid credentials (demo: use password "demo123")');
                 return;
@@ -197,12 +199,10 @@
             document.getElementById('app-screen').classList.remove('hidden');
             document.getElementById('user-info').innerHTML = `${currentUser.name} <span class="text-xs px-2 py-0.5 bg-gray-200 rounded">${currentUser.role}</span>`;
             
-            if (bookings.length === 0) {
-                bookings = [
-                    { id: Date.now(), roomName: 'Main Hall', customerName: 'John Doe', customerEmail: 'john@example.com', eventDate: '2026-05-15', eventTime: '18:00', ticketCount: 4, seat: 'A12', notes: 'VIP guest' }
-                ];
-            }
-            renderBookings();
+            // Auto-load backend CSV after login
+            setTimeout(() => {
+                loadCSVFromBackend(true);
+            }, 500);
         }
 
         function logout() {
@@ -221,7 +221,7 @@
             container.innerHTML = '';
             
             if (bookings.length === 0) {
-                container.innerHTML = '<p class="text-gray-500 col-span-full">No bookings yet.</p>';
+                container.innerHTML = '<p class="text-gray-500 col-span-full">No bookings yet. Load from backend or add manually.</p>';
                 return;
             }
             
@@ -325,33 +325,100 @@
             renderBookings();
         }
 
+        // Load CSV from your backend (Firebase Storage / Firestore path)
+        async function loadCSVFromBackend(silent = false) {
+            // Replace this URL with your actual backend CSV endpoint or Firebase Storage URL
+            const backendCsvUrl = 'https://your-backend.com/data/bookings.csv'; // ← UPDATE THIS
+            
+            try {
+                const response = await fetch(backendCsvUrl);
+                if (!response.ok) throw new Error('Backend CSV not found or inaccessible');
+                
+                const csvText = await response.text();
+                const lines = csvText.split(/\r?\n/);
+                let imported = 0;
+                
+                for (let i = 1; i < lines.length; i++) {
+                    if (!lines[i].trim()) continue;
+                    const cols = lines[i].split(',').map(c => c.trim());
+                    if (cols.length < 3) continue;
+                    
+                    const booking = {
+                        id: Date.now() + i,
+                        roomName: cols[0],
+                        customerName: cols[1],
+                        eventDate: cols[2],
+                        ticketCount: parseInt(cols[3]) || 1,
+                        eventTime: cols[4] || '',
+                        seat: cols[5] || '',
+                        customerEmail: cols[6] || '',
+                        notes: cols[7] || ''
+                    };
+                    
+                    if (booking.roomName && booking.customerName && booking.eventDate) {
+                        // Avoid duplicates by checking existing bookings
+                        const exists = bookings.some(b => 
+                            b.roomName === booking.roomName && 
+                            b.customerName === booking.customerName && 
+                            b.eventDate === booking.eventDate
+                        );
+                        if (!exists) {
+                            bookings.push(booking);
+                            imported++;
+                        }
+                    }
+                }
+                
+                if (!silent) alert(`${imported} bookings loaded from backend CSV.`);
+                renderBookings();
+            } catch (error) {
+                if (!silent) {
+                    alert('Could not load CSV from backend. Make sure the file is accessible and the URL is correct.');
+                    console.error(error);
+                }
+            }
+        }
+
         function importCSV() {
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = '.csv';
             input.onchange = function() {
                 const file = this.files[0];
-                if (!file || file.size > 2 * 1024 * 1024) {
+                if (!file) return;
+                if (file.size > 2 * 1024 * 1024) {
                     alert('File too large (max 2MB)');
                     return;
                 }
                 const reader = new FileReader();
                 reader.onload = function(ev) {
-                    const lines = ev.target.result.split('\n');
+                    const lines = ev.target.result.split(/\r?\n/);
                     let imported = 0;
                     for (let i = 1; i < lines.length; i++) {
-                        const cols = lines[i].split(',');
+                        if (!lines[i].trim()) continue;
+                        const cols = lines[i].split(',').map(c => c.trim());
                         if (cols.length < 3) continue;
                         const booking = {
                             id: Date.now() + i,
-                            roomName: cols[0].trim(),
-                            customerName: cols[1].trim(),
-                            eventDate: cols[2].trim(),
-                            ticketCount: parseInt(cols[3]) || 1
+                            roomName: cols[0],
+                            customerName: cols[1],
+                            eventDate: cols[2],
+                            ticketCount: parseInt(cols[3]) || 1,
+                            eventTime: cols[4] || '',
+                            seat: cols[5] || '',
+                            customerEmail: cols[6] || '',
+                            notes: cols[7] || ''
                         };
                         if (booking.roomName && booking.customerName && booking.eventDate) {
-                            bookings.push(booking);
-                            imported++;
+                            const exists = bookings.some(b => 
+                                b.roomName === booking.roomName && 
+                                b.customerName === booking.customerName && 
+                                b.eventDate === booking.eventDate
+                            );
+                            if (!exists) {
+                                bookings.push(booking);
+                                imported++;
+                            }
                         }
                     }
                     alert(`${imported} bookings imported successfully.`);
