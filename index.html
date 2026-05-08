@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Portal - Backend CSV Ready</title>
+    <title>Staff Portal - Calendar Ready</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body { font-family: system-ui, -apple-system, sans-serif; }
         .section { display: none; }
         .section.active { display: block; }
-        .booking-card { transition: all 0.2s; }
-        .booking-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
+        .calendar-day { transition: all 0.1s; min-height: 80px; }
+        .calendar-day:hover { background-color: #f8fafc; }
+        .event-dot { background-color: #3b82f6; }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -72,14 +73,15 @@
 
         <div class="max-w-7xl mx-auto px-6 pt-6">
             <div class="flex border-b">
-                <button onclick="showSection('bookings')" class="tab-btn px-6 py-3 font-medium border-b-2 border-blue-600 text-blue-600" data-section="bookings">Bookings</button>
+                <button onclick="showSection('bookings')" class="tab-btn px-6 py-3 font-medium text-gray-600 hover:text-gray-900" data-section="bookings">Bookings</button>
+                <button onclick="showSection('calendar')" class="tab-btn px-6 py-3 font-medium border-b-2 border-blue-600 text-blue-600" data-section="calendar">Calendar</button>
                 <button onclick="showSection('notices')" class="tab-btn px-6 py-3 font-medium text-gray-600 hover:text-gray-900" data-section="notices">Notices</button>
                 <button onclick="showSection('chat')" class="tab-btn px-6 py-3 font-medium text-gray-600 hover:text-gray-900" data-section="chat">Staff Chat</button>
             </div>
         </div>
 
         <!-- Bookings Section -->
-        <div id="bookings" class="section active max-w-7xl mx-auto px-6 py-8">
+        <div id="bookings" class="section max-w-7xl mx-auto px-6 py-8">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold">Bookings</h2>
                 <div class="flex gap-3">
@@ -97,6 +99,40 @@
 
             <div id="bookings-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <!-- Bookings populated by JS -->
+            </div>
+        </div>
+
+        <!-- Calendar Section -->
+        <div id="calendar" class="section active max-w-7xl mx-auto px-6 py-8">
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center gap-4">
+                    <button onclick="prevMonth()" class="px-4 py-2 border rounded-lg hover:bg-gray-50"><i class="fas fa-chevron-left"></i></button>
+                    <h2 id="calendar-month" class="text-2xl font-bold w-48 text-center"></h2>
+                    <button onclick="nextMonth()" class="px-4 py-2 border rounded-lg hover:bg-gray-50"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <button onclick="goToToday()" class="px-4 py-2 border border-gray-300 rounded-lg flex items-center gap-2 hover:bg-gray-50">
+                    Today
+                </button>
+            </div>
+            
+            <div class="bg-white border rounded-xl p-6">
+                <div class="grid grid-cols-7 gap-px bg-gray-200 mb-2">
+                    <div class="text-center font-medium py-2 text-sm text-gray-600">Sun</div>
+                    <div class="text-center font-medium py-2 text-sm text-gray-600">Mon</div>
+                    <div class="text-center font-medium py-2 text-sm text-gray-600">Tue</div>
+                    <div class="text-center font-medium py-2 text-sm text-gray-600">Wed</div>
+                    <div class="text-center font-medium py-2 text-sm text-gray-600">Thu</div>
+                    <div class="text-center font-medium py-2 text-sm text-gray-600">Fri</div>
+                    <div class="text-center font-medium py-2 text-sm text-gray-600">Sat</div>
+                </div>
+                <div id="calendar-grid" class="grid grid-cols-7 gap-px bg-gray-200">
+                    <!-- Calendar days populated by JS -->
+                </div>
+            </div>
+            
+            <div id="calendar-events" class="mt-6 bg-white border rounded-xl p-6 hidden">
+                <h3 class="font-bold mb-4">Events on <span id="selected-date"></span></h3>
+                <div id="selected-events-list" class="space-y-3"></div>
             </div>
         </div>
 
@@ -157,6 +193,9 @@
         let notices = [];
         let chatMessages = [];
         let currentUser = null;
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        let selectedDate = null;
 
         function showSection(section) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -170,6 +209,7 @@
             });
             
             if (section === 'bookings') renderBookings();
+            if (section === 'calendar') renderCalendar();
             if (section === 'notices') renderNotices();
             if (section === 'chat') renderChat();
         }
@@ -199,7 +239,6 @@
             document.getElementById('app-screen').classList.remove('hidden');
             document.getElementById('user-info').innerHTML = `${currentUser.name} <span class="text-xs px-2 py-0.5 bg-gray-200 rounded">${currentUser.role}</span>`;
             
-            // Auto-load backend CSV after login
             setTimeout(() => {
                 loadCSVFromBackend(true);
             }, 500);
@@ -317,22 +356,26 @@
             
             closeBookingModal();
             renderBookings();
+            if (document.getElementById('calendar').classList.contains('active')) {
+                renderCalendar();
+            }
         });
 
         function deleteBooking(id) {
             if (!confirm('Delete this booking?')) return;
             bookings = bookings.filter(b => b.id !== id);
             renderBookings();
+            if (document.getElementById('calendar').classList.contains('active')) {
+                renderCalendar();
+            }
         }
 
-        // Load CSV from your backend (Firebase Storage / Firestore path)
         async function loadCSVFromBackend(silent = false) {
-            // Replace this URL with your actual backend CSV endpoint or Firebase Storage URL
-            const backendCsvUrl = 'https://your-backend.com/data/bookings.csv'; // ← UPDATE THIS
+            const backendCsvUrl = 'https://your-backend.com/data/bookings.csv';
             
             try {
                 const response = await fetch(backendCsvUrl);
-                if (!response.ok) throw new Error('Backend CSV not found or inaccessible');
+                if (!response.ok) throw new Error('Backend CSV not found');
                 
                 const csvText = await response.text();
                 const lines = csvText.split(/\r?\n/);
@@ -343,7 +386,6 @@
                     const cols = lines[i].split(',').map(c => c.trim());
                     if (cols.length < 3) continue;
                     
-                    // Parse ticket count from "Order items" (e.g., "20 x Bistroteca...")
                     let ticketCount = 1;
                     const orderItems = cols[5] || '';
                     const match = orderItems.match(/(\d+)\s*x/);
@@ -351,9 +393,9 @@
                     
                     const booking = {
                         id: Date.now() + i,
-                        roomName: cols[7] || cols[6] || 'Unknown Venue', // Event name
-                        customerName: (cols[10] + ' ' + cols[12]).trim() || cols[9], // Name
-                        eventDate: cols[8] ? cols[8].split(' ')[0] : cols[4], // Event start or Order date
+                        roomName: cols[7] || cols[6] || 'Unknown Venue',
+                        customerName: (cols[10] + ' ' + cols[12]).trim() || cols[9],
+                        eventDate: cols[8] ? cols[8].split(' ')[0] : cols[4],
                         ticketCount: ticketCount,
                         eventTime: cols[8] ? cols[8].split(' ').slice(1).join(' ') : '',
                         seat: '',
@@ -376,10 +418,12 @@
                 
                 if (!silent) alert(`${imported} bookings loaded from backend CSV.`);
                 renderBookings();
+                if (document.getElementById('calendar').classList.contains('active')) {
+                    renderCalendar();
+                }
             } catch (error) {
                 if (!silent) {
-                    alert('Could not load CSV from backend. Make sure the file is accessible and the URL is correct.');
-                    console.error(error);
+                    alert('Could not load CSV from backend. Update the URL in code.');
                 }
             }
         }
@@ -435,10 +479,109 @@
                     }
                     alert(`${imported} bookings imported successfully.`);
                     renderBookings();
+                    if (document.getElementById('calendar').classList.contains('active')) {
+                        renderCalendar();
+                    }
                 };
                 reader.readAsText(file);
             };
             input.click();
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            const monthHeader = document.getElementById('calendar-month');
+            grid.innerHTML = '';
+            
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            monthHeader.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+            
+            for (let i = 0; i < firstDay; i++) {
+                const empty = document.createElement('div');
+                empty.className = 'calendar-day bg-white p-2 border border-gray-200';
+                grid.appendChild(empty);
+            }
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayBookings = bookings.filter(b => b.eventDate === dateStr);
+                
+                const dayDiv = document.createElement('div');
+                dayDiv.className = `calendar-day bg-white p-2 border border-gray-200 cursor-pointer ${dayBookings.length > 0 ? 'bg-blue-50' : ''}`;
+                dayDiv.innerHTML = `
+                    <div class="text-sm font-medium mb-1">${day}</div>
+                    ${dayBookings.length > 0 ? `
+                        <div class="flex flex-wrap gap-1">
+                            ${dayBookings.slice(0, 3).map(b => `
+                                <div class="event-dot w-2 h-2 rounded-full"></div>
+                            `).join('')}
+                            ${dayBookings.length > 3 ? `<span class="text-xs text-blue-600">+${dayBookings.length - 3}</span>` : ''}
+                        </div>
+                    ` : ''}
+                `;
+                
+                dayDiv.onclick = () => showEventsForDate(dateStr, dayDiv);
+                grid.appendChild(dayDiv);
+            }
+            
+            document.getElementById('calendar-events').classList.add('hidden');
+        }
+
+        function showEventsForDate(dateStr, element) {
+            selectedDate = dateStr;
+            const eventsContainer = document.getElementById('calendar-events');
+            const dateDisplay = document.getElementById('selected-date');
+            const list = document.getElementById('selected-events-list');
+            
+            dateDisplay.textContent = dateStr;
+            list.innerHTML = '';
+            
+            const dayBookings = bookings.filter(b => b.eventDate === dateStr);
+            
+            if (dayBookings.length === 0) {
+                list.innerHTML = '<p class="text-gray-500">No events on this date.</p>';
+            } else {
+                dayBookings.forEach(booking => {
+                    const item = document.createElement('div');
+                    item.className = 'border-l-4 border-blue-500 pl-4 py-2';
+                    item.innerHTML = `
+                        <div class="font-medium">${sanitize(booking.roomName)}</div>
+                        <div class="text-sm text-gray-600">${sanitize(booking.customerName)} • ${booking.ticketCount} tickets</div>
+                        <div class="text-xs text-gray-500">${booking.eventTime || ''} ${booking.notes ? '• ' + sanitize(booking.notes) : ''}</div>
+                    `;
+                    list.appendChild(item);
+                });
+            }
+            
+            eventsContainer.classList.remove('hidden');
+            eventsContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function prevMonth() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        }
+
+        function goToToday() {
+            const today = new Date();
+            currentMonth = today.getMonth();
+            currentYear = today.getFullYear();
+            renderCalendar();
         }
 
         function renderNotices() {
@@ -494,13 +637,17 @@
             renderChat();
         }
 
-        // Initialize
         document.getElementById('login-form').addEventListener('submit', login);
         
         window.onload = function() {
             notices = [
                 { title: 'System Maintenance', content: 'Portal will be down for 30 minutes tonight.', date: '2026-05-08' }
             ];
+            
+            // Default to calendar view
+            document.getElementById('bookings').classList.remove('active');
+            document.getElementById('calendar').classList.add('active');
+            document.querySelector('[data-section="calendar"]').classList.add('border-b-2', 'border-blue-600', 'text-blue-600');
         };
     </script>
 </body>
