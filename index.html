@@ -5,578 +5,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Members Lounge | Staff Portal</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-
-        body {
-            background: #f1f5f9;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1500px;
-            margin: 0 auto;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #0f172a, #1e293b);
-            color: white;
-            padding: 28px 32px;
-            border-radius: 32px;
-            margin-bottom: 28px;
-            box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.15);
-        }
-
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-
-        .stats-bar {
-            display: flex;
-            gap: 24px;
-            flex-wrap: wrap;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(8px);
-            padding: 10px 22px;
-            border-radius: 60px;
-        }
-
-        .stat-value {
-            font-size: 28px;
-            font-weight: 800;
-        }
-
-        .logout-btn {
-            background: #ef4444;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
-            color: white;
-            transition: 0.2s;
-        }
-
-        .logout-btn:hover {
-            background: #dc2626;
-            transform: scale(0.97);
-        }
-
-        .login-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 2000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(12px);
-        }
-
-        .login-box {
-            background: white;
-            border-radius: 40px;
-            padding: 44px 36px;
-            width: 440px;
-            max-width: 90%;
-            text-align: center;
-            box-shadow: 0 35px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        .login-box input {
-            width: 100%;
-            padding: 14px 18px;
-            margin: 12px 0;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 60px;
-            font-size: 1rem;
-        }
-
-        .login-box input:focus {
-            outline: none;
-            border-color: #3b82f6;
-        }
-
-        .login-box button {
-            width: 100%;
-            padding: 14px;
-            background: #3b82f6;
-            border: none;
-            border-radius: 60px;
-            font-weight: 700;
-            color: white;
-            font-size: 1rem;
-            cursor: pointer;
-        }
-
-        .main-layout {
-            display: flex;
-            gap: 28px;
-            flex-wrap: wrap;
-        }
-
-        .calendar-column {
-            flex: 2.5;
-            min-width: 300px;
-        }
-
-        .sidebar-column {
-            flex: 1.5;
-            min-width: 300px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 32px;
-            padding: 24px;
-            margin-bottom: 28px;
-            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.03);
-            border: 1px solid #e2e8f0;
-        }
-
-        .card-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            border-left: 6px solid #3b82f6;
-            padding-left: 18px;
-            margin-bottom: 20px;
-            color: #0f172a;
-        }
-
-        .room-tabs {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 24px;
-        }
-
-        .room-tab {
-            background: #f1f5f9;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 60px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .room-tab.active {
-            background: #3b82f6;
-            color: white;
-            box-shadow: 0 8px 18px rgba(59, 130, 246, 0.3);
-        }
-
-        .ticket-counter {
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            border-radius: 24px;
-            padding: 18px 22px;
-            margin-bottom: 20px;
-            border: 1px solid #fbbf24;
-        }
-
-        .ticket-counter h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #92400e;
-            margin-bottom: 8px;
-        }
-
-        .ticket-numbers {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .ticket-available {
-            font-size: 2.6rem;
-            font-weight: 800;
-            color: #b45309;
-        }
-
-        .ticket-progress {
-            margin-top: 12px;
-            height: 8px;
-            background: #fed7aa;
-            border-radius: 20px;
-            overflow: hidden;
-        }
-
-        .ticket-progress-fill {
-            height: 100%;
-            background: #ea580c;
-            border-radius: 20px;
-            transition: width 0.3s ease;
-        }
-
-        .date-nav {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 24px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .date-nav button {
-            background: #eef2ff;
-            border: none;
-            padding: 8px 18px;
-            border-radius: 40px;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        .date-display {
-            font-weight: 700;
-            background: #f8fafc;
-            padding: 6px 18px;
-            border-radius: 40px;
-            margin-left: auto;
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
-        }
-
-        .weekday-header {
-            text-align: center;
-            font-weight: 700;
-            padding: 8px;
-            color: #475569;
-        }
-
-        .calendar-day {
-            background: white;
-            border-radius: 20px;
-            min-height: 110px;
-            padding: 10px;
-            cursor: pointer;
-            border: 1px solid #e2e8f0;
-            transition: 0.15s;
-            position: relative;
-        }
-
-        .calendar-day.status-green {
-            border-left: 6px solid #10b981;
-            background: #f0fdf4;
-        }
-        .calendar-day.status-yellow {
-            border-left: 6px solid #eab308;
-            background: #fefce8;
-        }
-        .calendar-day.status-red {
-            border-left: 6px solid #ef4444;
-            background: #fef2f2;
-        }
-        .calendar-day.status-neutral {
-            border-left: 6px solid #94a3b8;
-        }
-        .calendar-day.empty {
-            background: #f8fafc;
-            opacity: 0.5;
-            cursor: default;
-            pointer-events: none;
-        }
-
-        .calendar-day:hover:not(.empty) {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
-        }
-
-        .day-number {
-            font-weight: 800;
-            font-size: 1rem;
-            margin-bottom: 8px;
-        }
-
-        .ticket-status-badge {
-            font-size: 10px;
-            font-weight: 700;
-            padding: 3px 8px;
-            border-radius: 30px;
-            margin-top: 6px;
-            display: inline-block;
-        }
-        .ticket-status-badge.green-bg { background: #10b98120; color: #065f46; }
-        .ticket-status-badge.yellow-bg { background: #eab30820; color: #854d0e; }
-        .ticket-status-badge.red-bg { background: #ef444420; color: #991b1b; }
-
-        .booking-badge {
-            background: #ef4444;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 30px;
-            font-size: 10px;
-            display: inline-block;
-        }
-
-        .bookings-list {
-            max-height: 560px;
-            overflow-y: auto;
-        }
-
-        .booking-card {
-            background: #ffffff;
-            border-radius: 24px;
-            padding: 18px;
-            margin-bottom: 14px;
-            border: 1px solid #eef2ff;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .booking-card:hover {
-            background: #fefce8;
-            border-color: #fde047;
-        }
-
-        .booking-customer-name {
-            font-size: 1.1rem;
-            font-weight: 800;
-            color: #1e293b;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .ticket-chip {
-            background: #fbbf24;
-            color: #78350f;
-            padding: 2px 12px;
-            border-radius: 40px;
-            font-size: 0.75rem;
-            font-weight: 700;
-        }
-
-        .booking-meta-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin: 10px 0;
-            font-size: 12px;
-            background: #f8fafc;
-            padding: 10px;
-            border-radius: 20px;
-        }
-
-        .detail-expand {
-            background: #f1f5f9;
-            border-radius: 16px;
-            padding: 12px;
-            margin-top: 12px;
-            font-size: 12px;
-            border-left: 3px solid #f59e0b;
-            display: none;
-        }
-
-        .detail-expand.show {
-            display: block;
-        }
-
-        .booking-actions {
-            margin-top: 12px;
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-        }
-
-        .btn-edit, .btn-remove {
-            border: none;
-            padding: 6px 16px;
-            border-radius: 40px;
-            font-weight: 500;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        .btn-edit {
-            background: #f59e0b;
-            color: white;
-        }
-        .btn-remove {
-            background: #ef4444;
-            color: white;
-        }
-
-        .upload-area {
-            border: 2px dashed #94a3b8;
-            border-radius: 28px;
-            padding: 28px 16px;
-            text-align: center;
-            cursor: pointer;
-            background: #fafcff;
-            transition: 0.2s;
-            margin-bottom: 16px;
-        }
-        .upload-area.dragover {
-            border-color: #10b981;
-            background: #e6f7ef;
-        }
-
-        .chat-messages {
-            height: 280px;
-            overflow-y: auto;
-            background: #f9fafb;
-            border-radius: 24px;
-            padding: 14px;
-            margin-bottom: 14px;
-        }
-        .chat-message {
-            background: white;
-            border-radius: 20px;
-            padding: 10px 14px;
-            margin-bottom: 12px;
-        }
-        .chat-name { font-weight: 800; color: #2563eb; font-size: 0.75rem; }
-        .chat-text { font-size: 0.85rem; margin-top: 4px; }
-
-        .notice-board {
-            background: #fffbeb;
-            border-radius: 24px;
-            padding: 16px;
-            max-height: 260px;
-            overflow-y: auto;
-        }
-        .notice-item {
-            border-left: 5px solid #f59e0b;
-            background: #fff7e6;
-            padding: 12px;
-            margin-bottom: 12px;
-            border-radius: 16px;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 32px 16px;
-            color: #94a3b8;
-            font-weight: 500;
-        }
-
-        .status-msg {
-            padding: 10px;
-            border-radius: 60px;
-            margin-top: 12px;
-            font-size: 0.8rem;
-            text-align: center;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f1f5f9; padding: 20px; }
+        .container { max-width: 1500px; margin: 0 auto; }
+        .header { background: linear-gradient(135deg, #0f172a, #1e293b); color: white; padding: 24px; border-radius: 28px; margin-bottom: 24px; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+        .stats-bar { display: flex; gap: 20px; margin-top: 12px; flex-wrap: wrap; }
+        .stat-card { background: rgba(255,255,255,0.12); padding: 8px 18px; border-radius: 40px; }
+        .stat-value { font-size: 26px; font-weight: 800; }
+        .logout-btn { background: #ef4444; border: none; padding: 8px 18px; border-radius: 40px; font-weight: 600; cursor: pointer; color: white; }
+        .login-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: white; border-radius: 32px; padding: 40px; width: 400px; max-width: 90%; text-align: center; }
+        .login-box input { width:100%; padding: 14px; margin: 10px 0; border: 1px solid #cbd5e1; border-radius: 20px; font-size: 1rem; }
+        .login-box button { width:100%; padding: 14px; background: #3b82f6; border: none; border-radius: 40px; font-weight: bold; color: white; font-size: 1rem; cursor: pointer; }
+        .main-layout { display: flex; gap: 24px; flex-wrap: wrap; }
+        .calendar-column { flex: 2.5; min-width: 300px; }
+        .sidebar-column { flex: 1.5; min-width: 280px; }
+        .card { background: white; border-radius: 28px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .card-title { font-size: 1.3rem; font-weight: 700; border-left: 5px solid #3b82f6; padding-left: 14px; margin-bottom: 16px; }
+        .room-tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+        .room-tab { background: #eef2ff; border: none; padding: 10px 18px; border-radius: 40px; font-weight: 500; cursor: pointer; }
+        .room-tab.active { background: #3b82f6; color: white; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 8px; }
+        .weekday-header { text-align: center; font-weight: 700; color: #475569; padding: 8px; }
+        .calendar-day { background: white; border-radius: 18px; min-height: 100px; padding: 8px; cursor: pointer; border: 1px solid #e2e8f0; }
+        .calendar-day.available { border-left: 5px solid #10b981; }
+        .calendar-day.booked { border-left: 5px solid #ef4444; background: #fef2f2; }
+        .calendar-day.empty { background: #f1f5f9; opacity: 0.6; cursor: default; pointer-events: none; }
+        .day-number { font-weight: 800; font-size: 1rem; margin-bottom: 6px; }
+        .booking-badge { background: #ef4444; color: white; padding: 2px 10px; border-radius: 20px; font-size: 10px; display: inline-block; }
+        .bookings-list { max-height: 520px; overflow-y: auto; }
+        .booking-card { background: #fafcff; border-radius: 20px; padding: 14px; margin-bottom: 12px; border: 1px solid #eef2ff; cursor: pointer; }
+        .booking-card:hover { background: #fefce8; }
+        .booking-customer { font-weight: 700; }
+        .booking-contact { font-size: 12px; color: #64748b; margin-top: 4px; }
+        .booking-details { font-size: 11px; color: #475569; margin-top: 6px; display: flex; flex-wrap: wrap; gap: 8px; }
+        .booking-notes { font-size: 11px; margin-top: 6px; background: #f8fafc; padding: 4px 8px; border-radius: 12px; }
+        .booking-actions { margin-top: 10px; display: flex; gap: 8px; }
+        .btn-edit, .btn-remove { border: none; padding: 6px 12px; border-radius: 30px; font-weight: 500; cursor: pointer; }
+        .btn-edit { background: #f59e0b; color: white; }
+        .btn-remove { background: #ef4444; color: white; }
+        .upload-area { border: 2px dashed #94a3b8; border-radius: 24px; padding: 20px; text-align: center; cursor: pointer; background: #f8fafc; margin-bottom: 12px; }
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 1500; display: none; align-items: center; justify-content: center; }
+        .modal { background: white; border-radius: 32px; padding: 28px; width: 500px; max-width: 90%; }
+        .modal input, .modal textarea { width:100%; margin: 8px 0; padding: 12px; border: 1px solid #cbd5e1; border-radius: 20px; }
+        .modal-buttons { display: flex; gap: 12px; margin-top: 20px; justify-content: flex-end; }
+        .chat-messages { height: 260px; overflow-y: auto; background: #f8fafc; border-radius: 20px; padding: 12px; margin-bottom: 12px; }
+        .chat-message { background: white; border-radius: 18px; padding: 8px 12px; margin-bottom: 10px; }
+        .chat-name { font-weight: 700; color: #2563eb; font-size: 0.75rem; }
+        .chat-input-area { display: flex; gap: 8px; }
+        .notice-board { background: #fffbeb; border-radius: 20px; padding: 16px; max-height: 260px; overflow-y: auto; }
+        .notice-item { border-left: 4px solid #f59e0b; background: #fffbeb; padding: 10px; margin-bottom: 8px; border-radius: 14px; }
+        .empty-state { text-align: center; padding: 28px; color: #94a3b8; }
+        .status-msg { padding: 10px; border-radius: 60px; margin-top: 10px; font-size: 0.8rem; text-align: center; }
         .status-msg.success { background: #d1fae5; color: #065f46; }
         .status-msg.error { background: #fee2e2; color: #991b1b; }
-        .status-msg.info { background: #dbeafe; color: #1e40af; }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 1500;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(4px);
-        }
-
-        .modal {
-            background: white;
-            border-radius: 36px;
-            padding: 0;
-            width: 550px;
-            max-width: 92%;
-            max-height: 90%;
-            overflow: hidden;
-            animation: modalSlideIn 0.3s ease;
-        }
-
-        @keyframes modalSlideIn {
-            from { opacity: 0; transform: scale(0.96) translateY(-10px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
-        .modal-header {
-            background: linear-gradient(135deg, #0f172a, #1e293b);
-            color: white;
-            padding: 22px 28px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .modal-header h3 { font-size: 1.4rem; font-weight: 700; margin: 0; }
-        .modal-close {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .modal-body { padding: 28px; max-height: 60vh; overflow-y: auto; }
-        .form-group { margin-bottom: 18px; }
-        .form-group label { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 6px; }
-        .form-group input, .form-group textarea {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 20px;
-            font-size: 0.9rem;
-        }
-        .form-group input:focus, .form-group textarea:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
-        }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .modal-footer {
-            padding: 20px 28px;
-            background: #f8fafc;
-            border-top: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-        }
-        .btn-save { background: #3b82f6; color: white; padding: 12px 24px; border-radius: 40px; font-weight: 600; border: none; cursor: pointer; }
-        .btn-cancel { background: #e2e8f0; color: #475569; padding: 12px 24px; border-radius: 40px; font-weight: 600; border: none; cursor: pointer; }
-        .add-notice { display: flex; gap: 10px; margin-top: 12px; }
-        .add-notice input { flex: 1; padding: 12px; border-radius: 40px; border: 1px solid #cbd5e1; }
-
-        @media (max-width: 760px) { .calendar-day { min-height: 70px; } .form-row { grid-template-columns: 1fr; } }
+        .date-nav { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; }
+        .date-nav button { background: #eef2ff; border: none; padding: 6px 14px; border-radius: 30px; cursor: pointer; }
+        .date-display { font-weight: 600; margin-left: auto; }
+        .add-notice { display: flex; gap: 8px; margin-top: 12px; }
+        .add-notice input { flex: 1; padding: 8px 12px; border-radius: 30px; border: 1px solid #cbd5e1; }
+        .detail-expand { background: #f1f5f9; border-radius: 16px; padding: 12px; margin-top: 12px; font-size: 12px; display: none; }
+        .detail-expand.show { display: block; }
+        @media (max-width: 760px) { .calendar-day { min-height: 70px; } }
     </style>
 </head>
 <body>
-
 <div id="loginOverlay" class="login-overlay" style="display: flex;">
     <div class="login-box">
         <h2>🍸 Members Lounge</h2>
-        <p style="margin-bottom: 20px; color: #475569;">Staff Access Portal</p>
-        <input type="text" id="loginUsername" placeholder="Username" autocomplete="off">
+        <p style="margin-bottom: 20px;">Staff Access Portal</p>
+        <input type="text" id="loginUsername" placeholder="Username">
         <input type="password" id="loginPassword" placeholder="Password">
         <button onclick="window.attemptLogin()">Login</button>
-        <div id="loginError" style="margin-top: 14px; font-size: 13px; color:#dc2626;"></div>
-        <div style="font-size: 12px; margin-top: 24px; background:#f1f5f9; padding: 8px; border-radius: 32px;">
+        <div id="loginError" style="margin-top:12px;"></div>
+        <div style="font-size: 12px; margin-top: 20px; background:#f1f5f9; padding: 8px; border-radius: 32px;">
             🔐 Admin: admin / admin123 (CSV access)<br>
             👤 Staff: enza / enza123 | maria / maria123 | michelle / michelle123 | petta / petta123
         </div>
@@ -588,11 +91,11 @@
     <div class="header">
         <div class="header-top">
             <h1>Members Lounge · Staff Hub</h1>
-            <div><span id="userEmail" style="font-weight: 500;"></span> <button class="logout-btn" onclick="window.logout()">Logout</button></div>
+            <div><span id="userEmail"></span> <button class="logout-btn" onclick="window.logout()">Logout</button></div>
         </div>
         <div class="stats-bar">
             <div class="stat-card"><span class="stat-value" id="totalBookings">0</span><div>Future bookings</div></div>
-            <div class="stat-card"><span class="stat-value">⚡</span><div>Live sync</div></div>
+            <div class="stat-card"><span class="stat-value">✨</span><div>Live sync</div></div>
         </div>
     </div>
 
@@ -616,106 +119,40 @@
         </div>
         
         <div class="sidebar-column">
-            <!-- CSV Import - Admin Only -->
             <div id="adminCsvCard" class="card" style="display: none;">
-                <div class="card-title">📂 CSV Bulk Import (Admin Only)</div>
-                <div id="csvUploadZone" class="upload-area">
-                    📎 Drag & drop CSV or click<br><small>Columns: Event name, Event start, Email, Name, Tickets</small>
-                </div>
+                <div class="card-title">📂 CSV Import (Admin Only)</div>
+                <div id="csvUploadZone" class="upload-area">📎 Drag & drop CSV or click<br><small>Columns: Event name, Event start, Email, Name</small></div>
                 <input type="file" id="csvFileInput" accept=".csv" style="display:none">
                 <div id="uploadStatus"></div>
-            </div>
-
-            <!-- Ticket Counter for Bistroteca -->
-            <div id="ticketCounterWidget" class="ticket-counter" style="display: none;">
-                <h3>🎟️ Bistroteca · Ticket Inventory (150 total)</h3>
-                <div class="ticket-numbers">
-                    <div>
-                        <div style="font-size: 12px; opacity:0.7;">Available now</div>
-                        <div class="ticket-available" id="availableTicketsCount">150</div>
-                    </div>
-                    <div class="ticket-used">
-                        🎫 Used: <span id="usedTicketsCount">0</span> / 150
-                    </div>
-                </div>
-                <div class="ticket-progress">
-                    <div class="ticket-progress-fill" id="ticketProgressFill" style="width: 0%;"></div>
-                </div>
-                <div class="ticket-warning" id="ticketWarningMsg" style="margin-top:8px; font-size:11px; font-weight:600; color:#92400e;"></div>
             </div>
             
             <div class="card">
                 <div class="card-title">📢 Urgent Notices</div>
                 <div id="noticeBoard" class="notice-board"></div>
                 <div class="add-notice">
-                    <input type="text" id="newNotice" placeholder="New announcement ...">
-                    <button onclick="window.addNotice()" style="background:#f59e0b; border:none; border-radius:40px; color:white; padding:0 20px;">Post</button>
+                    <input type="text" id="newNotice" placeholder="New announcement...">
+                    <button onclick="window.addNotice()" style="background:#f59e0b; border:none; padding:8px 16px; border-radius:30px; color:white;">Post</button>
                 </div>
             </div>
             
             <div class="card">
                 <div class="card-title">💬 Staff Chat</div>
                 <div id="chatMessages" class="chat-messages"></div>
-                <div class="chat-input-area" style="display: flex; gap: 10px;">
-                    <input type="text" id="staffName" placeholder="Your name" style="flex:0.5; border-radius:40px; border:1px solid #cbd5e1; padding:10px;">
-                    <input type="text" id="chatMessage" placeholder="Message..." style="flex:1; border-radius:40px; border:1px solid #cbd5e1; padding:10px;">
-                    <button onclick="window.sendChatMessage()" style="background:#3b82f6; border:none; border-radius:40px; color:white; padding:0 18px;">Send</button>
+                <div class="chat-input-area">
+                    <input type="text" id="staffName" placeholder="Your name" style="flex:0.4; border-radius:30px; border:1px solid #cbd5e1; padding:8px;">
+                    <input type="text" id="chatMessage" placeholder="Message..." style="flex:1; border-radius:30px; border:1px solid #cbd5e1; padding:8px;">
+                    <button onclick="window.sendChatMessage()" style="background:#3b82f6; border:none; border-radius:30px; color:white; padding:0 14px;">Send</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Enhanced Edit Modal -->
-<div id="editModal" class="modal-overlay">
-    <div class="modal">
-        <div class="modal-header">
-            <h3>✏️ Edit Booking</h3>
-            <button class="modal-close" onclick="window.closeEditModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="form-row">
-                <div class="form-group"><label>👤 FULL NAME</label><input id="editCustomerName" placeholder="Guest name"></div>
-                <div class="form-group"><label>📧 EMAIL</label><input id="editCustomerEmail" placeholder="Email"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>📱 MOBILE</label><input id="editMobileNumber" placeholder="Mobile"></div>
-                <div class="form-group"><label>⏰ EVENT TIME</label><input id="editEventTime" placeholder="e.g., 7:00 PM"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>🎟️ TICKETS</label><input type="number" id="editTicketCount" placeholder="Tickets" value="1" min="1"></div>
-                <div class="form-group"><label>🪑 SEAT/TABLE</label><input id="editSeat" placeholder="Seat"></div>
-            </div>
-            <div class="form-group"><label>🎉 CELEBRATING FOR</label><input id="editCelebrationFor" placeholder="e.g., Birthday - John, Anniversary"></div>
-            <div class="form-group"><label>📝 NOTES</label><textarea id="editNotes" rows="3" placeholder="Special requests, dietary needs..."></textarea></div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-cancel" onclick="window.closeEditModal()">Cancel</button>
-            <button class="btn-save" onclick="window.saveBookingEdit()">Save Changes</button>
-        </div>
-    </div>
-</div>
-
-<div id="deleteModal" class="modal-overlay">
-    <div class="modal" style="width: 420px;">
-        <div class="modal-header" style="background: linear-gradient(135deg, #991b1b, #7f1d1d);">
-            <h3>⚠️ Delete Booking</h3>
-            <button class="modal-close" onclick="window.closeDeleteModal()">&times;</button>
-        </div>
-        <div class="modal-body" style="text-align: center;">
-            <p style="margin-bottom: 8px;">Are you sure you want to delete this booking?</p>
-            <p style="font-size: 13px; color: #64748b;">This action cannot be undone.</p>
-        </div>
-        <div class="modal-footer" style="justify-content: center;">
-            <button class="btn-cancel" onclick="window.closeDeleteModal()">Cancel</button>
-            <button onclick="window.confirmDelete()" style="background:#ef4444; color:white; padding:12px 24px; border-radius:40px; font-weight:600; border:none; cursor:pointer;">Yes, Delete</button>
-        </div>
-    </div>
-</div>
+<div id="editModal" class="modal-overlay"><div class="modal"><h3>✏️ Edit Booking</h3><input id="editCustomerName" placeholder="Name"><input id="editCustomerEmail" placeholder="Email"><input id="editMobileNumber" placeholder="Mobile"><input id="editEventTime" placeholder="Time"><input type="number" id="editTicketCount" placeholder="Tickets"><input id="editSeat" placeholder="Seat"><textarea id="editNotes" rows="2" placeholder="Notes"></textarea><div class="modal-buttons"><button onclick="window.saveBookingEdit()">Save</button><button onclick="window.closeEditModal()">Cancel</button></div></div></div>
+<div id="deleteModal" class="modal-overlay"><div class="modal"><h3>⚠️ Delete booking?</h3><p>Action cannot be undone.</p><div class="modal-buttons"><button onclick="window.confirmDelete()" style="background:#ef4444;">Delete</button><button onclick="window.closeDeleteModal()">Cancel</button></div></div></div>
 </div>
 
 <script>
-    // STAFF CREDENTIALS - Admin + 4 Staff (Enza, Maria, Michelle, Petta)
     const STAFF = {
         'admin': { password: 'admin123', name: 'Admin Director', role: 'admin', displayName: 'Admin' },
         'enza': { password: 'enza123', name: 'Enza', role: 'staff', displayName: 'Enza' },
@@ -725,7 +162,7 @@
     };
     
     const ROOMS = [
-        { id: 'bistroteca', name: 'Bistroteca', totalTickets: 150 },
+        { id: 'bistroteca', name: 'Bistroteca' },
         { id: 'sala_regio', name: 'Sala Reggio Ballroom' },
         { id: 'members_lounge', name: 'Members Lounge Restaurant' },
         { id: 'ottimo', name: 'Ottimo Private Dining' }
@@ -742,45 +179,11 @@
     let pendingDelete = null;
     
     function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
-    function formatDate(timestamp) { if(!timestamp) return 'Unknown'; if(timestamp.toDate) return timestamp.toDate().toLocaleString(); return new Date(timestamp).toLocaleString(); }
-    function showStatus(msg, type) { const div = document.getElementById('uploadStatus'); if(div) div.innerHTML = `<div class="status-msg ${type}">${escapeHtml(msg)}</div>`; setTimeout(() => { if(div && div.firstChild) div.innerHTML = ''; }, 4000); }
     
-    function getTicketUsageForDate(dateStr) {
-        const dayBookings = allBookings.filter(b => b.roomId === 'bistroteca' && b.eventDate === dateStr);
-        let totalTickets = 0;
-        dayBookings.forEach(b => { totalTickets += (b.ticketCount && !isNaN(b.ticketCount)) ? parseInt(b.ticketCount) : 1; });
-        return { used: totalTickets, remaining: Math.max(0, 150 - totalTickets), isFull: totalTickets >= 150, hasAny: totalTickets > 0 };
-    }
-    
-    function getDayStatusClass(dateStr, isPast) {
-        if(isPast) return 'empty';
-        if(currentRoom !== 'bistroteca') return 'status-neutral';
-        const { used, remaining, isFull, hasAny } = getTicketUsageForDate(dateStr);
-        if(!hasAny) return 'status-green';
-        if(isFull) return 'status-red';
-        if(hasAny && remaining > 0) return 'status-yellow';
-        return 'status-green';
-    }
-    
-    function updateTicketAvailability() {
-        const widget = document.getElementById('ticketCounterWidget');
-        if (!widget) return;
-        if (currentRoom === 'bistroteca') {
-            widget.style.display = 'block';
-            const today = new Date(); today.setHours(0,0,0,0);
-            const futureBistroBookings = allBookings.filter(b => b.roomId === 'bistroteca' && new Date(b.eventDate) >= today);
-            let totalUsed = 0;
-            futureBistroBookings.forEach(b => { totalUsed += (b.ticketCount && !isNaN(b.ticketCount)) ? parseInt(b.ticketCount) : 1; });
-            const available = Math.max(0, 150 - totalUsed);
-            document.getElementById('availableTicketsCount').innerText = available;
-            document.getElementById('usedTicketsCount').innerText = totalUsed;
-            const percent = (totalUsed / 150) * 100;
-            document.getElementById('ticketProgressFill').style.width = Math.min(100, percent) + '%';
-            const warning = document.getElementById('ticketWarningMsg');
-            if (available <= 10 && available > 0) warning.innerHTML = '⚠️ Low availability! Only ' + available + ' tickets left.';
-            else if (available === 0) warning.innerHTML = '❌ SOLD OUT — No tickets remaining.';
-            else warning.innerHTML = '✓ ' + available + ' seats available across future events.';
-        } else { widget.style.display = 'none'; }
+    function showStatus(msg, type) {
+        const div = document.getElementById('uploadStatus');
+        if(div) div.innerHTML = `<div class="status-msg ${type}">${escapeHtml(msg)}</div>`;
+        setTimeout(() => { if(div && div.firstChild) div.innerHTML = ''; }, 4000);
     }
     
     function updateStats() {
@@ -789,17 +192,38 @@
         document.getElementById('totalBookings').innerText = future;
     }
     
+    // Load demo data if empty
     function initDemoData() {
         if(allBookings.length > 0) return;
         const today = new Date();
         const demoDate1 = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()+2).padStart(2,'0')}`;
         const demoDate2 = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()+5).padStart(2,'0')}`;
-        allBookings.push({ id: 'b1', roomId: 'bistroteca', roomName: 'Bistroteca', customerName: 'Emma Watson', customerEmail: 'emma@example.com', customerMobile: '0412345678', eventDate: demoDate1, eventTime: '7:00 PM', ticketCount: 4, celebrationFor: 'Birthday - Emma', seat: 'Table 5', notes: 'Gluten free cake', createdAt: new Date() });
-        allBookings.push({ id: 'b2', roomId: 'bistroteca', roomName: 'Bistroteca', customerName: 'James Bond', customerEmail: 'james@example.com', customerMobile: '0422334455', eventDate: demoDate1, eventTime: '8:30 PM', ticketCount: 2, celebrationFor: 'Anniversary', seat: 'Table 12', notes: 'Window seat', createdAt: new Date() });
-        allBookings.push({ id: 'b3', roomId: 'bistroteca', roomName: 'Bistroteca', customerName: 'Sophia Loren', customerEmail: 'sophia@example.com', customerMobile: '0433778899', eventDate: demoDate2, eventTime: '7:30 PM', ticketCount: 6, celebrationFor: 'Graduation', seat: 'VIP Section', notes: 'Vegetarian meals', createdAt: new Date() });
+        allBookings.push({ id: '1', roomId: 'bistroteca', customerName: 'Emma Watson', customerEmail: 'emma@example.com', customerMobile: '0412345678', eventDate: demoDate1, eventTime: '7:00 PM', ticketCount: 4, seat: 'Table 5', notes: 'Gluten free cake', createdAt: new Date() });
+        allBookings.push({ id: '2', roomId: 'bistroteca', customerName: 'James Bond', customerEmail: 'james@example.com', customerMobile: '0422334455', eventDate: demoDate1, eventTime: '8:30 PM', ticketCount: 2, seat: 'Table 12', notes: 'Window seat', createdAt: new Date() });
+        allBookings.push({ id: '3', roomId: 'sala_regio', customerName: 'Sophia Loren', customerEmail: 'sophia@example.com', customerMobile: '0433778899', eventDate: demoDate2, eventTime: '7:30 PM', ticketCount: 6, seat: 'VIP Section', notes: 'Vegetarian meals', createdAt: new Date() });
         noticesList.push({ text: 'Kitchen closed Monday 9-11am for maintenance', author: 'Admin', timestamp: new Date(), id: Date.now() });
-        chatMessages.push({ name: 'Admin', text: 'Welcome everyone! New booking system live.', timestamp: new Date(), id: Date.now() });
+        chatMessages.push({ name: 'Admin', text: 'Welcome to the staff chat!', timestamp: new Date(), id: Date.now() });
+        renderCalendar();
+        renderBookingsList();
+        renderNotices();
+        renderChat();
+        updateStats();
     }
+    
+    function renderRoomTabs() {
+        document.getElementById('roomTabs').innerHTML = ROOMS.map(room => 
+            `<button class="room-tab ${currentRoom === room.id ? 'active' : ''}" onclick="window.switchRoom('${room.id}')">🏠 ${escapeHtml(room.name)}</button>`
+        ).join('');
+    }
+    
+    window.switchRoom = function(roomId) {
+        currentRoom = roomId;
+        renderRoomTabs();
+        renderCalendar();
+        selectedDate = null;
+        document.getElementById('selectedRoomTitle').innerHTML = `📋 ${ROOMS.find(r=>r.id===currentRoom)?.name} - Bookings`;
+        document.getElementById('bookingsList').innerHTML = '<div class="empty-state">Click a date</div>';
+    };
     
     function renderCalendar() {
         const year = currentDate.getFullYear(), month = currentDate.getMonth();
@@ -812,17 +236,15 @@
         for(let i=0;i<firstDay;i++) html += `<div class="calendar-day empty"></div>`;
         for(let d=1; d<=daysInMonth; d++) {
             const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const dayBookings = allBookings.filter(b => b.roomId === currentRoom && b.eventDate === dateStr);
+            const isBooked = dayBookings.length > 0;
             const isPast = new Date(year, month, d) < today;
-            let statusClass = getDayStatusClass(dateStr, isPast);
+            let statusClass = isPast ? 'empty' : (isBooked ? 'booked' : 'available');
             let badge = '';
-            if(currentRoom === 'bistroteca' && !isPast) {
-                const { used, remaining, isFull } = getTicketUsageForDate(dateStr);
-                if(used > 0) badge = `<div class="ticket-status-badge ${isFull ? 'red-bg' : (remaining > 0 ? 'yellow-bg' : 'red-bg')}">🎫 ${used}/150 tickets</div>`;
-                else badge = `<div class="ticket-status-badge green-bg">✓ ${remaining} available</div>`;
-            } else {
-                const dayBookings = allBookings.filter(b => b.roomId === currentRoom && b.eventDate === dateStr);
-                if(dayBookings.length > 0 && !isPast) badge = `<div class="booking-badge">${dayBookings.length} booking${dayBookings.length !== 1 ? 's' : ''}</div>`;
-                else if(!isPast) badge = '<div style="font-size:10px; color:#10b981;">✓ Free</div>';
+            if(isBooked && !isPast) {
+                badge = `<div class="booking-badge">${dayBookings.length}</div>`;
+            } else if(!isPast && !isBooked) {
+                badge = '<div style="font-size:10px; color:#10b981;">✓ Free</div>';
             }
             html += `<div class="calendar-day ${statusClass}" onclick="window.selectDate('${dateStr}')"><div class="day-number">${d}</div>${badge}</div>`;
         }
@@ -830,30 +252,36 @@
         document.getElementById('calendarGrid').innerHTML = html;
     }
     
+    window.selectDate = function(dateStr) {
+        selectedDate = dateStr;
+        document.getElementById('selectedRoomTitle').innerHTML = `📋 ${ROOMS.find(r=>r.id===currentRoom)?.name} - ${dateStr}`;
+        renderBookingsList();
+    };
+    
     function renderBookingsList() {
-        if(!selectedDate) { document.getElementById('bookingsList').innerHTML = '<div class="empty-state">Select a date from calendar</div>'; return; }
+        if(!selectedDate) { document.getElementById('bookingsList').innerHTML = '<div class="empty-state">Select a date</div>'; return; }
         const dayBookings = allBookings.filter(b => b.roomId === currentRoom && b.eventDate === selectedDate);
-        if(!dayBookings.length) { document.getElementById('bookingsList').innerHTML = '<div class="empty-state">✅ No bookings — room available</div>'; return; }
-        document.getElementById('bookingsList').innerHTML = dayBookings.map(b => {
-            const ticketQty = (b.ticketCount && !isNaN(b.ticketCount)) ? b.ticketCount : 1;
-            return `<div class="booking-card" onclick="window.toggleDetail('${b.id}')">
-                <div class="booking-customer-name">👤 ${escapeHtml(b.customerName)}<span class="ticket-chip">🎟️ ${ticketQty} ticket${ticketQty !== 1 ? 's' : ''}</span>${b.celebrationFor ? `<span class="ticket-chip">🎉 ${escapeHtml(b.celebrationFor)}</span>` : ''}</div>
-                <div class="booking-meta-grid"><div>📧 ${escapeHtml(b.customerEmail)}</div><div>📱 ${b.customerMobile || '—'}</div><div>⏰ ${escapeHtml(b.eventTime || 'TBD')}</div><div>🪑 ${b.seat || '—'}</div></div>
-                <div id="detail-${b.id}" class="detail-expand"><div><strong>📅 Booked:</strong> ${formatDate(b.createdAt)}</div><div><strong>🎉 Celebrating:</strong> ${escapeHtml(b.celebrationFor) || 'Not specified'}</div><div><strong>📝 Notes:</strong> ${escapeHtml(b.notes) || 'No special notes'}</div></div>
-                <div class="booking-actions" onclick="event.stopPropagation()"><button class="btn-edit" onclick="window.openEditModal('${b.id}')">Edit</button><button class="btn-remove" onclick="window.confirmDeleteBooking('${b.id}')">Delete</button></div>
-            </div>`;
-        }).join('');
+        if(!dayBookings.length) { document.getElementById('bookingsList').innerHTML = '<div class="empty-state">✅ No bookings</div>'; return; }
+        document.getElementById('bookingsList').innerHTML = dayBookings.map(b => `
+            <div class="booking-card" onclick="window.toggleDetail('${b.id}')">
+                <div class="booking-customer">👤 ${escapeHtml(b.customerName)}</div>
+                <div class="booking-contact">📧 ${escapeHtml(b.customerEmail)} ${b.customerMobile ? `📱 ${escapeHtml(b.customerMobile)}` : ''}</div>
+                <div class="booking-details"><span>⏰ ${escapeHtml(b.eventTime || 'TBD')}</span><span>🎟️ ${b.ticketCount || 1} tickets</span>${b.seat ? `<span>🪑 ${escapeHtml(b.seat)}</span>` : ''}</div>
+                <div id="detail-${b.id}" class="detail-expand"><strong>📅 Booked:</strong> ${b.createdAt ? new Date(b.createdAt).toLocaleString() : 'Just now'}<br><strong>📝 Notes:</strong> ${escapeHtml(b.notes) || 'None'}</div>
+                ${b.notes ? `<div class="booking-notes">📝 ${escapeHtml(b.notes)}</div>` : ''}
+                <div class="booking-actions" onclick="event.stopPropagation()">
+                    <button class="btn-edit" onclick="window.openEditModal('${b.id}')">Edit</button>
+                    <button class="btn-remove" onclick="window.confirmDeleteBooking('${b.id}')">Delete</button>
+                </div>
+            </div>
+        `).join('');
     }
     
-    window.toggleDetail = (id) => { document.getElementById(`detail-${id}`)?.classList.toggle('show'); };
-    window.selectDate = (date) => { selectedDate = date; renderBookingsList(); };
-    window.changeMonth = (delta) => { currentDate.setMonth(currentDate.getMonth()+delta); renderCalendar(); };
-    window.goToToday = () => { currentDate = new Date(); renderCalendar(); };
-    window.switchRoom = (id) => { currentRoom = id; renderRoomTabs(); renderCalendar(); selectedDate = null; document.getElementById('selectedRoomTitle').innerHTML = `📋 ${ROOMS.find(r=>r.id===currentRoom)?.name} - Bookings`; document.getElementById('bookingsList').innerHTML = '<div class="empty-state">Click a date</div>'; updateTicketAvailability(); };
+    window.toggleDetail = function(id) { document.getElementById(`detail-${id}`)?.classList.toggle('show'); };
+    window.changeMonth = function(delta) { currentDate.setMonth(currentDate.getMonth()+delta); renderCalendar(); };
+    window.goToToday = function() { currentDate = new Date(); renderCalendar(); };
     
-    function renderRoomTabs() { document.getElementById('roomTabs').innerHTML = ROOMS.map(r => `<button class="room-tab ${currentRoom === r.id ? 'active' : ''}" onclick="window.switchRoom('${r.id}')">🏠 ${escapeHtml(r.name)}</button>`).join(''); }
-    
-    window.openEditModal = (id) => {
+    window.openEditModal = function(id) {
         const b = allBookings.find(bk => bk.id === id);
         if(b) { currentEditContext = b;
             document.getElementById('editCustomerName').value = b.customerName || '';
@@ -861,14 +289,13 @@
             document.getElementById('editMobileNumber').value = b.customerMobile || '';
             document.getElementById('editEventTime').value = b.eventTime || '';
             document.getElementById('editTicketCount').value = b.ticketCount || 1;
-            document.getElementById('editCelebrationFor').value = b.celebrationFor || '';
             document.getElementById('editSeat').value = b.seat || '';
             document.getElementById('editNotes').value = b.notes || '';
             document.getElementById('editModal').style.display = 'flex';
         }
     };
     
-    window.saveBookingEdit = () => {
+    window.saveBookingEdit = function() {
         if(currentEditContext) {
             const idx = allBookings.findIndex(b => b.id === currentEditContext.id);
             if(idx !== -1) {
@@ -878,28 +305,71 @@
                     customerMobile: document.getElementById('editMobileNumber').value,
                     eventTime: document.getElementById('editEventTime').value,
                     ticketCount: parseInt(document.getElementById('editTicketCount').value) || 1,
-                    celebrationFor: document.getElementById('editCelebrationFor').value,
                     seat: document.getElementById('editSeat').value,
                     notes: document.getElementById('editNotes').value,
                     updatedAt: new Date()
                 };
-                renderCalendar(); if(selectedDate) renderBookingsList(); updateTicketAvailability(); updateStats(); showStatus('Booking updated', 'success');
+                renderCalendar();
+                if(selectedDate) renderBookingsList();
+                updateStats();
+                showStatus('Booking updated', 'success');
             }
             window.closeEditModal();
         }
     };
-    window.closeEditModal = () => { document.getElementById('editModal').style.display = 'none'; currentEditContext = null; };
-    window.confirmDeleteBooking = (id) => { pendingDelete = id; document.getElementById('deleteModal').style.display = 'flex'; };
-    window.confirmDelete = () => { if(pendingDelete) { allBookings = allBookings.filter(b => b.id !== pendingDelete); renderCalendar(); if(selectedDate) renderBookingsList(); updateTicketAvailability(); updateStats(); showStatus('Booking deleted', 'success'); window.closeDeleteModal(); } };
-    window.closeDeleteModal = () => { document.getElementById('deleteModal').style.display = 'none'; pendingDelete = null; };
     
-    function renderNotices() { const c=document.getElementById('noticeBoard'); if(!noticesList.length) c.innerHTML='<div class="empty-state">No notices</div>'; else c.innerHTML=noticesList.slice(0,12).map(n=>`<div class="notice-item"><div>⚠️ ${escapeHtml(n.text)}</div><div style="font-size:10px;">👤 ${escapeHtml(n.author)} · ${n.timestamp?.toLocaleString() || 'now'}</div></div>`).join(''); }
-    window.addNotice = () => { const t=document.getElementById('newNotice').value.trim(); if(!t) return; const a=document.getElementById('staffName').value.trim() || 'Staff'; noticesList.unshift({ text:t, author:a, timestamp:new Date(), id:Date.now() }); renderNotices(); document.getElementById('newNotice').value=''; showStatus('Notice posted','success'); };
+    window.closeEditModal = function() { document.getElementById('editModal').style.display = 'none'; currentEditContext = null; };
+    window.confirmDeleteBooking = function(id) { pendingDelete = id; document.getElementById('deleteModal').style.display = 'flex'; };
+    window.confirmDelete = function() {
+        if(pendingDelete) {
+            allBookings = allBookings.filter(b => b.id !== pendingDelete);
+            renderCalendar();
+            if(selectedDate) renderBookingsList();
+            updateStats();
+            showStatus('Booking deleted', 'success');
+            window.closeDeleteModal();
+        }
+    };
+    window.closeDeleteModal = function() { document.getElementById('deleteModal').style.display = 'none'; pendingDelete = null; };
     
-    function renderChat() { const c=document.getElementById('chatMessages'); if(!chatMessages.length) c.innerHTML='<div class="empty-state">No messages</div>'; else c.innerHTML=chatMessages.slice(-50).map(m=>`<div class="chat-message"><div class="chat-name">${escapeHtml(m.name)}</div><div class="chat-text">${escapeHtml(m.text)}</div></div>`).join(''); c.scrollTop=c.scrollHeight; }
-    window.sendChatMessage = () => { const txt=document.getElementById('chatMessage').value.trim(); if(!txt) return; const name=document.getElementById('staffName').value.trim() || 'Staff'; chatMessages.push({ name, text:txt, timestamp:new Date(), id:Date.now() }); renderChat(); document.getElementById('chatMessage').value=''; };
+    function renderNotices() {
+        const c = document.getElementById('noticeBoard');
+        if(noticesList.length === 0) c.innerHTML = '<div class="empty-state">No notices</div>';
+        else c.innerHTML = noticesList.slice(0,12).map(n => `<div class="notice-item"><div>⚠️ ${escapeHtml(n.text)}</div><div style="font-size:10px;">👤 ${escapeHtml(n.author)} · ${n.timestamp ? new Date(n.timestamp).toLocaleString() : 'now'}</div></div>`).join('');
+    }
     
-    window.attemptLogin = () => {
+    window.addNotice = function() {
+        const text = document.getElementById('newNotice').value.trim();
+        if(!text) return;
+        const author = document.getElementById('staffName').value.trim() || 'Staff';
+        noticesList.unshift({ text, author, timestamp: new Date(), id: Date.now() });
+        renderNotices();
+        document.getElementById('newNotice').value = '';
+        showStatus('Notice posted', 'success');
+    };
+    
+    function renderChat() {
+        const c = document.getElementById('chatMessages');
+        if(chatMessages.length === 0) c.innerHTML = '<div class="empty-state">No messages</div>';
+        else c.innerHTML = chatMessages.slice(-50).map(m => `<div class="chat-message"><div class="chat-name">${escapeHtml(m.name)}</div><div class="chat-text">${escapeHtml(m.text)}</div></div>`).join('');
+        c.scrollTop = c.scrollHeight;
+    }
+    
+    window.sendChatMessage = function() {
+        const text = document.getElementById('chatMessage').value.trim();
+        if(!text) return;
+        const name = document.getElementById('staffName').value.trim() || 'Staff';
+        chatMessages.push({ name, text, timestamp: new Date(), id: Date.now() });
+        renderChat();
+        document.getElementById('chatMessage').value = '';
+    };
+    
+    function handleCSV(file) {
+        if(currentUser?.role !== 'admin') { showStatus('Admin access required', 'error'); return; }
+        showStatus(`CSV import demo: Would process ${file.name}`, 'info');
+    }
+    
+    window.attemptLogin = function() {
         const username = document.getElementById('loginUsername').value.trim().toLowerCase();
         const password = document.getElementById('loginPassword').value.trim();
         if(STAFF[username] && STAFF[username].password === password) {
@@ -907,34 +377,58 @@
             localStorage.setItem('ml_user', JSON.stringify(currentUser));
             document.getElementById('loginOverlay').style.display = 'none';
             document.getElementById('mainContent').style.display = 'block';
-            document.getElementById('userEmail').innerHTML = `<strong>${escapeHtml(currentUser.displayName)}</strong> (${currentUser.role})`;
-            document.getElementById('staffName').value = currentUser.displayName;
-            const adminCsvCard = document.getElementById('adminCsvCard');
-            if(currentUser.role === 'admin') adminCsvCard.style.display = 'block';
-            else adminCsvCard.style.display = 'none';
+            document.getElementById('userEmail').innerHTML = `<strong>${escapeHtml(STAFF[username].displayName)}</strong> (${STAFF[username].role})`;
+            document.getElementById('staffName').value = STAFF[username].displayName;
+            
+            const adminCard = document.getElementById('adminCsvCard');
+            adminCard.style.display = currentUser.role === 'admin' ? 'block' : 'none';
+            
             initDemoData();
             renderRoomTabs();
             renderCalendar();
-            updateTicketAvailability();
             renderNotices();
             renderChat();
-            updateStats();
-        } else { document.getElementById('loginError').innerHTML = '❌ Invalid username or password'; }
+        } else {
+            document.getElementById('loginError').innerHTML = '❌ Invalid username or password';
+        }
     };
     
-    window.logout = () => { localStorage.removeItem('ml_user'); location.reload(); };
+    window.logout = function() { localStorage.removeItem('ml_user'); location.reload(); };
     
-    function handleCSV(file) { if(currentUser?.role !== 'admin') { showStatus('Admin access required', 'error'); return; } showStatus(`CSV import: Would process ${file.name}`, 'info'); }
     function setupFileUpload() {
-        const zone = document.getElementById('csvUploadZone'); const input = document.getElementById('csvFileInput');
-        if(zone) { zone.addEventListener('click', () => input.click()); zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); }); zone.addEventListener('dragleave', () => zone.classList.remove('dragover')); zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); const f = e.dataTransfer.files[0]; if(f && f.name.endsWith('.csv')) handleCSV(f); else showStatus('CSV only', 'error'); }); }
+        const zone = document.getElementById('csvUploadZone');
+        const input = document.getElementById('csvFileInput');
+        if(zone) {
+            zone.addEventListener('click', () => input.click());
+            zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+            zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+            zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); const f = e.dataTransfer.files[0]; if(f && f.name.endsWith('.csv')) handleCSV(f); else showStatus('CSV only', 'error'); });
+        }
         if(input) input.addEventListener('change', e => { if(e.target.files.length) handleCSV(e.target.files[0]); });
     }
     
     function checkAuth() {
         const saved = localStorage.getItem('ml_user');
         if(saved) {
-            try { const user = JSON.parse(saved); if(STAFF[user.username]) { currentUser = user; document.getElementById('loginOverlay').style.display = 'none'; document.getElementById('mainContent').style.display = 'block'; document.getElementById('userEmail').innerHTML = `<strong>${escapeHtml(currentUser.displayName)}</strong> (${currentUser.role})`; document.getElementById('staffName').value = currentUser.displayName; const adminCsvCard = document.getElementById('adminCsvCard'); if(currentUser.role === 'admin') adminCsvCard.style.display = 'block'; else adminCsvCard.style.display = 'none'; initDemoData(); renderRoomTabs(); renderCalendar(); updateTicketAvailability(); renderNotices(); renderChat(); updateStats(); return; } } catch(e) {} }
+            try {
+                const user = JSON.parse(saved);
+                if(STAFF[user.username]) {
+                    currentUser = user;
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    document.getElementById('mainContent').style.display = 'block';
+                    document.getElementById('userEmail').innerHTML = `<strong>${escapeHtml(STAFF[user.username].displayName)}</strong> (${STAFF[user.username].role})`;
+                    document.getElementById('staffName').value = STAFF[user.username].displayName;
+                    const adminCard = document.getElementById('adminCsvCard');
+                    adminCard.style.display = currentUser.role === 'admin' ? 'block' : 'none';
+                    initDemoData();
+                    renderRoomTabs();
+                    renderCalendar();
+                    renderNotices();
+                    renderChat();
+                    return;
+                }
+            } catch(e) {}
+        }
         document.getElementById('loginOverlay').style.display = 'flex';
     }
     
