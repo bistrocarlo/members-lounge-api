@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Members Lounge | Live Staff Hub</title>
+    <title>Members Lounge | Live Staff Portal</title>
     <style>
         * {
             margin: 0;
@@ -17,7 +17,6 @@
             padding: 20px;
         }
 
-        /* Modern scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -224,6 +223,64 @@
             color: white;
             box-shadow: 0 8px 18px rgba(59, 130, 246, 0.3);
             transform: translateY(-2px);
+        }
+
+        /* TICKET COUNTER CARD */
+        .ticket-counter {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-radius: 24px;
+            padding: 18px 22px;
+            margin-bottom: 20px;
+            border: 1px solid #fbbf24;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+        }
+        .ticket-counter h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .ticket-numbers {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .ticket-available {
+            font-size: 2.6rem;
+            font-weight: 800;
+            color: #b45309;
+            letter-spacing: -1px;
+        }
+        .ticket-used {
+            font-size: 1rem;
+            color: #78350f;
+            background: rgba(255,255,200,0.6);
+            padding: 4px 12px;
+            border-radius: 40px;
+        }
+        .ticket-progress {
+            margin-top: 12px;
+            height: 8px;
+            background: #fed7aa;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        .ticket-progress-fill {
+            height: 100%;
+            background: #ea580c;
+            border-radius: 20px;
+            transition: width 0.3s ease;
+        }
+        .ticket-warning {
+            margin-top: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #9a3412;
         }
 
         /* CALENDAR */
@@ -553,6 +610,24 @@
         </div>
         
         <div class="sidebar-column">
+            <!-- LIVE TICKET AVAILABILITY FOR BISTROTECA -->
+            <div id="ticketCounterWidget" class="ticket-counter" style="display: none;">
+                <h3>🎟️ Bistroteca · Ticket Inventory</h3>
+                <div class="ticket-numbers">
+                    <div>
+                        <div style="font-size: 12px; opacity:0.7;">Available now</div>
+                        <div class="ticket-available" id="availableTicketsCount">150</div>
+                    </div>
+                    <div class="ticket-used">
+                        🎫 Used: <span id="usedTicketsCount">0</span> / 150
+                    </div>
+                </div>
+                <div class="ticket-progress">
+                    <div class="ticket-progress-fill" id="ticketProgressFill" style="width: 0%;"></div>
+                </div>
+                <div class="ticket-warning" id="ticketWarningMsg"></div>
+            </div>
+
             <div class="card">
                 <div class="card-title">📂 CSV Bulk Import</div>
                 <div id="csvUploadZone" class="upload-area">
@@ -586,7 +661,7 @@
 </div>
 
 <!-- Modals -->
-<div id="editModal" class="modal-overlay"><div class="modal"><h3>✏️ Edit Booking</h3><input id="editCustomerName" placeholder="Full Name"><input id="editCustomerEmail" placeholder="Email"><input id="editMobileNumber" placeholder="Mobile"><input id="editEventTime" placeholder="Event Time (e.g. 7:30 PM)"><input id="editTicketCount" type="number" placeholder="Tickets"><input id="editSeat" placeholder="Seat / Table"><textarea id="editNotes" rows="2" placeholder="Special notes"></textarea><div class="modal-buttons"><button onclick="window.saveBookingEdit()" style="background:#3b82f6;color:white;">Save</button><button onclick="window.closeEditModal()">Cancel</button></div></div></div>
+<div id="editModal" class="modal-overlay"><div class="modal"><h3>✏️ Edit Booking</h3><input id="editCustomerName" placeholder="Full Name"><input id="editCustomerEmail" placeholder="Email"><input id="editMobileNumber" placeholder="Mobile"><input id="editEventTime" placeholder="Event Time (e.g. 7:30 PM)"><input id="editTicketCount" type="number" placeholder="Tickets" value="1"><input id="editSeat" placeholder="Seat / Table"><textarea id="editNotes" rows="2" placeholder="Special notes"></textarea><div class="modal-buttons"><button onclick="window.saveBookingEdit()" style="background:#3b82f6;color:white;">Save</button><button onclick="window.closeEditModal()">Cancel</button></div></div></div>
 <div id="deleteModal" class="modal-overlay"><div class="modal"><h3>⚠️ Confirm Deletion</h3><p>Remove this booking permanently?</p><div class="modal-buttons"><button onclick="window.confirmDelete()" style="background:#ef4444;color:white;">Delete</button><button onclick="window.closeDeleteModal()">Cancel</button></div></div></div>
 </div>
 
@@ -625,6 +700,8 @@
         { id: 'ottimo', name: 'Ottimo Private Dining Room' }
     ];
     
+    const BISTROTECA_TOTAL_TICKETS = 150;
+    
     let currentUser = null, currentDate = new Date(), currentRoom = 'bistroteca', selectedDate = null;
     let allBookings = [], noticesList = [], chatMessages = [];
     let currentEditContext = null, pendingDelete = null;
@@ -639,10 +716,64 @@
         const future = allBookings.filter(b => new Date(b.eventDate) >= today).length;
         document.getElementById('totalBookings') && (document.getElementById('totalBookings').innerText = future);
     }
+
+    // ----- TICKET AVAILABILITY for Bistroteca (real-time) -----
+    function updateTicketAvailability() {
+        const widget = document.getElementById('ticketCounterWidget');
+        if (!widget) return;
+        // Only show widget when currently viewing Bistroteca (most relevant)
+        if (currentRoom === 'bistroteca') {
+            widget.style.display = 'block';
+        } else {
+            widget.style.display = 'none';
+            return;
+        }
+        
+        // Get all future bookings for Bistroteca (eventDate >= today)
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const futureBistroBookings = allBookings.filter(b => 
+            b.roomId === 'bistroteca' && new Date(b.eventDate) >= today
+        );
+        
+        // Sum ticketCount (default to 1 if missing)
+        let totalUsed = 0;
+        futureBistroBookings.forEach(b => {
+            let tickets = b.ticketCount;
+            if (tickets === undefined || tickets === null || isNaN(tickets)) tickets = 1;
+            totalUsed += parseInt(tickets);
+        });
+        
+        const available = Math.max(0, BISTROTECA_TOTAL_TICKETS - totalUsed);
+        
+        document.getElementById('availableTicketsCount').innerText = available;
+        document.getElementById('usedTicketsCount').innerText = totalUsed;
+        const usedPercent = (totalUsed / BISTROTECA_TOTAL_TICKETS) * 100;
+        document.getElementById('ticketProgressFill').style.width = Math.min(100, usedPercent) + '%';
+        
+        const warningDiv = document.getElementById('ticketWarningMsg');
+        if (available <= 10 && available > 0) {
+            warningDiv.innerHTML = '⚠️ Low availability! Only ' + available + ' tickets left.';
+            warningDiv.style.color = '#b91c1c';
+        } else if (available === 0) {
+            warningDiv.innerHTML = '❌ SOLD OUT — No tickets remaining for future events.';
+            warningDiv.style.color = '#991b1b';
+            warningDiv.style.fontWeight = 'bold';
+        } else {
+            warningDiv.innerHTML = '✓ ' + available + ' seats left across all future Bistroteca events.';
+            warningDiv.style.color = '#92400e';
+        }
+    }
     
     // Firestore listeners
     if(firebaseReady) {
-        onSnapshot(collection(db, 'bookings'), (snap) => { allBookings = snap.docs.map(d => ({ id: d.id, ...d.data() })); renderCalendar(); if(selectedDate) renderBookingsList(); updateStats(); }, err => showStatus("DB error: "+err.message, "error"));
+        onSnapshot(collection(db, 'bookings'), (snap) => { 
+            allBookings = snap.docs.map(d => ({ id: d.id, ...d.data() })); 
+            renderCalendar(); 
+            if(selectedDate) renderBookingsList(); 
+            updateStats();
+            updateTicketAvailability();  // Refresh ticket counter every time bookings change
+        }, err => showStatus("DB error: "+err.message, "error"));
         onSnapshot(query(collection(db, 'notices'), orderBy('timestamp','desc')), (snap) => { noticesList = snap.docs.map(d => ({ id:d.id, ...d.data() })); renderNotices(); });
         onSnapshot(query(collection(db, 'chat'), orderBy('timestamp','asc')), (snap) => { chatMessages = snap.docs.map(d => ({ id:d.id, ...d.data() })); renderChat(); });
     }
@@ -659,10 +790,10 @@
         for(let i=0; i<Math.min(lines.length,20); i++) if(lines[i].toLowerCase().includes('event name') && lines[i].toLowerCase().includes('email')) { headerIdx=i; break; }
         if(headerIdx === -1) return showStatus("Missing header: 'Event name','Event start','Email'", "error");
         const headers = parseCSVRow(lines[headerIdx]);
-        let idx = { en:-1, es:-1, name:-1, email:-1, mobile:-1, ticketCode:-1 };
+        let idx = { en:-1, es:-1, name:-1, email:-1, mobile:-1, ticketCode:-1, tickets:-1 };
         headers.forEach((h,i) => { let c=h.toLowerCase().replace(/\s/g,'');
             if(c==='eventname') idx.en=i; if(c==='eventstart') idx.es=i; if(c==='name') idx.name=i; if(c==='email') idx.email=i;
-            if(c==='mobilenumber') idx.mobile=i; if(c==='ticketcode') idx.ticketCode=i; });
+            if(c==='mobilenumber') idx.mobile=i; if(c==='ticketcode') idx.ticketCode=i; if(c==='tickets' || c==='ticketcount') idx.tickets=i; });
         if(idx.en===-1 || idx.es===-1) return showStatus("Need columns: Event name, Event start", "error");
         let added=0, skipPast=0, noRoom=0, dup=0;
         const today = new Date(); today.setHours(0,0,0,0);
@@ -684,11 +815,13 @@
             let email = row[idx.email] || `${customerName.replace(/\s/g,'')}@guest.com`;
             let mobile = (idx.mobile !== -1 && row[idx.mobile]) ? row[idx.mobile] : '';
             let ticketCode = (idx.ticketCode !== -1 && row[idx.ticketCode]) ? row[idx.ticketCode] : '';
+            let ticketCount = (idx.tickets !== -1 && row[idx.tickets]) ? parseInt(row[idx.tickets]) : 1;
+            if(isNaN(ticketCount) || ticketCount < 1) ticketCount = 1;
             const timeMatch = rawDate.match(/(\d{1,2}:\d{2}\s*(?:AM|PM))/i);
             const eventTime = timeMatch ? timeMatch[1].toUpperCase() : 'TBD';
             const exists = allBookings.some(b => b.roomId === matchedRoom.id && b.eventDate === dateStr && b.customerName?.toLowerCase() === customerName.toLowerCase());
             if(exists) { dup++; continue; }
-            await addDoc(collection(db, 'bookings'), { roomId: matchedRoom.id, roomName: matchedRoom.name, customerName, customerEmail: email, customerMobile: mobile, eventDate: dateStr, eventTime, ticketCode, ticketCount: 1, seat: '', notes: '', createdAt: Timestamp.now() });
+            await addDoc(collection(db, 'bookings'), { roomId: matchedRoom.id, roomName: matchedRoom.name, customerName, customerEmail: email, customerMobile: mobile, eventDate: dateStr, eventTime, ticketCode, ticketCount: ticketCount, seat: '', notes: '', createdAt: Timestamp.now() });
             added++;
         }
         showStatus(`✅ Imported ${added} (skipped past:${skipPast}, no room:${noRoom}, dup:${dup})`, "success");
@@ -699,7 +832,15 @@
         const c = document.getElementById('roomTabs');
         if(c) c.innerHTML = ROOMS.map(r => `<button class="room-tab ${currentRoom===r.id?'active':''}" onclick="window.switchRoom('${r.id}')">🏠 ${escapeHtml(r.name)}</button>`).join('');
     }
-    window.switchRoom = (id) => { currentRoom = id; renderRoomTabs(); renderCalendar(); selectedDate = null; document.getElementById('selectedRoomTitle').innerHTML = `📋 ${ROOMS.find(r=>r.id===currentRoom)?.name} - Bookings`; document.getElementById('bookingsList').innerHTML = '<div class="empty-state">📅 Click on a date to view</div>'; };
+    window.switchRoom = (id) => { 
+        currentRoom = id; 
+        renderRoomTabs(); 
+        renderCalendar(); 
+        selectedDate = null; 
+        document.getElementById('selectedRoomTitle').innerHTML = `📋 ${ROOMS.find(r=>r.id===currentRoom)?.name} - Bookings`; 
+        document.getElementById('bookingsList').innerHTML = '<div class="empty-state">📅 Click on a date to view</div>';
+        updateTicketAvailability(); // refresh widget visibility + data on room switch
+    };
     function renderCalendar() {
         const year = currentDate.getFullYear(), month = currentDate.getMonth();
         document.getElementById('currentMonthYear').innerHTML = `${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][month]} ${year}`;
@@ -728,15 +869,17 @@
         if(!selectedDate) return;
         const dayBookings = allBookings.filter(b => b.roomId === currentRoom && b.eventDate === selectedDate);
         if(!dayBookings.length) { document.getElementById('bookingsList').innerHTML = '<div class="empty-state">✅ No bookings — available for events</div>'; return; }
-        document.getElementById('bookingsList').innerHTML = dayBookings.map(b => `
+        document.getElementById('bookingsList').innerHTML = dayBookings.map(b => {
+            const ticketQty = (b.ticketCount && !isNaN(b.ticketCount)) ? b.ticketCount : 1;
+            return `
             <div class="booking-card">
                 <div><strong>👤 ${escapeHtml(b.customerName)}</strong></div>
                 <div class="booking-contact">📧 ${escapeHtml(b.customerEmail)}</div>
                 ${b.customerMobile ? `<div>📱 ${escapeHtml(b.customerMobile)}</div>` : ''}
-                <div class="booking-details">⏰ ${escapeHtml(b.eventTime)}  🎟️ ${b.ticketCount||1} tickets ${b.seat ? `🪑 ${escapeHtml(b.seat)}` : ''}</div>
+                <div class="booking-details">⏰ ${escapeHtml(b.eventTime)}  🎟️ ${ticketQty} ${ticketQty === 1 ? 'ticket' : 'tickets'} ${b.seat ? `🪑 ${escapeHtml(b.seat)}` : ''}</div>
                 ${b.notes ? `<div class="booking-notes">📝 ${escapeHtml(b.notes)}</div>` : ''}
                 <div class="booking-actions"><button class="btn-edit" onclick="window.openEditModal('${b.id}')">✏️ Edit</button><button class="btn-remove" onclick="window.confirmDeleteBooking('${b.id}')">🗑️ Delete</button></div>
-            </div>`).join('');
+            </div>`}).join('');
     }
     window.changeMonth = (delta) => { currentDate.setMonth(currentDate.getMonth()+delta); renderCalendar(); };
     window.goToToday = () => { currentDate = new Date(); renderCalendar(); };
@@ -751,10 +894,10 @@
     function renderChat() { const c=document.getElementById('chatMessages'); if(!c)return; if(!chatMessages.length) c.innerHTML='<div class="empty-state">💬 Start chatting</div>'; else { c.innerHTML=chatMessages.slice(-50).map(m=>`<div class="chat-message"><div class="chat-name">${escapeHtml(m.name)}</div><div class="chat-text">${escapeHtml(m.text)}</div><div class="chat-time">${m.timestamp?.toDate().toLocaleTimeString()||'now'}</div></div>`).join(''); c.scrollTop=c.scrollHeight; } }
     window.sendChatMessage = async () => { const txt=document.getElementById('chatMessage').value.trim(); if(!txt) return; const name=document.getElementById('staffName').value.trim()||'Staff'; await addDoc(collection(db,'chat'),{name,text:txt,timestamp:Timestamp.now()}); document.getElementById('chatMessage').value=''; };
     
-    window.attemptLogin = () => { const u=document.getElementById('loginUsername').value.trim(), p=document.getElementById('loginPassword').value.trim(); if(STAFF[u] && STAFF[u].password===p) { currentUser={username:u,name:STAFF[u].name,role:STAFF[u].role}; localStorage.setItem('ml_user',JSON.stringify(currentUser)); document.getElementById('loginOverlay').style.display='none'; document.getElementById('mainContent').style.display='block'; document.getElementById('userEmail').innerHTML=`<strong>${escapeHtml(u)}</strong> (${STAFF[u].role})`; document.getElementById('staffName').value=STAFF[u].name; renderRoomTabs(); renderCalendar(); selectedDate=null; document.getElementById('bookingsList').innerHTML='<div class="empty-state">📅 Select a date from calendar</div>'; } else document.getElementById('loginError').innerHTML='❌ Invalid credentials'; };
+    window.attemptLogin = () => { const u=document.getElementById('loginUsername').value.trim(), p=document.getElementById('loginPassword').value.trim(); if(STAFF[u] && STAFF[u].password===p) { currentUser={username:u,name:STAFF[u].name,role:STAFF[u].role}; localStorage.setItem('ml_user',JSON.stringify(currentUser)); document.getElementById('loginOverlay').style.display='none'; document.getElementById('mainContent').style.display='block'; document.getElementById('userEmail').innerHTML=`<strong>${escapeHtml(u)}</strong> (${STAFF[u].role})`; document.getElementById('staffName').value=STAFF[u].name; renderRoomTabs(); renderCalendar(); selectedDate=null; document.getElementById('bookingsList').innerHTML='<div class="empty-state">📅 Select a date from calendar</div>'; updateTicketAvailability(); } else document.getElementById('loginError').innerHTML='❌ Invalid credentials'; };
     window.logout = () => { localStorage.removeItem('ml_user'); location.reload(); };
     
-    (function checkAuth() { const saved=localStorage.getItem('ml_user'); if(saved && STAFF[JSON.parse(saved).username]) { const u=JSON.parse(saved); currentUser=u; document.getElementById('loginOverlay').style.display='none'; document.getElementById('mainContent').style.display='block'; document.getElementById('userEmail').innerHTML=`<strong>${escapeHtml(u.username)}</strong> (${STAFF[u.username].role})`; document.getElementById('staffName').value=STAFF[u.username].name; renderRoomTabs(); renderCalendar(); } else { document.getElementById('loginOverlay').style.display='flex'; } })();
+    (function checkAuth() { const saved=localStorage.getItem('ml_user'); if(saved && STAFF[JSON.parse(saved).username]) { const u=JSON.parse(saved); currentUser=u; document.getElementById('loginOverlay').style.display='none'; document.getElementById('mainContent').style.display='block'; document.getElementById('userEmail').innerHTML=`<strong>${escapeHtml(u.username)}</strong> (${STAFF[u.username].role})`; document.getElementById('staffName').value=STAFF[u.username].name; renderRoomTabs(); renderCalendar(); updateTicketAvailability(); } else { document.getElementById('loginOverlay').style.display='flex'; } })();
     
     document.getElementById('csvUploadZone')?.addEventListener('click',()=>document.getElementById('csvFileInput').click());
     document.getElementById('csvUploadZone')?.addEventListener('dragover',e=>{e.preventDefault();document.getElementById('csvUploadZone').classList.add('dragover');});
