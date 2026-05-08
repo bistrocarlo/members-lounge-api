@@ -1,1554 +1,428 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>Members Lounge | Staff Portal</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
-<style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
-body{
-    font-family:'Inter',sans-serif;
-    background:#f1f5f9;
-    color:#0f172a;
-}
-
-.hidden{
-    display:none !important;
-}
-
-.container{
-    max-width:1600px;
-    margin:auto;
-    padding:20px;
-}
-
-/* LOGIN */
-
-.login-screen{
-    position:fixed;
-    inset:0;
-    background:linear-gradient(135deg,#020617,#0f172a,#1e293b);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:5000;
-}
-
-.login-card{
-    width:420px;
-    max-width:92%;
-    background:white;
-    border-radius:32px;
-    padding:40px;
-    box-shadow:0 25px 50px rgba(0,0,0,0.25);
-}
-
-.login-title{
-    font-size:2rem;
-    font-weight:800;
-    margin-bottom:10px;
-}
-
-.login-sub{
-    color:#64748b;
-    margin-bottom:30px;
-}
-
-.input{
-    width:100%;
-    padding:15px 18px;
-    border:none;
-    background:#f8fafc;
-    border-radius:18px;
-    margin-bottom:14px;
-    font-size:15px;
-    border:1px solid #e2e8f0;
-}
-
-.input:focus{
-    outline:none;
-    border-color:#3b82f6;
-}
-
-.btn{
-    border:none;
-    cursor:pointer;
-    transition:.2s;
-}
-
-.btn-primary{
-    width:100%;
-    padding:16px;
-    background:#2563eb;
-    color:white;
-    border-radius:20px;
-    font-weight:700;
-    font-size:15px;
-}
-
-.btn-primary:hover{
-    background:#1d4ed8;
-}
-
-.login-error{
-    margin-top:12px;
-    color:#dc2626;
-    font-size:14px;
-}
-
-/* HEADER */
-
-.header{
-    background:linear-gradient(135deg,#0f172a,#1e293b);
-    border-radius:30px;
-    padding:28px;
-    color:white;
-    margin-bottom:24px;
-    box-shadow:0 12px 30px rgba(0,0,0,0.08);
-}
-
-.header-top{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    flex-wrap:wrap;
-    gap:20px;
-}
-
-.header-title{
-    font-size:2rem;
-    font-weight:900;
-}
-
-.header-user{
-    display:flex;
-    align-items:center;
-    gap:12px;
-}
-
-.logout-btn{
-    background:#ef4444;
-    color:white;
-    padding:10px 18px;
-    border-radius:40px;
-    border:none;
-    font-weight:700;
-    cursor:pointer;
-}
-
-.stats{
-    display:flex;
-    gap:18px;
-    margin-top:24px;
-    flex-wrap:wrap;
-}
-
-.stat-card{
-    background:rgba(255,255,255,0.08);
-    padding:14px 20px;
-    border-radius:24px;
-    min-width:180px;
-}
-
-.stat-value{
-    font-size:30px;
-    font-weight:900;
-}
-
-/* LAYOUT */
-
-.main-layout{
-    display:grid;
-    grid-template-columns:2fr 1fr;
-    gap:24px;
-}
-
-@media(max-width:1100px){
-    .main-layout{
-        grid-template-columns:1fr;
-    }
-}
-
-/* CARD */
-
-.card{
-    background:white;
-    border-radius:30px;
-    padding:22px;
-    margin-bottom:24px;
-    box-shadow:0 4px 18px rgba(15,23,42,0.05);
-}
-
-.card-title{
-    font-size:1.25rem;
-    font-weight:800;
-    margin-bottom:18px;
-}
-
-/* ROOM TABS */
-
-.room-tabs{
-    display:flex;
-    gap:12px;
-    flex-wrap:wrap;
-    margin-bottom:22px;
-}
-
-.room-tab{
-    border:none;
-    background:#e0e7ff;
-    color:#1e293b;
-    padding:11px 18px;
-    border-radius:999px;
-    font-weight:600;
-    cursor:pointer;
-}
-
-.room-tab.active{
-    background:#2563eb;
-    color:white;
-}
-
-/* CALENDAR */
-
-.calendar-controls{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    margin-bottom:20px;
-    flex-wrap:wrap;
-}
-
-.calendar-btn{
-    background:#f1f5f9;
-    border:none;
-    padding:10px 16px;
-    border-radius:16px;
-    cursor:pointer;
-    font-weight:700;
-}
-
-.calendar-month{
-    font-weight:800;
-    font-size:1.1rem;
-}
-
-.calendar-grid{
-    display:grid;
-    grid-template-columns:repeat(7,1fr);
-    gap:8px;
-}
-
-.weekday{
-    text-align:center;
-    padding:10px;
-    font-weight:700;
-    color:#64748b;
-}
-
-.day{
-    min-height:105px;
-    background:#fff;
-    border:1px solid #e2e8f0;
-    border-radius:20px;
-    padding:10px;
-    cursor:pointer;
-    transition:.15s;
-}
-
-.day:hover{
-    transform:translateY(-2px);
-}
-
-.day.available{
-    border-left:5px solid #10b981;
-}
-
-.day.booked{
-    border-left:5px solid #ef4444;
-    background:#fef2f2;
-}
-
-.day.past{
-    opacity:.45;
-    pointer-events:none;
-}
-
-.day.empty{
-    background:transparent;
-    border:none;
-    pointer-events:none;
-}
-
-.day-number{
-    font-weight:800;
-}
-
-.booking-dot{
-    margin-top:8px;
-    background:#ef4444;
-    color:white;
-    font-size:11px;
-    display:inline-block;
-    padding:3px 10px;
-    border-radius:999px;
-}
-
-.available-text{
-    margin-top:8px;
-    font-size:11px;
-    color:#10b981;
-    font-weight:700;
-}
-
-/* BOOKINGS */
-
-.booking-card{
-    background:#f8fafc;
-    border-radius:24px;
-    padding:18px;
-    margin-bottom:14px;
-    border:1px solid #e2e8f0;
-}
-
-.booking-top{
-    display:flex;
-    justify-content:space-between;
-    gap:10px;
-    flex-wrap:wrap;
-}
-
-.booking-name{
-    font-weight:800;
-    font-size:1.05rem;
-}
-
-.booking-info{
-    margin-top:10px;
-    display:grid;
-    gap:8px;
-    font-size:14px;
-}
-
-.note-box{
-    margin-top:14px;
-    background:white;
-    border-radius:16px;
-    padding:14px;
-    border:1px solid #e2e8f0;
-}
-
-.note-history{
-    max-height:120px;
-    overflow:auto;
-    margin-bottom:10px;
-}
-
-.note-item{
-    background:#f8fafc;
-    padding:8px 10px;
-    border-radius:12px;
-    margin-bottom:8px;
-    font-size:13px;
-}
-
-.note-author{
-    font-weight:700;
-    color:#2563eb;
-}
-
-.note-input{
-    width:100%;
-    border:none;
-    background:#f1f5f9;
-    border-radius:14px;
-    padding:12px;
-    margin-bottom:10px;
-    resize:vertical;
-}
-
-.booking-actions{
-    display:flex;
-    gap:10px;
-    margin-top:14px;
-    flex-wrap:wrap;
-}
-
-.action-btn{
-    border:none;
-    border-radius:999px;
-    padding:10px 16px;
-    font-weight:700;
-    cursor:pointer;
-}
-
-.edit-btn{
-    background:#f59e0b;
-    color:white;
-}
-
-.delete-btn{
-    background:#ef4444;
-    color:white;
-}
-
-/* SIDEBAR */
-
-.upload-zone{
-    border:2px dashed #94a3b8;
-    border-radius:24px;
-    padding:24px;
-    text-align:center;
-    background:#f8fafc;
-    cursor:pointer;
-}
-
-.upload-zone.dragover{
-    border-color:#10b981;
-    background:#ecfdf5;
-}
-
-.status{
-    margin-top:12px;
-    padding:12px;
-    border-radius:16px;
-    font-size:14px;
-}
-
-.success{
-    background:#dcfce7;
-    color:#166534;
-}
-
-.error{
-    background:#fee2e2;
-    color:#991b1b;
-}
-
-/* CHAT */
-
-.chat-box{
-    height:320px;
-    overflow:auto;
-    background:#f8fafc;
-    border-radius:20px;
-    padding:14px;
-    margin-bottom:14px;
-}
-
-.chat-message{
-    background:white;
-    border-radius:16px;
-    padding:10px 12px;
-    margin-bottom:10px;
-}
-
-.chat-author{
-    font-weight:800;
-    color:#2563eb;
-    margin-bottom:5px;
-}
-
-.chat-time{
-    margin-top:6px;
-    font-size:11px;
-    color:#94a3b8;
-}
-
-.chat-send{
-    display:flex;
-    gap:10px;
-}
-
-.chat-input{
-    flex:1;
-    border:none;
-    background:#f1f5f9;
-    border-radius:16px;
-    padding:12px;
-}
-
-/* NOTICE */
-
-.notice-board{
-    max-height:220px;
-    overflow:auto;
-}
-
-.notice{
-    background:#fffbeb;
-    border-left:4px solid #f59e0b;
-    padding:12px;
-    border-radius:16px;
-    margin-bottom:10px;
-}
-
-.notice-author{
-    margin-top:6px;
-    font-size:12px;
-    color:#64748b;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Portal - Repaired Safe Version</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+        .section { display: none; }
+        .section.active { display: block; }
+        .booking-card { transition: all 0.2s; }
+        .booking-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
+    </style>
 </head>
-
-<body>
-
-<!-- LOGIN -->
-
-<div id="loginScreen" class="login-screen">
-    <div class="login-card">
-        <div class="login-title">🍸 Members Lounge</div>
-        <div class="login-sub">Live Staff Operations Portal</div>
-
-        <input id="username" class="input" placeholder="Username">
-        <input id="password" class="input" type="password" placeholder="Password">
-
-        <button class="btn btn-primary" onclick="login()">Login</button>
-
-        <div id="loginError" class="login-error"></div>
-
-        <div style="margin-top:20px;font-size:13px;color:#64748b;">
-            Demo: admin/admin123
-        </div>
-    </div>
-</div>
-
-<!-- APP -->
-
-<div id="app" class="hidden">
-
-<div class="container">
-
-<!-- HEADER -->
-
-<div class="header">
-    <div class="header-top">
-        <div>
-            <div class="header-title">🏨 Members Lounge Staff Hub</div>
-            <div style="margin-top:6px;color:#cbd5e1;">
-                Live Bookings · Staff Chat · Real-Time Sync
+<body class="bg-gray-50">
+    <!-- Login Screen -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center bg-gray-900">
+        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md">
+            <div class="text-center mb-8">
+                <i class="fas fa-shield-alt text-4xl text-blue-600 mb-4"></i>
+                <h1 class="text-3xl font-bold text-gray-900">Staff Portal</h1>
+                <p class="text-gray-600 mt-2">Secure access only</p>
             </div>
-        </div>
-
-        <div class="header-user">
-            <div id="loggedUser"></div>
-            <button class="logout-btn" onclick="logout()">Logout</button>
-        </div>
-    </div>
-
-    <div class="stats">
-        <div class="stat-card">
-            <div class="stat-value" id="futureBookings">0</div>
-            <div>Future Bookings</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-value">4</div>
-            <div>Rooms</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-value">⚡</div>
-            <div>Firebase Live Sync</div>
-        </div>
-    </div>
-</div>
-
-<div class="main-layout">
-
-<!-- LEFT -->
-
-<div>
-
-<div class="card">
-
-<div class="card-title">📅 Room Availability Calendar</div>
-
-<div class="calendar-controls">
-    <button class="calendar-btn" onclick="changeMonth(-1)">◀ Prev</button>
-    <button class="calendar-btn" onclick="today()">Today</button>
-    <button class="calendar-btn" onclick="changeMonth(1)">Next ▶</button>
-
-    <div class="calendar-month" id="monthLabel"></div>
-</div>
-
-<div class="room-tabs" id="roomTabs"></div>
-
-<div id="calendar"></div>
-
-</div>
-
-<div class="card">
-
-<div class="card-title" id="bookingTitle">
-📋 Room Bookings
-</div>
-
-<div id="bookingsContainer">
-    Select a date to view bookings.
-</div>
-
-</div>
-
-</div>
-
-<!-- RIGHT -->
-
-<div>
-
-<!-- CSV -->
-
-<div class="card">
-
-<div class="card-title">📂 CSV Booking Upload</div>
-
-<div id="uploadZone" class="upload-zone">
-    📎 Drop CSV file here or click to upload
-    <div style="margin-top:8px;font-size:12px;color:#64748b;">
-        Event name · Event start · Name · Email
-    </div>
-</div>
-
-<input id="csvInput" type="file" accept=".csv" class="hidden">
-
-<div id="uploadStatus"></div>
-
-</div>
-
-<!-- NOTICE -->
-
-<div class="card">
-
-<div class="card-title">📢 Staff Notices</div>
-
-<div id="noticeBoard" class="notice-board"></div>
-
-<div style="display:flex;gap:10px;margin-top:12px;">
-    <input id="noticeInput" class="chat-input" placeholder="Post notice...">
-    <button class="action-btn edit-btn" onclick="postNotice()">Post</button>
-</div>
-
-</div>
-
-<!-- CHAT -->
-
-<div class="card">
-
-<div class="card-title">💬 Staff Chat</div>
-
-<div id="chatBox" class="chat-box"></div>
-
-<div class="chat-send">
-    <input id="chatInput" class="chat-input" placeholder="Type message...">
-    <button class="action-btn edit-btn" onclick="sendChat()">Send</button>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- FIREBASE -->
-
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-
-import {
-getFirestore,
-collection,
-addDoc,
-updateDoc,
-deleteDoc,
-doc,
-onSnapshot,
-query,
-orderBy,
-Timestamp
-}
-from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-/* -------------------------------- */
-/* FIREBASE CONFIG */
-/* -------------------------------- */
-
-const firebaseConfig = {
-
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
-
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-/* -------------------------------- */
-/* STAFF */
-/* -------------------------------- */
-
-const STAFF = {
-
-    admin:{
-        password:"admin123",
-        role:"admin",
-        name:"Admin"
-    },
-
-    manager:{
-        password:"manager123",
-        role:"manager",
-        name:"Operations Manager"
-    },
-
-    staff:{
-        password:"staff123",
-        role:"staff",
-        name:"Senior Staff"
-    }
-
-};
-
-/* -------------------------------- */
-/* ROOMS */
-/* -------------------------------- */
-
-const ROOMS = [
-
-{
-    id:"bistroteca",
-    name:"Bistroteca"
-},
-
-{
-    id:"sala_reggio",
-    name:"Sala Reggio Ballroom"
-},
-
-{
-    id:"members_lounge",
-    name:"Members Lounge Restaurant"
-},
-
-{
-    id:"ottimo",
-    name:"Ottimo Private Dining Room"
-}
-
-];
-
-/* -------------------------------- */
-/* STATE */
-/* -------------------------------- */
-
-let currentUser = null;
-let currentRoom = "bistroteca";
-let currentDate = new Date();
-let selectedDate = null;
-
-let bookings = [];
-let notices = [];
-let messages = [];
-
-/* -------------------------------- */
-/* LOGIN */
-/* -------------------------------- */
-
-window.login = function(){
-
-    const username = document.getElementById("username").value.trim();
-    const password = document.getElementById("password").value.trim();
-
-    if(
-        STAFF[username] &&
-        STAFF[username].password === password
-    ){
-
-        currentUser = {
-            username,
-            ...STAFF[username]
-        };
-
-        localStorage.setItem(
-            "ml_user",
-            JSON.stringify(currentUser)
-        );
-
-        startPortal();
-
-    }else{
-
-        document.getElementById("loginError").innerHTML =
-        "Invalid login";
-
-    }
-
-};
-
-function startPortal(){
-
-    document.getElementById("loginScreen")
-    .classList.add("hidden");
-
-    document.getElementById("app")
-    .classList.remove("hidden");
-
-    document.getElementById("loggedUser")
-    .innerHTML =
-    `<strong>${currentUser.name}</strong> (${currentUser.role})`;
-
-    renderRoomTabs();
-    renderCalendar();
-
-    listenBookings();
-    listenNotices();
-    listenChat();
-
-}
-
-window.logout = function(){
-
-    localStorage.removeItem("ml_user");
-    location.reload();
-
-};
-
-(function checkLogin(){
-
-    const saved = localStorage.getItem("ml_user");
-
-    if(saved){
-
-        currentUser = JSON.parse(saved);
-        startPortal();
-
-    }
-
-})();
-
-/* -------------------------------- */
-/* BOOKINGS */
-/* -------------------------------- */
-
-function listenBookings(){
-
-    onSnapshot(
-        collection(db,"bookings"),
-        snapshot=>{
-
-            bookings = [];
-
-            snapshot.forEach(docSnap=>{
-
-                bookings.push({
-                    id:docSnap.id,
-                    ...docSnap.data()
-                });
-
-            });
-
-            renderCalendar();
-
-            if(selectedDate){
-                renderBookings();
-            }
-
-            updateStats();
-
-        }
-    );
-
-}
-
-function updateStats(){
-
-    const today = new Date();
-    today.setHours(0,0,0,0);
-
-    const future =
-    bookings.filter(b=>new Date(b.eventDate)>=today);
-
-    document.getElementById("futureBookings")
-    .innerHTML = future.length;
-
-}
-
-/* -------------------------------- */
-/* ROOM TABS */
-/* -------------------------------- */
-
-function renderRoomTabs(){
-
-    document.getElementById("roomTabs")
-    .innerHTML = ROOMS.map(room=>`
-
-        <button
-            class="room-tab ${room.id===currentRoom ? 'active':''}"
-            onclick="switchRoom('${room.id}')"
-        >
-            ${room.name}
-        </button>
-
-    `).join("");
-
-}
-
-window.switchRoom = function(roomId){
-
-    currentRoom = roomId;
-
-    renderRoomTabs();
-    renderCalendar();
-
-};
-
-/* -------------------------------- */
-/* CALENDAR */
-/* -------------------------------- */
-
-window.changeMonth = function(delta){
-
-    currentDate.setMonth(
-        currentDate.getMonth()+delta
-    );
-
-    renderCalendar();
-
-};
-
-window.today = function(){
-
-    currentDate = new Date();
-    renderCalendar();
-
-};
-
-function renderCalendar(){
-
-    const monthNames = [
-        "January","February","March","April",
-        "May","June","July","August",
-        "September","October","November","December"
-    ];
-
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-
-    document.getElementById("monthLabel")
-    .innerHTML =
-    `${monthNames[month]} ${year}`;
-
-    const firstDay =
-    new Date(year,month,1);
-
-    const startDay =
-    firstDay.getDay();
-
-    const daysInMonth =
-    new Date(year,month+1,0).getDate();
-
-    let html =
-    `<div class="calendar-grid">`;
-
-    ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
-    .forEach(day=>{
-
-        html += `
-        <div class="weekday">${day}</div>
-        `;
-
-    });
-
-    for(let i=0;i<startDay;i++){
-
-        html += `<div class="day empty"></div>`;
-
-    }
-
-    const todayDate = new Date();
-    todayDate.setHours(0,0,0,0);
-
-    for(let day=1;day<=daysInMonth;day++){
-
-        const dateStr =
-        `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-
-        const dayBookings =
-        bookings.filter(
-            b=>
-            b.roomId===currentRoom &&
-            b.eventDate===dateStr
-        );
-
-        const isBooked =
-        dayBookings.length>0;
-
-        const compare =
-        new Date(year,month,day);
-
-        let classes = "day ";
-
-        if(compare<todayDate){
-            classes += "past";
-        }else{
-            classes += isBooked ? "booked":"available";
-        }
-
-        html += `
-        <div
-            class="${classes}"
-            onclick="selectDate('${dateStr}')"
-        >
-            <div class="day-number">${day}</div>
-
-            ${
-                isBooked ?
-
-                `<div class="booking-dot">
-                    ${dayBookings.length} Booking(s)
-                </div>`
-
-                :
-
-                `<div class="available-text">
-                    ✓ Available
-                </div>`
-            }
-
-        </div>
-        `;
-
-    }
-
-    html += `</div>`;
-
-    document.getElementById("calendar")
-    .innerHTML = html;
-
-}
-
-window.selectDate = function(date){
-
-    selectedDate = date;
-
-    document.getElementById("bookingTitle")
-    .innerHTML =
-    `📋 ${date}`;
-
-    renderBookings();
-
-};
-
-function renderBookings(){
-
-    const filtered =
-    bookings.filter(
-        b=>
-        b.roomId===currentRoom &&
-        b.eventDate===selectedDate
-    );
-
-    if(filtered.length===0){
-
-        document.getElementById("bookingsContainer")
-        .innerHTML =
-        `
-        <div style="padding:30px;text-align:center;color:#64748b;">
-            ✅ No bookings for this room/date
-        </div>
-        `;
-
-        return;
-
-    }
-
-    document.getElementById("bookingsContainer")
-    .innerHTML =
-    filtered.map(booking=>`
-
-        <div class="booking-card">
-
-            <div class="booking-top">
-
+            
+            <form id="login-form" class="space-y-4">
                 <div>
-                    <div class="booking-name">
-                        👤 ${booking.customerName || 'Guest'}
-                    </div>
-
-                    <div style="margin-top:6px;color:#64748b;">
-                        ${booking.customerEmail || ''}
-                    </div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="login-email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="your@email.com" required>
                 </div>
-
                 <div>
-                    ⏰ ${booking.eventTime || 'TBD'}
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" id="login-password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••" required>
                 </div>
-
-            </div>
-
-            <div class="booking-info">
-
-                <div>
-                    📱 ${booking.customerMobile || '-'}
-                </div>
-
-                <div>
-                    🎟️ ${booking.ticketCount || 1} Guests
-                </div>
-
-                <div>
-                    🪑 ${booking.seat || 'No table assigned'}
-                </div>
-
-            </div>
-
-            <!-- NOTES -->
-
-            <div class="note-box">
-
-                <div
-                    class="note-history"
-                    id="notes-${booking.id}"
-                >
-
-                    ${
-                        booking.notesHistory?.length ?
-
-                        booking.notesHistory.map(note=>`
-
-                            <div class="note-item">
-
-                                <div class="note-author">
-                                    ${note.staff}
-                                </div>
-
-                                <div>
-                                    ${note.text}
-                                </div>
-
-                            </div>
-
-                        `).join("")
-
-                        :
-
-                        `<div style="color:#94a3b8;font-size:13px;">
-                            No notes yet
-                        </div>`
-                    }
-
-                </div>
-
-                <textarea
-                    class="note-input"
-                    id="noteInput-${booking.id}"
-                    placeholder="Add customer/staff note..."
-                ></textarea>
-
-                <button
-                    class="action-btn edit-btn"
-                    onclick="addNote('${booking.id}')"
-                >
-                    Add Note
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition flex items-center justify-center">
+                    <span id="login-btn-text">Sign In</span>
                 </button>
-
+            </form>
+            
+            <div class="mt-6 text-center text-xs text-gray-500">
+                Demo mode: Use any email + password "demo123" for testing.<br>
+                Replace with Firebase Auth in production.
             </div>
-
         </div>
-
-    `).join("");
-
-}
-
-/* -------------------------------- */
-/* ADD NOTE */
-/* -------------------------------- */
-
-window.addNote = async function(bookingId){
-
-    const booking =
-    bookings.find(b=>b.id===bookingId);
-
-    const input =
-    document.getElementById(
-        `noteInput-${bookingId}`
-    );
-
-    const text = input.value.trim();
-
-    if(!text) return;
-
-    const existing =
-    booking.notesHistory || [];
-
-    existing.push({
-
-        staff:currentUser.name,
-        text,
-        timestamp:new Date().toISOString()
-
-    });
-
-    await updateDoc(
-        doc(db,"bookings",bookingId),
-        {
-            notesHistory:existing,
-            updatedAt:Timestamp.now()
-        }
-    );
-
-    input.value = "";
-
-};
-
-/* -------------------------------- */
-/* CHAT */
-/* -------------------------------- */
-
-function listenChat(){
-
-    const q =
-    query(
-        collection(db,"chat"),
-        orderBy("timestamp","asc")
-    );
-
-    onSnapshot(q,snapshot=>{
-
-        messages = [];
-
-        snapshot.forEach(docSnap=>{
-
-            messages.push({
-                id:docSnap.id,
-                ...docSnap.data()
-            });
-
-        });
-
-        renderChat();
-
-    });
-
-}
-
-function renderChat(){
-
-    const box =
-    document.getElementById("chatBox");
-
-    box.innerHTML =
-    messages.slice(-80).map(msg=>`
-
-        <div class="chat-message">
-
-            <div class="chat-author">
-                ${msg.name}
-            </div>
-
-            <div>
-                ${msg.text}
-            </div>
-
-            <div class="chat-time">
-                ${
-                    msg.timestamp?.toDate()
-                    ?.toLocaleTimeString()
-                    || ''
-                }
-            </div>
-
-        </div>
-
-    `).join("");
-
-    box.scrollTop = box.scrollHeight;
-
-}
-
-window.sendChat = async function(){
-
-    const input =
-    document.getElementById("chatInput");
-
-    const text =
-    input.value.trim();
-
-    if(!text) return;
-
-    await addDoc(
-        collection(db,"chat"),
-        {
-            name:currentUser.name,
-            text,
-            timestamp:Timestamp.now()
-        }
-    );
-
-    input.value = "";
-
-};
-
-/* -------------------------------- */
-/* NOTICES */
-/* -------------------------------- */
-
-function listenNotices(){
-
-    const q =
-    query(
-        collection(db,"notices"),
-        orderBy("timestamp","desc")
-    );
-
-    onSnapshot(q,snapshot=>{
-
-        notices = [];
-
-        snapshot.forEach(docSnap=>{
-
-            notices.push({
-                id:docSnap.id,
-                ...docSnap.data()
-            });
-
-        });
-
-        renderNotices();
-
-    });
-
-}
-
-function renderNotices(){
-
-    document.getElementById("noticeBoard")
-    .innerHTML =
-    notices.map(notice=>`
-
-        <div class="notice">
-
-            <div>
-                ${notice.text}
-            </div>
-
-            <div class="notice-author">
-                ${notice.author}
-            </div>
-
-        </div>
-
-    `).join("");
-
-}
-
-window.postNotice = async function(){
-
-    const input =
-    document.getElementById("noticeInput");
-
-    const text =
-    input.value.trim();
-
-    if(!text) return;
-
-    await addDoc(
-        collection(db,"notices"),
-        {
-            text,
-            author:currentUser.name,
-            timestamp:Timestamp.now()
-        }
-    );
-
-    input.value = "";
-
-};
-
-/* -------------------------------- */
-/* CSV IMPORT */
-/* -------------------------------- */
-
-const uploadZone =
-document.getElementById("uploadZone");
-
-const csvInput =
-document.getElementById("csvInput");
-
-uploadZone.addEventListener(
-    "click",
-    ()=>csvInput.click()
-);
-
-uploadZone.addEventListener(
-    "dragover",
-    e=>{
-        e.preventDefault();
-        uploadZone.classList.add("dragover");
-    }
-);
-
-uploadZone.addEventListener(
-    "dragleave",
-    ()=>{
-        uploadZone.classList.remove("dragover");
-    }
-);
-
-uploadZone.addEventListener(
-    "drop",
-    e=>{
-
-        e.preventDefault();
-
-        uploadZone.classList.remove("dragover");
-
-        const file =
-        e.dataTransfer.files[0];
-
-        if(file){
-            processCSV(file);
-        }
-
-    }
-);
-
-csvInput.addEventListener(
-    "change",
-    e=>{
-
-        if(e.target.files[0]){
-
-            processCSV(
-                e.target.files[0]
-            );
-
-        }
-
-    }
-);
-
-async function processCSV(file){
-
-    try{
-
-        const text =
-        await file.text();
-
-        const lines =
-        text.split(/\r?\n/);
-
-        const headers =
-        lines[0].split(",");
-
-        let imported = 0;
-
-        for(let i=1;i<lines.length;i++){
-
-            if(!lines[i]) continue;
-
-            const cols =
-            lines[i].split(",");
-
-            const eventName =
-            cols[0];
-
-            const eventDate =
-            cols[1];
-
-            const customerName =
-            cols[2];
-
-            const email =
-            cols[3];
-
-            let roomId =
-            "members_lounge";
-
-            if(
-                eventName
-                .toLowerCase()
-                .includes("bistroteca")
-            ){
-                roomId = "bistroteca";
-            }
-
-            if(
-                eventName
-                .toLowerCase()
-                .includes("ottimo")
-            ){
-                roomId = "ottimo";
-            }
-
-            await addDoc(
-                collection(db,"bookings"),
-                {
-                    roomId,
-                    customerName,
-                    customerEmail:email,
-                    customerMobile:"",
-                    eventDate,
-                    eventTime:"7:00 PM",
-                    ticketCount:1,
-                    seat:"",
-                    notesHistory:[],
-                    createdAt:Timestamp.now()
-                }
-            );
-
-            imported++;
-
-        }
-
-        showStatus(
-            `✅ Imported ${imported} bookings`,
-            true
-        );
-
-    }catch(err){
-
-        showStatus(
-            "CSV import failed",
-            false
-        );
-
-        console.error(err);
-
-    }
-
-}
-
-function showStatus(message,success){
-
-    document.getElementById("uploadStatus")
-    .innerHTML =
-    `
-    <div class="status ${success ? 'success':'error'}">
-        ${message}
     </div>
-    `;
 
-}
+    <!-- Main App -->
+    <div id="app-screen" class="hidden min-h-screen">
+        <nav class="bg-white border-b shadow-sm">
+            <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-shield-alt text-blue-600 text-2xl"></i>
+                    <div>
+                        <h1 class="font-bold text-xl">Staff Portal</h1>
+                        <p id="user-info" class="text-sm text-gray-600"></p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <div class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm flex items-center gap-2">
+                        <i class="fas fa-circle text-green-500"></i>
+                        <span>Secure Session</span>
+                    </div>
+                    <button onclick="logout()" class="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-2">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
 
-</script>
+        <div class="max-w-7xl mx-auto px-6 pt-6">
+            <div class="flex border-b">
+                <button onclick="showSection('bookings')" class="tab-btn px-6 py-3 font-medium border-b-2 border-blue-600 text-blue-600" data-section="bookings">Bookings</button>
+                <button onclick="showSection('notices')" class="tab-btn px-6 py-3 font-medium text-gray-600 hover:text-gray-900" data-section="notices">Notices</button>
+                <button onclick="showSection('chat')" class="tab-btn px-6 py-3 font-medium text-gray-600 hover:text-gray-900" data-section="chat">Staff Chat</button>
+            </div>
+        </div>
 
+        <!-- Bookings Section -->
+        <div id="bookings" class="section active max-w-7xl mx-auto px-6 py-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Bookings</h2>
+                <div class="flex gap-3">
+                    <button onclick="showAddBookingModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700">
+                        <i class="fas fa-plus"></i> Add Booking
+                    </button>
+                    <button onclick="importCSV()" class="px-4 py-2 border border-gray-300 rounded-lg flex items-center gap-2 hover:bg-gray-50">
+                        <i class="fas fa-file-csv"></i> Import CSV
+                    </button>
+                </div>
+            </div>
+
+            <div id="bookings-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Bookings populated by JS -->
+            </div>
+        </div>
+
+        <!-- Notices Section -->
+        <div id="notices" class="section max-w-7xl mx-auto px-6 py-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Notices</h2>
+                <button onclick="addNotice()" class="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2">
+                    <i class="fas fa-plus"></i> Add Notice
+                </button>
+            </div>
+            <div id="notices-list" class="space-y-4"></div>
+        </div>
+
+        <!-- Chat Section -->
+        <div id="chat" class="section max-w-7xl mx-auto px-6 py-8">
+            <h2 class="text-2xl font-bold mb-6">Staff Chat</h2>
+            <div id="chat-messages" class="bg-white border rounded-xl p-4 h-96 overflow-y-auto mb-4"></div>
+            <div class="flex gap-2">
+                <input id="chat-input" type="text" class="flex-1 border rounded-lg px-4 py-2" placeholder="Type a message...">
+                <button onclick="sendChatMessage()" class="px-6 py-2 bg-blue-600 text-white rounded-lg">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Modal -->
+    <div id="booking-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md">
+            <h3 id="modal-title" class="text-xl font-bold mb-4">Add Booking</h3>
+            <form id="booking-form" class="space-y-4">
+                <input type="hidden" id="booking-id">
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="text-sm">Room</label><input type="text" id="room-name" class="w-full border rounded px-3 py-2" required></div>
+                    <div><label class="text-sm">Date</label><input type="date" id="event-date" class="w-full border rounded px-3 py-2" required></div>
+                </div>
+                <div><label class="text-sm">Customer Name</label><input type="text" id="customer-name" class="w-full border rounded px-3 py-2" maxlength="80" required></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="text-sm">Email</label><input type="email" id="customer-email" class="w-full border rounded px-3 py-2" maxlength="120"></div>
+                    <div><label class="text-sm">Mobile</label><input type="tel" id="customer-mobile" class="w-full border rounded px-3 py-2" maxlength="30"></div>
+                </div>
+                <div class="grid grid-cols-3 gap-4">
+                    <div><label class="text-sm">Tickets</label><input type="number" id="ticket-count" class="w-full border rounded px-3 py-2" min="1" max="100" value="1"></div>
+                    <div><label class="text-sm">Time</label><input type="text" id="event-time" class="w-full border rounded px-3 py-2" maxlength="30"></div>
+                    <div><label class="text-sm">Seat</label><input type="text" id="seat" class="w-full border rounded px-3 py-2" maxlength="30"></div>
+                </div>
+                <div><label class="text-sm">Notes</label><textarea id="notes" class="w-full border rounded px-3 py-2" maxlength="300" rows="2"></textarea></div>
+                
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeBookingModal()" class="flex-1 py-2 border rounded-lg">Cancel</button>
+                    <button type="submit" class="flex-1 py-2 bg-blue-600 text-white rounded-lg">Save Booking</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let bookings = [];
+        let notices = [];
+        let chatMessages = [];
+        let currentUser = null;
+
+        function showSection(section) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(section).classList.add('active');
+            
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('border-b-2', 'border-blue-600', 'text-blue-600');
+                if (b.dataset.section === section) {
+                    b.classList.add('border-b-2', 'border-blue-600', 'text-blue-600');
+                }
+            });
+            
+            if (section === 'bookings') renderBookings();
+            if (section === 'notices') renderNotices();
+            if (section === 'chat') renderChat();
+        }
+
+        function login(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            
+            if (!email || !password) {
+                alert('Please enter both email and password.');
+                return;
+            }
+            
+            // DEMO ONLY - Replace with real Firebase Auth
+            if (password !== 'demo123') {
+                alert('Invalid credentials (demo: use password "demo123")');
+                return;
+            }
+            
+            currentUser = { 
+                email: email, 
+                name: email.split('@')[0], 
+                role: email.includes('admin') ? 'admin' : 'staff' 
+            };
+            
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app-screen').classList.remove('hidden');
+            document.getElementById('user-info').innerHTML = `${currentUser.name} <span class="text-xs px-2 py-0.5 bg-gray-200 rounded">${currentUser.role}</span>`;
+            
+            if (bookings.length === 0) {
+                bookings = [
+                    { id: Date.now(), roomName: 'Main Hall', customerName: 'John Doe', customerEmail: 'john@example.com', eventDate: '2026-05-15', eventTime: '18:00', ticketCount: 4, seat: 'A12', notes: 'VIP guest' }
+                ];
+            }
+            renderBookings();
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('app-screen').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('login-form').reset();
+        }
+
+        function sanitize(str) {
+            return String(str || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+        }
+
+        function renderBookings() {
+            const container = document.getElementById('bookings-list');
+            container.innerHTML = '';
+            
+            if (bookings.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 col-span-full">No bookings yet.</p>';
+                return;
+            }
+            
+            bookings.forEach(booking => {
+                const card = document.createElement('div');
+                card.className = 'booking-card bg-white border rounded-xl p-5';
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <div class="font-semibold">${sanitize(booking.roomName)}</div>
+                            <div class="text-sm text-gray-600">${sanitize(booking.customerName)}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm font-medium">${booking.eventDate}</div>
+                            <div class="text-xs text-gray-500">${booking.eventTime || ''}</div>
+                        </div>
+                    </div>
+                    <div class="text-sm space-y-1 text-gray-700">
+                        <div><i class="fas fa-ticket-alt w-4"></i> ${booking.ticketCount} tickets • Seat: ${sanitize(booking.seat || '—')}</div>
+                        ${booking.customerEmail ? `<div><i class="fas fa-envelope w-4"></i> ${sanitize(booking.customerEmail)}</div>` : ''}
+                        ${booking.notes ? `<div class="text-xs text-gray-500 mt-2">${sanitize(booking.notes)}</div>` : ''}
+                    </div>
+                    <div class="flex gap-2 mt-4">
+                        <button onclick="editBooking(${booking.id})" class="flex-1 text-sm py-1.5 border rounded hover:bg-gray-50">Edit</button>
+                        <button onclick="deleteBooking(${booking.id})" class="flex-1 text-sm py-1.5 text-red-600 border border-red-200 rounded hover:bg-red-50">Delete</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function showAddBookingModal() {
+            document.getElementById('booking-modal').classList.remove('hidden');
+            document.getElementById('modal-title').textContent = 'Add Booking';
+            document.getElementById('booking-form').reset();
+            document.getElementById('booking-id').value = '';
+        }
+
+        function editBooking(id) {
+            const booking = bookings.find(b => b.id === id);
+            if (!booking) return;
+            
+            document.getElementById('booking-modal').classList.remove('hidden');
+            document.getElementById('modal-title').textContent = 'Edit Booking';
+            document.getElementById('booking-id').value = id;
+            document.getElementById('room-name').value = booking.roomName || '';
+            document.getElementById('event-date').value = booking.eventDate || '';
+            document.getElementById('customer-name').value = booking.customerName || '';
+            document.getElementById('customer-email').value = booking.customerEmail || '';
+            document.getElementById('customer-mobile').value = booking.customerMobile || '';
+            document.getElementById('event-time').value = booking.eventTime || '';
+            document.getElementById('ticket-count').value = booking.ticketCount || 1;
+            document.getElementById('seat').value = booking.seat || '';
+            document.getElementById('notes').value = booking.notes || '';
+        }
+
+        function closeBookingModal() {
+            document.getElementById('booking-modal').classList.add('hidden');
+        }
+
+        document.getElementById('booking-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('booking-id').value;
+            const data = {
+                roomName: document.getElementById('room-name').value.trim(),
+                eventDate: document.getElementById('event-date').value,
+                customerName: document.getElementById('customer-name').value.trim(),
+                customerEmail: document.getElementById('customer-email').value.trim(),
+                customerMobile: document.getElementById('customer-mobile').value.trim(),
+                eventTime: document.getElementById('event-time').value.trim(),
+                ticketCount: parseInt(document.getElementById('ticket-count').value) || 1,
+                seat: document.getElementById('seat').value.trim(),
+                notes: document.getElementById('notes').value.trim()
+            };
+            
+            if (!data.roomName || !data.eventDate || !data.customerName) {
+                alert('Room, Date, and Customer Name are required.');
+                return;
+            }
+            if (data.ticketCount < 1 || data.ticketCount > 100) {
+                alert('Ticket count must be between 1 and 100.');
+                return;
+            }
+            
+            if (id) {
+                const index = bookings.findIndex(b => b.id == id);
+                bookings[index] = { ...bookings[index], ...data };
+            } else {
+                data.id = Date.now();
+                bookings.push(data);
+            }
+            
+            closeBookingModal();
+            renderBookings();
+        });
+
+        function deleteBooking(id) {
+            if (!confirm('Delete this booking?')) return;
+            bookings = bookings.filter(b => b.id !== id);
+            renderBookings();
+        }
+
+        function importCSV() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.csv';
+            input.onchange = function() {
+                const file = this.files[0];
+                if (!file || file.size > 2 * 1024 * 1024) {
+                    alert('File too large (max 2MB)');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    const lines = ev.target.result.split('\n');
+                    let imported = 0;
+                    for (let i = 1; i < lines.length; i++) {
+                        const cols = lines[i].split(',');
+                        if (cols.length < 3) continue;
+                        const booking = {
+                            id: Date.now() + i,
+                            roomName: cols[0].trim(),
+                            customerName: cols[1].trim(),
+                            eventDate: cols[2].trim(),
+                            ticketCount: parseInt(cols[3]) || 1
+                        };
+                        if (booking.roomName && booking.customerName && booking.eventDate) {
+                            bookings.push(booking);
+                            imported++;
+                        }
+                    }
+                    alert(`${imported} bookings imported successfully.`);
+                    renderBookings();
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function renderNotices() {
+            const container = document.getElementById('notices-list');
+            container.innerHTML = '';
+            if (notices.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">No notices yet.</p>';
+                return;
+            }
+            notices.forEach(notice => {
+                const div = document.createElement('div');
+                div.className = 'bg-white border rounded-xl p-5';
+                div.innerHTML = `
+                    <div class="font-medium">${sanitize(notice.title)}</div>
+                    <div class="text-sm text-gray-600 mt-1">${sanitize(notice.content)}</div>
+                    <div class="text-xs text-gray-400 mt-2">${notice.date}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function addNotice() {
+            const title = prompt('Notice title:');
+            if (!title) return;
+            const content = prompt('Notice content:');
+            notices.unshift({ 
+                title: title.trim(), 
+                content: content ? content.trim() : '', 
+                date: new Date().toLocaleDateString() 
+            });
+            renderNotices();
+        }
+
+        function renderChat() {
+            const container = document.getElementById('chat-messages');
+            container.innerHTML = '';
+            chatMessages.forEach(msg => {
+                const div = document.createElement('div');
+                div.className = 'mb-3 p-3 bg-gray-100 rounded-lg max-w-[80%]';
+                div.innerHTML = `<div class="font-medium text-sm">${sanitize(msg.user)}</div><div>${sanitize(msg.text)}</div>`;
+                container.appendChild(div);
+            });
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text || !currentUser) return;
+            
+            chatMessages.push({ user: currentUser.name, text: text });
+            input.value = '';
+            renderChat();
+        }
+
+        // Initialize
+        document.getElementById('login-form').addEventListener('submit', login);
+        
+        window.onload = function() {
+            notices = [
+                { title: 'System Maintenance', content: 'Portal will be down for 30 minutes tonight.', date: '2026-05-08' }
+            ];
+        };
+    </script>
 </body>
 </html>
