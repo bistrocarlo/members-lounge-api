@@ -343,20 +343,25 @@
                     const cols = lines[i].split(',').map(c => c.trim());
                     if (cols.length < 3) continue;
                     
+                    // Parse ticket count from "Order items" (e.g., "20 x Bistroteca...")
+                    let ticketCount = 1;
+                    const orderItems = cols[5] || '';
+                    const match = orderItems.match(/(\d+)\s*x/);
+                    if (match) ticketCount = parseInt(match[1]);
+                    
                     const booking = {
                         id: Date.now() + i,
-                        roomName: cols[0],
-                        customerName: cols[1],
-                        eventDate: cols[2],
-                        ticketCount: parseInt(cols[3]) || 1,
-                        eventTime: cols[4] || '',
-                        seat: cols[5] || '',
-                        customerEmail: cols[6] || '',
-                        notes: cols[7] || ''
+                        roomName: cols[7] || cols[6] || 'Unknown Venue', // Event name
+                        customerName: (cols[10] + ' ' + cols[12]).trim() || cols[9], // Name
+                        eventDate: cols[8] ? cols[8].split(' ')[0] : cols[4], // Event start or Order date
+                        ticketCount: ticketCount,
+                        eventTime: cols[8] ? cols[8].split(' ').slice(1).join(' ') : '',
+                        seat: '',
+                        customerEmail: cols[13] || '',
+                        notes: (cols[17] || '') + ' ' + (cols[18] || '') + ' ' + (cols[19] || '')
                     };
                     
                     if (booking.roomName && booking.customerName && booking.eventDate) {
-                        // Avoid duplicates by checking existing bookings
                         const exists = bookings.some(b => 
                             b.roomName === booking.roomName && 
                             b.customerName === booking.customerName && 
@@ -398,17 +403,24 @@
                         if (!lines[i].trim()) continue;
                         const cols = lines[i].split(',').map(c => c.trim());
                         if (cols.length < 3) continue;
+                        
+                        let ticketCount = 1;
+                        const orderItems = cols[5] || '';
+                        const match = orderItems.match(/(\d+)\s*x/);
+                        if (match) ticketCount = parseInt(match[1]);
+                        
                         const booking = {
                             id: Date.now() + i,
-                            roomName: cols[0],
-                            customerName: cols[1],
-                            eventDate: cols[2],
-                            ticketCount: parseInt(cols[3]) || 1,
-                            eventTime: cols[4] || '',
-                            seat: cols[5] || '',
-                            customerEmail: cols[6] || '',
-                            notes: cols[7] || ''
+                            roomName: cols[7] || cols[6] || 'Unknown Venue',
+                            customerName: (cols[10] + ' ' + cols[12]).trim() || cols[9],
+                            eventDate: cols[8] ? cols[8].split(' ')[0] : cols[4],
+                            ticketCount: ticketCount,
+                            eventTime: cols[8] ? cols[8].split(' ').slice(1).join(' ') : '',
+                            seat: '',
+                            customerEmail: cols[13] || '',
+                            notes: (cols[17] || '') + ' ' + (cols[18] || '') + ' ' + (cols[19] || '')
                         };
+                        
                         if (booking.roomName && booking.customerName && booking.eventDate) {
                             const exists = bookings.some(b => 
                                 b.roomName === booking.roomName && 
