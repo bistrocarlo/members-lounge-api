@@ -3,11 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Members Lounge | Complete Staff Portal</title>
+    <title>Members Lounge | Staff Portal</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f2f5; padding: 20px; }
         .container { max-width: 1600px; margin: 0 auto; }
+        
+        /* Login Screen */
+        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1e293b, #0f172a); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+        .login-card { background: white; border-radius: 24px; padding: 40px; width: 400px; max-width: 90%; text-align: center; }
+        .login-card h2 { margin-bottom: 10px; color: #1e293b; }
+        .login-card p { margin-bottom: 25px; color: #64748b; }
+        .login-card select, .login-card input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 16px; }
+        .login-card button { background: #3b82f6; color: white; border: none; padding: 12px; border-radius: 10px; width: 100%; font-size: 16px; cursor: pointer; font-weight: 600; }
+        .login-card button:hover { background: #2563eb; }
+        .staff-avatar { width: 60px; height: 60px; border-radius: 50%; background: #8b5cf6; color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 15px; }
         
         .header { background: linear-gradient(135deg, #1e293b, #0f172a); color: white; padding: 25px; border-radius: 16px; margin-bottom: 25px; }
         .header h1 { font-size: 24px; margin-bottom: 5px; }
@@ -24,6 +34,10 @@
         .card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .card-title { font-size: 18px; font-weight: 600; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         
+        .current-user { background: #e0e7ff; padding: 10px 15px; border-radius: 12px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .current-user span { font-weight: 600; color: #1e293b; }
+        .logout-btn { background: #ef4444; color: white; border: none; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; }
+        
         .date-nav { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
         .date-nav button { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 500; }
         .date-nav button:hover { background: #2563eb; }
@@ -39,7 +53,6 @@
         .calendar-day { background: #f8fafc; border-radius: 12px; min-height: 100px; padding: 8px; position: relative; cursor: pointer; transition: all 0.2s; border: 1px solid #e2e8f0; }
         .calendar-day:hover { background: #f1f5f9; transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         .calendar-day.empty { background: #f1f5f9; opacity: 0.5; cursor: default; }
-        /* Status colors */
         .calendar-day.available { border-left: 4px solid #10b981; background: #ecfdf5; }
         .calendar-day.partial { border-left: 4px solid #f59e0b; background: #fffbeb; }
         .calendar-day.booked { border-left: 4px solid #ef4444; background: #fef2f2; }
@@ -51,7 +64,7 @@
         
         .bookings-list { max-height: 500px; overflow-y: auto; }
         .booking-card { background: #f8fafc; border-radius: 12px; padding: 15px; margin-bottom: 12px; border: 1px solid #e2e8f0; }
-        .booking-customer { font-weight: 700; font-size: 16px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .booking-customer { font-weight: 700; font-size: 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
         .booking-guest-of-honour { background: #8b5cf6; color: white; padding: 2px 10px; border-radius: 20px; font-size: 11px; }
         .booking-event-type { background: #3b82f6; color: white; padding: 2px 10px; border-radius: 20px; font-size: 11px; }
         .booking-contact { font-size: 12px; margin: 8px 0; display: flex; gap: 15px; flex-wrap: wrap; }
@@ -64,15 +77,12 @@
         .note-item { background: #fef3c7; padding: 8px; border-radius: 8px; margin-bottom: 6px; font-size: 12px; }
         .note-text { margin-bottom: 4px; }
         .note-meta { font-size: 10px; color: #92400e; display: flex; justify-content: space-between; }
-        .add-note { display: flex; gap: 8px; margin-top: 10px; }
-        .add-note input { flex: 1; padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; }
-        .add-note button { background: #3b82f6; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; }
         
         .btn-remove { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
         .btn-remove:hover { background: #dc2626; }
         .btn-note { background: #f59e0b; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
         .btn-edit { background: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
-        .btn-book { background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+        .btn-book { background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; text-decoration: none; display: inline-block; }
         
         .upload-area { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 15px; }
         .upload-area:hover { border-color: #3b82f6; background: #f8fafc; }
@@ -83,14 +93,13 @@
         
         .chat-messages { height: 250px; overflow-y: auto; margin-bottom: 10px; padding: 10px; background: #f8fafc; border-radius: 10px; }
         .chat-message { margin-bottom: 12px; padding: 10px; background: white; border-radius: 10px; border-left: 3px solid #3b82f6; }
-        .chat-name { font-weight: 600; font-size: 12px; color: #3b82f6; }
+        .chat-name { font-weight: 600; font-size: 12px; color: #3b82f6; display: flex; align-items: center; gap: 8px; }
         .chat-text { font-size: 13px; margin-top: 5px; }
         .chat-time { font-size: 9px; color: #94a3b8; margin-top: 5px; }
         .chat-mention { background: #fef3c7; padding: 2px 4px; border-radius: 4px; color: #f59e0b; }
         
         .chat-input-area { display: flex; gap: 8px; }
         .chat-input-area input { flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; }
-        .chat-input-area input:first-child { flex: 0.3; }
         
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1500; display: none; align-items: center; justify-content: center; }
         .modal { background: white; border-radius: 20px; padding: 25px; width: 550px; max-width: 90%; max-height: 85vh; overflow-y: auto; }
@@ -104,7 +113,7 @@
         .status-msg.error { background: #fee2e2; color: #991b1b; }
         .status-msg.notification { background: #fef3c7; color: #92400e; animation: pulse 1s; }
         
-        .staff-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 10px; margin-left: 8px; }
+        .staff-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 10px; }
         .staff-admin { background: #8b5cf6; color: white; }
         .staff-staff { background: #64748b; color: white; }
         
@@ -112,81 +121,98 @@
         .event-type-btn { padding: 6px 12px; background: #e2e8f0; border: none; border-radius: 20px; cursor: pointer; font-size: 12px; }
         .event-type-btn.selected { background: #3b82f6; color: white; }
         
-        .capacity-bar { background: #e2e8f0; border-radius: 10px; height: 6px; margin-top: 8px; overflow: hidden; }
-        .capacity-fill { background: #10b981; height: 100%; border-radius: 10px; transition: width 0.3s; }
-        .capacity-fill.partial { background: #f59e0b; }
-        .capacity-fill.full { background: #ef4444; }
-        
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
         @media (max-width: 900px) { .main-layout { flex-direction: column; } }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🏢 Members Lounge - Complete Staff Portal</h1>
-            <p>Manage bookings, track guest of honour, event types, and team communication</p>
-            <div class="stats-bar">
-                <div class="stat-card"><div class="stat-value" id="totalRooms">4</div><div class="stat-label">Rooms</div></div>
-                <div class="stat-card"><div class="stat-value" id="totalBookings">0</div><div class="stat-label">Future Bookings</div></div>
-                <div class="stat-card"><div class="stat-value" id="monthLabel">-</div><div class="stat-label">Current Month</div></div>
-                <div class="stat-card"><div class="stat-value" id="notificationCount">0</div><div class="stat-label">Notifications</div></div>
-            </div>
+    <!-- Login Screen -->
+    <div class="login-overlay" id="loginScreen">
+        <div class="login-card">
+            <div class="staff-avatar">👤</div>
+            <h2>Staff Login</h2>
+            <p>Select your name to continue</p>
+            <select id="staffLoginSelect">
+                <option value="">-- Select Staff --</option>
+                <option value="Enza">Enza</option>
+                <option value="Maria">Maria</option>
+                <option value="Michelle">Michelle</option>
+                <option value="Carlo">Carlo (Admin)</option>
+                <option value="Laura">Laura</option>
+                <option value="Isabella">Isabella</option>
+                <option value="Bianca">Bianca</option>
+                <option value="Charlie">Charlie</option>
+            </select>
+            <button onclick="loginStaff()">Login to Portal</button>
         </div>
+    </div>
 
-        <div class="main-layout">
-            <div class="calendar-column">
-                <div class="card">
-                    <div class="card-title">
-                        📅 Room Booking Calendar
-                        <button class="btn-success" onclick="openBookingModal()" style="padding: 8px 16px; font-size: 14px;">➕ Quick Booking</button>
-                    </div>
-                    <div class="date-nav">
-                        <button onclick="changeMonth(-1)">← Previous</button>
-                        <span class="date-display" id="currentMonthYear"></span>
-                        <button onclick="changeMonth(1)">Next →</button>
-                        <button onclick="goToToday()" style="background:#64748b">Today</button>
-                    </div>
-                    <div class="room-tabs" id="roomTabs"></div>
-                    <div id="calendarGrid"></div>
+    <!-- Main Portal -->
+    <div id="mainPortal" style="display:none">
+        <div class="container">
+            <div class="header">
+                <h1>🏢 Members Lounge - Staff Portal</h1>
+                <p>Manage bookings, track guest of honour, event types, and team communication</p>
+                <div class="stats-bar">
+                    <div class="stat-card"><div class="stat-value" id="totalRooms">4</div><div class="stat-label">Rooms</div></div>
+                    <div class="stat-card"><div class="stat-value" id="totalBookings">0</div><div class="stat-label">Future Bookings</div></div>
+                    <div class="stat-card"><div class="stat-value" id="monthLabel">-</div><div class="stat-label">Current Month</div></div>
+                    <div class="stat-card"><div class="stat-value" id="notificationCount">0</div><div class="stat-label">Notifications</div></div>
                 </div>
             </div>
 
-            <div class="sidebar-column">
-                <div class="card">
-                    <div class="card-title">
-                        💬 Staff Community Board
-                        <span id="chatNotificationBadge" style="display:none" class="notification-badge">New</span>
-                    </div>
-                    <div class="chat-messages" id="chatMessages">
-                        <div style="text-align:center; padding:30px; color:#94a3b8;">No messages yet</div>
-                    </div>
-                    <div class="chat-input-area">
-                        <input type="text" id="staffName" placeholder="Your name" value="Staff" list="staffNameList">
-                        <datalist id="staffNameList">
-                            <option>Enza</option><option>Maria</option><option>Michelle</option>
-                            <option>Carlo</option><option>Laura</option><option>Isabella</option>
-                            <option>Bianca</option><option>Charlie</option>
-                        </datalist>
-                        <input type="text" id="chatMessage" placeholder="Type a message... (use @Carlo to notify admin)" onkeypress="if(event.key==='Enter') sendChatMessage()">
-                        <button class="btn-secondary" onclick="sendChatMessage()">Send</button>
+            <div class="main-layout">
+                <div class="calendar-column">
+                    <div class="card">
+                        <div class="card-title">
+                            📅 Room Booking Calendar
+                            <a href="https://www.tickettailor.com/events/thememberslounge" target="_blank" class="btn-success" style="padding: 8px 16px; font-size: 14px; text-decoration: none;">➕ Make a Booking</a>
+                        </div>
+                        <div class="current-user">
+                            <span>👋 Logged in as: <strong id="currentStaffName"></strong> <span id="staffRoleBadge"></span></span>
+                            <button class="logout-btn" onclick="logout()">Logout</button>
+                        </div>
+                        <div class="date-nav">
+                            <button onclick="changeMonth(-1)">← Previous</button>
+                            <span class="date-display" id="currentMonthYear"></span>
+                            <button onclick="changeMonth(1)">Next →</button>
+                            <button onclick="goToToday()" style="background:#64748b">Today</button>
+                        </div>
+                        <div class="room-tabs" id="roomTabs"></div>
+                        <div id="calendarGrid"></div>
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-title">📂 Import Bookings (CSV)</div>
-                    <div class="upload-area" id="uploadArea" onclick="document.getElementById('csvInput').click()">
-                        📁 Click or drag CSV file here<br>
-                        <small>Upload your Ticket Tailor export (future events only)</small>
-                        <input type="file" id="csvInput" accept=".csv" style="display:none" onchange="handleCSV(this.files[0])">
+                <div class="sidebar-column">
+                    <div class="card">
+                        <div class="card-title">
+                            💬 Staff Chat
+                            <span id="chatNotificationBadge" style="display:none" class="notification-badge">New</span>
+                        </div>
+                        <div class="chat-messages" id="chatMessages">
+                            <div style="text-align:center; padding:30px; color:#94a3b8;">No messages yet</div>
+                        </div>
+                        <div class="chat-input-area">
+                            <input type="text" id="chatMessage" placeholder="Type a message... (use @Carlo to notify admin)" onkeypress="if(event.key==='Enter') sendChatMessage()">
+                            <button class="btn-secondary" onclick="sendChatMessage()">Send</button>
+                        </div>
                     </div>
-                    <div id="uploadStatus"></div>
-                </div>
 
-                <div class="card">
-                    <div class="card-title" id="selectedRoomTitle">📋 Bookings & Details</div>
-                    <div class="bookings-list" id="bookingsList">
-                        <div style="text-align:center; padding:30px; color:#94a3b8;">Click on a date to view bookings</div>
+                    <div class="card">
+                        <div class="card-title">📂 Import Bookings (CSV)</div>
+                        <div class="upload-area" id="uploadArea" onclick="document.getElementById('csvInput').click()">
+                            📁 Click or drag CSV file here<br>
+                            <small>Upload your Ticket Tailor export (future events only)</small>
+                            <input type="file" id="csvInput" accept=".csv" style="display:none" onchange="handleCSV(this.files[0])">
+                        </div>
+                        <div id="uploadStatus"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title" id="selectedRoomTitle">📋 Bookings & Details</div>
+                        <div class="bookings-list" id="bookingsList">
+                            <div style="text-align:center; padding:30px; color:#94a3b8;">Click on a date to view bookings</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -269,6 +295,10 @@
     </div>
 
     <script>
+        // Current logged in user
+        let currentUser = null;
+        let currentUserRole = null;
+
         // ROOM CAPACITIES
         const ROOM_CAPACITIES = {
             'ottimo': 50,
@@ -294,6 +324,69 @@
         ];
 
         let selectedEventType = '';
+        let bookings = {};
+        let chatMessages = JSON.parse(localStorage.getItem('chat_messages') || '[]');
+        let notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+        let currentDate = new Date();
+        let currentRoom = ROOMS[0].id;
+        let selectedDate = null;
+        let currentNoteContext = null;
+        let currentEditContext = null;
+        let pendingDelete = null;
+        let lastMessageCount = 0;
+
+        // Login Functions
+        function loginStaff() {
+            const selectedName = document.getElementById('staffLoginSelect').value;
+            if (!selectedName) {
+                alert('Please select your name');
+                return;
+            }
+            const staff = STAFF.find(s => s.name === selectedName);
+            currentUser = staff.name;
+            currentUserRole = staff.role;
+            
+            // Save to session storage
+            sessionStorage.setItem('ml_logged_in', 'true');
+            sessionStorage.setItem('ml_username', currentUser);
+            sessionStorage.setItem('ml_userrole', currentUserRole);
+            
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainPortal').style.display = 'block';
+            document.getElementById('currentStaffName').textContent = currentUser;
+            document.getElementById('staffRoleBadge').innerHTML = currentUserRole === 'admin' ? '<span class="staff-badge staff-admin">Admin</span>' : '<span class="staff-badge staff-staff">Staff</span>';
+            
+            loadData();
+            renderRoomTabs();
+            renderCalendar();
+            renderChat();
+            checkForNewMessages();
+            setInterval(checkForNewMessages, 5000);
+        }
+
+        function logout() {
+            sessionStorage.clear();
+            location.reload();
+        }
+
+        // Check for existing session
+        function checkSession() {
+            const isLoggedIn = sessionStorage.getItem('ml_logged_in');
+            if (isLoggedIn === 'true') {
+                currentUser = sessionStorage.getItem('ml_username');
+                currentUserRole = sessionStorage.getItem('ml_userrole');
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainPortal').style.display = 'block';
+                document.getElementById('currentStaffName').textContent = currentUser;
+                document.getElementById('staffRoleBadge').innerHTML = currentUserRole === 'admin' ? '<span class="staff-badge staff-admin">Admin</span>' : '<span class="staff-badge staff-staff">Staff</span>';
+                loadData();
+                renderRoomTabs();
+                renderCalendar();
+                renderChat();
+                checkForNewMessages();
+                setInterval(checkForNewMessages, 5000);
+            }
+        }
 
         function selectEventType(type) {
             selectedEventType = type;
@@ -310,18 +403,6 @@
             }
         }
 
-        // Storage
-        let bookings = {};
-        let chatMessages = JSON.parse(localStorage.getItem('chat_messages') || '[]');
-        let notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
-        let currentDate = new Date();
-        let currentRoom = ROOMS[0].id;
-        let selectedDate = null;
-        let currentNoteContext = null;
-        let currentEditContext = null;
-        let pendingDelete = null;
-        let lastMessageCount = 0;
-
         function loadData() {
             const saved = localStorage.getItem('ml_bookings_complete');
             if (saved) {
@@ -331,9 +412,6 @@
                 ROOMS.forEach(room => { bookings[room.id] = {}; });
             }
             updateStats();
-            renderChat();
-            checkForNewMessages();
-            setInterval(checkForNewMessages, 5000);
         }
 
         function saveData() {
@@ -347,7 +425,6 @@
             let futureCount = 0;
             const today = new Date();
             today.setHours(0,0,0,0);
-            
             for (const roomId in bookings) {
                 for (const dateStr in bookings[roomId]) {
                     const bookingDate = new Date(dateStr);
@@ -376,7 +453,6 @@
             setTimeout(() => { if (div.innerHTML.includes(msg)) div.innerHTML = ''; }, 4000);
         }
 
-        // Calculate total tickets for a room on a specific date
         function getTotalTicketsForDate(roomId, dateStr) {
             const dateBookings = bookings[roomId]?.[dateStr] || [];
             let total = 0;
@@ -386,22 +462,18 @@
             return total;
         }
 
-        // Get capacity status for a room on a date
         function getCapacityStatus(roomId, dateStr) {
             const capacity = ROOM_CAPACITIES[roomId] || 999;
             const totalTickets = getTotalTicketsForDate(roomId, dateStr);
             const remaining = capacity - totalTickets;
-            
-            if (totalTickets === 0) return { status: 'available', remaining, totalTickets, capacity, color: '#10b981', bgClass: 'available' };
-            if (totalTickets >= capacity) return { status: 'full', remaining, totalTickets, capacity, color: '#ef4444', bgClass: 'booked' };
-            return { status: 'partial', remaining, totalTickets, capacity, color: '#f59e0b', bgClass: 'partial' };
+            if (totalTickets === 0) return { status: 'available', remaining, totalTickets, capacity, bgClass: 'available' };
+            if (totalTickets >= capacity) return { status: 'full', remaining, totalTickets, capacity, bgClass: 'booked' };
+            return { status: 'partial', remaining, totalTickets, capacity, bgClass: 'partial' };
         }
 
-        // Parse CSV
         async function handleCSV(file) {
             if (!file) return;
             showStatus(`Processing ${file.name}...`, 'success');
-            
             const text = await file.text();
             const lines = text.split('\n');
             
@@ -412,11 +484,7 @@
                     break;
                 }
             }
-            
-            if (headerLine === -1) {
-                showStatus('Could not find CSV header row', 'error');
-                return;
-            }
+            if (headerLine === -1) { showStatus('Could not find CSV header row', 'error'); return; }
             
             const headers = parseCSVLine(lines[headerLine]);
             let orderDateIdx = -1, eventNameIdx = -1, eventStartIdx = -1, nameIdx = -1, emailIdx = -1, phoneIdx = -1;
@@ -434,13 +502,11 @@
             const newBookings = [];
             const today = new Date();
             today.setHours(0,0,0,0);
-            let added = 0;
-            let skipped = 0;
+            let added = 0, skipped = 0;
             
             for (let i = headerLine + 1; i < lines.length; i++) {
                 const line = lines[i].trim();
                 if (!line) continue;
-                
                 const values = parseCSVLine(line);
                 if (values.length < 5) continue;
                 
@@ -455,7 +521,6 @@
                     }
                     if (matchedRoom) break;
                 }
-                
                 if (!matchedRoom) continue;
                 
                 const eventStart = values[eventStartIdx]?.replace(/"/g, '').trim() || '';
@@ -463,57 +528,39 @@
                 const dateMatch = eventStart.match(/(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{4})/);
                 if (dateMatch) {
                     eventDate = formatDate(dateMatch[1], dateMatch[2], dateMatch[3]);
-                } else {
-                    continue;
-                }
+                } else { continue; }
                 
                 const bookingDate = new Date(eventDate);
-                if (bookingDate < today) {
-                    skipped++;
-                    continue;
-                }
+                if (bookingDate < today) { skipped++; continue; }
                 
                 const customerName = values[nameIdx]?.replace(/"/g, '').trim() || 'Unknown';
                 if (customerName === 'Unknown' || customerName.length < 2) continue;
                 
                 let email = values[emailIdx]?.replace(/"/g, '').trim() || '';
                 if (!email) email = `${customerName.toLowerCase().replace(/\s/g, '.')}@guest.com`;
-                
                 let phone = values[phoneIdx]?.replace(/"/g, '').trim() || '';
-                
                 const timeMatch = eventStart.match(/(\d{1,2}:\d{2}\s+(?:AM|PM))/i);
                 const eventTime = timeMatch ? timeMatch[1] : 'Time TBD';
                 
                 newBookings.push({
-                    roomId: matchedRoom.id,
-                    roomName: matchedRoom.name,
-                    customerName: customerName,
-                    customerEmail: email,
-                    customerPhone: phone,
-                    guestOfHonour: '',
-                    eventType: eventName,
-                    eventDate: eventDate,
-                    eventTime: eventTime,
+                    roomId: matchedRoom.id, roomName: matchedRoom.name,
+                    customerName, customerEmail: email, customerPhone: phone,
+                    guestOfHonour: '', eventType: eventName,
+                    eventDate, eventTime,
                     orderDate: values[orderDateIdx]?.replace(/"/g, '').trim() || '',
-                    ticketCount: 1,
-                    notes: []
+                    ticketCount: 1, notes: []
                 });
             }
             
             for (const booking of newBookings) {
                 if (!bookings[booking.roomId]) bookings[booking.roomId] = {};
                 if (!bookings[booking.roomId][booking.eventDate]) bookings[booking.roomId][booking.eventDate] = [];
-                
-                const exists = bookings[booking.roomId][booking.eventDate].some(b => 
-                    b.customerName.toLowerCase() === booking.customerName.toLowerCase()
-                );
-                
+                const exists = bookings[booking.roomId][booking.eventDate].some(b => b.customerName.toLowerCase() === booking.customerName.toLowerCase());
                 if (!exists) {
                     bookings[booking.roomId][booking.eventDate].push(booking);
                     added++;
                 }
             }
-            
             saveData();
             showStatus(`✅ Imported ${added} future bookings (skipped ${skipped} past events)`, 'success');
             renderRoomTabs();
@@ -522,8 +569,7 @@
         
         function parseCSVLine(line) {
             const result = [];
-            let inQuotes = false;
-            let current = '';
+            let inQuotes = false, current = '';
             for (let i = 0; i < line.length; i++) {
                 const char = line[i];
                 if (char === '"') inQuotes = !inQuotes;
@@ -574,7 +620,6 @@
             ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
                 gridHtml += `<div class="weekday-header">${day}</div>`;
             });
-            
             for (let i = 0; i < startOffset; i++) gridHtml += `<div class="calendar-day empty"></div>`;
             
             for (let day = 1; day <= daysInMonth; day++) {
@@ -584,9 +629,7 @@
                 const isPast = cellDate < today;
                 
                 let statusClass = 'available';
-                let statusText = '';
                 let badgeHtml = '';
-                let capacityHtml = '';
                 
                 if (isPast) {
                     statusClass = 'empty';
@@ -595,31 +638,25 @@
                     badgeHtml = `<div class="booking-badge">FULL</div>`;
                 } else if (capacityStatus.status === 'partial') {
                     statusClass = 'partial';
-                    badgeHtml = `<div class="partial-badge">${capacityStatus.remaining} seats left</div>`;
-                    capacityHtml = `<div class="seats-left">🪑 ${capacityStatus.totalTickets}/${capacityStatus.capacity} booked</div>`;
-                } else if (capacityStatus.status === 'available') {
+                    badgeHtml = `<div class="partial-badge">${capacityStatus.remaining} seats left</div>
+                                 <div class="seats-left">🪑 ${capacityStatus.totalTickets}/${capacityStatus.capacity} booked</div>`;
+                } else {
                     statusClass = 'available';
                     badgeHtml = `<div style="font-size:10px; color:#10b981; margin-top:5px;">✓ ${capacityStatus.capacity} seats available</div>`;
                 }
                 
-                // Show first booking name if exists
                 const roomBookings = bookings[currentRoom]?.[dateStr] || [];
                 if (roomBookings.length > 0 && !isPast && capacityStatus.status !== 'full') {
                     badgeHtml = `<div class="partial-badge">${capacityStatus.remaining} seats left</div>
                                  <div class="booking-name" title="${roomBookings[0].customerName}">${roomBookings[0].customerName.split(' ')[0]}</div>
                                  <div class="seats-left">🎟️ ${capacityStatus.totalTickets} booked</div>`;
-                } else if (roomBookings.length > 0 && !isPast) {
+                } else if (roomBookings.length > 0 && !isPast && capacityStatus.status === 'full') {
                     badgeHtml = `<div class="booking-badge">FULL</div>
                                  <div class="booking-name">${roomBookings.length} booking(s)</div>`;
                 }
                 
-                gridHtml += `
-                    <div class="calendar-day ${statusClass}" onclick="${!isPast ? `selectDate('${dateStr}')` : ''}">
-                        <div class="day-number">${day}</div>
-                        ${badgeHtml}
-                        ${capacityHtml}
-                    </div>
-                `;
+                gridHtml += `<div class="calendar-day ${statusClass}" onclick="${!isPast ? `selectDate('${dateStr}')` : ''}">
+                    <div class="day-number">${day}</div>${badgeHtml}</div>`;
             }
             gridHtml += '</div>';
             document.getElementById('calendarGrid').innerHTML = gridHtml;
@@ -632,7 +669,6 @@
             document.getElementById('selectedRoomTitle').textContent = `📋 ${room?.name} - ${dateStr} (${capacityStatus.totalTickets}/${capacityStatus.capacity} seats booked)`;
             
             const bookingsList = bookings[currentRoom]?.[dateStr] || [];
-            
             const container = document.getElementById('bookingsList');
             if (bookingsList.length === 0) {
                 container.innerHTML = `<div style="text-align:center; padding:30px; color:#94a3b8;">✅ No bookings for this date<br>${capacityStatus.capacity} seats available</div>`;
@@ -690,7 +726,6 @@
         function createQuickBooking() {
             const customerName = document.getElementById('newCustomerName').value.trim();
             if (!customerName) { showStatus('Customer name required', 'error'); return; }
-            
             const eventDate = document.getElementById('newEventDate').value;
             if (!eventDate) { showStatus('Event date required', 'error'); return; }
             
@@ -698,9 +733,8 @@
             const capacityStatus = getCapacityStatus(roomId, eventDate);
             const newTicketCount = parseInt(document.getElementById('newTicketCount').value) || 1;
             
-            // Check capacity
             if (capacityStatus.totalTickets + newTicketCount > ROOM_CAPACITIES[roomId]) {
-                showStatus(`❌ Cannot add ${newTicketCount} guests. Only ${capacityStatus.remaining} seats available for ${ROOMS.find(r=>r.id===roomId)?.name} on this date.`, 'error');
+                showStatus(`❌ Cannot add ${newTicketCount} guests. Only ${capacityStatus.remaining} seats available.`, 'error');
                 return;
             }
             
@@ -708,8 +742,7 @@
             if (eventType === 'Other') eventType = document.getElementById('newEventTypeCustom').value;
             
             const newBooking = {
-                roomId: roomId,
-                roomName: ROOMS.find(r => r.id === roomId)?.name,
+                roomId: roomId, roomName: ROOMS.find(r => r.id === roomId)?.name,
                 customerName: customerName,
                 customerEmail: document.getElementById('newCustomerEmail').value || `${customerName.toLowerCase().replace(/\s/g, '.')}@guest.com`,
                 customerPhone: document.getElementById('newCustomerPhone').value,
@@ -725,7 +758,6 @@
             if (!bookings[roomId]) bookings[roomId] = {};
             if (!bookings[roomId][eventDate]) bookings[roomId][eventDate] = [];
             bookings[roomId][eventDate].push(newBooking);
-            
             saveData();
             closeBookingModal();
             renderCalendar();
@@ -737,7 +769,6 @@
         function openEditModal(roomId, dateStr, bookingIndex) {
             const booking = bookings[roomId][dateStr][bookingIndex];
             currentEditContext = { roomId, dateStr, bookingIndex };
-            
             document.getElementById('editCustomerName').value = booking.customerName;
             document.getElementById('editCustomerEmail').value = booking.customerEmail;
             document.getElementById('editCustomerPhone').value = booking.customerPhone || '';
@@ -747,7 +778,6 @@
             document.getElementById('editEventDate').value = booking.eventDate;
             document.getElementById('editEventTime').value = booking.eventTime === 'Time TBD' ? '' : booking.eventTime;
             document.getElementById('editTicketCount').value = booking.ticketCount;
-            
             document.getElementById('editModal').style.display = 'flex';
         }
         
@@ -756,16 +786,14 @@
         function saveBookingEdit() {
             if (!currentEditContext) return;
             const { roomId, dateStr, bookingIndex } = currentEditContext;
-            
             const newRoomId = document.getElementById('editRoom').value;
             const newDate = document.getElementById('editEventDate').value;
             const newTicketCount = parseInt(document.getElementById('editTicketCount').value) || 1;
             
-            // Check capacity for new room/date
             if (newRoomId !== roomId || newDate !== dateStr) {
                 const newCapacityStatus = getCapacityStatus(newRoomId, newDate);
                 if (newCapacityStatus.totalTickets + newTicketCount > ROOM_CAPACITIES[newRoomId]) {
-                    showStatus(`❌ Cannot move booking. Only ${newCapacityStatus.remaining} seats available at ${ROOMS.find(r=>r.id===newRoomId)?.name} on ${newDate}`, 'error');
+                    showStatus(`❌ Cannot move booking. Only ${newCapacityStatus.remaining} seats available.`, 'error');
                     return;
                 }
             }
@@ -782,15 +810,11 @@
             booking.roomId = newRoomId;
             booking.roomName = ROOMS.find(r => r.id === newRoomId)?.name;
             
-            // Remove from old
             bookings[roomId][dateStr].splice(bookingIndex, 1);
             if (bookings[roomId][dateStr].length === 0) delete bookings[roomId][dateStr];
-            
-            // Add to new
             if (!bookings[newRoomId]) bookings[newRoomId] = {};
             if (!bookings[newRoomId][newDate]) bookings[newRoomId][newDate] = [];
             bookings[newRoomId][newDate].push(booking);
-            
             saveData();
             closeEditModal();
             renderCalendar();
@@ -812,21 +836,13 @@
             const noteText = document.getElementById('noteText').value.trim();
             if (!noteText) return;
             
-            const author = document.getElementById('staffName').value.trim() || 'Staff';
-            
             bookings[roomId][dateStr][bookingIndex].notes = bookings[roomId][dateStr][bookingIndex].notes || [];
-            bookings[roomId][dateStr][bookingIndex].notes.push({
-                author: author,
-                text: noteText,
-                time: Date.now()
-            });
-            
+            bookings[roomId][dateStr][bookingIndex].notes.push({ author: currentUser, text: noteText, time: Date.now() });
             saveData();
             closeNoteModal();
             selectDate(dateStr);
-            
             if (noteText.toLowerCase().includes('@carlo')) {
-                addNotification(`📝 ${author} mentioned Carlo in a note for ${bookings[roomId][dateStr][bookingIndex].customerName}`, 'notification');
+                addNotification(`📝 ${currentUser} mentioned Carlo in a note for ${bookings[roomId][dateStr][bookingIndex].customerName}`, 'notification');
             }
             showStatus('✅ Note added', 'success');
         }
@@ -863,7 +879,7 @@
                 }
                 return `
                     <div class="chat-message">
-                        <div class="chat-name">${escapeHtml(m.name)} ${m.role === 'admin' ? '<span class="staff-badge staff-admin">Admin</span>' : '<span class="staff-badge staff-staff">Staff</span>'}</div>
+                        <div class="chat-name">👤 ${escapeHtml(m.name)} ${m.role === 'admin' ? '<span class="staff-badge staff-admin">Admin</span>' : '<span class="staff-badge staff-staff">Staff</span>'}</div>
                         <div class="chat-text">${messageHtml}</div>
                         <div class="chat-time">${new Date(m.time).toLocaleString()}</div>
                     </div>
@@ -873,21 +889,16 @@
         }
         
         function sendChatMessage() {
-            const name = document.getElementById('staffName').value.trim();
             const text = document.getElementById('chatMessage').value.trim();
             if (!text) return;
             
-            const validStaff = STAFF.find(s => s.name.toLowerCase() === name.toLowerCase());
-            const finalName = validStaff ? validStaff.name : name;
-            const role = validStaff ? validStaff.role : 'staff';
-            
-            chatMessages.push({ name: finalName, text: text, role: role, time: Date.now() });
+            const staff = STAFF.find(s => s.name === currentUser);
+            chatMessages.push({ name: currentUser, text: text, role: staff?.role || 'staff', time: Date.now() });
             saveData();
             renderChat();
             document.getElementById('chatMessage').value = '';
-            
             if (text.toLowerCase().includes('@carlo')) {
-                addNotification(`💬 ${finalName} mentioned Carlo in chat`, 'notification');
+                addNotification(`💬 ${currentUser} mentioned Carlo in chat`, 'notification');
             }
         }
         
@@ -904,20 +915,21 @@
         function goToToday() { currentDate = new Date(); renderCalendar(); }
         function escapeHtml(s) { if (!s) return ''; return s.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
         
-        loadData();
-        renderRoomTabs();
-        renderCalendar();
+        // Initialize
+        checkSession();
         
         const uploadArea = document.getElementById('uploadArea');
-        uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
-        uploadArea.addEventListener('dragleave', () => { uploadArea.classList.remove('dragover'); });
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            const file = e.dataTransfer.files[0];
-            if (file && file.name.endsWith('.csv')) handleCSV(file);
-            else showStatus('Please upload a CSV file', 'error');
-        });
+        if (uploadArea) {
+            uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+            uploadArea.addEventListener('dragleave', () => { uploadArea.classList.remove('dragover'); });
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                if (file && file.name.endsWith('.csv')) handleCSV(file);
+                else showStatus('Please upload a CSV file', 'error');
+            });
+        }
     </script>
 </body>
 </html>
