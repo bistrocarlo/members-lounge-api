@@ -2,653 +2,634 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Portal - Calendar Ready</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Monday Night Soccer | Team Hub</title>
+    <!-- Firebase 10.7.1 Compat SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
-        body { font-family: system-ui, -apple-system, sans-serif; }
-        .section { display: none; }
-        .section.active { display: block; }
-        .calendar-day { transition: all 0.1s; min-height: 80px; }
-        .calendar-day:hover { background-color: #f8fafc; }
-        .event-dot { background-color: #3b82f6; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background: #eef2f5;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        .app {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #eef2f5;
+            min-height: 100vh;
+            box-shadow: 0 0 40px rgba(0,0,0,0.05);
+        }
+        .header {
+            background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(8px);
+            padding: 14px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(226,232,240,0.8);
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+        .logo-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #1a73e8, #0d5bbf);
+            border-radius: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            box-shadow: 0 8px 16px -6px rgba(26,115,232,0.25);
+        }
+        .logo-icon i { font-size: 28px; color: white; }
+        .header h1 {
+            font-size: 20px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .user-row {
+            background: #f1f5f9;
+            padding: 6px 14px;
+            border-radius: 60px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .user-row button {
+            background: #dc3545;
+            border: none;
+            padding: 5px 14px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 600;
+            font-size: 11px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .top-nav {
+            background: white;
+            padding: 12px 12px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 85px;
+            z-index: 15;
+        }
+        .nav-module {
+            background: #f8fafc;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #1e293b;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .nav-module.active {
+            background: #1a73e8;
+            color: white;
+            box-shadow: 0 4px 10px rgba(26,115,232,0.3);
+        }
+        .module-container {
+            padding: 18px 16px;
+            display: none;
+            animation: fadeIn 0.25s ease;
+        }
+        .module-container.active-module { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        .card {
+            background: white;
+            border-radius: 28px;
+            padding: 20px;
+            margin-bottom: 18px;
+            border: 1px solid rgba(226,232,240,0.6);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+        .card h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            border-left: 4px solid #1a73e8;
+            padding-left: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .attendance-card {
+            background: linear-gradient(145deg, #1a73e8, #0f5bbf);
+            color: white;
+            border-radius: 32px;
+            padding: 28px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .big-buttons {
+            display: flex;
+            gap: 16px;
+            margin: 20px 0 16px;
+        }
+        .btn-play-big {
+            background: #10b981;
+            flex: 1;
+            padding: 14px;
+            border-radius: 60px;
+            font-weight: 800;
+            font-size: 17px;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+        .btn-sit-big {
+            background: #ef4444;
+            flex: 1;
+            padding: 14px;
+            border-radius: 60px;
+            font-weight: 800;
+            font-size: 17px;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+        .profile-avatar, .player-avatar-small {
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .profile-avatar { width: 54px; height: 54px; font-size: 20px; }
+        .player-avatar-small { width: 34px; height: 34px; font-size: 13px; margin-right: 6px; }
+        .profile-badge {
+            background: white;
+            border-radius: 40px;
+            padding: 4px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+            margin-right: 6px;
+            margin-bottom: 5px;
+        }
+        .edit-profile-btn {
+            background: #475569;
+            padding: 6px 16px;
+            font-size: 12px;
+            border-radius: 40px;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+        .match-card {
+            background: white;
+            border-radius: 28px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+        .team-row { display: flex; gap: 14px; flex-wrap: wrap; }
+        .team-box {
+            flex: 1;
+            background: rgba(0,0,0,0.65);
+            border-radius: 20px;
+            padding: 14px;
+            min-width: 140px;
+        }
+        .team-yellow { background: #ffc107; color: #2c2c2c; font-weight: 800; text-align: center; padding: 6px; border-radius: 60px; margin-bottom: 12px; }
+        .team-orange { background: #fd7e14; color: white; font-weight: 800; text-align: center; padding: 6px; border-radius: 60px; margin-bottom: 12px; }
+        .player-list { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+        .player-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 40px;
+            padding: 4px 12px;
+            font-size: 12px;
+            color: white;
+        }
+        .attendee-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            padding: 6px 12px;
+            border-radius: 40px;
+            font-size: 13px;
+            margin: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .remove-attendee-btn {
+            background: #ef4444;
+            border: none;
+            color: white;
+            border-radius: 40px;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-left: 6px;
+        }
+        .remove-attendee-btn:hover { background: #dc2626; transform: scale(0.96); }
+        .guest-tag {
+            background: #d4edda;
+            color: #155724;
+            border-radius: 40px;
+            padding: 6px 14px;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .playing-list, .guest-section {
+            background: #e8f0fe;
+            border-radius: 24px;
+            padding: 18px;
+            margin-bottom: 18px;
+        }
+        .guest-section { background: #f0fdf4; border: 1px solid #bbf7d0; }
+        .timer-container {
+            background: linear-gradient(145deg, #0f172a, #1e293b);
+            border-radius: 36px;
+            padding: 28px 20px;
+            text-align: center;
+        }
+        .timer-display {
+            font-size: 58px;
+            font-weight: 800;
+            font-family: monospace;
+            color: #10b981;
+            letter-spacing: 6px;
+            background: #00000040;
+            border-radius: 32px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .flex-btns { display: flex; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+        .btn-outline { background: white; color: #1a73e8; border: 2px solid #1a73e8; }
+        .admin-team-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            background: #f1f5f9;
+            border-radius: 60px;
+            padding: 8px 18px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 32px;
+            padding: 24px;
+            max-width: 340px;
+            width: 90%;
+        }
+        button { background: #1a73e8; color: white; border: none; padding: 12px 20px; border-radius: 60px; font-weight: 700; cursor: pointer; }
+        input, select { width: 100%; padding: 14px; border: 1.5px solid #e2e8f0; border-radius: 60px; margin: 8px 0; font-size: 16px; }
+        .loading { text-align: center; padding: 40px; color: #64748b; }
+        .info-bar {
+            background: #e8f0fe;
+            border-radius: 20px;
+            padding: 12px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            text-align: center;
+            font-weight: 500;
+            color: #1a73e8;
+        }
+        @media (max-width:450px){ .team-row { flex-direction: column; } }
     </style>
 </head>
-<body class="bg-gray-50">
-    <!-- Login Screen -->
-    <div id="login-screen" class="min-h-screen flex items-center justify-center bg-gray-900">
-        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md">
-            <div class="text-center mb-8">
-                <i class="fas fa-shield-alt text-4xl text-blue-600 mb-4"></i>
-                <h1 class="text-3xl font-bold text-gray-900">Staff Portal</h1>
-                <p class="text-gray-600 mt-2">Secure access only</p>
-            </div>
-            
-            <form id="login-form" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input type="email" id="login-email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="your@email.com" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                    <input type="password" id="login-password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••" required>
-                </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition flex items-center justify-center">
-                    <span id="login-btn-text">Sign In</span>
-                </button>
-            </form>
-            
-            <div class="mt-6 text-center text-xs text-gray-500">
-                Demo mode: Use any email + password "demo123" for testing.<br>
-                Replace with Firebase Auth in production.
-            </div>
-        </div>
-    </div>
+<body>
+<div class="app" id="app"><div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading Monday Night Soccer...</div></div>
 
-    <!-- Main App -->
-    <div id="app-screen" class="hidden min-h-screen">
-        <nav class="bg-white border-b shadow-sm">
-            <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <i class="fas fa-shield-alt text-blue-600 text-2xl"></i>
-                    <div>
-                        <h1 class="font-bold text-xl">Staff Portal</h1>
-                        <p id="user-info" class="text-sm text-gray-600"></p>
-                    </div>
-                </div>
-                
-                <div class="flex items-center gap-4">
-                    <div class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm flex items-center gap-2">
-                        <i class="fas fa-circle text-green-500"></i>
-                        <span>Secure Session</span>
-                    </div>
-                    <button onclick="logout()" class="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-2">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Logout</span>
-                    </button>
-                </div>
-            </div>
-        </nav>
-
-        <div class="max-w-7xl mx-auto px-6 pt-6">
-            <div class="flex border-b">
-                <button onclick="showSection('bookings')" class="tab-btn px-6 py-3 font-medium text-gray-600 hover:text-gray-900" data-section="bookings">Bookings</button>
-                <button onclick="showSection('calendar')" class="tab-btn px-6 py-3 font-medium border-b-2 border-blue-600 text-blue-600" data-section="calendar">Calendar</button>
-                <button onclick="showSection('notices')" class="tab-btn px-6 py-3 font-medium text-gray-600 hover:text-gray-900" data-section="notices">Notices</button>
-                <button onclick="showSection('chat')" class="tab-btn px-6 py-3 font-medium text-gray-600 hover:text-gray-900" data-section="chat">Staff Chat</button>
-            </div>
-        </div>
-
-        <!-- Bookings Section -->
-        <div id="bookings" class="section max-w-7xl mx-auto px-6 py-8">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold">Bookings</h2>
-                <div class="flex gap-3">
-                    <button onclick="showAddBookingModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700">
-                        <i class="fas fa-plus"></i> Add Booking
-                    </button>
-                    <button onclick="loadCSVFromBackend()" class="px-4 py-2 border border-gray-300 rounded-lg flex items-center gap-2 hover:bg-gray-50">
-                        <i class="fas fa-cloud-download-alt"></i> Load CSV from Backend
-                    </button>
-                    <button onclick="importCSV()" class="px-4 py-2 border border-gray-300 rounded-lg flex items-center gap-2 hover:bg-gray-50">
-                        <i class="fas fa-file-csv"></i> Import Local CSV
-                    </button>
-                </div>
-            </div>
-
-            <div id="bookings-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <!-- Bookings populated by JS -->
-            </div>
-        </div>
-
-        <!-- Calendar Section -->
-        <div id="calendar" class="section active max-w-7xl mx-auto px-6 py-8">
-            <div class="flex justify-between items-center mb-6">
-                <div class="flex items-center gap-4">
-                    <button onclick="prevMonth()" class="px-4 py-2 border rounded-lg hover:bg-gray-50"><i class="fas fa-chevron-left"></i></button>
-                    <h2 id="calendar-month" class="text-2xl font-bold w-48 text-center"></h2>
-                    <button onclick="nextMonth()" class="px-4 py-2 border rounded-lg hover:bg-gray-50"><i class="fas fa-chevron-right"></i></button>
-                </div>
-                <button onclick="goToToday()" class="px-4 py-2 border border-gray-300 rounded-lg flex items-center gap-2 hover:bg-gray-50">
-                    Today
-                </button>
-            </div>
-            
-            <div class="bg-white border rounded-xl p-6">
-                <div class="grid grid-cols-7 gap-px bg-gray-200 mb-2">
-                    <div class="text-center font-medium py-2 text-sm text-gray-600">Sun</div>
-                    <div class="text-center font-medium py-2 text-sm text-gray-600">Mon</div>
-                    <div class="text-center font-medium py-2 text-sm text-gray-600">Tue</div>
-                    <div class="text-center font-medium py-2 text-sm text-gray-600">Wed</div>
-                    <div class="text-center font-medium py-2 text-sm text-gray-600">Thu</div>
-                    <div class="text-center font-medium py-2 text-sm text-gray-600">Fri</div>
-                    <div class="text-center font-medium py-2 text-sm text-gray-600">Sat</div>
-                </div>
-                <div id="calendar-grid" class="grid grid-cols-7 gap-px bg-gray-200">
-                    <!-- Calendar days populated by JS -->
-                </div>
-            </div>
-            
-            <div id="calendar-events" class="mt-6 bg-white border rounded-xl p-6 hidden">
-                <h3 class="font-bold mb-4">Events on <span id="selected-date"></span></h3>
-                <div id="selected-events-list" class="space-y-3"></div>
-            </div>
-        </div>
-
-        <!-- Notices Section -->
-        <div id="notices" class="section max-w-7xl mx-auto px-6 py-8">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold">Notices</h2>
-                <button onclick="addNotice()" class="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2">
-                    <i class="fas fa-plus"></i> Add Notice
-                </button>
-            </div>
-            <div id="notices-list" class="space-y-4"></div>
-        </div>
-
-        <!-- Chat Section -->
-        <div id="chat" class="section max-w-7xl mx-auto px-6 py-8">
-            <h2 class="text-2xl font-bold mb-6">Staff Chat</h2>
-            <div id="chat-messages" class="bg-white border rounded-xl p-4 h-96 overflow-y-auto mb-4"></div>
-            <div class="flex gap-2">
-                <input id="chat-input" type="text" class="flex-1 border rounded-lg px-4 py-2" placeholder="Type a message...">
-                <button onclick="sendChatMessage()" class="px-6 py-2 bg-blue-600 text-white rounded-lg">Send</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Booking Modal -->
-    <div id="booking-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-        <div class="bg-white rounded-xl p-6 w-full max-w-md">
-            <h3 id="modal-title" class="text-xl font-bold mb-4">Add Booking</h3>
-            <form id="booking-form" class="space-y-4">
-                <input type="hidden" id="booking-id">
-                <div class="grid grid-cols-2 gap-4">
-                    <div><label class="text-sm">Room</label><input type="text" id="room-name" class="w-full border rounded px-3 py-2" required></div>
-                    <div><label class="text-sm">Date</label><input type="date" id="event-date" class="w-full border rounded px-3 py-2" required></div>
-                </div>
-                <div><label class="text-sm">Customer Name</label><input type="text" id="customer-name" class="w-full border rounded px-3 py-2" maxlength="80" required></div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div><label class="text-sm">Email</label><input type="email" id="customer-email" class="w-full border rounded px-3 py-2" maxlength="120"></div>
-                    <div><label class="text-sm">Mobile</label><input type="tel" id="customer-mobile" class="w-full border rounded px-3 py-2" maxlength="30"></div>
-                </div>
-                <div class="grid grid-cols-3 gap-4">
-                    <div><label class="text-sm">Tickets</label><input type="number" id="ticket-count" class="w-full border rounded px-3 py-2" min="1" max="100" value="1"></div>
-                    <div><label class="text-sm">Time</label><input type="text" id="event-time" class="w-full border rounded px-3 py-2" maxlength="30"></div>
-                    <div><label class="text-sm">Seat</label><input type="text" id="seat" class="w-full border rounded px-3 py-2" maxlength="30"></div>
-                </div>
-                <div><label class="text-sm">Notes</label><textarea id="notes" class="w-full border rounded px-3 py-2" maxlength="300" rows="2"></textarea></div>
-                
-                <div class="flex gap-3 pt-2">
-                    <button type="button" onclick="closeBookingModal()" class="flex-1 py-2 border rounded-lg">Cancel</button>
-                    <button type="submit" class="flex-1 py-2 bg-blue-600 text-white rounded-lg">Save Booking</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        let bookings = [];
-        let notices = [];
-        let chatMessages = [];
-        let currentUser = null;
-        let currentMonth = new Date().getMonth();
-        let currentYear = new Date().getFullYear();
-        let selectedDate = null;
-
-        function showSection(section) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById(section).classList.add('active');
-            
-            document.querySelectorAll('.tab-btn').forEach(b => {
-                b.classList.remove('border-b-2', 'border-blue-600', 'text-blue-600');
-                if (b.dataset.section === section) {
-                    b.classList.add('border-b-2', 'border-blue-600', 'text-blue-600');
-                }
-            });
-            
-            if (section === 'bookings') renderBookings();
-            if (section === 'calendar') renderCalendar();
-            if (section === 'notices') renderNotices();
-            if (section === 'chat') renderChat();
+<script>
+    // Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyCWlFqDJyENgrUOhiLXCjSEi4Mk_54SA1w",
+        authDomain: "monday-night-soccer-hub.firebaseapp.com",
+        projectId: "monday-night-soccer-hub",
+        storageBucket: "monday-night-soccer-hub.firebasestorage.app",
+        messagingSenderId: "634335208908",
+        appId: "1:634335208908:web:dca705b65fc52de0606969"
+    };
+    
+    let db = null, firebaseReady = false;
+    try { 
+        firebase.initializeApp(firebaseConfig); 
+        db = firebase.firestore(); 
+        firebaseReady = true; 
+        console.log("Firebase ready");
+    } catch(e) { console.warn("Demo mode", e); }
+    
+    let players = ["Alex Rowe","Ali Mekawy","Carlo","Charlie","Chris Del Monaco","Chris M","Chris S","Danny","Dante","David","Dimitri","Enzo","Farid","Faros","Frank","George B","George T","Ivan","James Zoumis","James","Joe T","Joey","Kia","Leo","Manoli","Marco","Mario","Maurice","Nector","Paul","Perri","Peter","Ralph","Rocco","Stav","Stevan","Theo","Tony EH","Vasilis"].sort();
+    let playerProfiles = {};
+    let teamAssignments = {};
+    let matchResults = {};
+    let attendance = [];
+    let guests = [];
+    let matchComments = {};
+    let isAdminLoggedIn = false, currentUser = null;
+    let weeklyCaptain = "Football Freedom";
+    let timerInterval = null, currentHalf = 1, timeLeft = 45 * 60;
+    
+    function formatTime(s){ return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`; }
+    function updateTimerDisplay(){ let d = document.getElementById("timerDisplay"); if(d) d.textContent = formatTime(timeLeft); let hs = document.getElementById("currentHalf"); if(hs) hs.textContent = currentHalf === 1 ? "FIRST HALF" : "SECOND HALF"; }
+    function timerTick(){ if(timeLeft <= 0){ if(timerInterval) clearInterval(timerInterval); if(currentHalf === 1){ alert("🔔 HALF TIME! Start second half."); currentHalf = 2; timeLeft = 45 * 60; updateTimerDisplay(); startTimer(); } else { alert("🔔 FULL TIME!"); timerInterval = null; } return; } timeLeft--; updateTimerDisplay(); }
+    function startTimer(){ if(timerInterval) clearInterval(timerInterval); timerInterval = setInterval(timerTick, 1000); }
+    function pauseTimer(){ if(timerInterval){ clearInterval(timerInterval); timerInterval = null; } }
+    function resetTimer(){ pauseTimer(); currentHalf = 1; timeLeft = 45 * 60; updateTimerDisplay(); }
+    
+    function getNextMondayGame() {
+        const now = new Date();
+        const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+        const aestNow = new Date(utc + (10 * 3600000));
+        const day = aestNow.getDay(), hour = aestNow.getHours();
+        let daysUntilMonday;
+        if (day === 1 && hour >= 20) daysUntilMonday = 7;
+        else if (day === 1) daysUntilMonday = 0;
+        else if (day === 0) daysUntilMonday = 1;
+        else daysUntilMonday = (8 - day) % 7;
+        const nextMonday = new Date(aestNow);
+        nextMonday.setDate(aestNow.getDate() + daysUntilMonday);
+        nextMonday.setHours(20, 0, 0, 0);
+        return nextMonday;
+    }
+    function getCurrentGameWeekStr(){ return getNextMondayGame().toISOString().split('T')[0]; }
+    function getCurrentGameLabel(){ const m = getNextMondayGame(); return `Mon ${m.toLocaleDateString('en-AU',{day:'numeric',month:'short'})}`; }
+    function getAllGameWeeks() {
+        const year = new Date().getFullYear();
+        let start = new Date(year, 0, 1);
+        while(start.getDay() !== 1) start.setDate(start.getDate() + 1);
+        let weeks = [], cur = new Date(start);
+        let dec31 = new Date(year, 11, 31);
+        let lastMon = new Date(dec31);
+        while(lastMon.getDay() !== 1) lastMon.setDate(lastMon.getDate() - 1);
+        let secondLast = new Date(lastMon);
+        secondLast.setDate(secondLast.getDate() - 7);
+        while(cur <= secondLast) {
+            weeks.push({ dateStr: cur.toISOString().split('T')[0], label: `Mon ${cur.toLocaleDateString('en-AU',{day:'numeric',month:'short'})}` });
+            cur.setDate(cur.getDate() + 7);
         }
-
-        function login(e) {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value.trim();
-            const password = document.getElementById('login-password').value;
-            
-            if (!email || !password) {
-                alert('Please enter both email and password.');
-                return;
-            }
-            
-            if (password !== 'demo123') {
-                alert('Invalid credentials (demo: use password "demo123")');
-                return;
-            }
-            
-            currentUser = { 
-                email: email, 
-                name: email.split('@')[0], 
-                role: email.includes('admin') ? 'admin' : 'staff' 
-            };
-            
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('app-screen').classList.remove('hidden');
-            document.getElementById('user-info').innerHTML = `${currentUser.name} <span class="text-xs px-2 py-0.5 bg-gray-200 rounded">${currentUser.role}</span>`;
-            
-            setTimeout(() => {
-                loadCSVFromBackend(true);
-            }, 500);
+        return weeks;
+    }
+    const ALL_WEEKS = getAllGameWeeks();
+    const CURRENT_GAME_STR = getCurrentGameWeekStr();
+    function getPastWeeks(){ return ALL_WEEKS.filter(w => w.dateStr < CURRENT_GAME_STR).reverse(); }
+    function getAllParticipants(gameDate){
+        const playersIn = attendance.filter(a => a.gameDate === gameDate && a.status === 'in').map(a => a.player);
+        const guestsIn = guests.filter(g => g.gameDate === gameDate).map(g => ({ name: g.guestName, isGuest: true, addedBy: g.addedBy }));
+        return { players: playersIn, guests: guestsIn };
+    }
+    
+    function escapeHtml(s){ return String(s).replace(/[&<>]/g, m=> ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
+    function getInitials(n){ return n.split(' ').map(x=>x[0]).join('').toUpperCase().substring(0,2); }
+    function getAvatarColor(n){ const c=['#1a73e8','#10b981','#ef4444','#fd7e14','#8b5cf6','#06b6d4']; let h=0; for(let i=0;i<n.length;i++) h=((h<<5)-h)+n.charCodeAt(i); return c[Math.abs(h)%c.length]; }
+    function renderAvatar(n,s=50){ return `<div class="profile-avatar" style="background:${getAvatarColor(n)};width:${s}px;height:${s}px;font-size:${s/2.5}px;">${getInitials(n)}</div>`; }
+    function renderMiniAvatar(n,s=28){ return `<div class="player-avatar-small" style="background:${getAvatarColor(n)};width:${s}px;height:${s}px;font-size:${s/2}px;">${getInitials(n)}</div>`; }
+    
+    async function loadData(){
+        if(!firebaseReady || !db) return;
+        try{
+            const [pDoc,profDoc,tDoc,rDoc,attSnap,guestSnap,commentsSnap] = await Promise.all([
+                db.collection("config").doc("players").get(),
+                db.collection("config").doc("playerProfiles").get(),
+                db.collection("config").doc("teamAssignments").get(),
+                db.collection("config").doc("matchResults").get(),
+                db.collection("attendance").get(),
+                db.collection("guests").get(),
+                db.collection("matchComments").get()
+            ]);
+            if(pDoc.exists) players = pDoc.data().list.sort();
+            if(profDoc.exists) playerProfiles = profDoc.data();
+            if(tDoc.exists) teamAssignments = tDoc.data();
+            if(rDoc.exists) matchResults = rDoc.data();
+            attendance = attSnap.docs.map(d=>d.data());
+            guests = guestSnap.docs.map(d=>d.data());
+            matchComments = {};
+            commentsSnap.docs.forEach(doc=>{ const d=doc.data(); if(!matchComments[d.gameDate]) matchComments[d.gameDate]=[]; matchComments[d.gameDate].push(d); });
+        } catch(e){ console.warn(e); }
+        refreshAll();
+    }
+    
+    // 🔥 NEW: Remove a player from attendance (admin only or self)
+    async function removeAttendee(playerName, gameDate){
+        if(!isAdminLoggedIn && currentUser?.name !== playerName){
+            alert("Only admin or the player can remove attendance.");
+            return false;
         }
-
-        function logout() {
-            currentUser = null;
-            document.getElementById('app-screen').classList.add('hidden');
-            document.getElementById('login-screen').classList.remove('hidden');
-            document.getElementById('login-form').reset();
-        }
-
-        function sanitize(str) {
-            return String(str || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-        }
-
-        function renderBookings() {
-            const container = document.getElementById('bookings-list');
-            container.innerHTML = '';
-            
-            if (bookings.length === 0) {
-                container.innerHTML = '<p class="text-gray-500 col-span-full">No bookings yet. Load from backend or add manually.</p>';
-                return;
-            }
-            
-            bookings.forEach(booking => {
-                const card = document.createElement('div');
-                card.className = 'booking-card bg-white border rounded-xl p-5';
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-3">
-                        <div>
-                            <div class="font-semibold">${sanitize(booking.roomName)}</div>
-                            <div class="text-sm text-gray-600">${sanitize(booking.customerName)}</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-sm font-medium">${booking.eventDate}</div>
-                            <div class="text-xs text-gray-500">${booking.eventTime || ''}</div>
-                        </div>
-                    </div>
-                    <div class="text-sm space-y-1 text-gray-700">
-                        <div><i class="fas fa-ticket-alt w-4"></i> ${booking.ticketCount} tickets • Seat: ${sanitize(booking.seat || '—')}</div>
-                        ${booking.customerEmail ? `<div><i class="fas fa-envelope w-4"></i> ${sanitize(booking.customerEmail)}</div>` : ''}
-                        ${booking.notes ? `<div class="text-xs text-gray-500 mt-2">${sanitize(booking.notes)}</div>` : ''}
-                    </div>
-                    <div class="flex gap-2 mt-4">
-                        <button onclick="editBooking(${booking.id})" class="flex-1 text-sm py-1.5 border rounded hover:bg-gray-50">Edit</button>
-                        <button onclick="deleteBooking(${booking.id})" class="flex-1 text-sm py-1.5 text-red-600 border border-red-200 rounded hover:bg-red-50">Delete</button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function showAddBookingModal() {
-            document.getElementById('booking-modal').classList.remove('hidden');
-            document.getElementById('modal-title').textContent = 'Add Booking';
-            document.getElementById('booking-form').reset();
-            document.getElementById('booking-id').value = '';
-        }
-
-        function editBooking(id) {
-            const booking = bookings.find(b => b.id === id);
-            if (!booking) return;
-            
-            document.getElementById('booking-modal').classList.remove('hidden');
-            document.getElementById('modal-title').textContent = 'Edit Booking';
-            document.getElementById('booking-id').value = id;
-            document.getElementById('room-name').value = booking.roomName || '';
-            document.getElementById('event-date').value = booking.eventDate || '';
-            document.getElementById('customer-name').value = booking.customerName || '';
-            document.getElementById('customer-email').value = booking.customerEmail || '';
-            document.getElementById('customer-mobile').value = booking.customerMobile || '';
-            document.getElementById('event-time').value = booking.eventTime || '';
-            document.getElementById('ticket-count').value = booking.ticketCount || 1;
-            document.getElementById('seat').value = booking.seat || '';
-            document.getElementById('notes').value = booking.notes || '';
-        }
-
-        function closeBookingModal() {
-            document.getElementById('booking-modal').classList.add('hidden');
-        }
-
-        document.getElementById('booking-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const id = document.getElementById('booking-id').value;
-            const data = {
-                roomName: document.getElementById('room-name').value.trim(),
-                eventDate: document.getElementById('event-date').value,
-                customerName: document.getElementById('customer-name').value.trim(),
-                customerEmail: document.getElementById('customer-email').value.trim(),
-                customerMobile: document.getElementById('customer-mobile').value.trim(),
-                eventTime: document.getElementById('event-time').value.trim(),
-                ticketCount: parseInt(document.getElementById('ticket-count').value) || 1,
-                seat: document.getElementById('seat').value.trim(),
-                notes: document.getElementById('notes').value.trim()
-            };
-            
-            if (!data.roomName || !data.eventDate || !data.customerName) {
-                alert('Room, Date, and Customer Name are required.');
-                return;
-            }
-            if (data.ticketCount < 1 || data.ticketCount > 100) {
-                alert('Ticket count must be between 1 and 100.');
-                return;
-            }
-            
-            if (id) {
-                const index = bookings.findIndex(b => b.id == id);
-                bookings[index] = { ...bookings[index], ...data };
-            } else {
-                data.id = Date.now();
-                bookings.push(data);
-            }
-            
-            closeBookingModal();
-            renderBookings();
-            if (document.getElementById('calendar').classList.contains('active')) {
-                renderCalendar();
-            }
-        });
-
-        function deleteBooking(id) {
-            if (!confirm('Delete this booking?')) return;
-            bookings = bookings.filter(b => b.id !== id);
-            renderBookings();
-            if (document.getElementById('calendar').classList.contains('active')) {
-                renderCalendar();
-            }
-        }
-
-        async function loadCSVFromBackend(silent = false) {
-            const backendCsvUrl = 'https://your-backend.com/data/bookings.csv';
-            
-            try {
-                const response = await fetch(backendCsvUrl);
-                if (!response.ok) throw new Error('Backend CSV not found');
-                
-                const csvText = await response.text();
-                const lines = csvText.split(/\r?\n/);
-                let imported = 0;
-                
-                for (let i = 1; i < lines.length; i++) {
-                    if (!lines[i].trim()) continue;
-                    const cols = lines[i].split(',').map(c => c.trim());
-                    if (cols.length < 3) continue;
-                    
-                    let ticketCount = 1;
-                    const orderItems = cols[5] || '';
-                    const match = orderItems.match(/(\d+)\s*x/);
-                    if (match) ticketCount = parseInt(match[1]);
-                    
-                    const booking = {
-                        id: Date.now() + i,
-                        roomName: cols[7] || cols[6] || 'Unknown Venue',
-                        customerName: (cols[10] + ' ' + cols[12]).trim() || cols[9],
-                        eventDate: cols[8] ? cols[8].split(' ')[0] : cols[4],
-                        ticketCount: ticketCount,
-                        eventTime: cols[8] ? cols[8].split(' ').slice(1).join(' ') : '',
-                        seat: '',
-                        customerEmail: cols[13] || '',
-                        notes: (cols[17] || '') + ' ' + (cols[18] || '') + ' ' + (cols[19] || '')
-                    };
-                    
-                    if (booking.roomName && booking.customerName && booking.eventDate) {
-                        const exists = bookings.some(b => 
-                            b.roomName === booking.roomName && 
-                            b.customerName === booking.customerName && 
-                            b.eventDate === booking.eventDate
-                        );
-                        if (!exists) {
-                            bookings.push(booking);
-                            imported++;
-                        }
-                    }
-                }
-                
-                if (!silent) alert(`${imported} bookings loaded from backend CSV.`);
-                renderBookings();
-                if (document.getElementById('calendar').classList.contains('active')) {
-                    renderCalendar();
-                }
-            } catch (error) {
-                if (!silent) {
-                    alert('Could not load CSV from backend. Update the URL in code.');
-                }
-            }
-        }
-
-        function importCSV() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.csv';
-            input.onchange = function() {
-                const file = this.files[0];
-                if (!file) return;
-                if (file.size > 2 * 1024 * 1024) {
-                    alert('File too large (max 2MB)');
-                    return;
-                }
-                const reader = new FileReader();
-                reader.onload = function(ev) {
-                    const lines = ev.target.result.split(/\r?\n/);
-                    let imported = 0;
-                    for (let i = 1; i < lines.length; i++) {
-                        if (!lines[i].trim()) continue;
-                        const cols = lines[i].split(',').map(c => c.trim());
-                        if (cols.length < 3) continue;
-                        
-                        let ticketCount = 1;
-                        const orderItems = cols[5] || '';
-                        const match = orderItems.match(/(\d+)\s*x/);
-                        if (match) ticketCount = parseInt(match[1]);
-                        
-                        const booking = {
-                            id: Date.now() + i,
-                            roomName: cols[7] || cols[6] || 'Unknown Venue',
-                            customerName: (cols[10] + ' ' + cols[12]).trim() || cols[9],
-                            eventDate: cols[8] ? cols[8].split(' ')[0] : cols[4],
-                            ticketCount: ticketCount,
-                            eventTime: cols[8] ? cols[8].split(' ').slice(1).join(' ') : '',
-                            seat: '',
-                            customerEmail: cols[13] || '',
-                            notes: (cols[17] || '') + ' ' + (cols[18] || '') + ' ' + (cols[19] || '')
-                        };
-                        
-                        if (booking.roomName && booking.customerName && booking.eventDate) {
-                            const exists = bookings.some(b => 
-                                b.roomName === booking.roomName && 
-                                b.customerName === booking.customerName && 
-                                b.eventDate === booking.eventDate
-                            );
-                            if (!exists) {
-                                bookings.push(booking);
-                                imported++;
-                            }
-                        }
-                    }
-                    alert(`${imported} bookings imported successfully.`);
-                    renderBookings();
-                    if (document.getElementById('calendar').classList.contains('active')) {
-                        renderCalendar();
-                    }
-                };
-                reader.readAsText(file);
-            };
-            input.click();
-        }
-
-        function renderCalendar() {
-            const grid = document.getElementById('calendar-grid');
-            const monthHeader = document.getElementById('calendar-month');
-            grid.innerHTML = '';
-            
-            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            monthHeader.textContent = `${monthNames[currentMonth]} ${currentYear}`;
-            
-            for (let i = 0; i < firstDay; i++) {
-                const empty = document.createElement('div');
-                empty.className = 'calendar-day bg-white p-2 border border-gray-200';
-                grid.appendChild(empty);
-            }
-            
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const dayBookings = bookings.filter(b => b.eventDate === dateStr);
-                
-                const dayDiv = document.createElement('div');
-                dayDiv.className = `calendar-day bg-white p-2 border border-gray-200 cursor-pointer ${dayBookings.length > 0 ? 'bg-blue-50' : ''}`;
-                dayDiv.innerHTML = `
-                    <div class="text-sm font-medium mb-1">${day}</div>
-                    ${dayBookings.length > 0 ? `
-                        <div class="flex flex-wrap gap-1">
-                            ${dayBookings.slice(0, 3).map(b => `
-                                <div class="event-dot w-2 h-2 rounded-full"></div>
-                            `).join('')}
-                            ${dayBookings.length > 3 ? `<span class="text-xs text-blue-600">+${dayBookings.length - 3}</span>` : ''}
-                        </div>
-                    ` : ''}
-                `;
-                
-                dayDiv.onclick = () => showEventsForDate(dateStr, dayDiv);
-                grid.appendChild(dayDiv);
-            }
-            
-            document.getElementById('calendar-events').classList.add('hidden');
-        }
-
-        function showEventsForDate(dateStr, element) {
-            selectedDate = dateStr;
-            const eventsContainer = document.getElementById('calendar-events');
-            const dateDisplay = document.getElementById('selected-date');
-            const list = document.getElementById('selected-events-list');
-            
-            dateDisplay.textContent = dateStr;
-            list.innerHTML = '';
-            
-            const dayBookings = bookings.filter(b => b.eventDate === dateStr);
-            
-            if (dayBookings.length === 0) {
-                list.innerHTML = '<p class="text-gray-500">No events on this date.</p>';
-            } else {
-                dayBookings.forEach(booking => {
-                    const item = document.createElement('div');
-                    item.className = 'border-l-4 border-blue-500 pl-4 py-2';
-                    item.innerHTML = `
-                        <div class="font-medium">${sanitize(booking.roomName)}</div>
-                        <div class="text-sm text-gray-600">${sanitize(booking.customerName)} • ${booking.ticketCount} tickets</div>
-                        <div class="text-xs text-gray-500">${booking.eventTime || ''} ${booking.notes ? '• ' + sanitize(booking.notes) : ''}</div>
-                    `;
-                    list.appendChild(item);
-                });
-            }
-            
-            eventsContainer.classList.remove('hidden');
-            eventsContainer.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function prevMonth() {
-            currentMonth--;
-            if (currentMonth < 0) {
-                currentMonth = 11;
-                currentYear--;
-            }
-            renderCalendar();
-        }
-
-        function nextMonth() {
-            currentMonth++;
-            if (currentMonth > 11) {
-                currentMonth = 0;
-                currentYear++;
-            }
-            renderCalendar();
-        }
-
-        function goToToday() {
-            const today = new Date();
-            currentMonth = today.getMonth();
-            currentYear = today.getFullYear();
-            renderCalendar();
-        }
-
-        function renderNotices() {
-            const container = document.getElementById('notices-list');
-            container.innerHTML = '';
-            if (notices.length === 0) {
-                container.innerHTML = '<p class="text-gray-500">No notices yet.</p>';
-                return;
-            }
-            notices.forEach(notice => {
-                const div = document.createElement('div');
-                div.className = 'bg-white border rounded-xl p-5';
-                div.innerHTML = `
-                    <div class="font-medium">${sanitize(notice.title)}</div>
-                    <div class="text-sm text-gray-600 mt-1">${sanitize(notice.content)}</div>
-                    <div class="text-xs text-gray-400 mt-2">${notice.date}</div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        function addNotice() {
-            const title = prompt('Notice title:');
-            if (!title) return;
-            const content = prompt('Notice content:');
-            notices.unshift({ 
-                title: title.trim(), 
-                content: content ? content.trim() : '', 
-                date: new Date().toLocaleDateString() 
-            });
-            renderNotices();
-        }
-
-        function renderChat() {
-            const container = document.getElementById('chat-messages');
-            container.innerHTML = '';
-            chatMessages.forEach(msg => {
-                const div = document.createElement('div');
-                div.className = 'mb-3 p-3 bg-gray-100 rounded-lg max-w-[80%]';
-                div.innerHTML = `<div class="font-medium text-sm">${sanitize(msg.user)}</div><div>${sanitize(msg.text)}</div>`;
-                container.appendChild(div);
-            });
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function sendChatMessage() {
-            const input = document.getElementById('chat-input');
-            const text = input.value.trim();
-            if (!text || !currentUser) return;
-            
-            chatMessages.push({ user: currentUser.name, text: text });
-            input.value = '';
-            renderChat();
-        }
-
-        document.getElementById('login-form').addEventListener('submit', login);
+        const confirmMsg = `Remove ${playerName} from playing list for ${getCurrentGameLabel()}?`;
+        if(!confirm(confirmMsg)) return false;
         
-        window.onload = function() {
-            notices = [
-                { title: 'System Maintenance', content: 'Portal will be down for 30 minutes tonight.', date: '2026-05-08' }
-            ];
-            
-            // Default to calendar view
-            document.getElementById('bookings').classList.remove('active');
-            document.getElementById('calendar').classList.add('active');
-            document.querySelector('[data-section="calendar"]').classList.add('border-b-2', 'border-blue-600', 'text-blue-600');
+        // Delete from Firestore
+        if(firebaseReady && db){
+            await db.collection("attendance").doc(`${playerName}_${gameDate}`).delete();
+        }
+        // Remove from local array
+        attendance = attendance.filter(a => !(a.player === playerName && a.gameDate === gameDate));
+        
+        // Also remove team assignment for this week if exists
+        if(teamAssignments[gameDate]){
+            delete teamAssignments[gameDate][playerName];
+            if(firebaseReady && db) await db.collection("config").doc("teamAssignments").set(teamAssignments);
+        }
+        
+        // Update games played count in profile
+        const gamesCount = attendance.filter(a => a.player === playerName && a.status === 'in').length;
+        const opening = playerProfiles[playerName]?.openingBalanceGames || 0;
+        if(playerProfiles[playerName]) {
+            playerProfiles[playerName].gamesPlayed = gamesCount + opening;
+            if(firebaseReady && db) await db.collection("config").doc("playerProfiles").set(playerProfiles);
+        }
+        
+        refreshAll();
+        alert(`${playerName} removed from attendance.`);
+        return true;
+    }
+    
+    async function saveAttendance(a){
+        if(firebaseReady&&db) await db.collection("attendance").doc(`${a.player}_${a.gameDate}`).set(a);
+        const idx = attendance.findIndex(x=>x.player===a.player && x.gameDate===a.gameDate);
+        if(idx!==-1) attendance[idx]=a; else attendance.push(a);
+        const games = attendance.filter(att=>att.player===a.player && att.status==='in').length;
+        const opening = playerProfiles[a.player]?.openingBalanceGames || 0;
+        if(playerProfiles[a.player]) playerProfiles[a.player].gamesPlayed = games + opening;
+        else playerProfiles[a.player] = { age:'—', position:'—', yearJoined:'—', gamesPlayed:games+opening, openingBalanceGames:0 };
+        if(firebaseReady&&db) await db.collection("config").doc("playerProfiles").set(playerProfiles);
+        refreshAll();
+    }
+    
+    async function saveGuest(g){
+        if(firebaseReady&&db) await db.collection("guests").doc(`${g.guestName}_${g.gameDate}`).set(g);
+        guests.push(g);
+        refreshAll();
+    }
+    
+    async function removeGuest(n,d){
+        if(!confirm(`Remove guest "${n}"?`)) return;
+        if(firebaseReady&&db) await db.collection("guests").doc(`${n}_${d}`).delete();
+        guests = guests.filter(g=>!(g.guestName===n && g.gameDate===d));
+        if(teamAssignments[d]){ delete teamAssignments[d][n]; delete teamAssignments[d][`guest_${n}`]; if(firebaseReady&&db) await db.collection("config").doc("teamAssignments").set(teamAssignments); }
+        refreshAll();
+    }
+    
+    async function saveTeamAssignments(date,assign){
+        teamAssignments[date] = assign;
+        if(firebaseReady&&db) await db.collection("config").doc("teamAssignments").set(teamAssignments);
+        refreshAll();
+    }
+    
+    async function saveComment(date,author,text){
+        const c={ gameDate:date, author, text, timestamp:Date.now() };
+        if(firebaseReady&&db) await db.collection("matchComments").add(c);
+        if(!matchComments[date]) matchComments[date]=[];
+        matchComments[date].push(c);
+        renderHistoryPage();
+    }
+    
+    async function saveMatchResult(date,yellow,orange,goals,assists,mvp,injuries,ownGoals){
+        matchResults[date] = { yellowScore:yellow, orangeScore:orange, goals, assists:assists||{}, mvp, injuries:injuries||[], ownGoals:ownGoals||[], timestamp:Date.now() };
+        if(firebaseReady&&db) await db.collection("config").doc("matchResults").set(matchResults);
+        renderHistoryPage();
+        renderScoreboardPage();
+        if(isAdminLoggedIn) renderAdminPage();
+    }
+    
+    async function setAttendance(status){
+        if(!currentUser){ alert("Login required"); return; }
+        await saveAttendance({ player:currentUser.name, gameDate:CURRENT_GAME_STR, status:status });
+    }
+    
+    async function addGuest(name){
+        if(!currentUser){ alert("Login first"); return; }
+        if(guests.some(g=>g.gameDate===CURRENT_GAME_STR && g.guestName===name.trim())){ alert("Guest exists"); return; }
+        await saveGuest({ guestName:name.trim(), gameDate:CURRENT_GAME_STR, addedBy:currentUser.name });
+        const inp = document.getElementById("guestNameInput");
+        if(inp) inp.value="";
+        alert(`Guest "${name}" added!`);
+    }
+    
+    function showEditProfile(name){
+        if(!isAdminLoggedIn && currentUser?.name !== name){ alert("You can only edit your own profile"); return; }
+        const ex = playerProfiles[name] || { age:'', position:'Goalkeeper', yearJoined:'', openingBalanceGames:0 };
+        const POSITIONS = ["Goalkeeper","Defender","Midfielder","Striker","Winger"];
+        const modal = document.createElement('div'); modal.className='modal';
+        modal.innerHTML = `<div class="modal-content"><h3>✏️ Edit ${escapeHtml(name)}</h3><label>Age</label><input id="editAge" value="${escapeHtml(ex.age||'')}"><label>Position</label><select id="editPosition">${POSITIONS.map(p=>`<option ${ex.position===p?'selected':''}>${p}</option>`).join('')}</select><label>Year Joined</label><input id="editYear" value="${escapeHtml(ex.yearJoined||'')}"><label>🏆 Opening Games (History)</label><input id="editOpeningGames" type="number" value="${ex.openingBalanceGames||0}"><div class="flex-btns"><button id="saveBtn">Save</button><button id="cancelBtn" class="btn-outline">Cancel</button></div></div>`;
+        document.body.appendChild(modal);
+        document.getElementById('saveBtn').onclick = async()=>{
+            const newAge = document.getElementById('editAge').value.trim();
+            const newPos = document.getElementById('editPosition').value;
+            const newYear = document.getElementById('editYear').value.trim();
+            const newOpening = parseInt(document.getElementById('editOpeningGames').value) || 0;
+            const gamesFromAttend = attendance.filter(a=>a.player===name && a.status==='in').length;
+            playerProfiles[name] = { age:newAge||'—', position:newPos, yearJoined:newYear||'—', gamesPlayed:gamesFromAttend+newOpening, openingBalanceGames:newOpening };
+            if(firebaseReady&&db) await db.collection("config").doc("playerProfiles").set(playerProfiles);
+            modal.remove();
+            renderProfilesPage();
+            renderScoreboardPage();
         };
-    </script>
+        document.getElementById('cancelBtn').onclick = ()=>modal.remove();
+    }
+    
+    function refreshAll(){ renderHomePage(); renderTeamsPage(); renderHistoryPage(); renderProfilesPage(); renderScoreboardPage(); if(isAdminLoggedIn) renderAdminPage(); }
+    
+    // HOME PAGE with remove buttons for each attendee
+    function renderHomePage(){
+        const c = document.getElementById("homeContainer");
+        if(!c) return;
+        const gl = getCurrentGameLabel();
+        const status = attendance.find(a=>a.gameDate===CURRENT_GAME_STR && a.player===currentUser?.name)?.status;
+        const parts = getAllParticipants(CURRENT_GAME_STR);
+        c.innerHTML = `<div class="info-bar"><i class="fas fa-calendar-alt"></i> Next Match: ${gl} • 8:00pm Clifton Park</div>
+        <div class="attendance-card"><h2><i class="fas fa-futbol"></i> ${gl} • 8pm</h2><div>Clifton Park, Brunswick</div><div class="big-buttons"><button id="homePlayBtn" class="btn-play-big">✅ I'M PLAYING</button><button id="homeSitBtn" class="btn-sit-big">❌ CAN'T PLAY</button></div><div>${status==='in'?'✓ You are PLAYING':(status==='out'?'✗ You are NOT PLAYING':'Tap above to set attendance')}</div></div>
+        <div class="playing-list"><div style="font-weight:700; margin-bottom:10px;"><i class="fas fa-users"></i> 🟢 Players (${parts.players.length}) <span style="font-size:11px;">(click ✖ to remove)</span></div><div id="playersListContainer">${parts.players.map(p=>`<div class="attendee-tag">${renderMiniAvatar(p,28)} ${escapeHtml(p)} <button class="remove-attendee-btn" data-player="${escapeHtml(p)}" data-date="${CURRENT_GAME_STR}"><i class="fas fa-trash-alt"></i> Remove</button></div>`).join('')||'<span style="color:gray;">None</span>'}</div></div>
+        <div class="guest-section"><div><i class="fas fa-user-friends"></i> 🎭 Guests (${parts.guests.length})</div><div>${parts.guests.map(g=>`<span class="guest-tag"><i class="fas fa-user-plus"></i> ${escapeHtml(g.name)} <small>(${escapeHtml(g.addedBy)})</small></span>`).join('')||'None'}</div><div style="margin-top:12px;"><input id="guestNameInput" placeholder="Guest name"><button id="addGuestBtnPlayer" style="width:100%;margin-top:8px;">➕ Bring a Guest</button></div></div>`;
+        
+        document.getElementById("homePlayBtn")?.addEventListener("click",()=>setAttendance("in"));
+        document.getElementById("homeSitBtn")?.addEventListener("click",()=>setAttendance("out"));
+        document.getElementById("addGuestBtnPlayer")?.addEventListener("click",()=>{ const gn=document.getElementById("guestNameInput")?.value.trim(); if(gn) addGuest(gn); else alert("Enter guest name"); });
+        // Attach remove event listeners
+        document.querySelectorAll(".remove-attendee-btn").forEach(btn => {
+            btn.addEventListener("click", async (e) => {
+                e.stopPropagation();
+                const playerName = btn.dataset.player;
+                const gameDate = btn.dataset.date;
+                await removeAttendee(playerName, gameDate);
+            });
+        });
+    }
+    
+    function renderTeamsPage(){
+        const c=document.getElementById("page-teamswk"); if(!c) return;
+        const gl=getCurrentGameLabel();
+        const parts=getAllParticipants(CURRENT_GAME_STR);
+        const allList=[...parts.players.map(p=>({ name:p, isG:false })), ...parts.guests.map(g=>({ name:g.name, isG:true }))];
+        const assign=teamAssignments[CURRENT_GAME_STR]||{};
+        const yellow=[], orange=[];
+        for(let p of allList){ const t=assign[p.name] || assign[`guest_${p.name}`]; if(t==="yellow") yellow.push(p); else if(t==="orange") orange.push(p); }
+        c.innerHTML=`<div class="info-bar">${gl} • 8pm Clifton Park</div><div class="card" style="background:linear-gradient(135deg,#1a73e8,#0d5bbf);color:white;text-align:center;"><h2>${gl}</h2><p>👑 Captain: ${weeklyCaptain}</p></div><div class="card"><div class="team-row"><div class="team-box"><div class="team-yellow">🟡 YELLOW (${yellow.length})</div><div class="player-list">${yellow.map(p=>`<div class="player-tag">${renderMiniAvatar(p.name,24)} ${escapeHtml(p.name)}${p.isG?' <span style="background:#28a745;">Guest</span>':''}</div>`).join('')||'—'}</div></div><div class="team-box"><div class="team-orange">🟠 ORANGE (${orange.length})</div><div class="player-list">${orange.map(p=>`<div class="player-tag">${renderMiniAvatar(p.name,24)} ${escapeHtml(p.name)}${p.isG?' <span style="background:#28a745;">Guest</span>':''}</div>`).join('')||'—'}</div></div></div></div>`;
+    }
+    
+    function renderHistoryPage(){ /* simplified keep existing logic but ensure it works */ const c=document.getElementById("page-history"); if(!c) return; const past=getPastWeeks(); if(past.length===0){ c.innerHTML=`<div class="card"><h2>📖 History</h2><p>No past games yet</p></div>`; return; } let h=`<div class="card"><h2>📖 Match History</h2></div>`; for(let w of past){ const m=matchResults[w.dateStr]||{ yellowScore:0, orangeScore:0 }; h+=`<div class="match-card"><div class="match-header"><div>${w.label}</div><div class="match-result">🟡 ${m.yellowScore} - ${m.orangeScore} 🟠</div></div></div>`; } c.innerHTML=h; }
+    function renderProfilesPage(){ const c=document.getElementById("page-profiles"); if(!c) return; let h=`<div class="card"><h2>👤 Player Profiles</h2>`; for(let p of players){ const prof=playerProfiles[p]||{ age:'—', position:'—', yearJoined:'—', gamesPlayed:0 }; const canEdit=(currentUser?.name===p)||isAdminLoggedIn; h+=`<div class="profile-item">${renderAvatar(p,50)}<div><div>⚽ ${escapeHtml(p)} ${canEdit?`<button class="edit-profile-btn" data-player="${escapeHtml(p)}">Edit</button>`:''}</div><div><span class="profile-badge">🎂 ${escapeHtml(prof.age)}</span><span class="profile-badge">⚽ ${escapeHtml(prof.position)}</span><span class="profile-badge">📅 ${escapeHtml(prof.yearJoined)}</span><span class="profile-badge">🏆 ${prof.gamesPlayed||0} games</span></div></div></div>`; } c.innerHTML=h; document.querySelectorAll(".edit-profile-btn").forEach(btn=>btn.addEventListener("click",()=>showEditProfile(btn.dataset.player))); }
+    function renderScoreboardPage(){ const c=document.getElementById("page-scoreboard"); if(!c) return; let stats=new Map(); for(let p of players) stats.set(p,{goals:0,gamesPlayed:0,assists:0}); attendance.forEach(a=>{ if(a.status==='in' && stats.has(a.player)) stats.get(a.player).gamesPlayed++; }); for(let p of players){ const opening=playerProfiles[p]?.openingBalanceGames||0; if(stats.has(p)) stats.get(p).gamesPlayed+=opening; } for(let match of Object.values(matchResults)){ if(match.goals){ for(let [scorer,count] of Object.entries(match.goals)) if(stats.has(scorer)) stats.get(scorer).goals+=count; } } const topGoals=Array.from(stats.entries()).map(([n,s])=>({name:n,goals:s.goals})).sort((a,b)=>b.goals-a.goals).slice(0,10); c.innerHTML=`<div class="card"><h2>🏆 ALL-TIME LEADERBOARD</h2><table class="data-table"><thead><tr><th>#</th><th>Player</th><th>Goals</th></tr></thead><tbody>${topGoals.map((p,i)=>`<tr><td>${i+1}</td><td>${renderMiniAvatar(p.name,24)} ${escapeHtml(p.name)}</td><td>${p.goals}</td></tr>`).join('')}</tbody></table></div>`; }
+    function renderTimerPage(){ const c=document.getElementById("page-timer"); if(!c) return; c.innerHTML=`<div class="timer-container"><div class="timer-display" id="timerDisplay">45:00</div><div class="flex-btns"><button id="timerStartBtn">▶ Start</button><button id="timerPauseBtn">⏸ Pause</button><button id="timerResetBtn">⟳ Reset</button></div><div class="half-status"><span id="currentHalf">FIRST HALF</span></div></div>`; updateTimerDisplay(); document.getElementById("timerStartBtn")?.addEventListener("click",startTimer); document.getElementById("timerPauseBtn")?.addEventListener("click",pauseTimer); document.getElementById("timerResetBtn")?.addEventListener("click",resetTimer); }
+    function renderChatPage(){ const c=document.getElementById("page-chat"); if(c) c.innerHTML=`<div class="card"><h2>💬 Team Chat</h2><div style="padding:20px;text-align:center;">Chat coming soon with Firebase auth</div></div>`; }
+    function renderWeatherPage(){ const c=document.getElementById("page-weather"); if(c) c.innerHTML=`<div class="card"><h2>🌤️ Forecast</h2><div class="info-bar">🌡️ 18°C • Clear sky • Light breeze</div></div>`; }
+    function renderRulesPage(){ const c=document.getElementById("page-rules"); if(c) c.innerHTML=`<div class="card"><h2>📜 League Rules</h2><ul style="margin-left:20px;"><li>⏰ 8:00pm SHARP at Clifton Park</li><li>👑 Captain rotates weekly</li><li>✅ RSVP mandatory</li><li>🎭 Guests welcome</li></ul></div>`; }
+    function renderAdminPage(){ if(!isAdminLoggedIn){ const c=document.getElementById("page-admin"); if(c) c.innerHTML=`<div class="card"><button id="adminLoginBtn">🔐 Admin Login</button></div>`; document.getElementById("adminLoginBtn")?.addEventListener("click",()=>{ if(prompt("Password:")==="admin123"){ isAdminLoggedIn=true; refreshAll(); renderAdminPage(); } }); return; } const c=document.getElementById("page-admin"); if(c) c.innerHTML=`<div class="card"><h2>⚙️ Admin Panel</h2><p>Manage players, teams, and reports.</p><button id="forceRefreshBtn">🔄 Refresh All</button></div>`; document.getElementById("forceRefreshBtn")?.addEventListener("click",()=>refreshAll()); }
+    
+    function showLoginModal(){
+        const modal=document.createElement('div'); modal.className='modal';
+        modal.innerHTML=`<div class="modal-content"><div class="logo-icon" style="margin:0 auto 20px;"><i class="fas fa-futbol"></i></div><h3>Welcome to Monday Soccer</h3><select id="loginNameSelect"><option value="">Select your name</option>${players.map(p=>`<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('')}</select><button id="loginBtn" style="width:100%;">Continue</button><button id="adminModalBtn" class="btn-outline" style="margin-top:12px;width:100%;">🔑 Admin Access</button></div>`;
+        document.body.appendChild(modal);
+        document.getElementById("loginBtn").onclick=()=>{ const sel=document.getElementById("loginNameSelect"); const name=sel?.value; if(name && players.includes(name)){ currentUser={name}; isAdminLoggedIn=false; modal.remove(); document.getElementById("userNameDisplay").innerText=name; document.getElementById("logoutBtn").style.display="inline-block"; refreshAll(); } else alert("Select valid name"); };
+        document.getElementById("adminModalBtn").onclick=()=>{ if(prompt("Admin password:")==="admin123"){ isAdminLoggedIn=true; currentUser={name:"Admin"}; document.getElementById("userNameDisplay").innerText="Admin"; document.getElementById("logoutBtn").style.display="inline-block"; modal.remove(); refreshAll(); renderAdminPage(); } else alert("Wrong password"); };
+    }
+    function logout(){ currentUser=null; isAdminLoggedIn=false; document.getElementById("userNameDisplay").innerText="Not logged in"; document.getElementById("logoutBtn").style.display="none"; showLoginModal(); refreshAll(); }
+    
+    function initApp(){
+        const appDiv=document.getElementById("app");
+        appDiv.innerHTML=`<div class="header"><div class="logo-icon"><i class="fas fa-futbol"></i></div><h1>MONDAY NIGHT SOCCER</h1><div class="user-row"><span id="userNameDisplay">Not logged in</span><button id="logoutBtn" style="display:none;">Logout</button></div></div><div class="top-nav"><button class="nav-module active" data-module="home">🏠 Home</button><button class="nav-module" data-module="teamswk">⚽ Teams</button><button class="nav-module" data-module="history">📖 History</button><button class="nav-module" data-module="scoreboard">🏆 Stats</button><button class="nav-module" data-module="profiles">👤 Profiles</button><button class="nav-module" data-module="timer">⏱️ Timer</button><button class="nav-module" data-module="chat">💬 Chat</button><button class="nav-module" data-module="weather">🌤️ Weather</button><button class="nav-module" data-module="rules">📜 Rules</button><button class="nav-module" data-module="admin">🔧 Admin</button></div><div id="homeContainer" class="module-container active-module"></div><div id="page-teamswk" class="module-container"></div><div id="page-history" class="module-container"></div><div id="page-scoreboard" class="module-container"></div><div id="page-profiles" class="module-container"></div><div id="page-timer" class="module-container"></div><div id="page-chat" class="module-container"></div><div id="page-weather" class="module-container"></div><div id="page-rules" class="module-container"></div><div id="page-admin" class="module-container"></div>`;
+        document.querySelectorAll(".nav-module").forEach(btn=>{ btn.addEventListener("click",()=>{ document.querySelectorAll(".nav-module").forEach(b=>b.classList.remove("active")); btn.classList.add("active"); const mod=btn.dataset.module; document.querySelectorAll(".module-container").forEach(c=>c.classList.remove("active-module")); if(mod==="home") document.getElementById("homeContainer").classList.add("active-module"); else document.getElementById(`page-${mod}`).classList.add("active-module"); if(mod==="timer") renderTimerPage(); if(mod==="chat") renderChatPage(); if(mod==="weather") renderWeatherPage(); if(mod==="rules") renderRulesPage(); }); });
+        document.getElementById("logoutBtn").onclick=logout;
+        if(firebaseReady) loadData().then(()=>{ showLoginModal(); }); else { showLoginModal(); refreshAll(); }
+    }
+    initApp();
+</script>
 </body>
 </html>
