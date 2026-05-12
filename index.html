@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Wedding Seating Manager | Search & Assign</title>
+    <title>Wedding Seating Manager | Manual Guests + Search</title>
     <style>
         * {
             margin: 0;
@@ -92,6 +92,15 @@
             color: #5a4a35;
         }
 
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #219a54;
+        }
+
         .search-box {
             background: white;
             border-radius: 20px;
@@ -142,6 +151,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .search-result-item:hover {
@@ -164,6 +175,64 @@
             border: 1px solid #e8dcc8;
             background: #fefcf8;
             font-size: 0.75rem;
+        }
+
+        /* Manual Guest Form */
+        .manual-guest-form {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid #e8dcc8;
+        }
+
+        .form-title {
+            font-size: 1rem;
+            color: #c9a84c;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .form-row input {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 40px;
+            border: 1px solid #e8dcc8;
+            font-family: inherit;
+            font-size: 0.9rem;
+            background: #fefcf8;
+        }
+
+        .form-row input:focus {
+            outline: none;
+            border-color: #c9a84c;
+        }
+
+        .manual-guest-list {
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .manual-guest-tag {
+            display: inline-block;
+            background: #e8dcc8;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            margin: 4px;
+            cursor: pointer;
+        }
+
+        .manual-guest-tag:hover {
+            background: #d4c4a8;
         }
 
         .main-layout {
@@ -237,6 +306,11 @@
 
         .guest-chip:hover {
             background: #e8dcc8;
+        }
+
+        .guest-chip.manual {
+            background: #e8f5e9;
+            border-color: #a5d6a7;
         }
 
         .empty-table {
@@ -330,10 +404,11 @@
             100% { opacity: 0; visibility: hidden; }
         }
 
-        .table-quick-select {
-            padding: 8px 12px;
-            width: 100%;
-            font-size: 0.75rem;
+        .delete-manual {
+            color: #e74c3c;
+            font-size: 0.7rem;
+            margin-left: 6px;
+            cursor: pointer;
         }
 
         @media (max-width: 700px) {
@@ -365,13 +440,15 @@
     const GUESTS_COLLECTION = "wedding_guests";
     const RESPONSES_COLLECTION = "guest_responses";
     const SEATING_COLLECTION = "wedding_seating";
+    const MANUAL_GUESTS_COLLECTION = "manual_guests";
 
     const TOTAL_TABLES = 32;
     const BRIDAL_TABLE = "bridal";
     const MAX_PER_TABLE = 11;
     const MIN_PER_TABLE = 6;
 
-    let allAttendees = [];
+    let allAttendees = [];      // From Firebase responses
+    let manualGuests = [];      // Manually added guests { id, firstName, lastName, fullName, group }
     let tableAssignments = new Map();
     let attendeeTableMap = new Map();
     let currentSearchTerm = "";
@@ -406,9 +483,92 @@
         tableAssignments.set(BRIDAL_TABLE, { name: "👰 Bridal Table", guests: [] });
     }
 
+    // Load manual guests from local storage (persist between sessions)
+    function loadManualGuests() {
+        const saved = localStorage.getItem('wedding_manual_guests');
+        if (saved) {
+            try {
+                manualGuests = JSON.parse(saved);
+            } catch(e) { manualGuests = []; }
+        } else {
+            manualGuests = [];
+        }
+    }
+
+    function saveManualGuests() {
+        localStorage.setItem('wedding_manual_guests', JSON.stringify(manualGuests));
+    }
+
+    function addManualGuest(firstName, lastName) {
+        if (!firstName.trim()) {
+            showToast("Please enter first name");
+            return false;
+        }
+        const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
+        const newId = `manual_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`;
+        const newGuest = {
+            id: newId,
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
+            fullName: fullName,
+            group: "Manual Entry",
+            isManual: true,
+            createdAt: new Date().toISOString()
+        };
+        manualGuests.push(newGuest);
+        saveManualGuests();
+        
+        // Add to allAttendees array for assignment
+        allAttendees.push({
+            id: newId,
+            name: fullName,
+            group: "Manual Entry",
+            code: "MANUAL",
+            isManual: true,
+            firstName: firstName.trim(),
+            lastName: lastName.trim()
+        });
+        
+        showToast(`Added ${fullName} to guest list`);
+        renderUI();
+        return true;
+    }
+
+    function deleteManualGuest(guestId) {
+        // Remove from manualGuests array
+        const guestIndex = manualGuests.findIndex(g => g.id === guestId);
+        if (guestIndex !== -1) {
+            manualGuests.splice(guestIndex, 1);
+            saveManualGuests();
+        }
+        
+        // Remove from allAttendees
+        const attendeeIndex = allAttendees.findIndex(a => a.id === guestId);
+        if (attendeeIndex !== -1) {
+            allAttendees.splice(attendeeIndex, 1);
+        }
+        
+        // Remove from any table assignment
+        const tableId = attendeeTableMap.get(guestId);
+        if (tableId) {
+            const table = tableAssignments.get(tableId);
+            if (table) {
+                table.guests = table.guests.filter(g => g.id !== guestId);
+            }
+            attendeeTableMap.delete(guestId);
+        }
+        
+        showToast("Guest removed");
+        renderUI();
+    }
+
     async function loadData() {
         showLoading(true);
         try {
+            // Load manual guests first
+            loadManualGuests();
+            
+            // Load Firebase guests
             const guestsSnap = await getDocs(collection(db, GUESTS_COLLECTION));
             const guests = guestsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
             
@@ -417,6 +577,7 @@
             
             allAttendees = [];
             
+            // Add Firebase guests
             for (const guest of guests) {
                 const response = responses.find(r => r.guestCode === guest.code);
                 
@@ -449,6 +610,20 @@
                 }
             }
             
+            // Add manual guests to allAttendees
+            for (const manual of manualGuests) {
+                allAttendees.push({
+                    id: manual.id,
+                    name: manual.fullName,
+                    group: "Manual Entry",
+                    code: "MANUAL",
+                    isManual: true,
+                    firstName: manual.firstName,
+                    lastName: manual.lastName
+                });
+            }
+            
+            // Load seating assignments
             const seatingDoc = await getDoc(doc(db, SEATING_COLLECTION, "master"));
             if (seatingDoc.exists()) {
                 const data = seatingDoc.data();
@@ -509,26 +684,6 @@
         }
     }
 
-    function addBridalGuest() {
-        const name = prompt("Enter bridal party member name:");
-        if (!name || name.trim() === "") return;
-        
-        const newId = `bridal_${Date.now()}_${Math.random()}`;
-        const newGuest = {
-            id: newId,
-            name: name.trim(),
-            group: "Bridal Party",
-            code: "BRIDAL",
-            isManual: true
-        };
-        
-        const bridalTable = tableAssignments.get(BRIDAL_TABLE);
-        bridalTable.guests.push(newGuest);
-        attendeeTableMap.set(newId, BRIDAL_TABLE);
-        renderUI();
-        showToast(`Added ${name} to Bridal Table`);
-    }
-
     async function saveSeating() {
         showLoading(true);
         try {
@@ -573,7 +728,7 @@
         const term = searchTerm.toLowerCase().trim();
         return allAttendees.filter(a => 
             a.name.toLowerCase().includes(term) || 
-            a.group.toLowerCase().includes(term)
+            (a.group && a.group.toLowerCase().includes(term))
         );
     }
 
@@ -617,12 +772,30 @@
                 <div class="toolbar">
                     <button class="btn" id="saveBtn">💾 Save to Firebase</button>
                     <button class="btn btn-secondary" id="resetBtn">⟳ Reset All</button>
-                    <button class="btn btn-secondary" id="addBridalBtn">➕ Add to Bridal Table</button>
+                </div>
+                
+                <!-- Manual Guest Form -->
+                <div class="manual-guest-form">
+                    <div class="form-title">✏️ Add Manual Guest (not in original list)</div>
+                    <div class="form-row">
+                        <input type="text" id="firstNameInput" placeholder="First name" autocomplete="off">
+                        <input type="text" id="lastNameInput" placeholder="Last name" autocomplete="off">
+                        <button class="btn btn-success" id="addManualBtn">+ Add Guest</button>
+                    </div>
+                    <div class="manual-guest-list" id="manualGuestList">
+                        ${manualGuests.map(g => `
+                            <span class="manual-guest-tag" data-id="${g.id}">
+                                ${escapeHtml(g.fullName)} 
+                                <span class="delete-manual" data-id="${g.id}">✖</span>
+                            </span>
+                        `).join('')}
+                        ${manualGuests.length === 0 ? '<span style="font-size:0.7rem; color:#bfae8e;">No manual guests added yet</span>' : ''}
+                    </div>
                 </div>
                 
                 <!-- Search Bar -->
                 <div class="search-box">
-                    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search guest by name... (e.g., 'Rossi', 'Maria', 'Frank')" autocomplete="off">
+                    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search guest by name..." autocomplete="off">
                     <button class="btn" id="searchBtn">Search</button>
                     <button class="btn btn-secondary" id="clearSearchBtn">Clear</button>
                 </div>
@@ -634,10 +807,11 @@
                             <div>
                                 <span class="result-name">${escapeHtml(guest.name)}</span>
                                 <span class="result-group">(${escapeHtml(guest.group)})</span>
-                                ${attendeeTableMap.has(guest.id) ? `<span style="font-size:0.65rem; color:#27ae60; margin-left:8px;">✓ Already at ${tableAssignments.get(attendeeTableMap.get(guest.id))?.name || 'a table'}</span>` : ''}
+                                ${guest.isManual ? '<span style="font-size:0.65rem; color:#27ae60; margin-left:8px;">📝 Manual</span>' : ''}
+                                ${attendeeTableMap.has(guest.id) ? `<span style="font-size:0.65rem; color:#27ae60; margin-left:8px;">✓ At ${tableAssignments.get(attendeeTableMap.get(guest.id))?.name || 'a table'}</span>` : ''}
                             </div>
                             <div>
-                                <select class="assign-table-select" data-guest-id="${guest.id}" id="select_${guest.id.replace(/[^a-zA-Z0-9]/g, '_')}">
+                                <select class="assign-table-select" data-guest-id="${guest.id}">
                                     <option value="">→ Assign to table</option>
                                     ${Array.from(tableAssignments.keys())
                                         .filter(tid => tid !== BRIDAL_TABLE)
@@ -665,185 +839,146 @@
             </div>
         `;
         
-        // Render tables grid
+        // Render tables (same as before, simplified for brevity)
         const tablesGrid = document.getElementById('tablesGrid');
-        tablesGrid.innerHTML = '';
-        
-        const sortedTables = Array.from(tableAssignments.keys()).sort((a, b) => {
-            if (a === BRIDAL_TABLE) return 1;
-            if (b === BRIDAL_TABLE) return -1;
-            return parseInt(a) - parseInt(b);
-        });
-        
-        for (const tid of sortedTables) {
-            const table = tableAssignments.get(tid);
-            const isBridal = tid === BRIDAL_TABLE;
-            const guestCount = table.guests.length;
-            
-            const card = document.createElement('div');
-            card.className = `table-card ${isBridal ? 'bridal' : ''}`;
-            card.innerHTML = `
-                <div class="table-header">
-                    <span>${table.name} ${isBridal ? '⭐' : ''}</span>
-                    <span style="font-size:0.7rem;">${guestCount} ${!isBridal ? `/ ${MAX_PER_TABLE}` : 'guests'}</span>
-                </div>
-                <div class="table-guests" id="table-${tid}">
-                    ${table.guests.length === 0 ? '<div class="empty-table">— empty —</div>' : 
-                        table.guests.map(g => `
-                            <span class="guest-chip" data-id="${g.id}" data-table="${tid}">
-                                ${escapeHtml(g.name)} ${g.isManual ? '👑' : ''} <span style="font-size:10px;">✖</span>
-                            </span>
-                        `).join('')
-                    }
-                </div>
-                ${!isBridal ? `
-                    <div style="padding:8px 12px 12px;">
-                        <select id="quickAssign_${tid}" class="table-quick-select">
-                            <option value="">— quick assign —</option>
-                            ${unassigned.slice(0, 20).map(u => `<option value="${u.id}">${escapeHtml(u.name.substring(0, 30))} (${escapeHtml(u.group.substring(0, 20))})</option>`).join('')}
-                            ${unassigned.length > 20 ? '<option disabled>— more guests use search —</option>' : ''}
-                        </select>
-                        <button class="btn" style="width:100%; margin-top:8px; padding:6px;" data-quick-table="${tid}">Assign Selected</button>
-                    </div>
-                ` : ''}
-            `;
-            tablesGrid.appendChild(card);
-            
-            // Remove guest chips
-            const chips = card.querySelectorAll('.guest-chip');
-            chips.forEach(chip => {
-                chip.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const guestId = chip.dataset.id;
-                    const tableId = chip.dataset.table;
-                    if (confirm('Remove this guest from the table?')) {
-                        removeAttendee(guestId, tableId);
-                    }
-                });
+        if (tablesGrid) {
+            tablesGrid.innerHTML = '';
+            const sortedTables = Array.from(tableAssignments.keys()).sort((a, b) => {
+                if (a === BRIDAL_TABLE) return 1;
+                if (b === BRIDAL_TABLE) return -1;
+                return parseInt(a) - parseInt(b);
             });
             
-            // Quick assign for non-bridal tables
-            if (!isBridal) {
-                const assignBtn = card.querySelector(`[data-quick-table="${tid}"]`);
-                const select = card.querySelector(`#quickAssign_${tid}`);
-                if (assignBtn && select) {
-                    assignBtn.onclick = () => {
-                        const guestId = select.value;
-                        if (!guestId) {
-                            showToast('Select a guest from the dropdown');
-                            return;
+            for (const tid of sortedTables) {
+                const table = tableAssignments.get(tid);
+                const isBridal = tid === BRIDAL_TABLE;
+                const guestCount = table.guests.length;
+                
+                const card = document.createElement('div');
+                card.className = `table-card ${isBridal ? 'bridal' : ''}`;
+                card.innerHTML = `
+                    <div class="table-header">
+                        <span>${table.name} ${isBridal ? '⭐' : ''}</span>
+                        <span style="font-size:0.7rem;">${guestCount} ${!isBridal ? `/ ${MAX_PER_TABLE}` : 'guests'}</span>
+                    </div>
+                    <div class="table-guests" id="table-${tid}">
+                        ${table.guests.length === 0 ? '<div class="empty-table">— empty —</div>' : 
+                            table.guests.map(g => `
+                                <span class="guest-chip ${g.isManual ? 'manual' : ''}" data-id="${g.id}" data-table="${tid}">
+                                    ${escapeHtml(g.name)} ${g.isManual ? '📝' : ''} <span style="font-size:10px;">✖</span>
+                                </span>
+                            `).join('')
                         }
-                        const guest = allAttendees.find(a => a.id === guestId);
-                        if (guest && !attendeeTableMap.has(guest.id)) {
-                            assignAttendee(guest, tid);
-                            select.value = '';
-                        } else if (guest && attendeeTableMap.has(guest.id)) {
-                            showToast(`${guest.name} is already assigned to another table`);
+                    </div>
+                `;
+                tablesGrid.appendChild(card);
+                
+                const chips = card.querySelectorAll('.guest-chip');
+                chips.forEach(chip => {
+                    chip.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const guestId = chip.dataset.id;
+                        const tableId = chip.dataset.table;
+                        if (confirm('Remove this guest from the table?')) {
+                            removeAttendee(guestId, tableId);
                         }
-                    };
-                }
+                    });
+                });
             }
         }
         
         // Render unassigned list
         const unassignedDiv = document.getElementById('unassignedList');
-        if (unassigned.length === 0) {
-            unassignedDiv.innerHTML = '<div style="text-align:center; padding:30px; color:#bfae8e;">✨ All guests assigned! ✨</div>';
-        } else {
-            unassignedDiv.innerHTML = unassigned.slice(0, 50).map(guest => `
-                <div class="guest-list-item">
-                    <div>
-                        <div class="guest-name">${escapeHtml(guest.name)}</div>
-                        <div class="guest-group">${escapeHtml(guest.group)}</div>
+        if (unassignedDiv) {
+            if (unassigned.length === 0) {
+                unassignedDiv.innerHTML = '<div style="text-align:center; padding:30px; color:#bfae8e;">✨ All guests assigned! ✨</div>';
+            } else {
+                unassignedDiv.innerHTML = unassigned.map(guest => `
+                    <div class="guest-list-item">
+                        <div>
+                            <div class="guest-name">${escapeHtml(guest.name)} ${guest.isManual ? '📝' : ''}</div>
+                            <div class="guest-group">${escapeHtml(guest.group)}</div>
+                        </div>
+                        <select id="unassignSelect_${guest.id.replace(/[^a-zA-Z0-9]/g, '_')}" style="width:130px;">
+                            <option value="">Table...</option>
+                            ${Array.from(tableAssignments.keys()).filter(t => t !== BRIDAL_TABLE).slice(0, 20).map(tid => `<option value="${tid}">Table ${tid}</option>`).join('')}
+                            <option value="${BRIDAL_TABLE}">👰 Bridal</option>
+                        </select>
+                        <button class="btn" style="padding:4px 12px;" data-unassign="${guest.id}">✔</button>
                     </div>
-                    <select id="unassignSelect_${guest.id.replace(/[^a-zA-Z0-9]/g, '_')}" style="width:130px;">
-                        <option value="">Table...</option>
-                        ${sortedTables.filter(t => t !== BRIDAL_TABLE).slice(0, 20).map(tid => `<option value="${tid}">Table ${tid}</option>`).join('')}
-                        <option value="${BRIDAL_TABLE}">👰 Bridal</option>
-                    </select>
-                    <button class="btn" style="padding:4px 12px;" data-unassign="${guest.id}">✔</button>
-                </div>
-            `).join('');
-            if (unassigned.length > 50) {
-                unassignedDiv.innerHTML += '<div style="text-align:center; padding:10px; color:#bfae8e;">+ ' + (unassigned.length - 50) + ' more guests — use search to find them</div>';
-            }
-            
-            // Add assign listeners for unassigned list
-            for (const guest of unassigned.slice(0, 50)) {
-                const btn = unassignedDiv.querySelector(`[data-unassign="${guest.id}"]`);
-                const select = unassignedDiv.querySelector(`#unassignSelect_${guest.id.replace(/[^a-zA-Z0-9]/g, '_')}`);
-                if (btn && select) {
-                    btn.onclick = () => {
-                        const targetTable = select.value;
-                        if (!targetTable) {
-                            showToast('Select a table');
-                            return;
-                        }
-                        assignAttendee(guest, targetTable);
-                    };
+                `).join('');
+                
+                for (const guest of unassigned) {
+                    const btn = unassignedDiv.querySelector(`[data-unassign="${guest.id}"]`);
+                    const select = unassignedDiv.querySelector(`#unassignSelect_${guest.id.replace(/[^a-zA-Z0-9]/g, '_')}`);
+                    if (btn && select) {
+                        btn.onclick = () => {
+                            const targetTable = select.value;
+                            if (!targetTable) {
+                                showToast('Select a table');
+                                return;
+                            }
+                            assignAttendee(guest, targetTable);
+                        };
+                    }
                 }
             }
         }
+        
+        // Add manual guest button
+        document.getElementById('addManualBtn').onclick = () => {
+            const firstName = document.getElementById('firstNameInput').value;
+            const lastName = document.getElementById('lastNameInput').value;
+            if (addManualGuest(firstName, lastName)) {
+                document.getElementById('firstNameInput').value = '';
+                document.getElementById('lastNameInput').value = '';
+            }
+        };
+        
+        // Delete manual guest from the list
+        document.querySelectorAll('.delete-manual').forEach(el => {
+            el.onclick = (e) => {
+                e.stopPropagation();
+                const id = el.dataset.id;
+                if (confirm('Remove this manual guest?')) {
+                    deleteManualGuest(id);
+                }
+            };
+        });
         
         // Search functionality
         const searchInput = document.getElementById('searchInput');
-        const searchBtn = document.getElementById('searchBtn');
-        const clearBtn = document.getElementById('clearSearchBtn');
-        
         if (searchInput) {
             searchInput.value = currentSearchTerm;
-            searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    currentSearchTerm = searchInput.value;
-                    renderUI();
-                }
-            });
+            searchInput.onkeypress = (e) => { if (e.key === 'Enter') { currentSearchTerm = searchInput.value; renderUI(); } };
         }
+        document.getElementById('searchBtn').onclick = () => { currentSearchTerm = document.getElementById('searchInput')?.value || ''; renderUI(); };
+        document.getElementById('clearSearchBtn').onclick = () => { currentSearchTerm = ''; if (searchInput) searchInput.value = ''; renderUI(); };
         
-        if (searchBtn) {
-            searchBtn.onclick = () => {
-                currentSearchTerm = searchInput?.value || '';
-                renderUI();
-            };
-        }
-        
-        if (clearBtn) {
-            clearBtn.onclick = () => {
-                currentSearchTerm = '';
-                if (searchInput) searchInput.value = '';
-                renderUI();
-            };
-        }
-        
-        // Search result assignment buttons
+        // Search result assignment
         for (const guest of searchResults) {
             const assignBtn = document.querySelector(`[data-assign-search="${guest.id}"]`);
-            const select = document.querySelector(`#select_${guest.id.replace(/[^a-zA-Z0-9]/g, '_')}`);
+            const select = document.querySelector(`.assign-table-select[data-guest-id="${guest.id}"]`);
             if (assignBtn && select) {
                 assignBtn.onclick = () => {
                     const targetTable = select.value;
-                    if (!targetTable) {
-                        showToast('Select a table first');
-                        return;
-                    }
+                    if (!targetTable) { showToast('Select a table'); return; }
                     assignAttendee(guest, targetTable);
-                    currentSearchTerm = searchInput?.value || '';
+                    currentSearchTerm = document.getElementById('searchInput')?.value || '';
                     renderUI();
                 };
             }
         }
         
-        // Main buttons
         document.getElementById('saveBtn').onclick = saveSeating;
         document.getElementById('resetBtn').onclick = () => {
-            if (confirm('Reset all seating assignments? This cannot be undone.')) {
+            if (confirm('Reset all seating assignments? Manual guests will remain but become unassigned.')) {
                 initTables();
                 attendeeTableMap.clear();
                 renderUI();
                 showToast('Seating reset');
             }
         };
-        document.getElementById('addBridalBtn').onclick = addBridalGuest;
     }
     
     loadData();
