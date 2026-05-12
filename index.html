@@ -2,538 +2,356 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Monday Night Soccer | Complete Hub + Financials</title>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Daniel & Laura · Save the Date</title>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-        body{background:#f0f2f5;font-family:'Inter',sans-serif;}
-        .app{max-width:500px;margin:0 auto;background:#f0f2f5;min-height:100vh;}
-        .header{background:white;padding:14px 20px;text-align:center;border-bottom:1px solid #e9ecef;position:sticky;top:0;z-index:20;}
-        .logo-icon{width:52px;height:52px;background:#1a73e8;border-radius:16px;display:inline-flex;align-items:center;justify-content:center;margin:0 auto 6px;}
-        .logo-icon i{font-size:26px;color:white;}
-        .header h1{font-size:18px;font-weight:700;color:#1a1a2e;}
-        .user-row{background:#f1f5f9;padding:5px 14px;border-radius:40px;display:inline-flex;align-items:center;gap:10px;margin-top:6px;font-size:12px;}
-        .user-row button{background:#dc3545;border:none;padding:4px 12px;border-radius:40px;color:white;font-weight:500;font-size:11px;cursor:pointer;}
-        .top-nav{background:white;padding:10px 12px;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;border-bottom:1px solid #e9ecef;position:sticky;top:75px;z-index:15;}
-        .nav-module{background:#f0f2f5;border:none;padding:8px 14px;border-radius:40px;font-size:12px;font-weight:600;color:#5a626e;cursor:pointer;transition:all 0.2s;}
-        .nav-module.active{background:#1a73e8;color:white;}
-        .module-container{padding:16px;display:none;}
-        .module-container.active-module{display:block;animation:fadeIn 0.25s ease;}
-        @keyframes fadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
-        .card{background:white;border-radius:20px;padding:18px;margin-bottom:14px;border:1px solid #e9ecef;box-shadow:0 1px 2px rgba(0,0,0,0.03);}
-        .card h2{font-size:17px;font-weight:700;margin-bottom:14px;border-left:4px solid #1a73e8;padding-left:12px;color:#1a1a2e;}
-        .attendance-card{background:linear-gradient(135deg,#1a73e8,#0d5bbf);color:white;border-radius:24px;padding:24px 20px;text-align:center;margin-bottom:16px;}
-        .big-buttons{display:flex;gap:14px;margin:16px 0 12px;}
-        .btn-play-big{background:#28a745;flex:1;padding:14px;border-radius:60px;font-weight:700;font-size:16px;border:none;color:white;cursor:pointer;}
-        .btn-sit-big{background:#dc3545;flex:1;padding:14px;border-radius:60px;font-weight:700;font-size:16px;border:none;color:white;cursor:pointer;}
-        .profile-item{background:#f8f9fa;border-radius:16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;padding:12px;}
-        .profile-avatar{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:18px;flex-shrink:0;}
-        .player-avatar-small{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:12px;margin-right:5px;}
-        .profile-badge{background:white;border-radius:40px;padding:3px 10px;font-size:11px;font-weight:600;display:inline-block;margin-right:6px;margin-bottom:4px;color:#495057;border:1px solid #e9ecef;}
-        .edit-profile-btn{background:#6c757d;padding:5px 12px;font-size:11px;border-radius:40px;border:none;color:white;cursor:pointer;}
-        .match-card{background:white;border-radius:20px;margin-bottom:14px;border:1px solid #e9ecef;overflow:hidden;}
-        .match-header{background:#f8f9fa;padding:12px 16px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;border-bottom:1px solid #e9ecef;}
-        .match-result{background:#1a73e8;color:white;padding:4px 14px;border-radius:40px;font-weight:600;font-size:13px;}
-        .teams-section{padding:16px;background:#1a2a3a;}
-        .team-row{display:flex;gap:12px;flex-wrap:wrap;}
-        .team-box{flex:1;background:rgba(0,0,0,0.6);border-radius:16px;padding:12px;min-width:140px;}
-        .team-yellow{background:#ffc107;color:#2c2c2c;font-weight:800;text-align:center;padding:6px;border-radius:60px;margin-bottom:8px;}
-        .team-orange{background:#fd7e14;color:white;font-weight:800;text-align:center;padding:6px;border-radius:60px;margin-bottom:8px;}
-        .player-list{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;}
-        .player-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.15);border-radius:40px;padding:4px 10px;font-size:11px;color:white;}
-        .guest-tag-small{background:#28a74580;border-radius:40px;padding:2px 6px;font-size:9px;margin-left:4px;}
-        .score-big{text-align:center;margin-top:12px;font-size:22px;font-weight:800;background:rgba(0,0,0,0.6);border-radius:60px;padding:8px;color:#ffd700;}
-        .goals-section,.comments-section{padding:12px 16px;background:#fff8e7;}
-        .goal-badge{background:white;border-radius:40px;padding:5px 12px;font-size:12px;font-weight:600;border-left:3px solid #eab308;margin:4px;display:inline-block;}
-        .add-comment{display:flex;gap:8px;margin-top:10px;}
-        .add-comment input{flex:1;padding:12px;border-radius:60px;border:1.5px solid #e9ecef;font-size:14px;}
-        .comment-item{background:#f8f9fa;border-radius:16px;padding:10px;margin-bottom:8px;font-size:13px;}
-        .playing-list,.guest-section{background:#e8f0fe;border-radius:20px;padding:16px;margin-bottom:14px;}
-        .guest-section{background:#e6f7e6;border:1px solid #b3e6b3;}
-        .attendee-tag{display:inline-flex;align-items:center;gap:8px;background:white;padding:6px 12px;border-radius:40px;font-size:13px;margin:4px;box-shadow:0 1px 2px rgba(0,0,0,0.05);}
-        .remove-attendee-btn{background:#dc3545;border:none;color:white;border-radius:40px;padding:3px 8px;font-size:10px;font-weight:600;cursor:pointer;margin-left:6px;}
-        .admin-team-item{display:flex;justify-content:space-between;align-items:center;margin:8px 0;background:#f8f9fa;border-radius:60px;padding:8px 16px;flex-wrap:wrap;gap:8px;}
-        .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;}
-        .modal-content{background:white;border-radius:28px;padding:24px;max-width:340px;width:90%;max-height:80vh;overflow-y:auto;}
-        select,input{width:100%;padding:14px;border:1.5px solid #e9ecef;border-radius:60px;margin:8px 0;font-size:15px;background:white;}
-        button{background:#1a73e8;color:white;border:none;padding:12px 20px;border-radius:60px;font-weight:600;cursor:pointer;}
-        .btn-outline{background:white;color:#1a73e8;border:2px solid #1a73e8;}
-        .flex-btns{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;}
-        .info-bar{background:#e8f0fe;border-radius:16px;padding:12px;font-size:12px;margin-bottom:16px;text-align:center;color:#1a73e8;font-weight:500;}
-        .timer-container{background:white;border-radius:24px;padding:20px;text-align:center;margin-bottom:16px;border:1px solid #e9ecef;}
-        .timer-display{font-size:54px;font-weight:800;font-family:monospace;color:#1a73e8;background:#f0f2f5;border-radius:20px;padding:12px;margin-bottom:16px;}
-        .timer-btn{padding:10px 20px;border-radius:60px;font-weight:600;font-size:13px;border:none;cursor:pointer;}
-        .timer-btn.start{background:#28a745;color:white;}
-        .timer-btn.pause{background:#ffc107;color:#2c2c2c;}
-        .timer-btn.reset{background:#dc3545;color:white;}
-        .whatsapp-share{background:#25D366;color:white;border:none;margin-top:8px;width:100%;}
-        .stats-row{display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap;}
-        .half-status{font-size:13px;color:#6c757d;margin-top:10px;}
-        .loading{text-align:center;padding:40px;color:#6c757d;}
-        .data-table{width:100%;border-collapse:collapse;font-size:13px;}
-        .data-table th,.data-table td{padding:10px;text-align:left;border-bottom:1px solid #e9ecef;}
-        .finance-row{display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid #e9ecef;flex-wrap:wrap;gap:8px;}
-        .debt-badge{background:#dc3545;color:white;border-radius:40px;padding:4px 12px;font-size:12px;font-weight:600;}
-        .paid-badge{background:#28a745;color:white;border-radius:40px;padding:4px 12px;font-size:12px;font-weight:600;}
-        .pay-btn{background:#1a73e8;font-size:12px;padding:6px 16px;}
-        .finance-summary{background:linear-gradient(135deg,#28a745,#1a5a2e);color:white;border-radius:20px;padding:16px;margin-bottom:16px;text-align:center;}
-        .finance-summary h3{font-size:14px;opacity:0.9;}
-        .finance-summary .big-number{font-size:36px;font-weight:800;}
-        @media (max-width:450px){.team-row{flex-direction:column;}}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', Times, serif;
+            background: #faf8f3;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .guest-card {
+            max-width: 100%;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            border: 1px solid #e8dcc8;
+            transition: all 0.2s ease;
+        }
+
+        .guest-header {
+            background: linear-gradient(135deg, #c9a84c, #e8d5a8);
+            padding: 40px 25px 35px;
+            text-align: center;
+        }
+
+        .guest-header h1 {
+            font-size: 2.4rem;
+            letter-spacing: 3px;
+            font-weight: 400;
+            margin-bottom: 8px;
+            color: #2c2418;
+        }
+
+        .guest-header .ampersand {
+            font-family: 'Brush Script MT', cursive;
+            font-size: 2.2rem;
+            color: #fff;
+        }
+
+        .teaser-section {
+            padding: 28px 25px 20px;
+            text-align: center;
+            background: #ffffff;
+            border-bottom: 1px solid #e8dcc8;
+        }
+
+        .teaser-section h3 {
+            color: #c9a84c;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            font-weight: 400;
+            letter-spacing: 4px;
+        }
+
+        .teaser-section .save-date {
+            font-size: 1.65rem;
+            color: #c9a84c;
+            margin: 15px 0;
+            letter-spacing: 2px;
+            font-weight: 500;
+        }
+
+        .teaser-section p {
+            color: #6b5a45;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+
+        .form-container {
+            padding: 30px 25px;
+        }
+
+        .code-input-area input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1rem;
+            text-align: center;
+            letter-spacing: 2px;
+            font-family: monospace;
+            border: 1px solid #e8dcc8;
+            border-radius: 16px;
+            background: #fefcf8;
+        }
+
+        .code-input-area input:focus {
+            outline: none;
+            border-color: #c9a84c;
+            box-shadow: 0 0 0 2px rgba(201,168,76,0.2);
+        }
+
+        .form-field {
+            margin-bottom: 22px;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #c9a84c;
+            font-size: 0.7rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #e8dcc8;
+            border-radius: 14px;
+            font-size: 0.9rem;
+            font-family: 'Georgia', 'Times New Roman', Times, serif;
+            background: #fefcf8;
+            transition: 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #c9a84c;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(201,168,76,0.2);
+        }
+
+        .address-row, .address-row-3 {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .address-row input, .address-row-3 select, .address-row-3 input {
+            flex: 1;
+            min-width: calc(50% - 6px);
+        }
+
+        button {
+            width: 100%;
+            background: #c9a84c;
+            color: #2c2418;
+            border: none;
+            padding: 14px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-radius: 40px;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        button:hover {
+            background: #b8953a;
+            transform: translateY(-1px);
+        }
+
+        .success-message, .error-message, .info-message {
+            padding: 14px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+        }
+        .success-message { background: #d4edda; color: #155724; display: none; }
+        .error-message { background: #f8d7da; color: #721c24; display: none; }
+        .info-message { background: #d1ecf1; color: #0c5460; display: none; }
+
+        .limit-warning {
+            background: #fef8e7;
+            color: #856404;
+            padding: 12px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+            border-left: 3px solid #c9a84c;
+            font-style: italic;
+            font-size: 0.8rem;
+        }
+
+        .guest-name-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .guest-name-row input { flex: 1; }
+
+        .footer-note {
+            text-align: center;
+            color: #c9a84c;
+            font-size: 0.7rem;
+            padding: 20px;
+            border-top: 1px solid #e8dcc8;
+            letter-spacing: 1px;
+        }
+
+        .back-link { text-align: center; margin-top: 20px; }
+        .back-link a { color: #c9a84c; text-decoration: none; font-size: 0.75rem; }
+
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top-color: #c9a84c;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-overlay {
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.4);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .loading-spinner {
+            background: white;
+            padding: 18px 28px;
+            border-radius: 40px;
+            font-family: monospace;
+        }
+        .admin-link {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #c9a84c;
+            color: #2c2418;
+            padding: 6px 14px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-size: 0.7rem;
+            opacity: 0.7;
+            z-index: 100;
+            font-weight: bold;
+        }
+        .admin-link:hover { opacity: 1; }
+
+        /* Admin styles */
+        .admin-container { max-width: 1400px; margin: 0 auto; }
+        .admin-header {
+            background: linear-gradient(135deg, #c9a84c, #e8d5a8);
+            padding: 30px;
+            border-radius: 28px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+        .stat-item {
+            background: white;
+            padding: 20px;
+            border-radius: 24px;
+            text-align: center;
+            border: 1px solid #e8dcc8;
+        }
+        .stat-number { font-size: 2.2rem; font-weight: bold; color: #c9a84c; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 25px; flex-wrap: wrap; }
+        .tab-button {
+            background: #e8dcc8; border: none; padding: 10px 24px;
+            border-radius: 40px; cursor: pointer; font-weight: bold; color: #5a4a35;
+        }
+        .tab-button.active { background: #c9a84c; color: #2c2418; }
+        .tab-pane { display: none; background: white; border-radius: 24px; padding: 25px; border: 1px solid #e8dcc8; }
+        .tab-pane.active { display: block; }
+        .filter-bar { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; align-items: center; }
+        .filter-bar input, .filter-bar select {
+            flex: 1; min-width: 140px; padding: 10px 12px; border-radius: 40px;
+        }
+        .admin-table {
+            width: 100%; border-collapse: collapse; font-size: 0.75rem;
+        }
+        .admin-table th, .admin-table td {
+            padding: 12px 8px; text-align: left; border-bottom: 1px solid #e8dcc8;
+        }
+        .status-badge {
+            display: inline-block; padding: 4px 12px; border-radius: 30px; font-size: 0.7rem; font-weight: 500;
+        }
+        .status-pending { background: #f39c12; color: white; }
+        .status-sent { background: #3498db; color: white; }
+        .status-replied { background: #27ae60; color: white; }
+        .code-badge { background: #f0e6d8; padding: 4px 10px; border-radius: 30px; font-family: monospace; font-weight: bold; }
+        .type-badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.65rem; color: white; margin-top: 5px; background: #c9a84c; }
+        .btn-small {
+            background: #c9a84c; color: #2c2418; border: none; padding: 6px 14px;
+            border-radius: 30px; font-size: 0.7rem; cursor: pointer; margin: 2px; display: inline-block; font-weight: bold;
+        }
+        .btn-small-green { background: #27ae60; color: white; }
+        .toast-notification {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: #27ae60; color: white; padding: 12px 24px; border-radius: 60px; font-size: 0.85rem;
+            z-index: 2100; animation: fadeOut 3s forwards;
+        }
+        @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+        .modal {
+            display: none; position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.5); z-index: 1500; justify-content: center; align-items: center;
+        }
+        .modal-content, .edit-modal-content {
+            background: white; border-radius: 28px; padding: 28px; max-width: 500px; width: 90%;
+        }
+        .edit-modal-content input, .edit-modal-content select { width: 100%; margin-bottom: 14px; padding: 12px; border-radius: 40px; }
+        .sms-buttons { display: flex; gap: 12px; margin-top: 15px; }
+        .login-box { max-width: 400px; margin: 100px auto; background: white; padding: 40px; border-radius: 32px; text-align: center; border: 1px solid #e8dcc8;}
+        .login-box input { width: 100%; padding: 14px; margin: 15px 0; border-radius: 60px; }
+        @media (max-width: 600px) {
+            .address-row, .address-row-3 { flex-direction: column; gap: 10px; }
+            .address-row input, .address-row-3 select, .address-row-3 input { width: 100%; }
+        }
     </style>
 </head>
 <body>
-<div class="app" id="app"><div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading Monday Night Soccer...</div></div>
+<div id="app"></div>
+<a href="?admin=true" class="admin-link">✨ Admin</a>
 
-<script>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
     const firebaseConfig = {
-        apiKey: "AIzaSyCWlFqDJyENgrUOhiLXCjSEi4Mk_54SA1w",
-        authDomain: "monday-night-soccer-hub.firebaseapp.com",
-        projectId: "monday-night-soccer-hub",
-        storageBucket: "monday-night-soccer-hub.firebasestorage.app",
-        messagingSenderId: "634335208908",
-        appId: "1:634335208908:web:dca705b65fc52de0606969"
+        apiKey: "AIzaSyAH0rBpJUh3sRpBlQgrymQM1RLBDBiAPmE",
+        authDomain: "daniel-and-laura.firebaseapp.com",
+        projectId: "daniel-and-laura",
+        storageBucket: "daniel-and-laura.firebasestorage.app",
+        messagingSenderId: "363458517473",
+        appId: "1:363458517473:web:7eac683bc98623cb281aa0"
     };
-    
-    let db = null, firebaseReady = false;
-    try { 
-        firebase.initializeApp(firebaseConfig); 
-        db = firebase.firestore(); 
-        firebaseReady = true; 
-    } catch(e) { console.warn("Demo mode", e); }
-    
-    const FIXED_PLAYERS_LIST = [
-        "Alex Rowe", "Ali Mekawy", "Carlo Pavia", "Charlie Pavia", "Chris Del Monaco", 
-        "Chris Margelis", "Chris Sophocli", "Danny Sammartino", "Dante Sammartino", 
-        "David", "Dimitri", "Enzo", "Farid", "Faros", "Frank Marcaccio", 
-        "George Babatsikos", "George Theodoropoulos", "Ivan", "James Zoumis", 
-        "James Martino", "Joe Trimboli", "Joseph", "Kiarash Piani", "Leo", "Manoli", 
-        "Marco Mercuri", "Mario", "Morris Del Monte", "Nector Laskaris", "Paul Hardalas", 
-        "Perri Theodorlis", "Peter Disensi", "Ralph Risoli", "Rocco Mammoliti", 
-        "Paul Salustro", "Stevan Brankovic", "Theo", "Tony El Hajj", "Vasilis"
-    ].sort();
-    
-    let players = [...FIXED_PLAYERS_LIST];
-    let playerProfiles = {};
-    let teamAssignments = {};
-    let matchResults = {};
-    let attendance = [];
-    let guests = [];
-    let matchComments = {};
-    let paymentRecords = {}; // { week: { playerName: { paid: true, amount: 5, date } } }
-    let isAdminLoggedIn = false, currentUser = null;
-    let weeklyCaptain = "Football Freedom";
-    let weatherData = { temp: "18°C", condition: "Clear", icon: "fa-sun", rainChance: 10 };
-    let chatUnsubscribe = null;
-    let timerInterval = null, currentHalf = 1, timeLeft = 45 * 60;
-    const WEEKLY_FEE = 5;
-    
-    function getMondayDate(date) {
-        const d = new Date(date);
-        const day = d.getDay();
-        const diff = (day === 0 ? -6 : 1) - day;
-        d.setDate(d.getDate() + diff);
-        d.setHours(20, 0, 0, 0);
-        return d;
-    }
-    function getNextMondayGame() {
-        const today = new Date();
-        const nextMonday = getMondayDate(today);
-        if (nextMonday < today) nextMonday.setDate(nextMonday.getDate() + 7);
-        return nextMonday;
-    }
-    function getCurrentGameWeekStr(){ return getNextMondayGame().toISOString().split('T')[0]; }
-    function getCurrentGameLabel(){ const m = getNextMondayGame(); return `Mon ${m.toLocaleDateString('en-AU',{day:'numeric',month:'short'})}`; }
-    function getAllGameWeeks() {
-        const weeks = [];
-        const today = new Date();
-        const startDate = new Date(today);
-        startDate.setFullYear(today.getFullYear() - 1);
-        let current = new Date(getMondayDate(startDate));
-        const currentMonday = getMondayDate(today);
-        while (current <= currentMonday) {
-            weeks.push({ dateStr: current.toISOString().split('T')[0], label: `Mon ${current.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}` });
-            current.setDate(current.getDate() + 7);
-        }
-        weeks.sort((a,b) => b.dateStr.localeCompare(a.dateStr));
-        return weeks;
-    }
-    const ALL_WEEKS = getAllGameWeeks();
-    const CURRENT_GAME_STR = getCurrentGameWeekStr();
-    function getPastWeeks(){ return ALL_WEEKS.filter(w => w.dateStr < CURRENT_GAME_STR); }
-    function getAllParticipants(gameDate){
-        const playersIn = attendance.filter(a => a.gameDate === gameDate && a.status === 'in').map(a => a.player);
-        const guestsIn = guests.filter(g => g.gameDate === gameDate).map(g => ({ name: g.guestName, isGuest: true, addedBy: g.addedBy }));
-        return { players: playersIn, guests: guestsIn };
-    }
-    
-    function escapeHtml(s){ return String(s).replace(/[&<>]/g, m=> ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
-    function getInitials(n){ return n.split(' ').map(x=>x[0]).join('').toUpperCase().substring(0,2); }
-    function getAvatarColor(n){ const c=['#1a73e8','#28a745','#dc3545','#fd7e14','#6f42c1','#20c997']; let h=0; for(let i=0;i<n.length;i++) h=((h<<5)-h)+n.charCodeAt(i); return c[Math.abs(h)%c.length]; }
-    function renderAvatar(n,s=50){ return `<div class="profile-avatar" style="background:${getAvatarColor(n)};width:${s}px;height:${s}px;font-size:${s/2.5}px;">${getInitials(n)}</div>`; }
-    function renderMiniAvatar(n,s=28){ return `<div class="player-avatar-small" style="background:${getAvatarColor(n)};width:${s}px;height:${s}px;font-size:${s/2}px;">${getInitials(n)}</div>`; }
-    
-    function generateTeamSheet(yellowTeam, orangeTeam, gameLabel){
-        const yellowList = yellowTeam.map(p => `${p.name}${p.isGuest ? ' (Guest)' : ''}`).join('\n');
-        const orangeList = orangeTeam.map(p => `${p.name}${p.isGuest ? ' (Guest)' : ''}`).join('\n');
-        return `⚽ *MONDAY NIGHT SOCCER - TEAM SHEET* ⚽\n📅 ${gameLabel} | 8:00pm Clifton Park\n\n🟡 YELLOW (${yellowTeam.length}):\n${yellowList || '—'}\n\n🟠 ORANGE (${orangeTeam.length}):\n${orangeList || '—'}\n\n👑 Captain: ${weeklyCaptain}`;
-    }
-    
-    function generateAIMatchReport(weekLabel, yellowScore, orangeScore, goals, assists, mvp, injuries){
-        const goalText = Object.entries(goals).map(([p,c])=>`• ${p}: ${c}`).join('\n') || '• None';
-        const assistText = Object.entries(assists).map(([a,c])=>`• ${a}: ${c}`).join('\n') || '• None';
-        return `📰 *${weekLabel.toUpperCase()} REPORT*\n🟡 ${yellowScore} - ${orangeScore} 🟠\n\n⚽ GOALS:\n${goalText}\n\n🎯 ASSISTS:\n${assistText}\n\n🏆 MVP: ${mvp || 'N/A'}\n🩺 INJURIES: ${injuries?.join(', ') || 'None'}`;
-    }
-    
-    // FINANCIAL FUNCTIONS - Only players who played owe money
-    async function loadPaymentRecords() {
-        if(firebaseReady && db){
-            const doc = await db.collection("config").doc("paymentRecords").get();
-            if(doc.exists) paymentRecords = doc.data();
-            else paymentRecords = {};
-        }
-    }
-    async function savePaymentRecords() {
-        if(firebaseReady && db) await db.collection("config").doc("paymentRecords").set(paymentRecords);
-    }
-    
-    // Get players who played on a given week (from attendance)
-    function getPlayersWhoPlayed(weekStr) {
-        return attendance.filter(a => a.gameDate === weekStr && a.status === 'in').map(a => a.player);
-    }
-    
-    // Calculate how much a player owes for a specific week (only if they played)
-    function doesPlayerOweForWeek(player, weekStr) {
-        const played = attendance.some(a => a.player === player && a.gameDate === weekStr && a.status === 'in');
-        if (!played) return false;
-        const weekPayments = paymentRecords[weekStr] || {};
-        return !weekPayments[player];
-    }
-    
-    // Get total collected across all time
-    function getTotalCollected() {
-        let total = 0;
-        for (const week in paymentRecords) {
-            const weekPayments = paymentRecords[week];
-            for (const player in weekPayments) {
-                if (weekPayments[player]?.paid) total += WEEKLY_FEE;
-            }
-        }
-        return total;
-    }
-    
-    // Get total expected (sum of all players who played each week)
-    function getTotalExpected() {
-        let total = 0;
-        for (const week of ALL_WEEKS) {
-            const playersWhoPlayed = getPlayersWhoPlayed(week.dateStr);
-            total += playersWhoPlayed.length * WEEKLY_FEE;
-        }
-        return total;
-    }
-    
-    // Get outstanding balance
-    function getOutstandingBalance() {
-        return getTotalExpected() - getTotalCollected();
-    }
-    
-    // Mark a player as paid for a specific week
-    async function markPlayerPaid(playerName, weekStr) {
-        if (!isAdminLoggedIn && currentUser?.name !== playerName) {
-            alert("Only admin can record payments");
-            return false;
-        }
-        
-        const played = attendance.some(a => a.player === playerName && a.gameDate === weekStr && a.status === 'in');
-        if (!played) {
-            alert(`${playerName} did NOT play on ${weekStr}. Cannot record payment for a week they didn't play.`);
-            return false;
-        }
-        
-        if (!paymentRecords[weekStr]) paymentRecords[weekStr] = {};
-        if (paymentRecords[weekStr][playerName]?.paid) {
-            alert(`${playerName} already paid for ${weekStr}`);
-            return false;
-        }
-        
-        paymentRecords[weekStr][playerName] = {
-            paid: true,
-            amount: WEEKLY_FEE,
-            date: new Date().toISOString(),
-            recordedBy: currentUser?.name || "Admin"
-        };
-        
-        await savePaymentRecords();
-        alert(`✅ Recorded $${WEEKLY_FEE} payment from ${playerName} for ${weekStr}`);
-        renderFinancePage();
-        return true;
-    }
-    
-    // Get payment status for a player across all weeks they played
-    function getPlayerPaymentStatus(player) {
-        const weeksPlayed = attendance.filter(a => a.player === player && a.status === 'in').map(a => a.gameDate);
-        const paidWeeks = [];
-        const unpaidWeeks = [];
-        for (const week of weeksPlayed) {
-            const isPaid = paymentRecords[week]?.[player]?.paid === true;
-            if (isPaid) paidWeeks.push(week);
-            else unpaidWeeks.push(week);
-        }
-        return { paidWeeks, unpaidWeeks, totalOwed: unpaidWeeks.length * WEEKLY_FEE, totalPaid: paidWeeks.length * WEEKLY_FEE };
-    }
-    
-    async function removeAttendee(playerName, gameDate){
-        if(!isAdminLoggedIn && currentUser?.name !== playerName){ alert("Only admin or the player can remove attendance."); return false; }
-        if(!confirm(`Remove ${playerName} from playing list?`)) return false;
-        if(firebaseReady && db) await db.collection("attendance").doc(`${playerName}_${gameDate}`).delete();
-        attendance = attendance.filter(a => !(a.player === playerName && a.gameDate === gameDate));
-        if(teamAssignments[gameDate]){ delete teamAssignments[gameDate][playerName]; if(firebaseReady && db) await db.collection("config").doc("teamAssignments").set(teamAssignments); }
-        refreshAll();
-        alert(`${playerName} removed.`);
-        return true;
-    }
-    
-    async function loadData(){
-        if(!firebaseReady || !db) return;
-        try{
-            const [pDoc,profDoc,tDoc,rDoc,attSnap,guestSnap,commentsSnap] = await Promise.all([
-                db.collection("config").doc("players").get(),
-                db.collection("config").doc("playerProfiles").get(),
-                db.collection("config").doc("teamAssignments").get(),
-                db.collection("config").doc("matchResults").get(),
-                db.collection("attendance").get(),
-                db.collection("guests").get(),
-                db.collection("matchComments").get()
-            ]);
-            if(pDoc.exists) players = pDoc.data().list.sort();
-            if(profDoc.exists) playerProfiles = profDoc.data();
-            if(tDoc.exists) teamAssignments = tDoc.data();
-            if(rDoc.exists) matchResults = rDoc.data();
-            attendance = attSnap.docs.map(d=>d.data());
-            guests = guestSnap.docs.map(d=>d.data());
-            matchComments = {};
-            commentsSnap.docs.forEach(doc=>{ const d=doc.data(); if(!matchComments[d.gameDate]) matchComments[d.gameDate]=[]; matchComments[d.gameDate].push(d); });
-            for(let p of players) if(!playerProfiles[p]) playerProfiles[p] = { age:'—', position:'—', yearJoined:'—', gamesPlayed:0, openingBalanceGames:0 };
-            await loadPaymentRecords();
-        } catch(e){ console.warn(e); }
-        refreshAll();
-    }
-    
-    async function saveAttendance(a){
-        if(firebaseReady&&db) await db.collection("attendance").doc(`${a.player}_${a.gameDate}`).set(a);
-        const idx = attendance.findIndex(x=>x.player===a.player && x.gameDate===a.gameDate);
-        if(idx!==-1) attendance[idx]=a; else attendance.push(a);
-        const games = attendance.filter(att=>att.player===a.player && att.status==='in').length;
-        const opening = playerProfiles[a.player]?.openingBalanceGames || 0;
-        if(playerProfiles[a.player]) playerProfiles[a.player].gamesPlayed = games + opening;
-        else playerProfiles[a.player] = { age:'—', position:'—', yearJoined:'—', gamesPlayed:games+opening, openingBalanceGames:0 };
-        if(firebaseReady&&db) await db.collection("config").doc("playerProfiles").set(playerProfiles);
-        refreshAll();
-    }
-    
-    async function saveGuest(g){
-        if(firebaseReady&&db) await db.collection("guests").doc(`${g.guestName}_${g.gameDate}`).set(g);
-        guests.push(g);
-        refreshAll();
-    }
-    
-    async function saveTeamAssignments(date,assign){
-        teamAssignments[date] = assign;
-        if(firebaseReady&&db) await db.collection("config").doc("teamAssignments").set(teamAssignments);
-        refreshAll();
-    }
-    
-    async function saveComment(date,author,text){
-        const c={ gameDate:date, author, text, timestamp:Date.now() };
-        if(firebaseReady&&db) await db.collection("matchComments").add(c);
-        if(!matchComments[date]) matchComments[date]=[];
-        matchComments[date].push(c);
-        renderHistoryPage();
-    }
-    
-    async function saveMatchResult(date,yellow,orange,goals,assists,mvp,injuries){
-        matchResults[date] = { yellowScore:yellow, orangeScore:orange, goals, assists:assists||{}, mvp, injuries:injuries||[], timestamp:Date.now() };
-        if(firebaseReady&&db) await db.collection("config").doc("matchResults").set(matchResults);
-        renderHistoryPage();
-        renderScoreboardPage();
-        if(isAdminLoggedIn) renderAdminPage();
-        const weekLabel = ALL_WEEKS.find(w=>w.dateStr===date)?.label || date;
-        const report = generateAIMatchReport(weekLabel, yellow, orange, goals, assists, mvp, injuries);
-        alert("✅ Match saved!");
-        return report;
-    }
-    
-    async function saveChatMessage(msg){
-        if(!currentUser || !msg.trim()) return;
-        if(firebaseReady&&db) await db.collection("chatMessages").add({ name:currentUser.name, message:msg.trim(), timestamp:firebase.firestore.FieldValue.serverTimestamp() });
-    }
-    
-    async function setAttendance(status){
-        if(!currentUser){ alert("Login required"); return; }
-        await saveAttendance({ player:currentUser.name, gameDate:CURRENT_GAME_STR, status:status });
-    }
-    
-    async function addGuestToWeek(guestName, gameDate){
-        if(!isAdminLoggedIn){ alert("Admin access required."); return false; }
-        if(guests.some(g=>g.gameDate===gameDate && g.guestName===guestName.trim())){ alert("Guest already exists"); return false; }
-        await saveGuest({ guestName:guestName.trim(), gameDate:gameDate, addedBy:currentUser?.name || "Admin" });
-        alert(`✅ Guest "${guestName}" added!`);
-        refreshAll();
-        return true;
-    }
-    
-    function refreshAll(){ renderHomePage(); renderTeamsPage(); renderHistoryPage(); renderProfilesPage(); renderScoreboardPage(); renderTimerPage(); renderChatPage(); renderWeatherPage(); renderRulesPage(); renderFinancePage(); if(isAdminLoggedIn) renderAdminPage(); }
-    
-    // RENDER FUNCTIONS (simplified for space - full versions included)
-    function renderHomePage(){ /* Same as original */ const c=document.getElementById("homeContainer"); if(!c) return; const gl=getCurrentGameLabel(); const status=attendance.find(a=>a.gameDate===CURRENT_GAME_STR && a.player===currentUser?.name)?.status; const parts=getAllParticipants(CURRENT_GAME_STR); c.innerHTML=`<div class="info-bar"><i class="fas fa-calendar-alt"></i> Next Match: ${gl} • 8:00pm Clifton Park</div><div class="attendance-card"><h2>${gl} • 8pm</h2><div class="big-buttons"><button id="homePlayBtn" class="btn-play-big">✅ I'M PLAYING</button><button id="homeSitBtn" class="btn-sit-big">❌ CAN'T PLAY</button></div><div>${status==='in'?'✓ You are PLAYING':(status==='out'?'✗ You are NOT PLAYING':'Tap above')}</div></div><div class="playing-list"><div>🟢 Players (${parts.players.length})</div><div>${parts.players.map(p=>`<span class="attendee-tag">${renderMiniAvatar(p,28)} ${escapeHtml(p)} <button class="remove-attendee-btn" data-player="${escapeHtml(p)}" data-date="${CURRENT_GAME_STR}"><i class="fas fa-trash-alt"></i></button></span>`).join('')||'None'}</div></div><div class="guest-section"><div>🎭 Guests</div><div>${parts.guests.map(g=>`<span><i class="fas fa-user-plus"></i> ${escapeHtml(g.name)}</span>`).join('')||'None'}</div><div><input id="guestNameInput" placeholder="Guest name"><button id="addGuestBtnPlayer">➕ Bring a Guest</button></div></div>`; document.getElementById("homePlayBtn")?.addEventListener("click",()=>setAttendance("in")); document.getElementById("homeSitBtn")?.addEventListener("click",()=>setAttendance("out")); document.getElementById("addGuestBtnPlayer")?.addEventListener("click",()=>{ const gn=document.getElementById("guestNameInput")?.value.trim(); if(gn) addGuestToWeek(gn, CURRENT_GAME_STR); }); document.querySelectorAll(".remove-attendee-btn").forEach(btn=>btn.addEventListener("click",async(e)=>{ await removeAttendee(btn.dataset.player, btn.dataset.date); })); }
-    
-    function renderTeamsPage(){ const c=document.getElementById("page-teamswk"); if(!c) return; const gl=getCurrentGameLabel(); const parts=getAllParticipants(CURRENT_GAME_STR); const allList=[...parts.players.map(p=>({ name:p, isG:false })), ...parts.guests.map(g=>({ name:g.name, isG:true }))]; const assign=teamAssignments[CURRENT_GAME_STR]||{}; const yellow=[], orange=[]; for(let p of allList){ const t=assign[p.name] || assign[`guest_${p.name}`]; if(t==="yellow") yellow.push(p); else if(t==="orange") orange.push(p); } c.innerHTML=`<div class="info-bar">${gl}</div><div class="card"><div class="team-row"><div class="team-box"><div class="team-yellow">🟡 YELLOW (${yellow.length})</div><div class="player-list">${yellow.map(p=>`<div class="player-tag">${renderMiniAvatar(p.name,24)} ${escapeHtml(p.name)}${p.isG?' <span class="guest-tag-small">Guest</span>':''}</div>`).join('')||'—'}</div></div><div class="team-box"><div class="team-orange">🟠 ORANGE (${orange.length})</div><div class="player-list">${orange.map(p=>`<div class="player-tag">${renderMiniAvatar(p.name,24)} ${escapeHtml(p.name)}${p.isG?' <span class="guest-tag-small">Guest</span>':''}</div>`).join('')||'—'}</div></div></div></div><button id="shareTeamSheetBtn" class="whatsapp-share"><i class="fab fa-whatsapp"></i> Share Team Sheet</button>`; document.getElementById("shareTeamSheetBtn")?.addEventListener("click",()=>{ const sheet=generateTeamSheet(yellow,orange,gl); window.open(`https://wa.me/?text=${encodeURIComponent(sheet)}`,'_blank'); }); }
-    
-    function renderHistoryPage(){ const c=document.getElementById("page-history"); if(!c) return; const past=getPastWeeks().slice(0,6); if(past.length===0){ c.innerHTML=`<div class="card"><h2>📖 History</h2><p>No past games yet</p></div>`; return; } let h=`<div class="card"><h2>📖 MATCH HISTORY</h2></div>`; for(let w of past){ const assign=teamAssignments[w.dateStr]||{}; const participants=getAllParticipants(w.dateStr); const allPlayers=[...participants.players,...participants.guests.map(g=>g.name)]; const yellow=[], orange=[]; for(let player of allPlayers){ const t=assign[player]||assign[`guest_${player}`]; if(t==="yellow") yellow.push(player); else if(t==="orange") orange.push(player); } const m=matchResults[w.dateStr]||{ yellowScore:0, orangeScore:0, goals:{}, mvp:'', injuries:[], assists:{} }; const cmts=matchComments[w.dateStr]||[]; h+=`<div class="match-card"><div class="match-header"><div><i class="fas fa-calendar-alt"></i> ${w.label}</div><div class="match-result">🟡 ${m.yellowScore} - ${m.orangeScore} 🟠</div></div><div class="teams-section"><div class="team-row"><div class="team-box"><div class="team-yellow">🟡 YELLOW (${yellow.length})</div><div class="player-list">${yellow.map(p=>`<div class="player-tag">${renderMiniAvatar(p,24)} ${escapeHtml(p)}</div>`).join('')||'—'}</div></div><div class="team-box"><div class="team-orange">🟠 ORANGE (${orange.length})</div><div class="player-list">${orange.map(p=>`<div class="player-tag">${renderMiniAvatar(p,24)} ${escapeHtml(p)}</div>`).join('')||'—'}</div></div></div><div class="score-big">${m.yellowScore} - ${m.orangeScore}</div></div><div class="goals-section"><div><i class="fas fa-futbol"></i> <strong>GOAL SCORERS</strong></div><div>${Object.entries(m.goals||{}).map(([pl,cnt])=>`<div class="goal-badge">⚽ ${escapeHtml(pl)} ×${cnt}</div>`).join('')||'<span style="color:#6c757d;">No goals</span>'}</div>${m.assists&&Object.keys(m.assists).length?`<div><span class="goal-badge">🎯 Assists: ${Object.entries(m.assists).map(([a,c])=>`${escapeHtml(a)}(${c})`).join(', ')}</span></div>`:''}${m.mvp?`<div><span class="goal-badge">🏆 MVP: ${escapeHtml(m.mvp)}</span></div>`:''}</div><div class="comments-section"><div><i class="fas fa-comments"></i> <strong>COMMENTS</strong></div><div>${cmts.map(c=>`<div class="comment-item"><strong>${escapeHtml(c.author)}</strong><br>${escapeHtml(c.text)}</div>`).join('')||'No comments'}</div><div class="add-comment"><input id="commentInput-${w.dateStr.replace(/-/g,'')}" placeholder="Add comment..."><button onclick="window.addComment('${w.dateStr}')">Post</button></div></div><button class="whatsapp-share" onclick="window.shareReport('${w.dateStr}')"><i class="fab fa-whatsapp"></i> Share Report</button></div>`; } c.innerHTML=h; }
-    window.addComment = async function(date){ if(!currentUser) return; const inp=document.getElementById(`commentInput-${date.replace(/-/g,'')}`); if(inp?.value.trim()){ await saveComment(date, currentUser.name, inp.value.trim()); inp.value=""; renderHistoryPage(); } };
-    window.shareReport = function(date){ const m=matchResults[date]||{}; const w=ALL_WEEKS.find(w=>w.dateStr===date); const report=generateAIMatchReport(w?.label||date, m.yellowScore||0, m.orangeScore||0, m.goals||{}, m.assists||{}, m.mvp||'', m.injuries||[]); window.open(`https://wa.me/?text=${encodeURIComponent(report)}`,'_blank'); };
-    
-    function renderProfilesPage(){ const c=document.getElementById("page-profiles"); if(!c) return; let h=`<div class="card"><h2>👤 Player Profiles</h2>`; for(let p of players){ const prof=playerProfiles[p]||{}; h+=`<div class="profile-item">${renderAvatar(p,50)}<div><div>⚽ ${escapeHtml(p)} <button class="edit-profile-btn" data-player="${escapeHtml(p)}">Edit</button></div><div><span class="profile-badge">🎂 ${prof.age||'—'}</span><span class="profile-badge">⚽ ${prof.position||'—'}</span><span class="profile-badge">📅 ${prof.yearJoined||'—'}</span></div></div></div>`; } c.innerHTML=h; document.querySelectorAll(".edit-profile-btn").forEach(btn=>btn.addEventListener("click",()=>showEditProfile(btn.dataset.player))); }
-    function showEditProfile(name){ const ex=playerProfiles[name]||{}; const modal=document.createElement('div'); modal.className='modal'; modal.innerHTML=`<div class="modal-content"><h3>Edit ${escapeHtml(name)}</h3><input id="editAge" placeholder="Age" value="${ex.age||''}"><select id="editPosition">${["Goalkeeper","Defender","Midfielder","Striker","Winger"].map(p=>`<option ${ex.position===p?'selected':''}>${p}</option>`).join('')}</select><input id="editYear" placeholder="Year Joined" value="${ex.yearJoined||''}"><div class="flex-btns"><button id="saveBtn">Save</button><button id="cancelBtn">Cancel</button></div></div>`; document.body.appendChild(modal); document.getElementById("saveBtn").onclick=()=>{ playerProfiles[name]={ age:document.getElementById("editAge").value||'—', position:document.getElementById("editPosition").value, yearJoined:document.getElementById("editYear").value||'—', gamesPlayed:0, openingBalanceGames:0 }; if(firebaseReady&&db) db.collection("config").doc("playerProfiles").set(playerProfiles); modal.remove(); renderProfilesPage(); }; document.getElementById("cancelBtn").onclick=()=>modal.remove(); }
-    
-    function renderScoreboardPage(){ const c=document.getElementById("page-scoreboard"); if(!c) return; let stats=new Map(); for(let p of players) stats.set(p,{goals:0,gamesPlayed:0,assists:0}); attendance.forEach(a=>{if(a.status==='in'&&stats.has(a.player))stats.get(a.player).gamesPlayed++;}); for(let match of Object.values(matchResults)){ if(match.goals) for(let[scorer,count] of Object.entries(match.goals)) if(stats.has(scorer)) stats.get(scorer).goals+=count; if(match.assists) for(let[assister,count] of Object.entries(match.assists)) if(stats.has(assister)) stats.get(assister).assists+=count; } const topGoals=Array.from(stats.entries()).map(([n,s])=>({name:n,goals:s.goals})).sort((a,b)=>b.goals-a.goals).slice(0,10); c.innerHTML=`<div class="card"><h2>🏆 ALL-TIME LEADERBOARD</h2><div><h3>⚽ TOP GOAL SCORERS</h3>${topGoals.map((p,i)=>`<div style="display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #eee;"><span>${i+1}. ${renderMiniAvatar(p.name,24)} ${escapeHtml(p.name)}</span><span><strong>${p.goals}</strong></span></div>`).join('')}</div></div>`; }
-    
-    function renderTimerPage(){ const c=document.getElementById("page-timer"); if(!c) return; c.innerHTML=`<div class="timer-container"><div class="timer-display" id="timerDisplay">45:00</div><div class="flex-btns"><button class="timer-btn start" id="timerStartBtn">▶ Start</button><button class="timer-btn pause" id="timerPauseBtn">⏸ Pause</button><button class="timer-btn reset" id="timerResetBtn">⟳ Reset</button></div><div class="half-status"><span id="currentHalf">FIRST HALF</span></div></div>`; function update(){ document.getElementById("timerDisplay")&&(document.getElementById("timerDisplay").innerText=`${Math.floor(timeLeft/60).toString().padStart(2,'0')}:${(timeLeft%60).toString().padStart(2,'0')}`); } update(); document.getElementById("timerStartBtn")?.addEventListener("click",()=>{ if(timerInterval) clearInterval(timerInterval); timerInterval=setInterval(()=>{ if(timeLeft<=0){ clearInterval(timerInterval); if(currentHalf===1){ currentHalf=2; timeLeft=45*60; update(); alert("HALF TIME! Second half starts now."); } else { alert("FULL TIME!"); timerInterval=null; } } else { timeLeft--; update(); } },1000); }); document.getElementById("timerPauseBtn")?.addEventListener("click",()=>{ if(timerInterval) clearInterval(timerInterval); timerInterval=null; }); document.getElementById("timerResetBtn")?.addEventListener("click",()=>{ if(timerInterval) clearInterval(timerInterval); timerInterval=null; currentHalf=1; timeLeft=45*60; update(); }); }
-    
-    function renderChatPage(){ const c=document.getElementById("page-chat"); if(!c) return; c.innerHTML=`<div class="card"><h2>💬 Team Chat</h2><div id="chatMessagesList" style="height:350px;overflow-y:auto;background:#f8f9fa;border-radius:20px;padding:12px;margin-bottom:12px;"></div><div style="display:flex;gap:8px;"><input id="chatInput" placeholder="Type message..." style="flex:1;"><button id="chatSendBtn">Send</button></div></div>`; if(firebaseReady&&db){ db.collection("chatMessages").orderBy("timestamp","asc").onSnapshot(snap=>{ const div=document.getElementById("chatMessagesList"); if(div){ let h=""; snap.forEach(doc=>{ const m=doc.data(); const t=m.timestamp?new Date(m.timestamp.toDate()).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):""; h+=`<div><strong>${escapeHtml(m.name)}</strong> <span style="font-size:10px;color:#6c757d;">${t}</span><div style="background:#e9ecef;border-radius:12px;padding:8px;margin-top:4px;">${escapeHtml(m.message)}</div></div>`; }); div.innerHTML=h||"<div style='text-align:center;padding:20px;'>No messages</div>"; div.scrollTop=div.scrollHeight; } }); } document.getElementById("chatSendBtn")?.addEventListener("click",async()=>{ const inp=document.getElementById("chatInput"); if(inp?.value.trim() && currentUser){ if(firebaseReady&&db) await db.collection("chatMessages").add({ name:currentUser.name, message:inp.value.trim(), timestamp:firebase.firestore.FieldValue.serverTimestamp() }); inp.value=""; } }); }
-    
-    function renderWeatherPage(){ const c=document.getElementById("page-weather"); if(c) c.innerHTML=`<div class="card"><h2>🌤️ Forecast ${getCurrentGameLabel()}</h2><div style="text-align:center;"><i class="fas ${weatherData.icon}" style="font-size:48px;color:#1a73e8;"></i><h3>${weatherData.condition}</h3><h1>${weatherData.temp}</h1><p>Rain: ${weatherData.rainChance}%</p></div></div>`; }
-    function renderRulesPage(){ const c=document.getElementById("page-rules"); if(c) c.innerHTML=`<div class="card"><h2>📜 League Rules</h2><div>• 8:00pm SHARP kickoff at Clifton Park<br>• Captain rotates weekly<br>• RSVP mandatory<br>• Guests welcome!<br>• $5 weekly fee - pay via Financials tab<br>• Only players who play owe the fee<br>• Match reports generated after each game</div></div>`; }
-    
-    // FINANCE PAGE - Only shows players who played each week
-    function renderFinancePage(){
-        const c = document.getElementById("page-finance");
-        if(!c) return;
-        
-        const totalCollected = getTotalCollected();
-        const totalExpected = getTotalExpected();
-        const outstanding = getOutstandingBalance();
-        
-        // Group by week for weekly collection view
-        let weeklySummary = "";
-        const recentWeeks = [...ALL_WEEKS].slice(0,8);
-        for(const week of recentWeeks){
-            const playersWhoPlayed = getPlayersWhoPlayed(week.dateStr);
-            const weekPayments = paymentRecords[week.dateStr] || {};
-            const paidCount = playersWhoPlayed.filter(p => weekPayments[p]?.paid === true).length;
-            const collectedThisWeek = paidCount * WEEKLY_FEE;
-            const weekLabel = week.label;
-            weeklySummary += `<div style="background:#f8f9fa; border-radius:16px; padding:12px; margin-bottom:8px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-                    <div><strong>${weekLabel}</strong><br><span style="font-size:11px; color:#6c757d;">${playersWhoPlayed.length} players played</span></div>
-                    <div><span style="background:#1a73e8; color:white; padding:4px 12px; border-radius:40px; font-size:13px;">Collected: $${collectedThisWeek}</span></div>
-                </div>
-                <div style="margin-top:8px; font-size:11px;">
-                    <span class="${paidCount === playersWhoPlayed.length ? 'paid-badge' : 'debt-badge'}" style="padding:2px 8px;">${paidCount}/${playersWhoPlayed.length} paid</span>
-                </div>
-                <div style="margin-top:8px; font-size:11px; color:#6c757d;">
-                    Unpaid: ${playersWhoPlayed.filter(p => !weekPayments[p]?.paid).map(p=>escapeHtml(p)).join(', ') || 'All paid!'}
-                </div>
-            </div>`;
-        }
-        
-        // Player-by-player view
-        let playerRows = "";
-        for(let player of players){
-            const { paidWeeks, unpaidWeeks, totalOwed, totalPaid } = getPlayerPaymentStatus(player);
-            if(paidWeeks.length === 0 && unpaidWeeks.length === 0) continue;
-            playerRows += `<div class="finance-row">
-                <div style="display:flex;align-items:center;gap:8px;">${renderMiniAvatar(player,32)} <strong>${escapeHtml(player)}</strong></div>
-                <div><span style="font-size:11px;">Paid: $${totalPaid} | Owed: $${totalOwed}</span></div>
-                <div><span class="${totalOwed>0?'debt-badge':'paid-badge'}">${totalOwed>0 ? `OWES $${totalOwed}` : 'ALL PAID'}</span></div>
-                ${unpaidWeeks.length > 0 ? `<div><button class="pay-btn" data-player="${escapeHtml(player)}" data-week="${unpaidWeeks[0]}">💰 Pay $${WEEKLY_FEE}</button></div>` : ''}
-            </div>`;
-        }
-        
-        c.innerHTML = `<div class="card"><h2><i class="fas fa-dollar-sign"></i> FINANCIALS - $${WEEKLY_FEE}/Week</h2>
-            <div class="finance-summary">
-                <h3>💰 TOTAL COLLECTED</h3>
-                <div class="big-number">$${totalCollected}</div>
-                <hr style="margin:12px 0; border-color:rgba(255,255,255,0.3);">
-                <div style="display:flex; justify-content:space-between;">
-                    <div><small>Expected: $${totalExpected}</small></div>
-                    <div><small>Outstanding: $${outstanding}</small></div>
-                </div>
-            </div>
-            <h3 style="font-size:15px; margin-bottom:12px;">📆 WEEKLY COLLECTION</h3>
-            ${weeklySummary}
-            <h3 style="font-size:15px; margin:16px 0 12px;">👤 PLAYER BALANCES</h3>
-            ${playerRows || '<div style="text-align:center; padding:20px; color:#6c757d;">No payment records yet</div>'}
-        </div>`;
-        
-        document.querySelectorAll(".pay-btn").forEach(btn => btn.addEventListener("click", async () => {
-            await markPlayerPaid(btn.dataset.player, btn.dataset.week);
-        }));
-    }
-    
-    function renderAdminPage(){
-        if(!isAdminLoggedIn){ const c=document.getElementById("page-admin"); if(c) c.innerHTML=`<div class="card"><h2>🔒 Admin</h2><button id="adminLoginBtn">Admin Login</button></div>`; document.getElementById("adminLoginBtn")?.addEventListener("click",()=>{ if(prompt("Enter admin password:")==="admin123"){ isAdminLoggedIn=true; renderAdminPage(); refreshAll(); } else alert("Wrong password"); }); return; }
-        const parts=getAllParticipants(CURRENT_GAME_STR);
-        const currAssign=teamAssignments[CURRENT_GAME_STR]||{};
-        let teamHtml = `<div class="card"><h2>⚽ Assign Teams (Current Week)</h2>`;
-        for(let p of parts.players){
-            const current = currAssign[p] || "";
-            teamHtml += `<div class="admin-team-item"><span>${renderMiniAvatar(p,24)} ${escapeHtml(p)}</span><select data-name="${escapeHtml(p)}" class="team-select"><option value="">Unassigned</option><option value="yellow" ${current==="yellow"?"selected":""}>🟡 Yellow</option><option value="orange" ${current==="orange"?"selected":""}>🟠 Orange</option></select></div>`;
-        }
-        teamHtml += `<div class="flex-btns"><button id="saveTeamsBtn">💾 Save Teams</button><button id="autoBalanceBtn">🔄 Auto-Balance</button></div></div>
-        <div class="card"><h2>🎭 Add Guest</h2><input id="adminGuestName" placeholder="Guest Name"><button id="adminAddGuestBtn">➕ Add Guest</button></div>`;
-        document.getElementById("page-admin").innerHTML = teamHtml;
-        document.getElementById("saveTeamsBtn")?.addEventListener("click",()=>{ const newAssign={}; document.querySelectorAll(".team-select").forEach(sel=>{ if(sel.value) newAssign[sel.dataset.name]=sel.value; }); saveTeamAssignments(CURRENT_GAME_STR,newAssign); });
-        document.getElementById("autoBalanceBtn")?.addEventListener("click",()=>{ const shuffled=[...parts.players]; for(let i=shuffled.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]; } const half=Math.ceil(shuffled.length/2); const auto={}; shuffled.forEach((p,idx)=>{ auto[p]=idx<half?"yellow":"orange"; }); saveTeamAssignments(CURRENT_GAME_STR,auto); renderAdminPage(); renderTeamsPage(); });
-        document.getElementById("adminAddGuestBtn")?.addEventListener("click", async () => { const inp = document.getElementById("adminGuestName"); if(inp?.value.trim()) await addGuestToWeek(inp.value.trim(), CURRENT_GAME_STR); });
-    }
-    
-    function showLoginModal(){
-        const modal=document.createElement('div'); modal.className='modal'; 
-        modal.innerHTML=`<div class="modal-content"><div class="logo-icon" style="margin:0 auto 20px;"><i class="fas fa-futbol"></i></div><h3 style="text-align:center;">Monday Night Soccer</h3><select id="loginNameSelect"><option value="">Select your name</option>${FIXED_PLAYERS_LIST.map(p=>`<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('')}</select><button id="loginBtn" style="width:100%;">Login</button><button id="adminSwitchBtn" class="btn-outline" style="width:100%;margin-top:10px;">🔐 Admin Access</button></div>`;
-        document.body.appendChild(modal);
-        document.getElementById("loginBtn").onclick=()=>{ const name=document.getElementById("loginNameSelect").value; if(name && FIXED_PLAYERS_LIST.includes(name)){ currentUser={name}; isAdminLoggedIn=false; modal.remove(); document.getElementById("userNameDisplay").innerText=name; document.getElementById("logoutBtn").style.display="inline-block"; refreshAll(); } else alert("Select your name"); };
-        document.getElementById("adminSwitchBtn").onclick=()=>{ const pw=prompt("Admin password:"); if(pw==="admin123"){ isAdminLoggedIn=true; currentUser={name:"Admin"}; document.getElementById("userNameDisplay").innerText="Admin"; document.getElementById("logoutBtn").style.display="inline-block"; modal.remove(); refreshAll(); renderAdminPage(); } else alert("Wrong password"); };
-    }
-    function logout(){ currentUser=null; isAdminLoggedIn=false; document.getElementById("userNameDisplay").innerText="Not logged in"; document.getElementById("logoutBtn").style.display="none"; showLoginModal(); refreshAll(); }
-    
-    async function fetchWeather(){
-        try{
-            const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=-37.77&longitude=144.97&hourly=temperature_2m,precipitation_probability,weathercode&timezone=Australia/Melbourne&forecast_days=7');
-            const d=await r.json();
-            const target=CURRENT_GAME_STR;
-            for(let i=0;i<d.hourly.time.length;i++){
-                const hd=d.hourly.time[i].split('T')[0];
-                const hr=parseInt(d.hourly.time[i].split('T')[1].substring(0,2));
-                if(hd===target && hr===20){
-                    const t=Math.round(d.hourly.temperature_2m[i]);
-                    const code=d.hourly.weathercode[i];
-                    let cond="Clear", icon="fa-sun";
-                    if(code===0){ cond="Clear"; icon="fa-sun"; }
-                    else if(code===1||code===2){ cond="Partly cloudy"; icon="fa-cloud-sun"; }
-                    else if(code===3){ cond="Overcast"; icon="fa-cloud"; }
-                    else if(code>=51&&code<=67){ cond="Light rain"; icon="fa-cloud-rain"; }
-                    else if(code>=80&&code<=99){ cond="Rain/storm"; icon="fa-cloud-bolt"; }
-                    weatherData={ temp:`${t}°C`, condition:cond, icon, rainChance:d.hourly.precipitation_probability[i]||0 };
-                    break;
-                }
-            }
-        } catch(e){}
-        renderWeatherPage();
-    }
-    
-    function initApp(){
-        const appDiv=document.getElementById("app");
-        appDiv.innerHTML=`<div class="header"><div class="logo-icon"><i class="fas fa-futbol"></i></div><h1>MONDAY NIGHT SOCCER</h1><div class="user-row"><span id="userNameDisplay">Not logged in</span><button id="logoutBtn" style="display:none;">Logout</button></div></div><div class="top-nav"><button class="nav-module active" data-module="home">🏠 Home</button><button class="nav-module" data-module="teamswk">⚽ Teams</button><button class="nav-module" data-module="history">📖 History</button><button class="nav-module" data-module="scoreboard">🏆 Stats</button><button class="nav-module" data-module="profiles">👤 Profiles</button><button class="nav-module" data-module="timer">⏱️ Timer</button><button class="nav-module" data-module="chat">💬 Chat</button><button class="nav-module" data-module="finance">💰 Financials</button><button class="nav-module" data-module="weather">🌤️ Weather</button><button class="nav-module" data-module="rules">📜 Rules</button><button class="nav-module" data-module="admin">🔧 Admin</button></div><div id="homeContainer" class="module-container active-module"></div><div id="page-teamswk" class="module-container"></div><div id="page-history" class="module-container"></div><div id="page-scoreboard" class="module-container"></div><div id="page-profiles" class="module-container"></div><div id="page-timer" class="module-container"></div><div id="page-chat" class="module-container"></div><div id="page-finance" class="module-container"></div><div id="page-weather" class="module-container"></div><div id="page-rules" class="module-container"></div><div id="page-admin" class="module-container"></div>`;
-        document.querySelectorAll(".nav-module").forEach(btn=>{ btn.addEventListener("click",()=>{ document.querySelectorAll(".nav-module").forEach(b=>b.classList.remove("active")); btn.classList.add("active"); const mod=btn.dataset.module; document.querySelectorAll(".module-container").forEach(c=>c.classList.remove("active-module")); if(mod==="home") document.getElementById("homeContainer").classList.add("active-module"); else document.getElementById(`page-${mod}`).classList.add("active-module"); if(mod==="finance") renderFinancePage(); if(mod==="chat") renderChatPage(); }); });
-        document.getElementById("logoutBtn").onclick=logout;
-        if(firebaseReady) loadData().then(()=>{ showLoginModal(); fetchWeather(); }); else { showLoginModal(); fetchWeather(); refreshAll(); }
-    }
-    initApp();
-</script>
-</body>
-</html>
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const GUESTS_COLLECTION = "wedding_guests";
+    const RESPONSES_COLLECTION = "guest_responses";
+    const ADMIN_PASSWORD = "LauraDaniel2026";
+    const submissionTracker = new Map();
+
+    const preloadedGuests = [
+        { name: "Rossi Mel", type: "couple", maxGuests: 2, code: "CRO102" }, { name: "Gianni Laverde", type: "single", maxGuests: 1, code: "SGL103" },
+        { name: "
