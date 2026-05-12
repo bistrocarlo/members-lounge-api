@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Wedding Seating Manager | Daniel & Laura</title>
+    <title>Wedding Seating Manager | Search & Assign</title>
     <style>
         * {
             margin: 0;
@@ -90,6 +90,80 @@
         .btn-secondary {
             background: #e8dcc8;
             color: #5a4a35;
+        }
+
+        .search-box {
+            background: white;
+            border-radius: 20px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border: 1px solid #e8dcc8;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 18px;
+            border-radius: 40px;
+            border: 1px solid #e8dcc8;
+            font-size: 1rem;
+            font-family: inherit;
+            background: #fefcf8;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #c9a84c;
+            box-shadow: 0 0 0 2px rgba(201,168,76,0.2);
+        }
+
+        .search-results {
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #e8dcc8;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 25px;
+            display: none;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        .search-result-item {
+            padding: 12px 18px;
+            border-bottom: 1px solid #e8dcc8;
+            cursor: pointer;
+            transition: background 0.1s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .search-result-item:hover {
+            background: #faf5ea;
+        }
+
+        .result-name {
+            font-weight: 500;
+        }
+
+        .result-group {
+            font-size: 0.7rem;
+            color: #c9a84c;
+            margin-left: 10px;
+        }
+
+        .assign-table-select {
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid #e8dcc8;
+            background: #fefcf8;
+            font-size: 0.75rem;
         }
 
         .main-layout {
@@ -191,14 +265,6 @@
             color: #c9a84c;
         }
 
-        select, input {
-            padding: 8px 12px;
-            border-radius: 20px;
-            border: 1px solid #e8dcc8;
-            background: #fefcf8;
-            font-size: 0.75rem;
-        }
-
         .warning {
             background: #fff3e0;
             border-radius: 16px;
@@ -264,6 +330,12 @@
             100% { opacity: 0; visibility: hidden; }
         }
 
+        .table-quick-select {
+            padding: 8px 12px;
+            width: 100%;
+            font-size: 0.75rem;
+        }
+
         @media (max-width: 700px) {
             .main-layout { flex-direction: column; }
             .guests-area { position: static; }
@@ -299,9 +371,10 @@
     const MAX_PER_TABLE = 11;
     const MIN_PER_TABLE = 6;
 
-    let allAttendees = [];      // List of individual people attending
-    let tableAssignments = new Map();  // tableId -> { name, guests: [] }
-    let attendeeTableMap = new Map();  // attendeeId -> tableId
+    let allAttendees = [];
+    let tableAssignments = new Map();
+    let attendeeTableMap = new Map();
+    let currentSearchTerm = "";
 
     function showToast(msg) {
         const existing = document.querySelector('.toast');
@@ -325,7 +398,6 @@
         }
     }
 
-    // Initialize empty tables (1-32 + bridal)
     function initTables() {
         tableAssignments.clear();
         for (let i = 1; i <= TOTAL_TABLES; i++) {
@@ -334,26 +406,21 @@
         tableAssignments.set(BRIDAL_TABLE, { name: "👰 Bridal Table", guests: [] });
     }
 
-    // Load guest data from Firebase and build attendee list
     async function loadData() {
         showLoading(true);
         try {
-            // Get all guests
             const guestsSnap = await getDocs(collection(db, GUESTS_COLLECTION));
             const guests = guestsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
             
-            // Get all responses
             const responsesSnap = await getDocs(collection(db, RESPONSES_COLLECTION));
             const responses = responsesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
             
-            // Build attendee list from responses
             allAttendees = [];
             
             for (const guest of guests) {
                 const response = responses.find(r => r.guestCode === guest.code);
                 
                 if (response && response.guestNames && response.guestNames.length > 0) {
-                    // Has named guests
                     for (let i = 0; i < response.guestNames.length; i++) {
                         allAttendees.push({
                             id: `${guest.code}_${i}`,
@@ -364,7 +431,6 @@
                         });
                     }
                 } else if (response && response.fullName) {
-                    // Has full name but no guestNames array
                     allAttendees.push({
                         id: `${guest.code}_main`,
                         name: response.fullName,
@@ -373,7 +439,6 @@
                         isManual: false
                     });
                 } else if (guest.replied === true) {
-                    // Replied but no name data
                     allAttendees.push({
                         id: `${guest.code}_default`,
                         name: guest.name,
@@ -384,13 +449,11 @@
                 }
             }
             
-            // Load saved seating from Firebase
             const seatingDoc = await getDoc(doc(db, SEATING_COLLECTION, "master"));
             if (seatingDoc.exists()) {
                 const data = seatingDoc.data();
                 if (data.tableAssignments) {
                     tableAssignments = new Map(Object.entries(data.tableAssignments));
-                    // Rebuild attendeeTableMap
                     attendeeTableMap.clear();
                     for (const [tableId, table] of tableAssignments.entries()) {
                         for (const guest of table.guests) {
@@ -404,13 +467,6 @@
                 initTables();
             }
             
-            // Make sure all attendees are tracked in maps (unassigned ones not in any table)
-            for (const attendee of allAttendees) {
-                if (!attendeeTableMap.has(attendee.id)) {
-                    // Not assigned - will appear in unassigned list
-                }
-            }
-            
             renderUI();
         } catch (err) {
             console.error(err);
@@ -420,18 +476,15 @@
         }
     }
 
-    // Assign attendee to a table
     function assignAttendee(attendee, tableId) {
         const table = tableAssignments.get(tableId);
         if (!table) return false;
         
-        // Check capacity (bridal table has no limit)
         if (tableId !== BRIDAL_TABLE && table.guests.length >= MAX_PER_TABLE) {
             showToast(`Table ${tableId} is full (max ${MAX_PER_TABLE} guests)`);
             return false;
         }
         
-        // Remove from old table if exists
         const oldTableId = attendeeTableMap.get(attendee.id);
         if (oldTableId) {
             const oldTable = tableAssignments.get(oldTableId);
@@ -440,7 +493,6 @@
             }
         }
         
-        // Add to new table
         table.guests.push({ ...attendee });
         attendeeTableMap.set(attendee.id, tableId);
         
@@ -448,7 +500,6 @@
         return true;
     }
 
-    // Remove attendee from table
     function removeAttendee(attendeeId, tableId) {
         const table = tableAssignments.get(tableId);
         if (table) {
@@ -458,7 +509,6 @@
         }
     }
 
-    // Add manual guest to bridal table
     function addBridalGuest() {
         const name = prompt("Enter bridal party member name:");
         if (!name || name.trim() === "") return;
@@ -479,7 +529,6 @@
         showToast(`Added ${name} to Bridal Table`);
     }
 
-    // Save seating to Firebase
     async function saveSeating() {
         showLoading(true);
         try {
@@ -500,12 +549,10 @@
         }
     }
 
-    // Get unassigned attendees
     function getUnassigned() {
         return allAttendees.filter(a => !attendeeTableMap.has(a.id));
     }
 
-    // Get table warnings
     function getWarnings() {
         const warnings = [];
         for (const [tid, table] of tableAssignments.entries()) {
@@ -519,6 +566,15 @@
             }
         }
         return warnings;
+    }
+
+    function searchGuests(searchTerm) {
+        if (!searchTerm.trim()) return [];
+        const term = searchTerm.toLowerCase().trim();
+        return allAttendees.filter(a => 
+            a.name.toLowerCase().includes(term) || 
+            a.group.toLowerCase().includes(term)
+        );
     }
 
     function escapeHtml(str) {
@@ -535,6 +591,7 @@
         const app = document.getElementById('app');
         const unassigned = getUnassigned();
         const warnings = getWarnings();
+        const searchResults = currentSearchTerm ? searchGuests(currentSearchTerm) : [];
         
         let totalSeated = 0;
         for (const table of tableAssignments.values()) {
@@ -563,20 +620,52 @@
                     <button class="btn btn-secondary" id="addBridalBtn">➕ Add to Bridal Table</button>
                 </div>
                 
+                <!-- Search Bar -->
+                <div class="search-box">
+                    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search guest by name... (e.g., 'Rossi', 'Maria', 'Frank')" autocomplete="off">
+                    <button class="btn" id="searchBtn">Search</button>
+                    <button class="btn btn-secondary" id="clearSearchBtn">Clear</button>
+                </div>
+                
+                <!-- Search Results -->
+                <div id="searchResults" class="search-results ${searchResults.length > 0 ? 'active' : ''}">
+                    ${searchResults.map(guest => `
+                        <div class="search-result-item" data-guest-id="${guest.id}">
+                            <div>
+                                <span class="result-name">${escapeHtml(guest.name)}</span>
+                                <span class="result-group">(${escapeHtml(guest.group)})</span>
+                                ${attendeeTableMap.has(guest.id) ? `<span style="font-size:0.65rem; color:#27ae60; margin-left:8px;">✓ Already at ${tableAssignments.get(attendeeTableMap.get(guest.id))?.name || 'a table'}</span>` : ''}
+                            </div>
+                            <div>
+                                <select class="assign-table-select" data-guest-id="${guest.id}" id="select_${guest.id.replace(/[^a-zA-Z0-9]/g, '_')}">
+                                    <option value="">→ Assign to table</option>
+                                    ${Array.from(tableAssignments.keys())
+                                        .filter(tid => tid !== BRIDAL_TABLE)
+                                        .map(tid => `<option value="${tid}">${tableAssignments.get(tid).name} (${tableAssignments.get(tid).guests.length}/${MAX_PER_TABLE})</option>`)
+                                        .join('')}
+                                    <option value="${BRIDAL_TABLE}">👰 Bridal Table (${tableAssignments.get(BRIDAL_TABLE)?.guests.length || 0} guests)</option>
+                                </select>
+                                <button class="btn" style="padding:6px 12px; margin-left:8px;" data-assign-search="${guest.id}">Assign</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                    ${searchResults.length === 0 && currentSearchTerm ? '<div style="padding:20px; text-align:center; color:#bfae8e;">No guests found</div>' : ''}
+                </div>
+                
                 <div class="main-layout">
                     <div class="tables-area">
                         <div class="tables-grid" id="tablesGrid"></div>
                     </div>
                     <div class="guests-area">
                         <h3>📋 Unassigned Guests</h3>
-                        <p style="font-size:0.7rem; margin:8px 0 12px; color:#8b7355;">Click a guest, then choose a table</p>
+                        <p style="font-size:0.7rem; margin:8px 0 12px; color:#8b7355;">${unassigned.length} guests waiting for seating</p>
                         <div id="unassignedList"></div>
                     </div>
                 </div>
             </div>
         `;
         
-        // Render tables
+        // Render tables grid
         const tablesGrid = document.getElementById('tablesGrid');
         tablesGrid.innerHTML = '';
         
@@ -609,17 +698,18 @@
                 </div>
                 ${!isBridal ? `
                     <div style="padding:8px 12px 12px;">
-                        <select id="assignSelect-${tid}" style="width:100%; margin-bottom:8px;">
-                            <option value="">— assign guest —</option>
-                            ${unassigned.map(u => `<option value="${u.id}">${escapeHtml(u.name)} (${escapeHtml(u.group)})</option>`).join('')}
+                        <select id="quickAssign_${tid}" class="table-quick-select">
+                            <option value="">— quick assign —</option>
+                            ${unassigned.slice(0, 20).map(u => `<option value="${u.id}">${escapeHtml(u.name.substring(0, 30))} (${escapeHtml(u.group.substring(0, 20))})</option>`).join('')}
+                            ${unassigned.length > 20 ? '<option disabled>— more guests use search —</option>' : ''}
                         </select>
-                        <button class="btn" style="width:100%; padding:6px;" data-assign-to="${tid}">Assign</button>
+                        <button class="btn" style="width:100%; margin-top:8px; padding:6px;" data-quick-table="${tid}">Assign Selected</button>
                     </div>
                 ` : ''}
             `;
             tablesGrid.appendChild(card);
             
-            // Add remove listener to guest chips
+            // Remove guest chips
             const chips = card.querySelectorAll('.guest-chip');
             chips.forEach(chip => {
                 chip.addEventListener('click', (e) => {
@@ -632,21 +722,23 @@
                 });
             });
             
-            // Add assign button listener for non-bridal tables
+            // Quick assign for non-bridal tables
             if (!isBridal) {
-                const assignBtn = card.querySelector(`[data-assign-to="${tid}"]`);
-                const select = card.querySelector(`#assignSelect-${tid}`);
-                if (assignBtn) {
+                const assignBtn = card.querySelector(`[data-quick-table="${tid}"]`);
+                const select = card.querySelector(`#quickAssign_${tid}`);
+                if (assignBtn && select) {
                     assignBtn.onclick = () => {
                         const guestId = select.value;
                         if (!guestId) {
-                            showToast('Select a guest first');
+                            showToast('Select a guest from the dropdown');
                             return;
                         }
-                        const guest = unassigned.find(u => u.id === guestId);
-                        if (guest) {
+                        const guest = allAttendees.find(a => a.id === guestId);
+                        if (guest && !attendeeTableMap.has(guest.id)) {
                             assignAttendee(guest, tid);
                             select.value = '';
+                        } else if (guest && attendeeTableMap.has(guest.id)) {
+                            showToast(`${guest.name} is already assigned to another table`);
                         }
                     };
                 }
@@ -658,26 +750,29 @@
         if (unassigned.length === 0) {
             unassignedDiv.innerHTML = '<div style="text-align:center; padding:30px; color:#bfae8e;">✨ All guests assigned! ✨</div>';
         } else {
-            unassignedDiv.innerHTML = unassigned.map(guest => `
+            unassignedDiv.innerHTML = unassigned.slice(0, 50).map(guest => `
                 <div class="guest-list-item">
                     <div>
                         <div class="guest-name">${escapeHtml(guest.name)}</div>
                         <div class="guest-group">${escapeHtml(guest.group)}</div>
                     </div>
-                    <select id="quickAssign-${guest.id}" style="width:130px;">
+                    <select id="unassignSelect_${guest.id.replace(/[^a-zA-Z0-9]/g, '_')}" style="width:130px;">
                         <option value="">Table...</option>
-                        ${sortedTables.filter(t => t !== BRIDAL_TABLE).map(tid => `<option value="${tid}">Table ${tid}</option>`).join('')}
+                        ${sortedTables.filter(t => t !== BRIDAL_TABLE).slice(0, 20).map(tid => `<option value="${tid}">Table ${tid}</option>`).join('')}
                         <option value="${BRIDAL_TABLE}">👰 Bridal</option>
                     </select>
-                    <button class="btn" style="padding:4px 12px;" data-quick="${guest.id}">✔</button>
+                    <button class="btn" style="padding:4px 12px;" data-unassign="${guest.id}">✔</button>
                 </div>
             `).join('');
+            if (unassigned.length > 50) {
+                unassignedDiv.innerHTML += '<div style="text-align:center; padding:10px; color:#bfae8e;">+ ' + (unassigned.length - 50) + ' more guests — use search to find them</div>';
+            }
             
-            // Add quick assign listeners
-            for (const guest of unassigned) {
-                const btn = unassignedDiv.querySelector(`[data-quick="${guest.id}"]`);
-                const select = unassignedDiv.querySelector(`#quickAssign-${guest.id}`);
-                if (btn) {
+            // Add assign listeners for unassigned list
+            for (const guest of unassigned.slice(0, 50)) {
+                const btn = unassignedDiv.querySelector(`[data-unassign="${guest.id}"]`);
+                const select = unassignedDiv.querySelector(`#unassignSelect_${guest.id.replace(/[^a-zA-Z0-9]/g, '_')}`);
+                if (btn && select) {
                     btn.onclick = () => {
                         const targetTable = select.value;
                         if (!targetTable) {
@@ -690,7 +785,55 @@
             }
         }
         
-        // Button listeners
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const clearBtn = document.getElementById('clearSearchBtn');
+        
+        if (searchInput) {
+            searchInput.value = currentSearchTerm;
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    currentSearchTerm = searchInput.value;
+                    renderUI();
+                }
+            });
+        }
+        
+        if (searchBtn) {
+            searchBtn.onclick = () => {
+                currentSearchTerm = searchInput?.value || '';
+                renderUI();
+            };
+        }
+        
+        if (clearBtn) {
+            clearBtn.onclick = () => {
+                currentSearchTerm = '';
+                if (searchInput) searchInput.value = '';
+                renderUI();
+            };
+        }
+        
+        // Search result assignment buttons
+        for (const guest of searchResults) {
+            const assignBtn = document.querySelector(`[data-assign-search="${guest.id}"]`);
+            const select = document.querySelector(`#select_${guest.id.replace(/[^a-zA-Z0-9]/g, '_')}`);
+            if (assignBtn && select) {
+                assignBtn.onclick = () => {
+                    const targetTable = select.value;
+                    if (!targetTable) {
+                        showToast('Select a table first');
+                        return;
+                    }
+                    assignAttendee(guest, targetTable);
+                    currentSearchTerm = searchInput?.value || '';
+                    renderUI();
+                };
+            }
+        }
+        
+        // Main buttons
         document.getElementById('saveBtn').onclick = saveSeating;
         document.getElementById('resetBtn').onclick = () => {
             if (confirm('Reset all seating assignments? This cannot be undone.')) {
@@ -703,7 +846,6 @@
         document.getElementById('addBridalBtn').onclick = addBridalGuest;
     }
     
-    // Start the app
     loadData();
 </script>
 </body>
