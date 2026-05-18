@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daniel & Laura's Wedding | Guest List + Email Manager</title>
+    <title>Daniel & Laura's Wedding | Guest List + Export to PDF/Excel</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Georgia', serif; background: #faf8f3; padding: 20px; }
@@ -97,6 +97,8 @@
         .btn-primary { background: #27ae60; color: white; }
         .btn-email { background: #3498db; color: white; }
         .btn-csv { background: #2c3e50; color: white; }
+        .btn-excel { background: #1e8449; color: white; }
+        .btn-pdf { background: #e74c3c; color: white; }
         
         .search-box {
             margin-bottom: 20px;
@@ -193,6 +195,20 @@
             color: #b7950b;
         }
         
+        .report-options {
+            background: #f0f4f8;
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .report-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        
         @media (max-width: 768px) {
             th, td { font-size: 0.75rem; padding: 8px; }
             .tab { padding: 8px 16px; font-size: 0.8rem; }
@@ -206,7 +222,18 @@
             text-align: center;
             color: #bfae8e;
         }
+        
+        /* Print styles for PDF */
+        @media print {
+            body { background: white; padding: 0; margin: 0; }
+            .tabs, .toolbar, .search-box, .bulk-email-bar, .btn, .report-options { display: none; }
+            .panel { display: block !important; }
+            .guest-table-container { max-height: none; overflow: visible; }
+            th, td { border: 1px solid #ddd; }
+        }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 <div id="app"></div>
@@ -214,7 +241,6 @@
 <script>
     // ==================== CONSOLIDATED GUEST LIST (Excel + CSV) ====================
     const consolidatedGuests = [
-        // === FROM EXCEL FILE (with phone numbers) ===
         { name: "Rosssi Mel family", verified: "Mario, Enza", address: "", phone: "", notes: "", group: "Family", guestCount: 2 },
         { name: "Father Aurelio Fragapane", verified: "Father Aurelio", address: "", phone: "", notes: "", group: "Clergy", guestCount: 1 },
         { name: "Mr V & Mrs C Di Pasquale & family", verified: "Vito, Carmel, John, Domenic", address: "1 Rhode Island Court, Taylors Lakes", phone: "", notes: "", group: "Family", guestCount: 4 },
@@ -261,7 +287,6 @@
         { name: "Mr T & Mrs S Stoduto", verified: "Titch, Silvana", address: "11 Bramble Crescent, Bundoora 3083", phone: "0412148320", notes: "", group: "Friends", guestCount: 2 },
         { name: "Mr G & Mrs C Mantello & family", verified: "Greg, Claudia, Joshua, Yvonne, Alessio, Amy", address: "1 Hasset Cresent, Keilor East 3033", phone: "0409145783", notes: "", group: "Family", guestCount: 6 },
         
-        // === FROM CSV FILE ===
         { name: "Domenic & Kimberley Chila", verified: "Dominic Chila; Kimberley Chila", address: "16 Basalt Avenue, Keilor East, VIC 3033", phone: "", notes: "", group: "Family", guestCount: 2 },
         { name: "Raajpal Singh Chahl", verified: "Raajpal Chahl", address: "23 Spinifex St, Point Cook, VIC 3030", phone: "", notes: "", group: "Friends", guestCount: 1 },
         { name: "Domenico & Maria Iervasi", verified: "Domenico Iervasi; Maria Iervasi", address: "4 Sophia street, Sunshine west, VIC 3020", phone: "", notes: "", group: "Family", guestCount: 2 },
@@ -311,7 +336,7 @@
         { name: "Tony & Sharon Corso", verified: "Tony Corso; Sharon Corso", address: "42 Norwood drive, East Keilor, VIC 3033", phone: "", notes: "", group: "Friends", guestCount: 2 },
         { name: "George & Amelia Theodoropoulos", verified: "George Theodoropoulos; Amelia Theodoropoulos", address: "4 Reidford Avenue, Preston, VIC 3072", phone: "", notes: "", group: "Friends", guestCount: 2 },
         { name: "Vince & Cathy Tripodi", verified: "Vince Tripodi; Cathy Tripodi", address: "22 Hedderwick Street, Essendon, VIC 3040", phone: "", notes: "", group: "Friends", guestCount: 2 },
-        { name: "Frank & Jacqui Costanzo", verified: "Frank Costanzo; Jacqui Costanzo", address: "58 Feehan Avenue, Moonee Ponds, VIC 3039", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Frank & Jackie Costanzo", verified: "Frank Costanzo; Jacqui Costanzo", address: "58 Feehan Avenue, Moonee Ponds, VIC 3039", phone: "", notes: "", group: "Friends", guestCount: 2 },
         { name: "Raymond, Stephanie & Frost Saw", verified: "Raymond Saw; Stephanie Saw; Frost Saw", address: "6/96 Lenoak Street, Gladstone Park, VIC 3043", phone: "", notes: "", group: "Family", guestCount: 3 },
         { name: "Ubaldo & Angela Caringola", verified: "Ubaldo Caringola; Angela Caringola", address: "4 Simon Crescent, Epping, VIC 3076", phone: "", notes: "", group: "Family", guestCount: 2 },
         { name: "Dominic & Natalie Trentadue", verified: "Dominic Trentadue; Natalie Trentadue", address: "10 Truscott Street, Glenroy, 3046", phone: "", notes: "", group: "Family", guestCount: 2 },
@@ -403,7 +428,6 @@
             return;
         }
 
-        // Open email client for each pending guest (limit to 10 at a time)
         const toEmail = pending.slice(0, 10);
         for (const guest of toEmail) {
             const subject = encodeURIComponent("Daniel & Laura's Wedding - Important Information");
@@ -430,14 +454,125 @@ Daniel & Laura 💒`);
         showToast(`📧 Opened emails for ${toEmail.length} guest(s)`);
     }
 
+    // ==================== EXPORT FUNCTIONS ====================
+    
+    // Export to Excel (XLSX)
+    function exportToExcel() {
+        const filtered = filterGuests();
+        const worksheetData = [
+            ["Name", "Verified Names", "Address", "Phone", "Notes", "Group", "Guest Count", "Emailed", "Delivery Method"],
+            ...filtered.map(g => [
+                g.name,
+                g.verified || "",
+                g.address || "",
+                g.phone || "",
+                g.notes || "",
+                g.group,
+                g.guestCount,
+                g.emailed ? "Yes" : "No",
+                g.deliveryMethod
+            ])
+        ];
+        
+        const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Wedding Guests");
+        
+        // Auto-size columns (approximate)
+        ws['!cols'] = [{wch:25},{wch:30},{wch:35},{wch:15},{wch:25},{wch:15},{wch:12},{wch:10},{wch:15}];
+        
+        XLSX.writeFile(wb, `wedding_guest_list_${new Date().toISOString().slice(0,10)}.xlsx`);
+        showToast("📊 Excel file exported!");
+    }
+    
+    // Export to PDF using html2pdf
+    async function exportToPDF() {
+        showToast("📄 Generating PDF...");
+        
+        // Create a temporary div for PDF content
+        const pdfContent = document.createElement('div');
+        pdfContent.style.cssText = 'font-family: Georgia, Times New Roman, Times, serif; padding: 20px; background: white;';
+        
+        const filtered = filterGuests();
+        const totalIndividual = filtered.reduce((sum, g) => sum + g.guestCount, 0);
+        
+        // Build PDF HTML
+        pdfContent.innerHTML = `
+            <div style="text-align:center; margin-bottom:25px; border-bottom:2px solid #c9a84c; padding-bottom:15px;">
+                <h1 style="font-size:24px; color:#2c2418;">💍 Daniel & Laura's Wedding</h1>
+                <h2 style="font-size:18px; color:#c9a84c;">Complete Guest List</h2>
+                <p style="color:#8b7355; font-size:11px;">Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+            </div>
+            
+            <div style="display:flex; justify-content:space-around; margin-bottom:25px; flex-wrap:wrap;">
+                <div style="text-align:center;"><div style="font-size:22px; font-weight:bold; color:#c9a84c;">${filtered.length}</div><div style="font-size:10px;">Groups/Families</div></div>
+                <div style="text-align:center;"><div style="font-size:22px; font-weight:bold; color:#c9a84c;">${totalIndividual}</div><div style="font-size:10px;">Individual Guests</div></div>
+                <div style="text-align:center;"><div style="font-size:22px; font-weight:bold; color:#c9a84c;">${filtered.filter(g => g.emailed).length}</div><div style="font-size:10px;">Emailed</div></div>
+                <div style="text-align:center;"><div style="font-size:22px; font-weight:bold; color:#c9a84c;">${filtered.filter(g => g.phone && g.phone !== "na").length}</div><div style="font-size:10px;">Have Contact</div></div>
+            </div>
+            
+            <table style="width:100%; border-collapse:collapse; font-size:9px;">
+                <thead>
+                    <tr style="background:#faf5ea;">
+                        <th style="border:1px solid #ddd; padding:8px; text-align:left;">Name</th>
+                        <th style="border:1px solid #ddd; padding:8px; text-align:left;">Verified Names</th>
+                        <th style="border:1px solid #ddd; padding:8px; text-align:left;">Address</th>
+                        <th style="border:1px solid #ddd; padding:8px; text-align:left;">Phone</th>
+                        <th style="border:1px solid #ddd; padding:8px; text-align:left;">Group</th>
+                        <th style="border:1px solid #ddd; padding:8px; text-align:center;">Count</th>
+                        <th style="border:1px solid #ddd; padding:8px; text-align:center;">Emailed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${filtered.map(g => `
+                        <tr>
+                            <td style="border:1px solid #ddd; padding:6px;">${escapeHtml(g.name)}</td>
+                            <td style="border:1px solid #ddd; padding:6px;">${escapeHtml(g.verified || "-")}</td>
+                            <td style="border:1px solid #ddd; padding:6px;">${escapeHtml(g.address || "-")}</td>
+                            <td style="border:1px solid #ddd; padding:6px;">${escapeHtml(g.phone || "-")}</td>
+                            <td style="border:1px solid #ddd; padding:6px;">${escapeHtml(g.group)}</td>
+                            <td style="border:1px solid #ddd; padding:6px; text-align:center;">${g.guestCount}</td>
+                            <td style="border:1px solid #ddd; padding:6px; text-align:center;">${g.emailed ? "✓" : ""}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            
+            <div style="text-align:center; margin-top:25px; padding-top:12px; border-top:1px solid #e8dcc8; font-size:7px; color:#bfae8e;">
+                <p>Daniel & Laura's Wedding • Guest List Report • Page 1 of 1</p>
+            </div>
+        `;
+        
+        document.body.appendChild(pdfContent);
+        
+        const opt = {
+            margin: [0.4, 0.4, 0.4, 0.4],
+            filename: `wedding_guest_list_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, letterRendering: true },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+        };
+        
+        try {
+            await html2pdf().set(opt).from(pdfContent).save();
+            showToast("📄 PDF exported successfully!");
+        } catch (err) {
+            showToast("PDF export failed: " + err.message);
+        } finally {
+            pdfContent.remove();
+        }
+    }
+    
+    // Export to CSV (legacy)
     function exportToCSV() {
+        const filtered = filterGuests();
         const headers = ["Name", "Verified Names", "Address", "Phone", "Notes", "Group", "Guest Count", "Emailed", "Delivery Method"];
-        const rows = guests.map(g => [
-            `"${g.name}"`,
-            `"${g.verified}"`,
-            `"${g.address || ""}"`,
-            `"${g.phone || ""}"`,
-            `"${g.notes || ""}"`,
+        const rows = filtered.map(g => [
+            `"${g.name.replace(/"/g, '""')}"`,
+            `"${(g.verified || "").replace(/"/g, '""')}"`,
+            `"${(g.address || "").replace(/"/g, '""')}"`,
+            `"${(g.phone || "").replace(/"/g, '""')}"`,
+            `"${(g.notes || "").replace(/"/g, '""')}"`,
             `"${g.group}"`,
             g.guestCount,
             g.emailed ? "Yes" : "No",
@@ -451,7 +586,7 @@ Daniel & Laura 💒`);
         link.download = `wedding_guest_list_${new Date().toISOString().slice(0, 10)}.csv`;
         link.click();
         URL.revokeObjectURL(link.href);
-        showToast("CSV exported!");
+        showToast("📊 CSV exported!");
     }
 
     function filterGuests() {
@@ -475,10 +610,18 @@ Daniel & Laura 💒`);
                 <div class="stat"><div class="stat-number">${getPhoneCount()}</div><div>Have Phone/Email</div></div>
             </div>
             
+            <div class="report-options">
+                <h3>📄 Export Reports</h3>
+                <div class="report-buttons">
+                    <button class="btn btn-excel" onclick="exportToExcel()">📊 Export to Excel (XLSX)</button>
+                    <button class="btn btn-pdf" onclick="exportToPDF()">📄 Export to PDF</button>
+                    <button class="btn btn-csv" onclick="exportToCSV()">📎 Export to CSV</button>
+                </div>
+            </div>
+            
             <div class="bulk-email-bar">
                 <span>📧 ${getPendingCount()} guests not yet emailed</span>
                 <button class="btn btn-email" onclick="sendBulkEmails()">📧 Send Bulk Emails</button>
-                <button class="btn btn-csv" onclick="exportToCSV()">📊 Export CSV</button>
             </div>
             
             <div class="search-box">
@@ -565,7 +708,7 @@ Daniel & Laura 💒`);
                 </div>
                 
                 <div class="tabs">
-                    <button class="tab ${currentTab === 'guestlist' ? 'active' : ''}" onclick="setTab('guestlist')">📋 Guest List + Email</button>
+                    <button class="tab ${currentTab === 'guestlist' ? 'active' : ''}" onclick="setTab('guestlist')">📋 Guest List + Reports</button>
                     <button class="tab ${currentTab === 'tables' ? 'active' : ''}" onclick="setTab('tables')">🪑 Table Assignment (Coming Soon)</button>
                 </div>
                 
@@ -579,6 +722,8 @@ Daniel & Laura 💒`);
     // Make functions global for onclick
     window.toggleEmail = toggleEmail;
     window.sendBulkEmails = sendBulkEmails;
+    window.exportToExcel = exportToExcel;
+    window.exportToPDF = exportToPDF;
     window.exportToCSV = exportToCSV;
     window.updateSearch = updateSearch;
     window.clearSearch = clearSearch;
