@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daniel & Laura's Wedding | Seating + Email Manager</title>
+    <title>Daniel & Laura's Wedding | Guest List + Email Manager</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Georgia', serif; background: #faf8f3; padding: 20px; }
-        .container { max-width: 1600px; margin: 0 auto; }
+        .container { max-width: 1400px; margin: 0 auto; }
         
         .header {
             background: linear-gradient(135deg, #c9a84c, #e8d5a8);
@@ -17,6 +17,43 @@
             text-align: center;
         }
         
+        .header h1 { font-size: 1.8rem; color: #2c2418; }
+        .header p { color: #5a4a35; margin-top: 8px; }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            background: #e8dcc8;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .tab.active {
+            background: #c9a84c;
+            color: white;
+        }
+        
+        .panel {
+            display: none;
+            background: white;
+            border-radius: 24px;
+            padding: 25px;
+            border: 1px solid #e8dcc8;
+        }
+        
+        .panel.active { display: block; }
+        
         .stats-bar {
             display: flex;
             gap: 15px;
@@ -25,27 +62,23 @@
         }
         
         .stat {
-            background: white;
+            background: #faf5ea;
             border-radius: 16px;
-            padding: 15px 25px;
+            padding: 12px 20px;
             flex: 1;
             text-align: center;
-            border: 1px solid #e8dcc8;
         }
         
         .stat-number {
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: bold;
             color: #c9a84c;
         }
         
         .toolbar {
-            background: white;
-            border-radius: 20px;
-            padding: 15px 20px;
-            margin-bottom: 25px;
             display: flex;
             gap: 12px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
         }
         
@@ -63,142 +96,74 @@
         .btn:hover { background: #b8953a; transform: translateY(-1px); }
         .btn-primary { background: #27ae60; color: white; }
         .btn-email { background: #3498db; color: white; }
-        .btn-preview { background: #e67e22; color: white; }
+        .btn-csv { background: #2c3e50; color: white; }
         
-        .main-layout {
+        .search-box {
+            margin-bottom: 20px;
             display: flex;
-            gap: 25px;
+            gap: 10px;
             flex-wrap: wrap;
         }
         
-        .tables-area {
-            flex: 2;
-            min-width: 300px;
-        }
-        
-        .guests-area {
+        .search-input {
             flex: 1;
-            min-width: 300px;
-            background: white;
-            border-radius: 20px;
+            padding: 12px 18px;
+            border-radius: 40px;
             border: 1px solid #e8dcc8;
-            padding: 20px;
-            height: fit-content;
-            position: sticky;
-            top: 20px;
+            font-family: inherit;
+            font-size: 0.9rem;
         }
         
-        .tables-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 18px;
+        table {
+            width: 100%;
+            border-collapse: collapse;
         }
         
-        .table-card {
-            background: white;
-            border-radius: 20px;
-            border: 1px solid #e8dcc8;
-            overflow: hidden;
-        }
-        
-        .table-card.bridal { border: 2px solid #c9a84c; background: #fffcf5; }
-        
-        .table-header {
-            background: #faf5ea;
-            padding: 12px 16px;
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 1px solid #e8dcc8;
-            font-weight: bold;
-        }
-        
-        .table-guests {
+        th, td {
             padding: 12px;
-            min-height: 100px;
-            max-height: 200px;
+            text-align: left;
+            border-bottom: 1px solid #e8dcc8;
+        }
+        
+        th {
+            background: #faf5ea;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        
+        .guest-table-container {
+            overflow-x: auto;
+            max-height: 500px;
             overflow-y: auto;
         }
         
-        .guest-chip {
+        .email-status {
             display: inline-block;
-            background: #fef7e9;
-            padding: 5px 12px;
+            padding: 4px 10px;
             border-radius: 20px;
             font-size: 0.7rem;
-            margin: 3px;
-            cursor: pointer;
-            border: 1px solid #e8dcc8;
-        }
-        
-        .guest-chip.emailed { background: #d5f5e3; border-color: #27ae60; }
-        
-        .guest-list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #efe4d4;
-        }
-        
-        .email-status {
-            font-size: 0.65rem;
-            padding: 2px 8px;
-            border-radius: 20px;
         }
         
         .email-status.sent { background: #d5f5e3; color: #1e8449; }
         .email-status.pending { background: #fef9e7; color: #b7950b; }
         
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
+        .email-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
         }
         
-        .modal.active { display: flex; }
-        
-        .modal-content {
-            background: white;
-            border-radius: 24px;
-            padding: 30px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        
-        .modal-content textarea {
-            width: 100%;
-            padding: 12px;
-            margin: 15px 0;
-            border-radius: 12px;
-            border: 1px solid #e8dcc8;
-            font-family: monospace;
-            font-size: 0.9rem;
-        }
-        
-        .email-preview {
-            background: #f0f0f0;
+        .bulk-email-bar {
+            background: #e8f4f8;
             padding: 15px;
-            border-radius: 12px;
-            margin: 15px 0;
-            white-space: pre-wrap;
-            font-family: monospace;
-            font-size: 0.8rem;
-        }
-        
-        .search-input {
-            padding: 10px 16px;
-            border-radius: 40px;
-            border: 1px solid #e8dcc8;
-            width: 250px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
         .toast {
@@ -210,7 +175,7 @@
             color: white;
             padding: 10px 24px;
             border-radius: 40px;
-            z-index: 1001;
+            z-index: 1000;
             animation: fadeOut 3s forwards;
         }
         
@@ -220,404 +185,405 @@
             100% { opacity: 0; visibility: hidden; }
         }
         
-        @media (max-width: 700px) {
-            .main-layout { flex-direction: column; }
-            .guests-area { position: static; }
+        .note-badge {
+            background: #fef9e7;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            color: #b7950b;
+        }
+        
+        @media (max-width: 768px) {
+            th, td { font-size: 0.75rem; padding: 8px; }
+            .tab { padding: 8px 16px; font-size: 0.8rem; }
+        }
+        
+        .table-assignment-area {
+            min-height: 400px;
+            background: #faf5ea;
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            color: #bfae8e;
         }
     </style>
 </head>
 <body>
-<div id="app">Loading wedding planner...</div>
+<div id="app"></div>
 
 <script>
-    // ==================== DATA ====================
-    let allGuests = [];
-    let tableMap = new Map();
-    let guestTableMap = new Map();
-    let emailedGuests = new Set();
-    
-    const TOTAL_TABLES = 32;
-    const BRIDAL_TABLE = "bridal";
-    const MAX_PER_TABLE = 11;
-    const MIN_PER_TABLE = 6;
-    
-    // Email template
-    const DEFAULT_EMAIL_TEMPLATE = `Dear {{guestName}},
+    // ==================== CONSOLIDATED GUEST LIST (Excel + CSV) ====================
+    const consolidatedGuests = [
+        // === FROM EXCEL FILE (with phone numbers) ===
+        { name: "Rosssi Mel family", verified: "Mario, Enza", address: "", phone: "", notes: "", group: "Family", guestCount: 2 },
+        { name: "Father Aurelio Fragapane", verified: "Father Aurelio", address: "", phone: "", notes: "", group: "Clergy", guestCount: 1 },
+        { name: "Mr V & Mrs C Di Pasquale & family", verified: "Vito, Carmel, John, Domenic", address: "1 Rhode Island Court, Taylors Lakes", phone: "", notes: "", group: "Family", guestCount: 4 },
+        { name: "Mr C & Mrs D Di Pasquale & family", verified: "Carlo, Doreen, Teresa", address: "14 Wanaka Drive, Taylors Lakes", phone: "", notes: "Teresa at bridal table", group: "Family", guestCount: 3 },
+        { name: "Mr M & Mrs M Mirarchi & family", verified: "Mick, Mim, Nicholas, Josephine, Anthony", address: "1 Collendina Close, Keilor East 3033", phone: "", notes: "", group: "Family", guestCount: 5 },
+        { name: "Mr T & Mrs R Pisano & family", verified: "Tony, Rosa, Isabella", address: "14 Overland Place, Keilor East 3033", phone: "", notes: "", group: "Family", guestCount: 3 },
+        { name: "Mr L & Mrs A Palumbo & family", verified: "Leo, Antonia, Joseph, Alessia", address: "73 Steele Creek Drive, East Keilor", phone: "", notes: "", group: "Family", guestCount: 4 },
+        { name: "Mr M & Mrs S Guzzardi & family", verified: "Mick, Sonia, Julius, Danni", address: "2 Eastgate Street, Pascoe Vale South", phone: "", notes: "", group: "Family", guestCount: 4 },
+        { name: "Mr S & Mrs M Ibrahim", verified: "Sam, Michelle", address: "13 Brewster Street, Essendon", phone: "", notes: "", group: "Family", guestCount: 2 },
+        { name: "Mr S & Mrs M Lombardo & family", verified: "Silvio, Marisa, Celeste, Emily, Jack", address: "49 Oakley Drive, Avondale Heights 3034", phone: "", notes: "", group: "Family", guestCount: 5 },
+        { name: "Mr T & Mrs C Di Pasquale", verified: "Tom, Cheryl", address: "c/- Moreland Conveycing, 526 Sydney Road Brunswick 3056", phone: "", notes: "", group: "Family", guestCount: 2 },
+        { name: "Mr D Gizzi & partner", verified: "Domenic, ?", address: "", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Mr B & Mrs M Hamilton & family", verified: "Brett, Melissa, Mikayla", address: "36 William Street, Essendon", phone: "", notes: "", group: "Family", guestCount: 3 },
+        { name: "Mr S & Mrs A Hovanessian & family", verified: "Sam, Aleen, Sam, Alec, Marc", address: "54 Canning Street, Avondale Heights", phone: "", notes: "", group: "Family", guestCount: 5 },
+        { name: "Mr A & Mrs T Chellemi", verified: "Tania, Angelo", address: "", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Mr J Agosta plus 1", verified: "1 or 2 tbc", address: "", phone: "", notes: "", group: "Friends", guestCount: 1 },
+        { name: "Mr & Mrs Lim & family", verified: "", address: "", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Mr Jason Chan plus 1", verified: "", address: "", phone: "0467816879", notes: "Daniel - work colleagues", group: "Work", guestCount: 1 },
+        { name: "Ms Michelle Hanvey plus 1", verified: "", address: "", phone: "0460293866", notes: "Daniel - work colleagues", group: "Work", guestCount: 1 },
+        { name: "Mr Philippe Phan plus 1", verified: "", address: "", phone: "0423100833", notes: "Daniel - work colleagues", group: "Work", guestCount: 1 },
+        { name: "Mr Ben Kerekes plus 1", verified: "", address: "", phone: "0411 838 700", notes: "Daniel - work colleagues", group: "Work", guestCount: 1 },
+        { name: "Ms S Surulimuthu plus 1", verified: "", address: "", phone: "0411 052 295", notes: "Daniel - work colleagues", group: "Work", guestCount: 1 },
+        { name: "Mr C Moors plus 1", verified: "", address: "", phone: "0475 581 841", notes: "Daniel - work colleagues", group: "Work", guestCount: 1 },
+        { name: "Mr N Tang & family", verified: "", address: "", phone: "0430930874", notes: "Daniel - work colleagues", group: "Work", guestCount: 1 },
+        { name: "Mr M Modesti plus 1", verified: "", address: "", phone: "0433 402 207", notes: "", group: "Friends", guestCount: 1 },
+        { name: "Mr Johnny Xuerub & 1", verified: "", address: "", phone: "0411016106", notes: "", group: "Friends", guestCount: 1 },
+        { name: "Mrs A Zampieri", verified: "Anna", address: "", phone: "", notes: "", group: "Family", guestCount: 1 },
+        { name: "Mr R & Mrs A Barto", verified: "Rob, Anna", address: "", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Stefan Guzzardi (Groomsman)", verified: "Stefan", address: "2 Eastgate Street, Pascoe Vale South", phone: "", notes: "Bridal table", group: "Wedding Party", guestCount: 1 },
+        { name: "Julian Lombardo (Groomsman)", verified: "Julian", address: "49 Oakley Street, Avondale Heights", phone: "", notes: "Bridal table", group: "Wedding Party", guestCount: 1 },
+        { name: "Matthew Ibrahim (Groomsman)", verified: "Matthew", address: "", phone: "", notes: "Bridal table", group: "Wedding Party", guestCount: 1 },
+        { name: "Brad Hamilton (Groomsman)", verified: "Brad", address: "36 William Street, Essendon", phone: "", notes: "Bridal table", group: "Wedding Party", guestCount: 1 },
+        { name: "Mrs L Mancuso & Mr Nicola", verified: "", address: "", phone: "0451674258", notes: "ill - most likely not able to attend", group: "Family", guestCount: 2 },
+        { name: "Mrs G Bonfa & Miss M Bonfa", verified: "", address: "21 Martha Street, Donvale", phone: "0412954292", notes: "most likely not able to attend", group: "Family", guestCount: 2 },
+        { name: "Mrs E Renga & Miss L Renga", verified: "", address: "716 Pascoe Vale Road, Glenroy", phone: "na", notes: "most likely not able to attend", group: "Family", guestCount: 2 },
+        { name: "Mrs Pina Scully & Miss M DiGenova", verified: "Pina, Maria", address: "3 Ilora Court, Glen Waverley", phone: "0421674388", notes: "already said yes", group: "Family", guestCount: 2 },
+        { name: "Mr G & Mrs C Perta", verified: "Gino, Carmel", address: "3 Clivedon Court, Greenvale", phone: "0409561009", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Mrs F Giunta & Alessia", verified: "Frances, Alessia", address: "PO Box 142 Essendon North 3041", phone: "0422 319 532", notes: "", group: "Family", guestCount: 2 },
+        { name: "Mr M & Mrs E Tenace & family", verified: "Michael, Erika, Selena, baby", address: "7 Delvida Court, Eltham", phone: "0477644770", notes: "", group: "Family", guestCount: 4 },
+        { name: "Mr T & Mrs M Belifore", verified: "Tony, Marina", address: "8 Pia Court, Taylors Lakes 3038", phone: "0418356592", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Mr V & Mrs S Vorperian", verified: "Vatche, Sira", address: "39 Tamar Grove, Oakleigh 3166", phone: "0419304846", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Ms H Dimitropoulos + 1", verified: "Helen, ?", address: "1/47 Hartwood Street, Kew East 3102", phone: "0418121563", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Mr S & Mrs G Dellevergnini", verified: "Sandy, Georgie, Miki", address: "46 Hardy Terrace, Ivanhoe East 3079", phone: "0419500846", notes: "", group: "Friends", guestCount: 3 },
+        { name: "Mr T & Mrs S Stoduto", verified: "Titch, Silvana", address: "11 Bramble Crescent, Bundoora 3083", phone: "0412148320", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Mr G & Mrs C Mantello & family", verified: "Greg, Claudia, Joshua, Yvonne, Alessio, Amy", address: "1 Hasset Cresent, Keilor East 3033", phone: "0409145783", notes: "", group: "Family", guestCount: 6 },
+        
+        // === FROM CSV FILE ===
+        { name: "Domenic & Kimberley Chila", verified: "Dominic Chila; Kimberley Chila", address: "16 Basalt Avenue, Keilor East, VIC 3033", phone: "", notes: "", group: "Family", guestCount: 2 },
+        { name: "Raajpal Singh Chahl", verified: "Raajpal Chahl", address: "23 Spinifex St, Point Cook, VIC 3030", phone: "", notes: "", group: "Friends", guestCount: 1 },
+        { name: "Domenico & Maria Iervasi", verified: "Domenico Iervasi; Maria Iervasi", address: "4 Sophia street, Sunshine west, VIC 3020", phone: "", notes: "", group: "Family", guestCount: 2 },
+        { name: "Joe & Anita Trimboli", verified: "Joe Trimboli; Anita Trimboli", address: "84 Reynolds parade, Pascoe Vale South, VIC 3044", phone: "", notes: "", group: "Family", guestCount: 2 },
+        { name: "Remzi Asllanaj & family", verified: "Remzi; Donna; Mark; Robert", address: "5 Gordon Street, Brunswick West, VIC 3055", phone: "", notes: "", group: "Family", guestCount: 4 },
+        { name: "Ralph & Gloria Risoli", verified: "Ralph Risoli; Gloria Risoli", address: "65 Mitchell Parade, Pascoe Vale South, VIC 3044", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Frank & Mary Marcaccio", verified: "Frank Marcaccio; Mary Marcaccio", address: "34 Buckley, Essendon, VIC 3030", phone: "", notes: "", group: "Family", guestCount: 2 },
+        { name: "Alex Calenda & Maria Andreadis", verified: "Alex Calenda; Maria Andreadis", address: "2 53 Kent Road, Pascoe Vale, VIC 3044", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Chris & Patty Sophocli", verified: "Chris Sophocli; Patty Sophocli", address: "46 Robb Street, Essendon, VIC 3040", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Mary Youkhana", verified: "Mary Youkhana", address: "3064 2 Natural Dr, Craigieburn, VIC 3064", phone: "", notes: "", group: "Friends", guestCount: 1 },
+        { name: "Charlie Bevilacqua & family", verified: "Charlie; Nadia; Olivia; Jaimen", address: "PO BOX 360, WEST PENNANT HILLS, NSW 2125", phone: "", notes: "", group: "Family", guestCount: 4 },
+        { name: "Theresa Pavia", verified: "Theresa Pavia", address: "34 Laurence Avenue, Airport West, VIC 3042", phone: "", notes: "", group: "Friends", guestCount: 1 },
+        { name: "Marcello & Kylie Ioculano", verified: "Marcello Ioculano; Kylie Ioculano", address: "12a Balderrie crt, Gowanbrae, VIC 3043", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Frank & Teresa Taverna", verified: "Frank Taverna; Teresa Taverna", address: "14 Ventnor Place, Keilor Downs, VIC 3038", phone: "", notes: "", group: "Family", guestCount: 2 },
+        { name: "Peter, Melinda & Nicholas Gavos", verified: "Peter; Melinda; Nicholas", address: "8 Aldershot drive, Keilor Downs, VIC 3038", phone: "", notes: "", group: "Family", guestCount: 3 },
+        { name: "Nino & Belinda Muscara", verified: "Nino Muscara; Belinda Muscara", address: "69 Mascoma Street, Strathmore, VIC 3041", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Deanna Spataro", verified: "Deanna Spataro", address: "41 Hassett Crescent, Keilor East, VIC 3033", phone: "", notes: "", group: "Friends", guestCount: 1 },
+        { name: "Michele & Maria De Petro", verified: "Michele De Petro; Maria De Petro", address: "50 Middle st, Ascot Vale, VIC 3032", phone: "", notes: "", group: "Family", guestCount: 2 },
+        { name: "Bruno & Connie Martino", verified: "Bruno; Connie", address: "11 ardoch Street, Essendon, VIC 3040", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Francesco & Annette Cammaroto", verified: "Francesco Cammaroto; Annette Cammaroto", address: "7 Talus court, Keilor East, VIC 3033", phone: "", notes: "", group: "Family", guestCount: 2 },
+        { name: "John & Vanessa Macedonio", verified: "John Macedonio; Vanessa Macedonio", address: "13 Largs crt, Greenvale, VIC 3059", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Raffaele & Teresa Martino", verified: "Raffaele; Teresa", address: "9A Ridge road, Oak Park VIC 3046", phone: "", notes: "", group: "Family", guestCount: 2 },
+        { name: "Frank & Daniela Tranquillo", verified: "Frank; Daniela", address: "13 hawker st, Airport West, VIC 3042", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Marco & Cathy Mercuri", verified: "Marco Mercuri; Cathy Mercuri", address: "12 Florence Street, Essendon, VIC 3040", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Jake & Judy Venuta", verified: "Jake Venuta; Judy Venuta", address: "34 Wonganella Drive, Keilor East, VIC 3033", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Sam & Vanessa Rumoro", verified: "Sam Rumoro; Vanessa Rumoro", address: "44 Thomas Street, Airport West, VIC 3042", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Michelle & Carlo Pavia", verified: "Michelle Pavia; Carlo Pavia", address: "277 Pascoe Vale Road, Essendon, VIC 3040", phone: "", notes: "", group: "Family", guestCount: 2 },
+        { name: "Tony El Hajj", verified: "Tony El Hajj", address: "28a Pattison Street, Moonee Ponds, VIC 3039", phone: "", notes: "", group: "Friends", guestCount: 1 },
+        { name: "Peter Hellier & Giovanna Hellier", verified: "Peter Hellier; Giovanna Hellier", address: "Unit 3 1 Irvine Street, Pascoe Vale, VIC 3044", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Michele & Teresa Ferraro", verified: "Michele Ferraro; Teresa Ferraro", address: "10 San Remo Drive, Avondale Heights, VIC 3034", phone: "", notes: "", group: "Family", guestCount: 2 },
+        { name: "Nella Venuta & Tony Foti", verified: "Nella; Tony", address: "5 Jeffrey St, Keilor East, VIC 3033", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Michael & Adele La Verde", verified: "Michael La Verde; Adele La Verde", address: "85 Rossiter ave, Roxburgh park, VIC 3064", phone: "", notes: "", group: "Family", guestCount: 2 },
+        { name: "Meshanah Mendoza", verified: "Meshanah Mendoza", address: "9 Davis Avenue, Avondale Heights, VIC 3034", phone: "", notes: "", group: "Friends", guestCount: 1 },
+        { name: "Mick & Connie Iermano", verified: "Mick Iermano; Connie Iermano", address: "52 Cornwall street, West Brunswick, VIC 3055", phone: "", notes: "", group: "Family", guestCount: 2 },
+        { name: "George & Fay Babatsikos", verified: "George Babatsikos; Fay Babatsikos", address: "34 Collegian Avenue, Strathmore, VIC 3041", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Nicole, Chris, Olivia & Tessa Bortone", verified: "Nicole Bortone; Chris Bortone; Olivia Bortone; Tessa Bortone", address: "14 Alsom Place, Airport West, VIC 3042", phone: "", notes: "", group: "Family", guestCount: 4 },
+        { name: "Teresa & Anthony Raso", verified: "Teresa; Anthony", address: "25 Pitt street, Fawkner, VIC 3060", phone: "", notes: "", group: "Family", guestCount: 2 },
+        { name: "Rebecca Perri & Conor Young", verified: "Rebecca Perri; Conor Young", address: "4A Kendale st, Airport West, VIC 3042", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Pasquale & Vanessa Barbaro", verified: "Pasquale Barbaro; Vanessa Barbaro", address: "15 Gatehouse drive, Attwood, VIC 3049", phone: "", notes: "", group: "Family", guestCount: 2 },
+        { name: "Jennifer Guidi & Zeus", verified: "Jennifer; Zeus", address: "111 Cuthbert street, Broadmeadows, VIC 3047", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Giuseppe & Carmela Ferraro", verified: "Giuseppe Ferraro; Carmela Ferraro", address: "989 Old calder hwy, Keilor, VIC 3036", phone: "", notes: "", group: "Family", guestCount: 2 },
+        { name: "Olivia Colina & Lucas Bertovic", verified: "Olivia Colina; Lucas Bertovic", address: "17C Pearl Street, Niddrie, VIC 3042", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Nello & Sarina Lanza", verified: "Nello Lanza; Sarina Lanza", address: "1 Tyrone Court, Avondale Heights, VIC 3034", phone: "", notes: "", group: "Family", guestCount: 2 },
+        { name: "John & Rosa Sciacchitano", verified: "John; Rosa", address: "559 Moreland Road, Pascoe Vale Sth, VIC 3044", phone: "", notes: "", group: "Family", guestCount: 2 },
+        { name: "Daniel Rossi Mel & Laura Pavia", verified: "Daniel Rossi Mel; Laura Pavia", address: "15 Simpson Pl, Keilor East, VIC 3033", phone: "", notes: "", group: "Couple", guestCount: 2 },
+        { name: "Melissa, Luca & Natalia Cerra", verified: "Melissa; Luca; Natalia", address: "5 Nuthall Way, Epping, VIC 3076", phone: "", notes: "", group: "Family", guestCount: 3 },
+        { name: "Tony & Sharon Corso", verified: "Tony Corso; Sharon Corso", address: "42 Norwood drive, East Keilor, VIC 3033", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "George & Amelia Theodoropoulos", verified: "George Theodoropoulos; Amelia Theodoropoulos", address: "4 Reidford Avenue, Preston, VIC 3072", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Vince & Cathy Tripodi", verified: "Vince Tripodi; Cathy Tripodi", address: "22 Hedderwick Street, Essendon, VIC 3040", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Frank & Jacqui Costanzo", verified: "Frank Costanzo; Jacqui Costanzo", address: "58 Feehan Avenue, Moonee Ponds, VIC 3039", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Raymond, Stephanie & Frost Saw", verified: "Raymond Saw; Stephanie Saw; Frost Saw", address: "6/96 Lenoak Street, Gladstone Park, VIC 3043", phone: "", notes: "", group: "Family", guestCount: 3 },
+        { name: "Ubaldo & Angela Caringola", verified: "Ubaldo Caringola; Angela Caringola", address: "4 Simon Crescent, Epping, VIC 3076", phone: "", notes: "", group: "Family", guestCount: 2 },
+        { name: "Dominic & Natalie Trentadue", verified: "Dominic Trentadue; Natalie Trentadue", address: "10 Truscott Street, Glenroy, 3046", phone: "", notes: "", group: "Family", guestCount: 2 },
+        { name: "Karen, Nathan & Tane Rowe", verified: "Karen; Nathan; Tane", address: "81 Waverley Street, Moonee Ponds, VIC 3039", phone: "", notes: "", group: "Family", guestCount: 3 },
+        { name: "Pericles, Peter & Effie Theodorlis", verified: "Pericles; Peter; Effie", address: "1/25 Dorset Road, Pascoe Vale, VIC 3044", phone: "", notes: "", group: "Family", guestCount: 3 },
+        { name: "Alex & Agnieszka Georgiou", verified: "Alex Georgiou; Agnieszka Georgiou", address: "36 Threadneedle st, Attwood, VIC 3049", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Gina Patti", verified: "Gina Patti", address: "7 Wellesley Drive, Taylor's Lakes, VIC 3038", phone: "", notes: "", group: "Friends", guestCount: 1 },
+        { name: "Francesco De Angelo & family", verified: "Francesco De Angelo; Clotilde Gentile; Giuseppe De Angelo; Stephanie Vargas; Caterina De Angelo; Adrian Iuele", address: "2 Kayak course, Delahey, VIC 3037", phone: "", notes: "", group: "Extended Family", guestCount: 6 },
+        { name: "Anthony Diaco & family", verified: "Anthony Diaco; Joanne Diaco; Lisa Raso; Angelo Raso; Mary Stellato; Fabian Stellato; Isabella Diaco; Jacob Artigas; Vince Diaco", address: "5 Fairthorne Street, Keysborough, 3173", phone: "", notes: "", group: "Extended Family", guestCount: 9 },
+        { name: "Rocco Careri", verified: "Rocco Careri", address: "18 Lind Street, Strathmore, VIC 3041", phone: "", notes: "", group: "Friends", guestCount: 1 },
+        { name: "Trang Nguyen & Jean Lee", verified: "Trang Nguyen; Jean Lee", address: "8 Edward st, Essendon, VIC 3040", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Alessia Giampiccolo", verified: "Alessia Giampiccolo", address: "20 Murnong Street, Maribyrnong, VIC 3032", phone: "", notes: "", group: "Friends", guestCount: 1 },
+        { name: "Phuong, Ricky, Rhiannon & Aiden Stilley", verified: "Phuong Stilley; Ricky Stilley; Rhiannon Stilley; Aiden Stilley", address: "8 Verbena Court, Cairnlea, VIC 3023", phone: "", notes: "", group: "Family", guestCount: 4 },
+        { name: "Angela, Frank, Luca & Mika Natoli", verified: "Frank; Angela; Luca; Mika", address: "4 Hardiman Court, Mill Park, VIC 3082", phone: "", notes: "", group: "Family", guestCount: 4 },
+        { name: "Andrew & Jessica Belante", verified: "Andrew Belante; Jessica Belante", address: "3 Exeter street, Hadfield, VIC 3046", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Frank, Priscila, Bianca & Sofia Barbaro", verified: "Frank Barbaro; Priscila Barbaro; Bianca Barbaro; Sofia Barbaro", address: "1 urquhart crt, Greenvale, VIC 3059", phone: "", notes: "", group: "Family", guestCount: 4 },
+        { name: "Anthony & Elsa Pagniello", verified: "Anthony Pagniello; Elsa Pagniello", address: "34 Domain Drive, Hillside, VIC 3037", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Zavier Vicari", verified: "Zavier Vicari", address: "3023 73 Lake street, Caroline Springs, VIC 3023", phone: "", notes: "", group: "Family", guestCount: 1 },
+        { name: "Cosimo Bertone", verified: "Cosimo Bertone", address: "57A Hardwick Street, Coburg, VIC 3058", phone: "", notes: "", group: "Friends", guestCount: 1 },
+        { name: "Danielle Scarmozzino & Tony Maraschiello", verified: "Danielle Scarmozzino; Tony Maraschiello", address: "75 Worcester Crescent, Bundoora, VIC 3083", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Carolina Arango", verified: "Carolina Arango", address: "18 Glenys Ave, Airport West, VIC 3042", phone: "", notes: "", group: "Friends", guestCount: 1 },
+        { name: "Alex Dal Corobbo", verified: "Alex Dal Corobbo", address: "77 Rutherglen Crescent, Gowanbrae, VIC 3043", phone: "", notes: "", group: "Friends", guestCount: 1 },
+        { name: "Joe & Carmen Italiano", verified: "Joe Italiano; Carmen Italiano", address: "1 Church street, Keilor, VIC 3036", phone: "", notes: "", group: "Family", guestCount: 2 },
+        { name: "Frank, Lina, Giuseppe & Amelia Andronaco", verified: "Frank Andronaco; Lina Andronaco; Giuseppe Andronaco; Amelia Andronaco", address: "9 Orr Street, Strathmore, VIC 3041", phone: "", notes: "", group: "Family", guestCount: 4 },
+        { name: "Antonio & Giulia Bongiovanni", verified: "Antonio Bongiovanni; Giulia Bongiovanni", address: "22 Le Cateau St, Pascoe Vale South, VIC 3044", phone: "", notes: "", group: "Family", guestCount: 2 },
+        { name: "Renee Tranos", verified: "Renee Tranos", address: "Apartment 403/16 Leake Street, Essendon, VIC 3040", phone: "", notes: "", group: "Friends", guestCount: 1 },
+        { name: "Giuseppe & Maria Gattellari", verified: "Peppe; Maria", address: "5 Crepe Myrtle Cres, South Morang, VIC 3752", phone: "", notes: "", group: "Family", guestCount: 2 },
+        { name: "Cheska Pelea", verified: "Cheska Pelea", address: "12 Earlston Place, Craigieburn, VIC 3064", phone: "", notes: "", group: "Friends", guestCount: 1 },
+        { name: "Kevin, Rania, Theresa, Mary, Catherine, Leah Eid", verified: "Kevin Eid; Rania Eid; Theresa Eid; Mary Eid; Catherine Eid; Leah Eid", address: "10 Shanley St, Pascoe Vale, VIC 3044", phone: "", notes: "", group: "Extended Family", guestCount: 6 },
+        { name: "Gianni La Verde & family", verified: "Gianni La Verde; Julia La Verde; Josephine Folino; Dominic Folino; Antionette La Verde; Antonio La Verde", address: "15 Bowman lane, Keysborough, VIC 3173", phone: "", notes: "", group: "Extended Family", guestCount: 6 },
+        { name: "Nick & Irene Laskaris", verified: "Nick; Irene", address: "117 Edmund Rice Pde, Bundoora, VIC 3083", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Peter DeSensi", verified: "Peter DeSensi", address: "5 Steele Street, Moonee Ponds, VIC 3039", phone: "", notes: "", group: "Friends", guestCount: 1 },
+        { name: "Cosimo & Toula Patti", verified: "Cosimo Patti; Toula", address: "2 Brickworks drive, Brunswick, VIC 3056", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Chris & Zina Margelis", verified: "Chris Margelis; Zina Margelis", address: "2 / 38 Nolan Street, Niddrie, VIC 3042", phone: "", notes: "", group: "Friends", guestCount: 2 },
+        { name: "Alannah O'Brien", verified: "Alannah O'Brien", address: "16a Newsom Street, Ascot Vale, VIC 3032", phone: "", notes: "", group: "Friends", guestCount: 1 },
+        { name: "Mimmo Ranieri & Mary Careri", verified: "Mimmo Ranieri; Mary Careri", address: "16a Lind Street, Strathmore, VIC 3041", phone: "", notes: "", group: "Friends", guestCount: 2 }
+    ];
 
-We are so excited to celebrate our wedding day with you!
+    // Add unique IDs to each guest
+    let guests = consolidatedGuests.map((guest, index) => ({
+        id: index,
+        ...guest,
+        emailed: false,
+        deliveryMethod: guest.phone ? "Email/Text" : "Post"
+    }));
 
-📋 Your table number is: **Table {{tableNumber}}**
+    let currentTab = "guestlist";
+    let searchTerm = "";
 
-📍 Venue: [Your Venue Name]
-🕕 Time: [Time]
-📅 Date: [Date]
-
-We can't wait to see you there!
-
-With love,
-Daniel & Laura 💒
-`;
-    
-    // ==================== CONSOLIDATED GUEST LIST (from your Excel + CSV) ====================
-    function getConsolidatedGuests() {
-        return [
-            // === FROM EXCEL FILE ===
-            { name: "Rosssi Mel family", group: "Family", verified: "Mario, Enza", address: "", phone: "" },
-            { name: "Father Aurelio Fragapane", group: "Family", verified: "Father Aurelio", address: "", phone: "" },
-            { name: "Mr V & Mrs C Di Pasquale & family", group: "Family", verified: "Vito, Carmel, John, Domenic", address: "1 Rhode Island Court, Taylors Lakes", phone: "" },
-            { name: "Mr C & Mrs D Di Pasquale & family", group: "Family", verified: "Carlo, Doreen, Teresa", address: "14 Wanaka Drive, Taylors Lakes", phone: "", notes: "Teresa at bridal table" },
-            { name: "Mr M & Mrs M Mirarchi & family", group: "Family", verified: "Mick, Mim, Nicholas, Josephine, Anthony", address: "1 Collendina Close, Keilor East 3033", phone: "" },
-            { name: "Mr T & Mrs R Pisano & family", group: "Family", verified: "Tony, Rosa, Isabella", address: "14 Overland Place, Keilor East 3033", phone: "" },
-            { name: "Mr L & Mrs A Palumbo & family", group: "Family", verified: "Leo, Antonia, Joseph, Alessia", address: "73 Steele Creek Drive, East Keilor", phone: "" },
-            { name: "Mr M & Mrs S Guzzardi & family", group: "Family", verified: "Mick, Sonia, Julius, Danni", address: "2 Eastgate Street, Pascoe Vale South", phone: "" },
-            { name: "Mr S & Mrs M Ibrahim", group: "Family", verified: "Sam, Michelle", address: "13 Brewster Street, Essendon", phone: "" },
-            { name: "Mr S & Mrs M Lombardo & family", group: "Family", verified: "Silvio, Marisa, Celeste, Emily, Jack", address: "49 Oakley Drive, Avondale Heights 3034", phone: "" },
-            { name: "Stefan Guzzardi", group: "Wedding Party", verified: "Stefan", address: "2 Eastgate Street, Pascoe Vale South", phone: "", notes: "Groomsman - Bridal table" },
-            { name: "Julian Lombardo", group: "Wedding Party", verified: "Julian", address: "49 Oakley Street, Avondale Heights", phone: "", notes: "Groomsman - Bridal table" },
-            { name: "Matthew Ibrahim", group: "Wedding Party", verified: "Matthew", address: "", phone: "", notes: "Groomsman - Bridal table" },
-            { name: "Brad Hamilton", group: "Wedding Party", verified: "Brad", address: "36 William Street, Essendon", phone: "", notes: "Groomsman - Bridal table" },
-            
-            // === FROM CSV FILE ===
-            { name: "Domenic & Kimberley Chila", group: "Family", verified: "Dominic Chila; Kimberley Chila", address: "16 Basalt Avenue, Keilor East, VIC 3033", phone: "" },
-            { name: "Raajpal Chahl", group: "Friend", verified: "Raajpal Singh Chahl", address: "23 Spinifex St, Point Cook, VIC 3030", phone: "" },
-            { name: "Domenico & Maria Iervasi", group: "Family", verified: "Domenico Iervasi; Maria Iervasi", address: "4 Sophia street, Sunshine west, VIC 3020", phone: "" },
-            { name: "Joe & Anita Trimboli", group: "Family", verified: "Joe Trimboli; Anita Trimboli", address: "84 Reynolds parade, Pascoe Vale South, VIC 3044", phone: "" },
-            { name: "Remzi Asllanaj & family", group: "Family", verified: "Remzi; Donna; Mark; Robert", address: "5 Gordon Street, Brunswick West, VIC 3055", phone: "" },
-            { name: "Frank & Mary Marcaccio", group: "Family", verified: "Frank Marcaccio; Mary Marcaccio", address: "34 Buckley, Essendon, VIC 3030", phone: "" },
-            { name: "Theresa Pavia", group: "Friend", verified: "Theresa Pavia", address: "34 Laurence Avenue, Airport West, VIC 3042", phone: "" },
-            { name: "Deanna Spataro", group: "Friend", verified: "Deanna Spataro", address: "41 Hassett Crescent, Keilor East, VIC 3033", phone: "" },
-            { name: "Rocco Careri", group: "Friend", verified: "Rocco Careri", address: "18 Lind Street, Strathmore, VIC 3041", phone: "" },
-            { name: "Gina Patti", group: "Friend", verified: "Gina Patti", address: "7 Wellesley Drive, Taylor's Lakes, VIC 3038", phone: "" },
-        ];
-    }
-    
-    // ==================== INITIALIZATION ====================
-    function initTables() {
-        tableMap.clear();
-        for (let i = 1; i <= TOTAL_TABLES; i++) {
-            tableMap.set(i.toString(), { name: `Table ${i}`, guests: [] });
-        }
-        tableMap.set(BRIDAL_TABLE, { name: "👰 Bridal Table", guests: [] });
-    }
-    
-    function loadData() {
-        // Load consolidated guests
-        const consolidated = getConsolidatedGuests();
-        allGuests = consolidated.map((g, idx) => ({
-            id: `guest_${idx}`,
-            name: g.name,
-            group: g.group,
-            verified: g.verified,
-            address: g.address,
-            phone: g.phone,
-            notes: g.notes || ""
-        }));
-        
-        // Load saved seating from localStorage
-        const saved = localStorage.getItem('wedding_seating');
-        if (saved) {
-            const data = JSON.parse(saved);
-            if (data.tableMap) {
-                for (const [tid, tdata] of Object.entries(data.tableMap)) {
-                    if (tableMap.has(tid)) {
-                        tableMap.get(tid).guests = tdata.guests;
-                    }
-                }
-            }
-            if (data.emailedGuests) emailedGuests = new Set(data.emailedGuests);
-        }
-        
-        // Build guestTableMap
-        guestTableMap.clear();
-        for (const [tid, table] of tableMap.entries()) {
-            for (const guest of table.guests) {
-                if (guest && guest.id) guestTableMap.set(guest.id, tid);
-            }
-        }
-    }
-    
-    function saveToLocalStorage() {
-        const exportMap = {};
-        for (const [tid, table] of tableMap.entries()) {
-            exportMap[tid] = { name: table.name, guests: table.guests };
-        }
-        localStorage.setItem('wedding_seating', JSON.stringify({
-            tableMap: exportMap,
-            emailedGuests: Array.from(emailedGuests)
-        }));
-    }
-    
-    // ==================== GUEST MANAGEMENT ====================
-    function assignGuestToTable(guest, tableId) {
-        const table = tableMap.get(tableId);
-        if (!table) return false;
-        
-        if (tableId !== BRIDAL_TABLE && table.guests.length >= MAX_PER_TABLE) {
-            showToast(`Table is full (max ${MAX_PER_TABLE})`);
-            return false;
-        }
-        
-        const oldTableId = guestTableMap.get(guest.id);
-        if (oldTableId) {
-            const oldTable = tableMap.get(oldTableId);
-            if (oldTable) oldTable.guests = oldTable.guests.filter(g => g.id !== guest.id);
-        }
-        
-        table.guests.push({ ...guest });
-        guestTableMap.set(guest.id, tableId);
-        saveToLocalStorage();
-        renderApp();
-        return true;
-    }
-    
-    function removeGuestFromTable(guestId, tableId) {
-        const table = tableMap.get(tableId);
-        if (table) {
-            table.guests = table.guests.filter(g => g.id !== guestId);
-            guestTableMap.delete(guestId);
-            saveToLocalStorage();
-            renderApp();
-        }
-    }
-    
-    function getUnassignedGuests() {
-        return allGuests.filter(g => !guestTableMap.has(g.id));
-    }
-    
-    // ==================== EMAIL FUNCTIONS ====================
-    function getGuestEmail(guest) {
-        // In real use, you'd collect emails. For demo, prompt or use placeholder
-        // You can add emails to the guest object above
-        return prompt(`Enter email for ${guest.name}:`, `${guest.name.replace(/\s/g, '.').toLowerCase()}@example.com`);
-    }
-    
-    function getTableNumber(guestId) {
-        const tid = guestTableMap.get(guestId);
-        if (!tid) return "Not assigned yet";
-        if (tid === BRIDAL_TABLE) return "Bridal Table";
-        return tid;
-    }
-    
-    function sendEmailToGuest(guest, tableNum, customTemplate = null) {
-        const template = customTemplate || DEFAULT_EMAIL_TEMPLATE;
-        const email = getGuestEmail(guest);
-        if (!email) return false;
-        
-        const subject = encodeURIComponent("Daniel & Laura's Wedding - Your Table Number");
-        const body = encodeURIComponent(
-            template
-                .replace(/{{guestName}}/g, guest.name.split(' & ')[0])
-                .replace(/{{tableNumber}}/g, tableNum)
-                .replace(/{{verifiedNames}}/g, guest.verified || guest.name)
-        );
-        
-        window.open(`mailto:${email}?subject=${subject}&body=${body}`);
-        
-        emailedGuests.add(guest.id);
-        saveToLocalStorage();
-        showToast(`📧 Email opened for ${guest.name}`);
-        return true;
-    }
-    
-    function sendBulkEmails() {
-        const assigned = allGuests.filter(g => guestTableMap.has(g.id));
-        if (assigned.length === 0) {
-            showToast("No assigned guests to email yet!");
-            return;
-        }
-        
-        let count = 0;
-        for (const guest of assigned) {
-            const tableNum = getTableNumber(guest.id);
-            if (tableNum !== "Not assigned yet") {
-                sendEmailToGuest(guest, tableNum);
-                count++;
-                if (count >= 5) {
-                    showToast(`Opening emails for first ${count} guests...`);
-                    break;
-                }
-            }
-        }
-        showToast(`📧 Opening email for ${count} guest(s)`);
-    }
-    
-    function sendReminderEmails() {
-        const notEmailed = allGuests.filter(g => guestTableMap.has(g.id) && !emailedGuests.has(g.id));
-        if (notEmailed.length === 0) {
-            showToast("All assigned guests have been emailed!");
-            return;
-        }
-        
-        for (const guest of notEmailed.slice(0, 5)) {
-            const tableNum = getTableNumber(guest.id);
-            sendEmailToGuest(guest, tableNum);
-        }
-        showToast(`📧 Sending reminders to ${Math.min(5, notEmailed.length)} guest(s)`);
-    }
-    
-    // ==================== EXPORTS ====================
-    function exportToCSV() {
-        const rows = [['Table Name', 'Guest Name', 'Group', 'Verified Names', 'Emailed']];
-        
-        for (const [tid, table] of tableMap.entries()) {
-            const tableName = table.name;
-            for (const guest of table.guests) {
-                rows.push([
-                    `"${tableName}"`,
-                    `"${guest.name}"`,
-                    `"${guest.group}"`,
-                    `"${guest.verified || guest.name}"`,
-                    emailedGuests.has(guest.id) ? 'Yes' : 'No'
-                ]);
-            }
-        }
-        
-        const unassigned = getUnassignedGuests();
-        for (const guest of unassigned) {
-            rows.push(['"UNASSIGNED"', `"${guest.name}"`, `"${guest.group}"`, `"${guest.verified || guest.name}"`, 'No']);
-        }
-        
-        const csv = rows.map(row => row.join(',')).join('\n');
-        const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `wedding_seating_${new Date().toISOString().slice(0,10)}.csv`;
-        link.click();
-        URL.revokeObjectURL(link.href);
-        showToast("CSV exported!");
-    }
-    
-    function showToast(msg) {
+    function showToast(message) {
         let toast = document.querySelector('.toast');
         if (toast) toast.remove();
         toast = document.createElement('div');
         toast.className = 'toast';
-        toast.textContent = msg;
+        toast.textContent = message;
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
     }
-    
-    // ==================== RENDER APP ====================
-    function renderApp() {
-        const app = document.getElementById('app');
-        const unassigned = getUnassignedGuests();
-        let totalSeated = 0;
-        for (const table of tableMap.values()) totalSeated += table.guests.length;
+
+    function getTotalGuestCount() {
+        return guests.reduce((sum, g) => sum + g.guestCount, 0);
+    }
+
+    function getEmailedCount() {
+        return guests.filter(g => g.emailed).length;
+    }
+
+    function getPendingCount() {
+        return guests.filter(g => !g.emailed).length;
+    }
+
+    function getPhoneCount() {
+        return guests.filter(g => g.phone && g.phone.trim() !== "" && g.phone !== "na").length;
+    }
+
+    function toggleEmail(guestId) {
+        const guest = guests.find(g => g.id === guestId);
+        if (guest) {
+            guest.emailed = !guest.emailed;
+            renderApp();
+            showToast(`${guest.emailed ? "Marked as emailed" : "Marked as pending"}: ${guest.name}`);
+        }
+    }
+
+    function sendBulkEmails() {
+        const pending = guests.filter(g => !g.emailed);
+        if (pending.length === 0) {
+            showToast("🎉 All guests have been emailed!");
+            return;
+        }
+
+        // Open email client for each pending guest (limit to 10 at a time)
+        const toEmail = pending.slice(0, 10);
+        for (const guest of toEmail) {
+            const subject = encodeURIComponent("Daniel & Laura's Wedding - Important Information");
+            const body = encodeURIComponent(`Dear ${guest.name.split(' & ')[0]},
+
+We are so excited to celebrate our wedding day with you!
+
+📅 Date: [Your Wedding Date]
+📍 Venue: [Venue Name]
+🕕 Time: [Time]
+
+We can't wait to see you there!
+
+With love,
+Daniel & Laura 💒`);
+
+            const email = prompt(`Enter email address for ${guest.name}:`, `${guest.name.replace(/\s/g, '.').toLowerCase()}@example.com`);
+            if (email) {
+                window.open(`mailto:${email}?subject=${subject}&body=${body}`);
+                guest.emailed = true;
+            }
+        }
+        renderApp();
+        showToast(`📧 Opened emails for ${toEmail.length} guest(s)`);
+    }
+
+    function exportToCSV() {
+        const headers = ["Name", "Verified Names", "Address", "Phone", "Notes", "Group", "Guest Count", "Emailed", "Delivery Method"];
+        const rows = guests.map(g => [
+            `"${g.name}"`,
+            `"${g.verified}"`,
+            `"${g.address || ""}"`,
+            `"${g.phone || ""}"`,
+            `"${g.notes || ""}"`,
+            `"${g.group}"`,
+            g.guestCount,
+            g.emailed ? "Yes" : "No",
+            g.deliveryMethod
+        ]);
+
+        const csv = [headers, ...rows].map(row => row.join(",")).join("\n");
+        const blob = new Blob(["\uFEFF" + csv], { type: "text/csv" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `wedding_guest_list_${new Date().toISOString().slice(0, 10)}.csv`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+        showToast("CSV exported!");
+    }
+
+    function filterGuests() {
+        if (!searchTerm) return guests;
+        const term = searchTerm.toLowerCase();
+        return guests.filter(g => 
+            g.name.toLowerCase().includes(term) || 
+            (g.verified && g.verified.toLowerCase().includes(term)) ||
+            (g.phone && g.phone.includes(term))
+        );
+    }
+
+    function renderGuestList() {
+        const filtered = filterGuests();
+        const totalIndividual = filtered.reduce((sum, g) => sum + g.guestCount, 0);
         
-        const allTableOptions = Array.from({ length: TOTAL_TABLES }, (_, i) => i + 1);
-        
-        app.innerHTML = `
-            <div class="container">
-                <div class="header">
-                    <h1>✨ Daniel & Laura's Wedding Manager ✨</h1>
-                    <p>Table Assignment + Email Guest Notifications</p>
-                </div>
-                
-                <div class="stats-bar">
-                    <div class="stat"><div class="stat-number">${allGuests.length}</div><div>Total Guests</div></div>
-                    <div class="stat"><div class="stat-number">${totalSeated}</div><div>Seated</div></div>
-                    <div class="stat"><div class="stat-number">${unassigned.length}</div><div>Unassigned</div></div>
-                    <div class="stat"><div class="stat-number">${emailedGuests.size}</div><div>Emailed</div></div>
-                </div>
-                
-                <div class="toolbar">
-                    <button class="btn" id="saveBtn">💾 Save</button>
-                    <button class="btn btn-primary" id="bulkEmailBtn">📧 Email All Seated Guests</button>
-                    <button class="btn btn-email" id="reminderBtn">📨 Send Reminders (Unemailed)</button>
-                    <button class="btn" id="csvBtn">📊 Export CSV</button>
-                </div>
-                
-                <div class="main-layout">
-                    <div class="tables-area">
-                        <div class="tables-grid" id="tablesGrid"></div>
+        return `
+            <div class="stats-bar">
+                <div class="stat"><div class="stat-number">${filtered.length}</div><div>Groups/Families</div></div>
+                <div class="stat"><div class="stat-number">${totalIndividual}</div><div>Individual Guests</div></div>
+                <div class="stat"><div class="stat-number">${getPhoneCount()}</div><div>Have Phone/Email</div></div>
+            </div>
+            
+            <div class="bulk-email-bar">
+                <span>📧 ${getPendingCount()} guests not yet emailed</span>
+                <button class="btn btn-email" onclick="sendBulkEmails()">📧 Send Bulk Emails</button>
+                <button class="btn btn-csv" onclick="exportToCSV()">📊 Export CSV</button>
+            </div>
+            
+            <div class="search-box">
+                <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search by name, verified names, or phone..." value="${searchTerm.replace(/"/g, '&quot;')}">
+                <button class="btn" onclick="updateSearch()">Search</button>
+                <button class="btn" onclick="clearSearch()">Clear</button>
+            </div>
+            
+            <div class="guest-table-container">
+                <table>
+                    <thead>
+                        <tr><th>Emailed?</th><th>Name</th><th>Verified Names</th><th>Address</th><th>Phone</th><th>Group</th><th>Count</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        ${filtered.map(guest => `
+                            <tr>
+                                <td style="text-align:center">
+                                    <input type="checkbox" class="email-checkbox" ${guest.emailed ? "checked" : ""} onchange="toggleEmail(${guest.id})">
+                                </td>
+                                <td><strong>${escapeHtml(guest.name)}</strong></td>
+                                <td>${escapeHtml(guest.verified || "-")}</td>
+                                <td style="font-size:0.8rem">${escapeHtml(guest.address || "-")}</td>
+                                <td>${guest.phone ? `<a href="tel:${guest.phone}">${guest.phone}</a>` : "-"}</td>
+                                <td><span class="note-badge">${guest.group}</span></td>
+                                <td style="text-align:center">${guest.guestCount}</td>
+                                <td style="font-size:0.75rem; color:#b7950b">${escapeHtml(guest.notes || "-")}</td>
+                            </tr>
+                        `).join('')}
+                        ${filtered.length === 0 ? '<tr><td colspan="8" style="text-align:center; padding:40px;">✨ No guests found ✨</td></tr>' : ''}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    function renderTableAssignment() {
+        return `
+            <div class="table-assignment-area">
+                <h2>🪑 Table Assignment Coming Soon</h2>
+                <p style="margin-top: 15px;">The table assignment feature will be available in the next update.</p>
+                <p style="margin-top: 10px;">For now, you can use the Guest List tab to manage all ${guests.length} groups/families.</p>
+                <div style="margin-top: 30px;">
+                    <div class="stat" style="display: inline-block; margin: 10px;">
+                        <div class="stat-number">${guests.length}</div>
+                        <div>Groups/Families</div>
                     </div>
-                    <div class="guests-area">
-                        <h3>📋 Unassigned Guests (${unassigned.length})</h3>
-                        <div id="unassignedList"></div>
+                    <div class="stat" style="display: inline-block; margin: 10px;">
+                        <div class="stat-number">${getTotalGuestCount()}</div>
+                        <div>Total Guests</div>
                     </div>
                 </div>
             </div>
         `;
-        
-        // Render tables
-        const grid = document.getElementById('tablesGrid');
-        if (grid) {
-            grid.innerHTML = '';
-            const sorted = Array.from(tableMap.keys()).sort((a,b) => {
-                if (a === BRIDAL_TABLE) return 1;
-                if (b === BRIDAL_TABLE) return -1;
-                return parseInt(a) - parseInt(b);
-            });
-            
-            for (const tid of sorted) {
-                const table = tableMap.get(tid);
-                const isBridal = tid === BRIDAL_TABLE;
-                const card = document.createElement('div');
-                card.className = `table-card ${isBridal ? 'bridal' : ''}`;
-                card.innerHTML = `
-                    <div class="table-header">
-                        <span>${table.name}</span>
-                        <span>${table.guests.length} guests</span>
-                    </div>
-                    <div class="table-guests">
-                        ${table.guests.length === 0 ? '<div style="color:#bfae8e; text-align:center;">— empty —</div>' : 
-                            table.guests.map(g => `<span class="guest-chip ${emailedGuests.has(g.id) ? 'emailed' : ''}" data-id="${g.id}" data-table="${tid}">${g.name} ${emailedGuests.has(g.id) ? '📧' : ''} ✖</span>`).join('')
-                        }
-                    </div>
-                `;
-                grid.appendChild(card);
-                
-                card.querySelectorAll('.guest-chip').forEach(chip => {
-                    chip.onclick = () => {
-                        const id = chip.dataset.id;
-                        const tid = chip.dataset.table;
-                        if (confirm('Remove this guest?')) removeGuestFromTable(id, tid);
-                    };
-                });
-            }
-        }
-        
-        // Render unassigned
-        const unassignedDiv = document.getElementById('unassignedList');
-        if (unassignedDiv) {
-            if (unassigned.length === 0) {
-                unassignedDiv.innerHTML = '<div style="text-align:center; padding:30px; color:#bfae8e;">✨ All guests assigned! ✨</div>';
-            } else {
-                unassignedDiv.innerHTML = unassigned.map(g => `
-                    <div class="guest-list-item">
-                        <div>
-                            <strong>${g.name}</strong><br>
-                            <small>${g.group} | ${g.verified || ''}</small>
-                        </div>
-                        <div>
-                            <select id="table_${g.id.replace(/[^a-zA-Z0-9]/g, '_')}" style="width:80px;">
-                                <option value="">Table</option>
-                                ${allTableOptions.map(t => `<option value="${t}">${t}</option>`).join('')}
-                                <option value="${BRIDAL_TABLE}">👰</option>
-                            </select>
-                            <button class="btn" style="padding:4px 10px;" data-assign="${g.id}">Assign</button>
-                        </div>
-                    </div>
-                `).join('');
-                
-                for (const g of unassigned) {
-                    const btn = unassignedDiv.querySelector(`[data-assign="${g.id}"]`);
-                    const sel = unassignedDiv.querySelector(`#table_${g.id.replace(/[^a-zA-Z0-9]/g, '_')}`);
-                    if (btn && sel) btn.onclick = () => { if (sel.value) assignGuestToTable(g, sel.value); else showToast('Select a table'); };
-                }
-            }
-        }
-        
-        // Event listeners
-        document.getElementById('saveBtn').onclick = () => { saveToLocalStorage(); showToast("Saved!"); };
-        document.getElementById('bulkEmailBtn').onclick = sendBulkEmails;
-        document.getElementById('reminderBtn').onclick = sendReminderEmails;
-        document.getElementById('csvBtn').onclick = exportToCSV;
     }
-    
-    // Initialize
-    initTables();
-    loadData();
+
+    function escapeHtml(str) {
+        if (!str) return "";
+        return str.replace(/[&<>]/g, m => m === "&" ? "&amp;" : m === "<" ? "&lt;" : "&gt;");
+    }
+
+    function updateSearch() {
+        searchTerm = document.getElementById('searchInput').value;
+        renderApp();
+    }
+
+    function clearSearch() {
+        searchTerm = "";
+        renderApp();
+    }
+
+    function setTab(tab) {
+        currentTab = tab;
+        renderApp();
+    }
+
+    function renderApp() {
+        const app = document.getElementById('app');
+        
+        app.innerHTML = `
+            <div class="container">
+                <div class="header">
+                    <h1>💍 Daniel & Laura's Wedding Manager 💒</h1>
+                    <p>Complete Guest List | ${guests.length} groups | ${getTotalGuestCount()} total guests</p>
+                </div>
+                
+                <div class="tabs">
+                    <button class="tab ${currentTab === 'guestlist' ? 'active' : ''}" onclick="setTab('guestlist')">📋 Guest List + Email</button>
+                    <button class="tab ${currentTab === 'tables' ? 'active' : ''}" onclick="setTab('tables')">🪑 Table Assignment (Coming Soon)</button>
+                </div>
+                
+                <div class="panel active">
+                    ${currentTab === 'guestlist' ? renderGuestList() : renderTableAssignment()}
+                </div>
+            </div>
+        `;
+    }
+
+    // Make functions global for onclick
+    window.toggleEmail = toggleEmail;
+    window.sendBulkEmails = sendBulkEmails;
+    window.exportToCSV = exportToCSV;
+    window.updateSearch = updateSearch;
+    window.clearSearch = clearSearch;
+    window.setTab = setTab;
+
     renderApp();
 </script>
 </body>
