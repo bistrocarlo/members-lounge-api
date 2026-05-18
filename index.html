@@ -3,553 +3,817 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <meta name="theme-color" content="#1a73e8">
-    <title>Monday Night Soccer • Elite Hub</title>
+    <title>Monday Night Soccer | Ultimate Edition 🏆</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
-        :root {
-            --primary: #1a73e8;
-            --success: #22c55e;
-            --danger: #ef4444;
-            --warning: #eab308;
-        }
-        [data-theme="dark"] {
-            --bg: #0f172a;
-            --surface: #1e2937;
-            --card: #334155;
-            --text: #f1f5f9;
-            --muted: #94a3b8;
-        }
         *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-        body {
-            background: #f8fafc;
-            font-family: 'Inter', sans-serif;
-            color: #1e2937;
-            min-height: 100vh;
-        }
-        [data-theme="dark"] body {
-            background: var(--bg);
-            color: var(--text);
-        }
-        .app {
-            max-width: 500px;
-            margin: 0 auto;
-            background: #f8fafc;
-            min-height: 100vh;
-            padding-bottom: 90px;
-        }
-        [data-theme="dark"] .app { background: var(--bg); }
+        body{background:#f0f2f5;font-family:'Inter',sans-serif;}
+        .app{max-width:500px;margin:0 auto;background:#f0f2f5;min-height:100vh;padding-bottom:20px;}
         
-        .header {
-            background: white;
-            padding: 16px 20px;
-            text-align: center;
-            position: sticky;
-            top: 0;
-            z-index: 30;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-        [data-theme="dark"] .header { background: var(--surface); }
+        /* Header */
+        .header{background:linear-gradient(135deg,#1a1a2e,#16213e);color:white;padding:14px 20px;text-align:center;border-bottom:1px solid #e9ecef;position:sticky;top:0;z-index:20;}
+        .logo-icon{width:52px;height:52px;background:linear-gradient(135deg,#e94560,#ff6b6b);border-radius:16px;display:inline-flex;align-items:center;justify-content:center;margin:0 auto 6px;box-shadow:0 4px 15px rgba(233,69,96,0.3);}
+        .logo-icon i{font-size:26px;color:white;}
+        .header h1{font-size:18px;font-weight:800;letter-spacing:-0.5px;}
+        .user-row{background:rgba(255,255,255,0.15);padding:5px 14px;border-radius:40px;display:inline-flex;align-items:center;gap:10px;margin-top:6px;font-size:12px;backdrop-filter:blur(10px);}
+        .user-row button{background:#dc3545;border:none;padding:4px 12px;border-radius:40px;color:white;font-weight:500;font-size:11px;cursor:pointer;}
         
-        .logo-icon {
-            width: 68px; height: 68px;
-            background: linear-gradient(135deg, #1a73e8, #3b82f6);
-            border-radius: 22px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 8px;
-            box-shadow: 0 8px 25px rgba(26,115,232,0.4);
-        }
-        .header h1 {
-            font-size: 22px;
-            font-weight: 800;
-            letter-spacing: -0.8px;
-            color: #1e2937;
-        }
-        .user-row {
-            background: #f1f5f9;
-            padding: 6px 16px;
-            border-radius: 9999px;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 13px;
-            margin-top: 8px;
-        }
-        [data-theme="dark"] .user-row { background: #475569; }
+        /* Navigation */
+        .top-nav{background:white;padding:10px 12px;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;border-bottom:1px solid #e9ecef;position:sticky;top:75px;z-index:15;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
+        .nav-module{background:#f0f2f5;border:none;padding:8px 14px;border-radius:40px;font-size:12px;font-weight:600;color:#5a626e;cursor:pointer;transition:all 0.2s;}
+        .nav-module.active{background:#e94560;color:white;box-shadow:0 2px 8px rgba(233,69,96,0.3);}
+        .module-container{padding:16px;display:none;}
+        .module-container.active-module{display:block;animation:fadeIn 0.3s ease;}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
         
-        .top-nav {
-            background: white;
-            padding: 12px 10px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 6px;
-            position: sticky;
-            top: 78px;
-            z-index: 25;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        }
-        [data-theme="dark"] .top-nav { background: var(--surface); }
+        /* Cards */
+        .card{background:white;border-radius:24px;padding:18px;margin-bottom:14px;border:1px solid #e9ecef;box-shadow:0 2px 8px rgba(0,0,0,0.04);transition:transform 0.2s, box-shadow 0.2s;}
+        .card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,0.08);}
+        .card h2{font-size:17px;font-weight:800;margin-bottom:14px;border-left:4px solid #e94560;padding-left:12px;color:#1a1a2e;}
         
-        .nav-module {
-            background: #f1f5f9;
-            border: none;
-            padding: 9px 14px;
-            border-radius: 9999px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        [data-theme="dark"] .nav-module { background: #475569; color: #e2e8f0; }
-        .nav-module.active {
-            background: var(--primary);
-            color: white;
-            box-shadow: 0 4px 12px rgba(26,115,232,0.3);
-        }
+        /* Attendance Card */
+        .attendance-card{background:linear-gradient(135deg,#e94560,#ff6b6b);color:white;border-radius:28px;padding:24px 20px;text-align:center;margin-bottom:16px;box-shadow:0 8px 25px rgba(233,69,96,0.3);}
+        .big-buttons{display:flex;gap:14px;margin:16px 0 12px;}
+        .btn-play-big{background:#28a745;flex:1;padding:14px;border-radius:60px;font-weight:800;font-size:16px;border:none;color:white;cursor:pointer;transition:transform 0.1s;}
+        .btn-play-big:active{transform:scale(0.97);}
+        .btn-sit-big{background:#dc3545;flex:1;padding:14px;border-radius:60px;font-weight:800;font-size:16px;border:none;color:white;cursor:pointer;transition:transform 0.1s;}
+        .btn-sit-big:active{transform:scale(0.97);}
         
-        .module-container { padding: 16px; display: none; }
-        .module-container.active-module { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        /* Profile & Player Items */
+        .profile-item{background:#f8f9fa;border-radius:20px;margin-bottom:10px;display:flex;align-items:center;gap:12px;padding:12px;transition:all 0.2s;}
+        .profile-item:hover{background:#e9ecef;}
+        .profile-avatar{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:18px;flex-shrink:0;box-shadow:0 4px 10px rgba(0,0,0,0.1);}
+        .player-avatar-small{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:12px;margin-right:5px;flex-shrink:0;}
+        .profile-badge{background:white;border-radius:40px;padding:3px 10px;font-size:11px;font-weight:600;display:inline-block;margin-right:6px;margin-bottom:4px;color:#495057;border:1px solid #e9ecef;}
         
-        .card {
-            background: white;
-            border-radius: 24px;
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.07);
-        }
-        [data-theme="dark"] .card { background: var(--card); }
+        /* Ranking Tables */
+        .ranking-table{width:100%;border-collapse:collapse;}
+        .ranking-table th,.ranking-table td{padding:10px 8px;text-align:left;border-bottom:1px solid #e9ecef;}
+        .ranking-table th{font-weight:800;color:#e94560;font-size:12px;}
+        .rank-number{font-weight:800;color:#e94560;width:35px;}
+        .rank-medal{font-size:18px;}
+        .trend-up{color:#28a745;margin-left:5px;}
+        .trend-down{color:#dc3545;margin-left:5px;}
         
-        .attendance-card {
-            background: linear-gradient(135deg, #1e40af, #3b82f6);
-            color: white;
-            border-radius: 28px;
-            padding: 28px 20px;
-            text-align: center;
-        }
+        /* Power Ranking Card */
+        .power-rank-card{background:linear-gradient(135deg,#1a1a2e,#16213e);color:white;border-radius:20px;padding:16px;margin-bottom:12px;display:flex;align-items:center;gap:12px;}
+        .power-rank-number{font-size:32px;font-weight:900;color:#e94560;min-width:50px;}
+        .power-rank-info{flex:1;}
+        .power-rank-name{font-weight:700;font-size:16px;}
+        .power-rank-stats{font-size:11px;opacity:0.8;}
         
-        .btn-play-big, .btn-sit-big {
-            flex: 1;
-            padding: 18px;
-            border-radius: 9999px;
-            font-weight: 700;
-            font-size: 17px;
-            border: none;
-            color: white;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .btn-play-big:active, .btn-sit-big:active { transform: scale(0.96); }
-        .btn-play-big { background: linear-gradient(135deg, #22c55e, #4ade80); }
-        .btn-sit-big { background: linear-gradient(135deg, #ef4444, #f87171); }
+        /* Match Card */
+        .match-card{background:white;border-radius:20px;margin-bottom:14px;border:1px solid #e9ecef;overflow:hidden;}
+        .match-header{background:#f8f9fa;padding:12px 16px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;border-bottom:1px solid #e9ecef;}
+        .match-result{background:#e94560;color:white;padding:4px 14px;border-radius:40px;font-weight:700;font-size:13px;}
+        .teams-section{padding:16px;background:#1a2a3a;}
+        .team-yellow{background:#ffc107;color:#2c2c2c;font-weight:800;text-align:center;padding:6px;border-radius:60px;margin-bottom:8px;}
+        .team-orange{background:#fd7e14;color:white;font-weight:800;text-align:center;padding:6px;border-radius:60px;margin-bottom:8px;}
+        .score-big{text-align:center;margin-top:12px;font-size:22px;font-weight:800;background:rgba(0,0,0,0.6);border-radius:60px;padding:8px;color:#ffd700;}
         
-        .toast {
-            position: fixed;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1f2937;
-            color: white;
-            padding: 14px 24px;
-            border-radius: 9999px;
-            font-size: 15px;
-            z-index: 99999;
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.2);
-            display: none;
-            align-items: center;
-            gap: 10px;
-        }
+        /* Achievement Badges */
+        .achievement-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;}
+        .achievement-badge{background:linear-gradient(135deg,#f8f9fa,#e9ecef);border-radius:16px;padding:12px;text-align:center;transition:all 0.2s;}
+        .achievement-badge.earned{background:linear-gradient(135deg,#ffd700,#ffed4e);box-shadow:0 4px 15px rgba(255,215,0,0.3);}
+        .achievement-icon{font-size:28px;margin-bottom:6px;}
+        .achievement-name{font-size:11px;font-weight:600;}
+        .achievement-desc{font-size:9px;color:#6c757d;}
         
-        .profile-avatar {
-            width: 52px; height: 52px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 18px;
-            flex-shrink: 0;
-        }
+        /* Trash Talk */
+        .trash-talk-card{background:linear-gradient(135deg,#fff5f5,#ffe0e0);border-radius:20px;padding:16px;margin-bottom:12px;border-left:4px solid #e94560;}
+        .trash-talk-author{font-weight:800;color:#e94560;margin-bottom:6px;}
+        .trash-talk-text{font-size:14px;font-style:italic;}
+        .trash-talk-time{font-size:10px;color:#6c757d;margin-top:6px;}
         
-        .player-tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(255,255,255,0.15);
-            border-radius: 9999px;
-            padding: 6px 14px;
-            font-size: 13px;
-            color: white;
-            margin: 4px;
-        }
+        /* Streak Indicator */
+        .streak-fire{background:#ff6b6b;color:white;border-radius:40px;padding:2px 10px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:4px;}
         
-        .guest-tag {
-            background: #bbf7d0;
-            color: #166534;
-            padding: 6px 14px;
-            border-radius: 9999px;
-            font-size: 13px;
-        }
+        /* Modal */
+        .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;}
+        .modal-content{background:white;border-radius:32px;padding:24px;max-width:340px;width:90%;max-height:80vh;overflow-y:auto;}
         
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
-        .data-table th, .data-table td {
-            padding: 12px 8px;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
-        }
+        /* Buttons & Inputs */
+        select,input{width:100%;padding:12px;border:1.5px solid #e9ecef;border-radius:60px;margin:8px 0;font-size:14px;font-family:'Inter',sans-serif;}
+        button{background:#e94560;color:white;border:none;padding:10px 20px;border-radius:60px;font-weight:700;cursor:pointer;transition:all 0.2s;}
+        button:active{transform:scale(0.97);}
+        .btn-outline{background:white;color:#e94560;border:2px solid #e94560;}
+        .whatsapp-share{background:#25D366;color:white;}
+        .flex-btns{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;}
+        .info-bar{background:#e8f0fe;border-radius:16px;padding:12px;font-size:12px;margin-bottom:16px;text-align:center;color:#e94560;font-weight:600;}
+        .guest-tag{display:inline-block;background:#d4edda;border-radius:40px;padding:4px 12px;margin:4px;font-size:12px;}
+        .guest-badge{background:#28a745;color:white;border-radius:40px;padding:2px 8px;font-size:9px;margin-left:6px;}
         
-        .modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-        }
-        .modal-content {
-            background: white;
-            border-radius: 28px;
-            padding: 28px;
-            width: 92%;
-            max-width: 380px;
-            max-height: 85vh;
-            overflow-y: auto;
-        }
-        [data-theme="dark"] .modal-content { background: #1e2937; }
-        
-        button {
-            font-family: 'Inter', sans-serif;
-        }
-        
-        .fines-jar {
-            background: linear-gradient(135deg, #f59e0b, #fbbf24);
-            color: #1f2937;
-            border-radius: 24px;
-            padding: 20px;
-            text-align: center;
-            font-weight: 700;
-        }
+        @media (max-width:450px){.team-row{flex-direction:column;}}
     </style>
 </head>
-<body data-theme="light">
-<div class="app" id="app">
-    <div style="text-align:center; padding:80px 20px;">
-        <i class="fas fa-futbol fa-spin fa-4x" style="color:#1a73e8;"></i>
-        <p style="margin-top:30px; font-size:18px; font-weight:600;">Loading the greatest Monday Night Soccer app ever made...</p>
-    </div>
-</div>
+<body>
+<div class="app" id="app"><div style="text-align:center; padding:40px;"><i class="fas fa-spinner fa-spin"></i> Loading Ultimate Monday Night Soccer...</div></div>
 
 <script>
-// ==================== FIREBASE CONFIG ====================
-const firebaseConfig = {
-    apiKey: "AIzaSyCWlFqDJyENgrUOhiLXCjSEi4Mk_54SA1w",
-    authDomain: "monday-night-soccer-hub.firebaseapp.com",
-    projectId: "monday-night-soccer-hub",
-    storageBucket: "monday-night-soccer-hub.firebasestorage.app",
-    messagingSenderId: "634335208908",
-    appId: "1:634335208908:web:dca705b65fc52de0606969"
-};
-
-let db = null, firebaseReady = false;
-try {
-    firebase.initializeApp(firebaseConfig);
-    db = firebase.firestore();
-    firebaseReady = true;
-} catch(e) { console.warn("Offline mode"); }
-
-// ==================== DATA ====================
-const FIXED_PLAYERS_LIST = [
-    "Alex Rowe", "Ali Mekawy", "Carlo Pavia", "Charlie Pavia", "Chris Del Monaco", 
-    "Chris Margelis", "Chris Sophocli", "Danny Sammartino", "Dante Sammartino", 
-    "David", "Dimitri", "Enzo", "Farid", "Faros", "Frank Marcaccio", 
-    "George Babatsikos", "George Theodoropoulos", "Ivan", "James Zoumis", 
-    "James Martino", "Joe Trimboli", "Joseph", "Kiarash Piani", "Leo", "Manoli", 
-    "Marco Mercuri", "Mario", "Morris Del Monte", "Nector Laskaris", "Paul Hardalas", 
-    "Perri Theodorlis", "Peter Disensi", "Ralph Risoli", "Rocco Mammoliti", 
-    "Paul Salustro", "Stevan Brankovic", "Theo", "Tony El Hajj", "Vasilis"
-].sort();
-
-let players = [...FIXED_PLAYERS_LIST];
-let playerProfiles = {};
-let teamAssignments = {};
-let matchResults = {};
-let attendance = [];
-let guests = [];
-let matchComments = {};
-let captainPerWeek = {};
-let fines = [];
-
-let currentUser = null;
-let isAdminLoggedIn = false;
-let currentWeek = null;
-
-// ==================== HELPERS ====================
-function getMondayDate(d) {
-    const date = new Date(d);
-    const day = date.getDay();
-    const diff = day === 0 ? -6 : 1 - day;
-    date.setDate(date.getDate() + diff);
-    date.setHours(20,0,0,0);
-    return date;
-}
-
-function getCurrentGameWeekStr() {
-    return getMondayDate(new Date()).toISOString().split('T')[0];
-}
-
-function getCurrentGameLabel() {
-    const m = getMondayDate(new Date());
-    return `Mon ${m.toLocaleDateString('en-AU', {day:'numeric', month:'short'})}`;
-}
-
-const CURRENT_GAME_STR = getCurrentGameWeekStr();
-
-function showToast(message, type = "success") {
-    const toast = document.createElement("div");
-    toast.className = "toast";
-    toast.style.background = type === "success" ? "#166534" : type === "error" ? "#b91c1c" : "#854d0e";
-    toast.innerHTML = `<i class="fas fa-${type==='success'?'check-circle':'exclamation-triangle'}"></i> ${message}`;
-    document.body.appendChild(toast);
-    toast.style.display = "flex";
-    setTimeout(() => toast.remove(), 3000);
-}
-
-function getInitials(name) {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
-}
-
-function getAvatarColor(name) {
-    const colors = ['#1a73e8','#22c55e','#ef4444','#f59e0b','#8b5cf6','#14b8a6'];
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    return colors[Math.abs(hash) % colors.length];
-}
-
-function renderAvatar(name, size=52) {
-    return `<div class="profile-avatar" style="background:${getAvatarColor(name)};width:${size}px;height:${size}px;font-size:${size/2.3}px;">${getInitials(name)}</div>`;
-}
-
-// ==================== PERSISTENT LOGIN & THEME ====================
-function saveLogin() {
-    if (currentUser) localStorage.setItem('mns_currentUser', JSON.stringify(currentUser));
-    if (isAdminLoggedIn) localStorage.setItem('mns_isAdmin', 'true');
-}
-
-function loadSavedLogin() {
-    const savedUser = localStorage.getItem('mns_currentUser');
-    if (savedUser) currentUser = JSON.parse(savedUser);
-    if (localStorage.getItem('mns_isAdmin') === 'true') isAdminLoggedIn = true;
+    // ==================== FIREBASE CONFIG ====================
+    const firebaseConfig = {
+        apiKey: "AIzaSyCWlFqDJyENgrUOhiLXCjSEi4Mk_54SA1w",
+        authDomain: "monday-night-soccer-hub.firebaseapp.com",
+        projectId: "monday-night-soccer-hub",
+        storageBucket: "monday-night-soccer-hub.firebasestorage.app",
+        messagingSenderId: "634335208908",
+        appId: "1:634335208908:web:dca705b65fc52de0606969"
+    };
     
-    const savedTheme = localStorage.getItem('mns_theme');
-    if (savedTheme) document.body.setAttribute('data-theme', savedTheme);
-}
-
-function toggleDarkMode() {
-    const current = document.body.getAttribute('data-theme') || 'light';
-    const newTheme = current === 'light' ? 'dark' : 'light';
-    document.body.setAttribute('data-theme', newTheme);
-    localStorage.setItem('mns_theme', newTheme);
-    refreshAll();
-}
-
-// ==================== CORE FUNCTIONS (enhanced) ====================
-async function loadData() {
-    if (!firebaseReady || !db) return;
-    try {
-        const [profDoc, teamDoc, resultDoc, attSnap, guestSnap] = await Promise.all([
-            db.collection("config").doc("playerProfiles").get(),
-            db.collection("config").doc("teamAssignments").get(),
-            db.collection("config").doc("matchResults").get(),
-            db.collection("attendance").get(),
-            db.collection("guests").get()
-        ]);
-        
-        if (profDoc.exists) playerProfiles = profDoc.data();
-        if (teamDoc.exists) teamAssignments = teamDoc.data();
-        if (resultDoc.exists) matchResults = resultDoc.data();
-        attendance = attSnap.docs.map(d => d.data());
-        guests = guestSnap.docs.map(d => d.data());
-        
-        refreshAll();
-        showToast("Data synced successfully ⚽", "success");
-    } catch(e) { console.error(e); }
-}
-
-async function setAttendance(status) {
-    if (!currentUser) return showToast("Please log in first", "error");
-    const record = { player: currentUser.name, gameDate: CURRENT_GAME_STR, status, timestamp: Date.now() };
-    if (firebaseReady) await db.collection("attendance").doc(`${currentUser.name}_${CURRENT_GAME_STR}`).set(record);
-    attendance = attendance.filter(a => !(a.player === currentUser.name && a.gameDate === CURRENT_GAME_STR));
-    attendance.push(record);
-    refreshAll();
-    showToast(status === "in" ? "You're in! See you Monday 🔥" : "Noted – we'll miss you", "success");
-}
-
-// ... (All other original functions like addGuest, saveTeamAssignments, etc. are preserved and enhanced with toasts)
-
-function refreshAll() {
-    renderHome();
-    renderTeams();
-    renderHistory();
-    renderStats();
-    renderProfiles();
-    renderTimer();
-    renderChat();
-    if (isAdminLoggedIn) renderAdmin();
-}
-
-// ==================== RENDER FUNCTIONS (Sweet & Modern) ====================
-function renderHome() {
-    const container = document.getElementById("homeContainer") || createContainer("homeContainer");
-    const label = getCurrentGameLabel();
-    const myStatus = attendance.find(a => a.gameDate === CURRENT_GAME_STR && a.player === currentUser?.name)?.status;
+    let db = null, firebaseReady = false;
+    try { 
+        firebase.initializeApp(firebaseConfig); 
+        db = firebase.firestore(); 
+        firebaseReady = true; 
+    } catch(e) { console.warn("Offline mode", e); }
     
-    container.innerHTML = `
-        <div class="card attendance-card">
-            <h2 style="font-size:24px;margin-bottom:8px;">${label}</h2>
-            <p>8:00pm • Clifton Park, Brunswick</p>
-            <div style="display:flex;gap:12px;margin:24px 0;">
-                <button class="btn-play-big" onclick="setAttendance('in')">✅ I'M PLAYING</button>
-                <button class="btn-sit-big" onclick="setAttendance('out')">❌ CAN'T MAKE IT</button>
-            </div>
-            <div style="font-size:15px;font-weight:500;">${myStatus === 'in' ? '✅ You are confirmed!' : myStatus === 'out' ? '😢 Not playing this week' : 'Tap a button above'}</div>
-        </div>
-        <!-- Guests, Playing list, etc. – enhanced versions of your original -->
-    `;
-}
-
-// (All render functions are fully implemented in the complete version below this comment block for brevity in response)
-
-function createContainer(id) {
-    let c = document.getElementById(id);
-    if (!c) {
-        c = document.createElement("div");
-        c.id = id;
-        c.className = "module-container";
-        document.getElementById("app").appendChild(c);
+    // ==================== MASTER DATA ====================
+    const FIXED_PLAYERS_LIST = [
+        "Alex Rowe", "Ali Mekawy", "Carlo Pavia", "Charlie Pavia", "Chris Del Monaco", 
+        "Chris Margelis", "Chris Sophocli", "Danny Sammartino", "Dante Sammartino", 
+        "David", "Dimitri", "Enzo", "Farid", "Faros", "Frank Marcaccio", 
+        "George Babatsikos", "George Theodoropoulos", "Ivan", "James Zoumis", 
+        "James Martino", "Joe Trimboli", "Joseph", "Kiarash Piani", "Leo", "Manoli", 
+        "Marco Mercuri", "Mario", "Morris Del Monte", "Nector Laskaris", "Paul Hardalas", 
+        "Perri Theodorlis", "Peter Disensi", "Ralph Risoli", "Rocco Mammoliti", 
+        "Paul Salustro", "Stevan Brankovic", "Theo", "Tony El Hajj", "Vasilis"
+    ].sort();
+    
+    // Achievements Database
+    const ACHIEVEMENTS = [
+        { id: "hattrick", name: "Hat Trick Hero", desc: "Score 3+ goals in a match", icon: "⚽⚽⚽", requirement: 3 },
+        { id: "playmaker", name: "Playmaker", desc: "3+ assists in a match", icon: "🎯", requirement: 3 },
+        { id: "ironman", name: "Iron Man", desc: "Play 10 consecutive games", icon: "💪", requirement: 10 },
+        { id: "golden_boot", name: "Golden Boot", desc: "Top scorer of the season", icon: "👟", requirement: 1 },
+        { id: "mvp", name: "MVP", desc: "Named Man of the Match", icon: "🏆", requirement: 1 },
+        { id: "loyalty", name: "Loyalty", desc: "Play 20 total games", icon: "❤️", requirement: 20 },
+        { id: "debut", name: "Debutant", desc: "First game played", icon: "🌟", requirement: 1 },
+        { id: "comeback", name: "Comeback King", desc: "Score winning goal after trailing", icon: "👑", requirement: 1 }
+    ];
+    
+    // Trash Talk Templates
+    const TRASH_TALK_TEMPLATES = [
+        "🧂 Is it me or is it salty in here? 🧂",
+        "🚫 Nice try, but maybe stick to training 🚫",
+        "💀 That defending was a public health hazard 💀",
+        "🎯 My grandma could've scored that 🎯",
+        "😴 Did you guys forget there was a game today? 😴",
+        "🦵 Maybe try using both feet next time 🦵",
+        "📉 Your form is dropping faster than my phone's battery 📉",
+        "🍼 Someone get these guys a bottle 🍼"
+    ];
+    
+    // ==================== GLOBAL STATE ====================
+    let players = [...FIXED_PLAYERS_LIST];
+    let playerProfiles = {};
+    let teamAssignments = {};
+    let matchResults = {};
+    let attendance = [];
+    let guests = [];
+    let matchComments = [];
+    let trashTalkPosts = [];
+    let isAdminLoggedIn = false, currentUser = null;
+    let weeklyCaptain = "Football Freedom";
+    let timerInterval = null, currentHalf = 1, timeLeft = 45 * 60;
+    let chatUnsubscribe = null;
+    
+    // ==================== HELPER FUNCTIONS ====================
+    function getCurrentGameWeekStr(){ 
+        const d = new Date();
+        const day = d.getDay();
+        const diff = (day === 0 ? -6 : 1) - day;
+        const monday = new Date(d);
+        monday.setDate(d.getDate() + diff);
+        monday.setHours(20,0,0,0);
+        if(monday < d) monday.setDate(monday.getDate() + 7);
+        return monday.toISOString().split('T')[0];
     }
-    return c;
-}
-
-// ==================== INIT ====================
-function initApp() {
-    loadSavedLogin();
     
-    document.getElementById("app").innerHTML = `
-        <div class="header">
-            <div class="logo-icon"><i class="fas fa-futbol"></i></div>
-            <h1>MONDAY NIGHT SOCCER</h1>
-            <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-top:8px;">
-                <div class="user-row" id="userDisplay">
-                    ${currentUser ? currentUser.name : 'Not logged in'}
-                </div>
-                <button onclick="toggleDarkMode()" style="background:none;border:none;font-size:24px;cursor:pointer;">🌙</button>
-            </div>
-        </div>
-        
-        <div class="top-nav" id="topNav"></div>
-        
-        <div id="homeContainer" class="module-container active-module"></div>
-        <div id="teamsContainer" class="module-container"></div>
-        <div id="historyContainer" class="module-container"></div>
-        <div id="statsContainer" class="module-container"></div>
-        <div id="profilesContainer" class="module-container"></div>
-        <div id="timerContainer" class="module-container"></div>
-        <div id="chatContainer" class="module-container"></div>
-        <div id="adminContainer" class="module-container"></div>
-    `;
-
-    // Build top nav
-    const navHTML = `
-        <button class="nav-module active" data-module="home">🏠 Home</button>
-        <button class="nav-module" data-module="teams">⚽ Teams</button>
-        <button class="nav-module" data-module="history">📖 History</button>
-        <button class="nav-module" data-module="stats">🏆 Stats</button>
-        <button class="nav-module" data-module="profiles">👤 Profiles</button>
-        <button class="nav-module" data-module="timer">⏱ Timer</button>
-        <button class="nav-module" data-module="chat">💬 Chat</button>
-        ${isAdminLoggedIn ? `<button class="nav-module" data-module="admin">🔧 Admin</button>` : ''}
-    `;
-    document.getElementById("topNav").innerHTML = navHTML;
-
-    // Nav click handlers
-    document.querySelectorAll(".nav-module").forEach(btn => {
-        btn.addEventListener("click", () => {
-            document.querySelectorAll(".nav-module").forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-            document.querySelectorAll(".module-container").forEach(c => c.classList.remove("active-module"));
-            const mod = btn.dataset.module;
-            document.getElementById(mod + "Container").classList.add("active-module");
+    function getCurrentGameLabel(){ 
+        const m = new Date(getCurrentGameWeekStr());
+        return `Mon ${m.toLocaleDateString('en-AU',{day:'numeric',month:'short'})}`;
+    }
+    
+    const CURRENT_GAME_STR = getCurrentGameWeekStr();
+    
+    function getPastWeeks(){ 
+        const weeks = [];
+        const today = new Date();
+        for(let i = 1; i <= 12; i++){
+            const past = new Date(today);
+            past.setDate(past.getDate() - (i * 7));
+            const pastMonday = new Date(past);
+            const day = pastMonday.getDay();
+            const diff = (day === 0 ? -6 : 1) - day;
+            pastMonday.setDate(pastMonday.getDate() + diff);
+            weeks.push({ dateStr: pastMonday.toISOString().split('T')[0], label: `Mon ${pastMonday.toLocaleDateString('en-AU',{day:'numeric',month:'short'})}` });
+        }
+        return weeks;
+    }
+    
+    function getAllParticipants(gameDate){ 
+        const playersIn = attendance.filter(a => a.gameDate === gameDate && a.status === 'in').map(a => a.player); 
+        const guestsIn = guests.filter(g => g.gameDate === gameDate).map(g => ({ name: g.guestName, isGuest: true, addedBy: g.addedBy })); 
+        return { players: playersIn, guests: guestsIn }; 
+    }
+    
+    function escapeHtml(s){ return String(s).replace(/[&<>]/g, m=> ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
+    function getInitials(n){ return n.split(' ').map(x=>x[0]).join('').toUpperCase().substring(0,2); }
+    function getAvatarColor(n){ const c=['#e94560','#28a745','#dc3545','#fd7e14','#6f42c1','#20c997','#17a2b8']; let h=0; for(let i=0;i<n.length;i++) h=((h<<5)-h)+n.charCodeAt(i); return c[Math.abs(h)%c.length]; }
+    function renderAvatar(n,s=48){ return `<div class="profile-avatar" style="background:${getAvatarColor(n)};width:${s}px;height:${s}px;font-size:${s/2.5}px;">${getInitials(n)}</div>`; }
+    function renderMiniAvatar(n,s=28){ return `<div class="player-avatar-small" style="background:${getAvatarColor(n)};width:${s}px;height:${s}px;font-size:${s/2}px;">${getInitials(n)}</div>`; }
+    
+    // ==================== PLAYER STATS & RANKINGS ====================
+    function calculatePlayerStats(){
+        let stats = new Map();
+        for(let p of players) stats.set(p, { 
+            goals: 0, 
+            assists: 0, 
+            gamesPlayed: 0,
+            mvps: 0,
+            motmWins: 0,
+            yellowCards: 0,
+            winRate: 0,
+            streak: 0,
+            bestStreak: 0
         });
-    });
-
-    if (firebaseReady) loadData();
-    else showToast("Running in offline mode", "warning");
-
-    showToast(`Welcome back, ${currentUser ? currentUser.name.split(" ")[0] : "Legend"}! ⚽`, "success");
-    
-    // Show login if needed
-    if (!currentUser) showLoginModal();
-    else refreshAll();
-}
-
-function showLoginModal() {
-    const modal = document.createElement("div");
-    modal.className = "modal";
-    modal.innerHTML = `
-        <div class="modal-content">
-            <div style="text-align:center;margin-bottom:20px;">
-                <div class="logo-icon" style="margin:0 auto;width:80px;height:80px;font-size:32px;"><i class="fas fa-futbol"></i></div>
-                <h2>Monday Night Soccer</h2>
-            </div>
-            <select id="playerSelect" style="width:100%;padding:14px;border-radius:9999px;margin:12px 0;">
-                <option value="">Select your name</option>
-                ${FIXED_PLAYERS_LIST.map(p => `<option>${p}</option>`).join('')}
-            </select>
-            <button onclick="performLogin()" style="width:100%;padding:16px;background:var(--primary);color:white;border:none;border-radius:9999px;font-size:17px;font-weight:700;">Login</button>
-            <button onclick="adminQuickLogin()" style="width:100%;margin-top:12px;padding:12px;background:#64748b;color:white;border:none;border-radius:9999px;">🔐 Admin Login</button>
-        </div>
-    `;
-    document.body.appendChild(modal);
-}
-
-window.performLogin = function() {
-    const name = document.getElementById("playerSelect").value;
-    if (!name) return;
-    currentUser = {name};
-    saveLogin();
-    document.getElementById("userDisplay").innerHTML = name;
-    document.querySelectorAll(".modal").forEach(m => m.remove());
-    refreshAll();
-    showToast(`Logged in as ${name} 👋`, "success");
-};
-
-window.adminQuickLogin = function() {
-    const pw = prompt("Enter admin password:");
-    if (pw === "admin123") {
-        isAdminLoggedIn = true;
-        currentUser = {name: "Admin"};
-        saveLogin();
-        document.querySelectorAll(".modal").forEach(m => m.remove());
-        refreshAll();
-        showToast("Admin mode activated 🔥", "success");
+        
+        // Count games played
+        attendance.forEach(a => { 
+            if(a.status === 'in' && stats.has(a.player)) {
+                stats.get(a.player).gamesPlayed++;
+            }
+        });
+        
+        // Add opening balance games
+        for(let p of players){
+            const opening = playerProfiles[p]?.openingBalanceGames || 0;
+            if(stats.has(p)) stats.get(p).gamesPlayed += opening;
+        }
+        
+        // Count goals & assists from match results
+        for(let match of Object.values(matchResults)){
+            if(match.goals){
+                for(let [scorer, cnt] of Object.entries(match.goals)){
+                    if(stats.has(scorer)) stats.get(scorer).goals += cnt;
+                }
+            }
+            if(match.assists){
+                for(let [assister, cnt] of Object.entries(match.assists)){
+                    if(stats.has(assister)) stats.get(assister).assists += cnt;
+                }
+            }
+            if(match.mvp && stats.has(match.mvp)){
+                stats.get(match.mvp).mvps++;
+                stats.get(match.mvp).motmWins++;
+            }
+        }
+        
+        // Calculate streaks and win rates
+        for(let p of players){
+            const playerGames = attendance.filter(a => a.player === p && a.status === 'in').sort((a,b) => a.gameDate.localeCompare(b.gameDate));
+            let currentStreak = 0, bestStreak = 0;
+            for(let i = 0; i < playerGames.length; i++){
+                if(i > 0 && new Date(playerGames[i].gameDate) - new Date(playerGames[i-1].gameDate) <= 8*24*60*60*1000){
+                    currentStreak++;
+                } else {
+                    currentStreak = 1;
+                }
+                bestStreak = Math.max(bestStreak, currentStreak);
+            }
+            if(stats.has(p)){
+                stats.get(p).streak = currentStreak;
+                stats.get(p).bestStreak = bestStreak;
+            }
+        }
+        
+        return stats;
     }
-};
-
-// Start the app
-initApp();
+    
+    function getPowerRankings(){
+        const stats = calculatePlayerStats();
+        const rankings = [];
+        for(let [name, s] of stats){
+            // Calculate power score: goals*3 + assists*2 + games*1 + mvps*5
+            const score = (s.goals * 3) + (s.assists * 2) + (s.gamesPlayed * 1) + (s.mvps * 5);
+            rankings.push({ name, score, goals: s.goals, assists: s.assists, games: s.gamesPlayed, mvps: s.mvps });
+        }
+        return rankings.sort((a,b) => b.score - a.score);
+    }
+    
+    function getPlayerAchievements(playerName){
+        const stats = calculatePlayerStats();
+        const playerStats = stats.get(playerName);
+        if(!playerStats) return [];
+        
+        const earned = [];
+        // Hat trick
+        for(let match of Object.values(matchResults)){
+            if(match.goals && match.goals[playerName] >= 3){
+                if(!earned.find(a => a.id === "hattrick")) earned.push({...ACHIEVEMENTS.find(a => a.id === "hattrick"), earned: true});
+                break;
+            }
+        }
+        // Playmaker
+        for(let match of Object.values(matchResults)){
+            if(match.assists && match.assists[playerName] >= 3){
+                if(!earned.find(a => a.id === "playmaker")) earned.push({...ACHIEVEMENTS.find(a => a.id === "playmaker"), earned: true});
+                break;
+            }
+        }
+        // Iron Man
+        if(playerStats.streak >= 10) earned.push({...ACHIEVEMENTS.find(a => a.id === "ironman"), earned: true});
+        // Loyalty
+        if(playerStats.gamesPlayed >= 20) earned.push({...ACHIEVEMENTS.find(a => a.id === "loyalty"), earned: true});
+        // Debut
+        if(playerStats.gamesPlayed >= 1) earned.push({...ACHIEVEMENTS.find(a => a.id === "debut"), earned: true});
+        // MVP
+        if(playerStats.mvps >= 1) earned.push({...ACHIEVEMENTS.find(a => a.id === "mvp"), earned: true});
+        
+        return earned;
+    }
+    
+    // ==================== TRASH TALK ====================
+    async function addTrashTalk(text){
+        if(!currentUser) return alert("Login to talk trash!");
+        const post = {
+            author: currentUser.name,
+            text: text,
+            timestamp: Date.now(),
+            likes: 0,
+            likedBy: []
+        };
+        if(firebaseReady && db) await db.collection("trashTalk").add(post);
+        trashTalkPosts.unshift(post);
+        renderTrashTalkPage();
+    }
+    
+    async function loadTrashTalk(){
+        if(!firebaseReady || !db) return;
+        const snap = await db.collection("trashTalk").orderBy("timestamp","desc").limit(50).get();
+        trashTalkPosts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderTrashTalkPage();
+    }
+    
+    // ==================== FIREBASE OPERATIONS ====================
+    async function saveAttendance(a){ 
+        if(firebaseReady && db) await db.collection("attendance").doc(`${a.player}_${a.gameDate}`).set(a); 
+        const idx = attendance.findIndex(x=>x.player===a.player && x.gameDate===a.gameDate); 
+        if(idx !== -1) attendance[idx] = a; 
+        else attendance.push(a); 
+        refreshAll(); 
+    }
+    
+    async function saveGuest(g){ 
+        if(firebaseReady && db) await db.collection("guests").doc(`${g.guestName}_${g.gameDate}`).set(g); 
+        guests.push(g); 
+        refreshAll(); 
+    }
+    
+    async function saveTeamAssignments(date, assign){ 
+        teamAssignments[date] = assign; 
+        if(firebaseReady && db) await db.collection("config").doc("teamAssignments").set(teamAssignments); 
+        refreshAll(); 
+    }
+    
+    async function saveMatchResult(date, yellow, orange, goals, assists, mvp, injuries){ 
+        matchResults[date] = { yellowScore:yellow, orangeScore:orange, goals, assists:assists||{}, mvp, injuries:injuries||[], timestamp:Date.now() }; 
+        if(firebaseReady && db) await db.collection("config").doc("matchResults").set(matchResults); 
+        refreshAll(); 
+        alert("✅ Match saved! Power rankings updated!");
+    }
+    
+    async function addGuestToWeek(guestName, gameDate){ 
+        if(!currentUser) return alert("Login to add a guest");
+        if(guests.some(g=>g.gameDate===gameDate && g.guestName===guestName.trim())){ alert("Guest already added"); return false; }
+        await saveGuest({ guestName:guestName.trim(), gameDate, addedBy:currentUser.name, timestamp:Date.now() });
+        alert(`✅ ${guestName} added!`);
+        return true;
+    }
+    
+    async function setAttendance(status){ 
+        if(!currentUser){ alert("Login required"); return; } 
+        await saveAttendance({ player:currentUser.name, gameDate:CURRENT_GAME_STR, status }); 
+    }
+    
+    async function loadData(){ 
+        if(!firebaseReady || !db) return; 
+        try{ 
+            const [profDoc, tDoc, rDoc, attSnap, guestSnap] = await Promise.all([
+                db.collection("config").doc("playerProfiles").get(), 
+                db.collection("config").doc("teamAssignments").get(), 
+                db.collection("config").doc("matchResults").get(), 
+                db.collection("attendance").get(), 
+                db.collection("guests").get()
+            ]);
+            if(profDoc.exists) playerProfiles = profDoc.data(); 
+            if(tDoc.exists) teamAssignments = tDoc.data(); 
+            if(rDoc.exists) matchResults = rDoc.data(); 
+            attendance = attSnap.docs.map(d=>d.data()); 
+            guests = guestSnap.docs.map(d=>d.data()); 
+            for(let p of players) if(!playerProfiles[p]) playerProfiles[p] = {age:'—', position:'—', yearJoined:'—', gamesPlayed:0, openingBalanceGames:0}; 
+            refreshAll(); 
+            loadTrashTalk();
+        } catch(e){ console.warn(e); } 
+    }
+    
+    function refreshAll(){ 
+        renderHomePage(); 
+        renderTeamsPage(); 
+        renderHistoryPage(); 
+        renderProfilesPage(); 
+        renderRankingsPage(); 
+        renderAchievementsPage();
+        renderTrashTalkPage();
+        renderTimerPage(); 
+        renderChatPage(); 
+        if(isAdminLoggedIn) renderAdminPage(); 
+    }
+    
+    // ==================== RENDER FUNCTIONS ====================
+    function renderHomePage(){ 
+        const c = document.getElementById("homeContainer"); 
+        if(!c) return; 
+        const gl = getCurrentGameLabel(); 
+        const status = attendance.find(a=>a.gameDate===CURRENT_GAME_STR && a.player===currentUser?.name)?.status; 
+        const parts = getAllParticipants(CURRENT_GAME_STR);
+        const powerRank = getPowerRankings();
+        const top3 = powerRank.slice(0,3);
+        
+        c.innerHTML = `
+            <div class="info-bar"><i class="fas fa-fire" style="color:#e94560;"></i> Power Rankings Updated! <i class="fas fa-trophy"></i></div>
+            
+            <div class="attendance-card">
+                <h2>${gl}</h2>
+                <div>📍 Clifton Park, Brunswick | 8:00pm</div>
+                <div class="big-buttons">
+                    <button id="homePlayBtn" class="btn-play-big">✅ I'M IN</button>
+                    <button id="homeSitBtn" class="btn-sit-big">❌ CAN'T PLAY</button>
+                </div>
+                <div>${status==='in'?'✓ You\'re playing! ⚡':(status==='out'?'✗ Marked as out':'Tap to confirm')}</div>
+            </div>
+            
+            <div class="card">
+                <h2>🏆 Power Rankings Top 3</h2>
+                ${top3.map((p,i) => `
+                    <div class="power-rank-card">
+                        <div class="power-rank-number">#${i+1}</div>
+                        <div class="power-rank-info">
+                            <div class="power-rank-name">${renderMiniAvatar(p.name)} ${escapeHtml(p.name)}</div>
+                            <div class="power-rank-stats">⚽ ${p.goals} goals | 🎯 ${p.assists} assists | 🏆 ${p.mvps} MVPs</div>
+                        </div>
+                        <div>${i===0?'👑':(i===1?'🥈':'🥉')}</div>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <div class="playing-list">
+                <div><i class="fas fa-users"></i> 🟢 Confirmed (${parts.players.length})</div>
+                <div>${parts.players.map(p=>`<span class="attendee-tag">${renderMiniAvatar(p)} ${escapeHtml(p)}</span>`).join('') || 'None yet'}</div>
+            </div>
+            
+            <div class="guest-section">
+                <div><i class="fas fa-user-plus"></i> 🎭 Guests (${parts.guests.length})</div>
+                <div>${parts.guests.map(g=>`<span class="guest-tag">${renderMiniAvatar(g.name)} ${escapeHtml(g.name)} <span class="guest-badge">by ${escapeHtml(g.addedBy)}</span></span>`).join('') || 'No guests'}</div>
+                <div style="margin-top:12px;">
+                    <input id="guestNameHome" placeholder="Bring a mate! Enter name">
+                    <button id="addGuestHomeBtn">➕ Add Guest</button>
+                </div>
+            </div>
+        `; 
+        document.getElementById("homePlayBtn")?.addEventListener("click",()=>setAttendance("in")); 
+        document.getElementById("homeSitBtn")?.addEventListener("click",()=>setAttendance("out")); 
+        document.getElementById("addGuestHomeBtn")?.addEventListener("click",()=>{ 
+            const val = document.getElementById("guestNameHome")?.value.trim(); 
+            if(val) addGuestToWeek(val, CURRENT_GAME_STR); 
+            else alert("Enter a name"); 
+        });
+    }
+    
+    function renderTeamsPage(){ 
+        const c = document.getElementById("page-teamswk"); 
+        if(!c) return; 
+        const gl = getCurrentGameLabel(); 
+        const parts = getAllParticipants(CURRENT_GAME_STR); 
+        const allList = [...parts.players.map(p=>({name:p, isG:false})), ...parts.guests.map(g=>({name:g.name, isG:true}))]; 
+        const assign = teamAssignments[CURRENT_GAME_STR] || {}; 
+        const yellow = [], orange = []; 
+        for(let p of allList){ 
+            if(assign[p.name] === "yellow") yellow.push(p); 
+            else if(assign[p.name] === "orange") orange.push(p); 
+        } 
+        c.innerHTML = `
+            <div class="info-bar">⚡ ${gl} • Team Sheet • Captain: ${weeklyCaptain}</div>
+            <div class="card">
+                <div class="team-row">
+                    <div class="team-box">
+                        <div class="team-yellow">🟡 YELLOW (${yellow.length})</div>
+                        <div class="player-list">${yellow.map(p=>`<div class="player-tag">${renderMiniAvatar(p.name)} ${escapeHtml(p.name)}${p.isG?' 🎭':''}</div>`).join('') || '—'}</div>
+                    </div>
+                    <div class="team-box">
+                        <div class="team-orange">🟠 ORANGE (${orange.length})</div>
+                        <div class="player-list">${orange.map(p=>`<div class="player-tag">${renderMiniAvatar(p.name)} ${escapeHtml(p.name)}${p.isG?' 🎭':''}</div>`).join('') || '—'}</div>
+                    </div>
+                </div>
+            </div>
+            <button id="shareTeamsBtn" class="whatsapp-share"><i class="fab fa-whatsapp"></i> Share Team Sheet</button>
+        `;
+        document.getElementById("shareTeamsBtn")?.addEventListener("click",()=>{
+            const sheet = `⚽ MONDAY NIGHT SOCCER - ${gl}\n🟡 Yellow: ${yellow.map(p=>p.name).join(', ')}\n🟠 Orange: ${orange.map(p=>p.name).join(', ')}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(sheet)}`,'_blank');
+        });
+    }
+    
+    function renderRankingsPage(){
+        const c = document.getElementById("page-rankings");
+        if(!c) return;
+        const powerRank = getPowerRankings();
+        const stats = calculatePlayerStats();
+        
+        c.innerHTML = `
+            <div class="card">
+                <h2><i class="fas fa-chart-line"></i> Power Rankings</h2>
+                <p style="font-size:11px; color:#6c757d;">Formula: Goals×3 + Assists×2 + Games + MVPs×5</p>
+                <table class="ranking-table">
+                    <thead><tr><th>#</th><th>Player</th><th>Score</th><th>G</th><th>A</th><th>MVP</th></tr></thead>
+                    <tbody>
+                        ${powerRank.map((p,i) => `
+                            <tr>
+                                <td class="rank-number">${i+1}${i===0?'👑':(i===1?'🥈':(i===2?'🥉':''))}</td>
+                                <td>${renderMiniAvatar(p.name)} ${escapeHtml(p.name)}</td>
+                                <td><strong>${p.score}</strong></td>
+                                <td>${p.goals}</td>
+                                <td>${p.assists}</td>
+                                <td>${p.mvps}</td>
+                            </tr>
+                        `).slice(0,15).join('')}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card">
+                <h2><i class="fas fa-fire"></i> Streak Leaders</h2>
+                <table class="ranking-table">
+                    <thead><tr><th>Player</th><th>🔥 Current Streak</th><th>🏆 Best Streak</th></tr></thead>
+                    <tbody>
+                        ${[...stats.entries()].sort((a,b)=>b[1].streak - a[1].streak).slice(0,10).map(([name,s]) => `
+                            <tr>
+                                <td>${renderMiniAvatar(name)} ${escapeHtml(name)}</td>
+                                <td>${s.streak > 0 ? `<span class="streak-fire"><i class="fas fa-fire"></i> ${s.streak}</span>` : '0'}</td>
+                                <td>${s.bestStreak}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card">
+                <h2><i class="fas fa-chart-simple"></i> All-Time Leaders</h2>
+                <h3>⚽ Goals</h3>
+                <table class="ranking-table"><tbody>${[...stats.entries()].sort((a,b)=>b[1].goals - a[1].goals).slice(0,10).map(([name,s],i)=>`<tr><td>${i+1}</td><td>${renderMiniAvatar(name)} ${escapeHtml(name)}</td><td><strong>${s.goals}</strong></td></tr>`).join('')}</tbody></table>
+                <h3 style="margin-top:16px;">🎯 Assists</h3>
+                <table class="ranking-table"><tbody>${[...stats.entries()].sort((a,b)=>b[1].assists - a[1].assists).slice(0,10).map(([name,s],i)=>`<tr><td>${i+1}</td><td>${renderMiniAvatar(name)} ${escapeHtml(name)}</td><td><strong>${s.assists}</strong></td></tr>`).join('')}</tbody></table>
+            </div>
+        `;
+    }
+    
+    function renderAchievementsPage(){
+        const c = document.getElementById("page-achievements");
+        if(!c) return;
+        
+        let html = `<div class="card"><h2><i class="fas fa-medal"></i> Achievement Gallery</h2>`;
+        
+        if(currentUser){
+            const earned = getPlayerAchievements(currentUser.name);
+            html += `<div class="achievement-grid">${ACHIEVEMENTS.map(a => {
+                const hasEarned = earned.some(e => e.id === a.id);
+                return `<div class="achievement-badge ${hasEarned ? 'earned' : ''}">
+                    <div class="achievement-icon">${a.icon}</div>
+                    <div class="achievement-name">${a.name}</div>
+                    <div class="achievement-desc">${a.desc}</div>
+                    ${hasEarned ? '<span style="color:#28a745;">✓</span>' : '🔒'}
+                </div>`;
+            }).join('')}</div>`;
+        } else {
+            html += `<p>Login to see your achievements!</p>`;
+        }
+        
+        // All-time achievement leaders
+        const achievementCounts = new Map();
+        for(let p of players){
+            const earned = getPlayerAchievements(p);
+            achievementCounts.set(p, earned.filter(e => e.earned).length);
+        }
+        const topAchievers = [...achievementCounts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,5);
+        
+        html += `<div style="margin-top:20px;"><h3>🏆 Top Achievers</h3>`;
+        html += topAchievers.map(([name, count], i) => `<div class="profile-item"><div>${renderMiniAvatar(name)} ${escapeHtml(name)}</div><div><span class="streak-fire"><i class="fas fa-medal"></i> ${count} badges</span></div></div>`).join('');
+        html += `</div></div>`;
+        
+        c.innerHTML = html;
+    }
+    
+    function renderTrashTalkPage(){
+        const c = document.getElementById("page-trashtalk");
+        if(!c) return;
+        
+        c.innerHTML = `
+            <div class="card">
+                <h2><i class="fas fa-comment-dots"></i> Trash Talk 🗣️</h2>
+                <div style="display:flex; gap:8px; margin-bottom:16px;">
+                    <input id="trashInput" placeholder="Talk your trash..." style="flex:1;">
+                    <button id="postTrashBtn">Post</button>
+                </div>
+                <div id="trashList">
+                    ${trashTalkPosts.map(post => `
+                        <div class="trash-talk-card">
+                            <div class="trash-talk-author">${renderMiniAvatar(post.author)} ${escapeHtml(post.author)}</div>
+                            <div class="trash-talk-text">"${escapeHtml(post.text)}"</div>
+                            <div class="trash-talk-time">${new Date(post.timestamp).toLocaleString()}</div>
+                        </div>
+                    `).join('') || '<p style="text-align:center;">No trash talk yet. Be the first! 🔥</p>'}
+                </div>
+                <button id="randomTrashBtn" class="btn-outline" style="margin-top:12px;"><i class="fas fa-dice"></i> Random Roast</button>
+            </div>
+        `;
+        
+        document.getElementById("postTrashBtn")?.addEventListener("click", () => {
+            const input = document.getElementById("trashInput");
+            if(input?.value.trim()) addTrashTalk(input.value.trim());
+            input.value = "";
+        });
+        
+        document.getElementById("randomTrashBtn")?.addEventListener("click", () => {
+            const random = TRASH_TALK_TEMPLATES[Math.floor(Math.random() * TRASH_TALK_TEMPLATES.length)];
+            addTrashTalk(random);
+        });
+    }
+    
+    function renderHistoryPage(){ 
+        const c = document.getElementById("page-history"); 
+        if(!c) return; 
+        const past = getPastWeeks(); 
+        c.innerHTML = `<div class="card"><h2>📖 Match History</h2>${past.map(w => {
+            const m = matchResults[w.dateStr] || {yellowScore:0, orangeScore:0, goals:{}, mvp:'', assists:{}};
+            return `<div class="match-card"><div class="match-header"><div>${w.label}</div><div class="match-result">🟡 ${m.yellowScore} - ${m.orangeScore} 🟠</div></div><div class="goals-section"><strong>⚽ Goals:</strong> ${Object.entries(m.goals).map(([p,c])=>`${p}(${c})`).join(', ') || 'none'}<br><strong>🏆 MVP:</strong> ${m.mvp || '—'}</div></div>`;
+        }).join('')}</div>`; 
+    }
+    
+    function renderProfilesPage(){ 
+        const c = document.getElementById("page-profiles"); 
+        if(!c) return; 
+        let h = `<div class="card"><h2>👤 Player Profiles</h2>`; 
+        for(let p of players){ 
+            const prof = playerProfiles[p] || {age:'—', position:'—', yearJoined:'—', gamesPlayed:0}; 
+            h += `<div class="profile-item">${renderAvatar(p)}<div><div>⚽ ${escapeHtml(p)}</div><div><span class="profile-badge">🎂 ${prof.age}</span><span class="profile-badge">⚽ ${prof.position}</span><span class="profile-badge">📅 ${prof.yearJoined}</span></div></div></div>`; 
+        } 
+        c.innerHTML = h; 
+    }
+    
+    function renderTimerPage(){ 
+        const c = document.getElementById("page-timer"); 
+        if(!c) return; 
+        c.innerHTML = `<div class="card"><div class="timer-display" id="timerDisplay" style="font-size:48px; text-align:center;">45:00</div><div class="flex-btns"><button id="timerStartBtn" style="background:#28a745;">▶ Start</button><button id="timerPauseBtn" style="background:#ffc107;">⏸ Pause</button><button id="timerResetBtn" style="background:#dc3545;">⟳ Reset</button></div><div class="half-status" id="currentHalf" style="text-align:center;">FIRST HALF</div></div>`; 
+        let time = 2700, half = 1;
+        const update = () => { document.getElementById("timerDisplay").innerText = `${Math.floor(time/60)}:${(time%60).toString().padStart(2,'0')}`; document.getElementById("currentHalf").innerText = half === 1 ? "FIRST HALF" : "SECOND HALF"; };
+        let interval;
+        document.getElementById("timerStartBtn")?.addEventListener("click",()=>{ if(interval) clearInterval(interval); interval = setInterval(()=>{ if(time<=0){ clearInterval(interval); alert("Half over!"); if(half===1){ half=2; time=2700; update(); } } else { time--; update(); } },1000); });
+        document.getElementById("timerPauseBtn")?.addEventListener("click",()=>{ if(interval) clearInterval(interval); });
+        document.getElementById("timerResetBtn")?.addEventListener("click",()=>{ if(interval) clearInterval(interval); time=2700; half=1; update(); });
+        update();
+    }
+    
+    function renderChatPage(){ 
+        const c = document.getElementById("page-chat"); 
+        if(!c) return; 
+        c.innerHTML = `<div class="card"><h2>💬 Team Chat</h2><div id="chatMessagesList" style="height:350px; overflow-y:auto; background:#f8f9fa; border-radius:20px; padding:12px; margin-bottom:12px;"></div><div style="display:flex; gap:8px;"><input id="chatInput" placeholder="Type message..." style="flex:1;"><button id="chatSendBtn">Send</button></div></div>`; 
+        if(firebaseReady && db){ 
+            if(chatUnsubscribe) chatUnsubscribe(); 
+            chatUnsubscribe = db.collection("chatMessages").orderBy("timestamp","asc").onSnapshot(snap=>{ 
+                const div = document.getElementById("chatMessagesList"); 
+                if(!div) return; 
+                let h = ""; 
+                snap.forEach(doc=>{ const m = doc.data(); h += `<div><strong>${escapeHtml(m.name)}</strong><div style="background:#e9ecef; border-radius:12px; padding:8px; margin-top:4px;">${escapeHtml(m.message)}</div></div>`; }); 
+                div.innerHTML = h || "<div style='text-align:center;'>No messages</div>"; 
+                div.scrollTop = div.scrollHeight; 
+            }); 
+        } 
+        document.getElementById("chatSendBtn")?.addEventListener("click", async()=>{ 
+            const inp = document.getElementById("chatInput"); 
+            if(inp?.value.trim() && currentUser){ 
+                if(firebaseReady && db) await db.collection("chatMessages").add({ name:currentUser.name, message:inp.value.trim(), timestamp:firebase.firestore.FieldValue.serverTimestamp() }); 
+                inp.value = ""; 
+            } 
+        }); 
+    }
+    
+    function renderAdminPage(){ 
+        const cont = document.getElementById("page-admin"); 
+        if(!isAdminLoggedIn){ 
+            if(cont) cont.innerHTML = `<div class="card"><h2>🔒 Admin</h2><button id="adminLoginBtn">Admin Login</button></div>`; 
+            document.getElementById("adminLoginBtn")?.addEventListener("click",()=>{ if(prompt("Password:")==="admin123"){ isAdminLoggedIn=true; refreshAll(); } }); 
+            return; 
+        } 
+        cont.innerHTML = `<div class="card"><h2>⚙️ Admin Panel</h2><p>Admin functions available in Firebase console</p><button onclick="logout()" style="background:#dc3545;">Logout</button></div>`;
+    }
+    
+    // ==================== LOGIN MODAL ====================
+    function showLoginModal(){ 
+        const modal = document.createElement('div'); 
+        modal.className = 'modal'; 
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div style="text-align:center"><i class="fas fa-futbol fa-3x" style="color:#e94560;"></i></div>
+                <h3 style="text-align:center;">Monday Night Soccer</h3>
+                <p style="text-align:center; font-size:12px;">Ultimate Edition 🏆</p>
+                <select id="loginSelect"><option value="">Select your name</option>${FIXED_PLAYERS_LIST.map(p=>`<option>${escapeHtml(p)}</option>`).join('')}</select>
+                <button id="doLoginBtn" style="width:100%;">Login</button>
+                <button id="adminLoginModalBtn" style="width:100%; margin-top:8px; background:#6c757d;">Admin Access</button>
+            </div>
+        `; 
+        document.body.appendChild(modal); 
+        document.getElementById("doLoginBtn").onclick = ()=>{ 
+            const val = document.getElementById("loginSelect").value; 
+            if(val && FIXED_PLAYERS_LIST.includes(val)){ 
+                currentUser = {name:val}; 
+                isAdminLoggedIn = false; 
+                modal.remove(); 
+                document.getElementById("userNameDisplay").innerText = val; 
+                document.getElementById("logoutBtn").style.display = "inline-block"; 
+                refreshAll(); 
+            } 
+        }; 
+        document.getElementById("adminLoginModalBtn").onclick = ()=>{ 
+            if(prompt("Admin password:")==="admin123"){ 
+                isAdminLoggedIn = true; 
+                currentUser = {name:"Admin"}; 
+                modal.remove(); 
+                document.getElementById("userNameDisplay").innerText = "Admin"; 
+                document.getElementById("logoutBtn").style.display = "inline-block"; 
+                refreshAll(); 
+            } 
+        }; 
+    }
+    
+    function logout(){ 
+        currentUser = null; 
+        isAdminLoggedIn = false; 
+        document.getElementById("userNameDisplay").innerText = "Not logged in"; 
+        document.getElementById("logoutBtn").style.display = "none"; 
+        showLoginModal(); 
+        refreshAll(); 
+    }
+    
+    // ==================== INITIALIZE ====================
+    function initApp(){ 
+        const appDiv = document.getElementById("app"); 
+        appDiv.innerHTML = `
+            <div class="header">
+                <div class="logo-icon"><i class="fas fa-futbol"></i></div>
+                <h1>MONDAY NIGHT SOCCER</h1>
+                <div class="user-row"><span id="userNameDisplay">Not logged in</span><button id="logoutBtn" style="display:none;">Logout</button></div>
+            </div>
+            <div class="top-nav">
+                <button class="nav-module active" data-module="home">🏠 Home</button>
+                <button class="nav-module" data-module="teamswk">⚽ Teams</button>
+                <button class="nav-module" data-module="rankings">📊 Rankings</button>
+                <button class="nav-module" data-module="achievements">🏅 Achievements</button>
+                <button class="nav-module" data-module="trashtalk">🗣️ Trash Talk</button>
+                <button class="nav-module" data-module="history">📖 History</button>
+                <button class="nav-module" data-module="profiles">👤 Profiles</button>
+                <button class="nav-module" data-module="timer">⏱️ Timer</button>
+                <button class="nav-module" data-module="chat">💬 Chat</button>
+                <button class="nav-module" data-module="admin">🔧 Admin</button>
+            </div>
+            <div id="homeContainer" class="module-container active-module"></div>
+            <div id="page-teamswk" class="module-container"></div>
+            <div id="page-rankings" class="module-container"></div>
+            <div id="page-achievements" class="module-container"></div>
+            <div id="page-trashtalk" class="module-container"></div>
+            <div id="page-history" class="module-container"></div>
+            <div id="page-profiles" class="module-container"></div>
+            <div id="page-timer" class="module-container"></div>
+            <div id="page-chat" class="module-container"></div>
+            <div id="page-admin" class="module-container"></div>
+        `; 
+        
+        document.querySelectorAll(".nav-module").forEach(btn=>{ 
+            btn.addEventListener("click",()=>{ 
+                document.querySelectorAll(".nav-module").forEach(b=>b.classList.remove("active")); 
+                btn.classList.add("active"); 
+                const mod = btn.dataset.module; 
+                document.querySelectorAll(".module-container").forEach(c=>c.classList.remove("active-module")); 
+                document.getElementById(mod === "home" ? "homeContainer" : `page-${mod}`).classList.add("active-module"); 
+            }); 
+        }); 
+        
+        document.getElementById("logoutBtn").onclick = logout; 
+        if(firebaseReady) loadData().then(()=>showLoginModal()); 
+        else { showLoginModal(); refreshAll(); } 
+    }
+    
+    initApp();
 </script>
 </body>
 </html>
