@@ -1,12 +1,9 @@
-I've created a complete, all-in-one wedding planner app that combines your guest list, table allocations, postal address management, and invitation printing tools.
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Daniel & Laura · Complete Wedding Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Wedding Seating Manager | Import CSV Guests</title>
     <style>
         * {
             margin: 0;
@@ -17,231 +14,282 @@ I've created a complete, all-in-one wedding planner app that combines your guest
         body {
             font-family: 'Georgia', 'Times New Roman', Times, serif;
             background: #faf8f3;
-            min-height: 100vh;
             padding: 20px;
         }
 
-        /* Main Layout */
-        .planner-container {
+        .container {
             max-width: 1600px;
             margin: 0 auto;
         }
 
-        /* Header */
-        .wedding-header {
+        .header {
             background: linear-gradient(135deg, #c9a84c, #e8d5a8);
-            border-radius: 28px;
-            padding: 30px 35px;
-            margin-bottom: 28px;
+            border-radius: 24px;
+            padding: 25px 30px;
+            margin-bottom: 25px;
             text-align: center;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-        }
-        .wedding-header h1 {
-            font-size: 2.2rem;
-            letter-spacing: 2px;
             color: #2c2418;
         }
-        .wedding-header p {
-            color: #5a4a35;
-            margin-top: 8px;
-            font-style: italic;
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 400;
+            letter-spacing: 2px;
         }
 
-        /* Stats Bar */
-        .stats-dashboard {
+        .stats-bar {
             display: flex;
-            gap: 18px;
+            gap: 15px;
             margin-bottom: 25px;
             flex-wrap: wrap;
         }
-        .stat-card {
+
+        .stat {
             background: white;
-            border-radius: 20px;
-            padding: 18px 22px;
+            border-radius: 16px;
+            padding: 15px 25px;
             flex: 1;
             text-align: center;
             border: 1px solid #e8dcc8;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
         }
+
         .stat-number {
-            font-size: 2.2rem;
+            font-size: 2rem;
             font-weight: bold;
             color: #c9a84c;
         }
 
-        /* Tabs */
-        .tabs-nav {
-            display: flex;
-            gap: 8px;
+        .toolbar {
+            background: white;
+            border-radius: 20px;
+            padding: 15px 20px;
             margin-bottom: 25px;
+            display: flex;
+            gap: 12px;
             flex-wrap: wrap;
-            border-bottom: 2px solid #e8dcc8;
-            padding-bottom: 5px;
-        }
-        .tab-btn {
-            background: transparent;
-            border: none;
-            padding: 12px 28px;
-            font-size: 1rem;
-            font-family: 'Georgia', serif;
-            font-weight: 600;
-            color: #8b7355;
-            cursor: pointer;
-            border-radius: 40px;
-            transition: all 0.2s;
-        }
-        .tab-btn.active {
-            background: #c9a84c;
-            color: #2c2418;
-        }
-        .tab-pane {
-            display: none;
-            animation: fadeIn 0.2s ease;
-        }
-        .tab-pane.active {
-            display: block;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px);}
-            to { opacity: 1; transform: translateY(0);}
+            border: 1px solid #e8dcc8;
+            align-items: center;
         }
 
-        /* Tables Grid */
+        .btn {
+            background: #c9a84c;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #b8953a;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #e8dcc8;
+            color: #5a4a35;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-pdf {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-csv {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .search-box {
+            background: white;
+            border-radius: 20px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border: 1px solid #e8dcc8;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 18px;
+            border-radius: 40px;
+            border: 1px solid #e8dcc8;
+            font-size: 1rem;
+            font-family: inherit;
+            background: #fefcf8;
+        }
+
+        .import-area {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid #e8dcc8;
+            border-left: 5px solid #27ae60;
+        }
+
+        .import-area h3 {
+            color: #27ae60;
+            margin-bottom: 15px;
+        }
+
+        .csv-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px dashed #c9a84c;
+            border-radius: 16px;
+            background: #fefcf8;
+            margin-bottom: 10px;
+        }
+
+        .import-preview {
+            max-height: 200px;
+            overflow-y: auto;
+            background: #faf5ea;
+            border-radius: 12px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.75rem;
+            display: none;
+        }
+
+        .import-preview.active {
+            display: block;
+        }
+
+        .main-layout {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+
+        .tables-area {
+            flex: 2;
+            min-width: 300px;
+        }
+
+        .guests-area {
+            flex: 1;
+            min-width: 280px;
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #e8dcc8;
+            padding: 20px;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
         .tables-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 22px;
-            margin-top: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 18px;
         }
+
         .table-card {
             background: white;
             border-radius: 20px;
             border: 1px solid #e8dcc8;
             overflow: hidden;
-            transition: all 0.2s;
         }
+
         .table-card.bridal {
             border: 2px solid #c9a84c;
             background: #fffcf5;
         }
+
         .table-header {
             background: #faf5ea;
-            padding: 14px 18px;
+            padding: 12px 16px;
             display: flex;
             justify-content: space-between;
-            font-weight: bold;
             border-bottom: 1px solid #e8dcc8;
-        }
-        .table-guests {
-            padding: 14px;
-            max-height: 280px;
-            overflow-y: auto;
-        }
-        .guest-tag {
-            display: inline-block;
-            background: #fef7e9;
-            padding: 6px 12px;
-            border-radius: 30px;
-            font-size: 0.75rem;
-            margin: 4px 6px 4px 0;
-            border: 1px solid #e8dcc8;
-            cursor: pointer;
-            transition: all 0.1s;
-        }
-        .guest-tag:hover { background: #e8dcc8; }
-        .empty-table {
-            text-align: center;
-            color: #bfae8e;
-            padding: 20px;
-            font-style: italic;
+            font-weight: bold;
         }
 
-        /* Guest Lists */
-        .guest-list-panel {
-            background: white;
-            border-radius: 20px;
-            border: 1px solid #e8dcc8;
-            padding: 20px;
+        .table-guests {
+            padding: 12px;
+            min-height: 100px;
+            max-height: 220px;
+            overflow-y: auto;
         }
+
+        .guest-chip {
+            display: inline-block;
+            background: #fef7e9;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            margin: 3px 5px 3px 0;
+            border: 1px solid #e8dcc8;
+            cursor: pointer;
+        }
+
+        .guest-chip.manual {
+            background: #e8f5e9;
+            border-color: #a5d6a7;
+        }
+
+        .guest-chip.imported {
+            background: #e3f2fd;
+            border-color: #90caf9;
+        }
+
+        .guest-chip:hover {
+            background: #e8dcc8;
+        }
+
+        .empty-table {
+            color: #bfae8e;
+            text-align: center;
+            padding: 15px;
+            font-style: italic;
+            font-size: 0.7rem;
+        }
+
         .guest-list-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px;
+            padding: 10px 0;
             border-bottom: 1px solid #efe4d4;
-            flex-wrap: wrap;
-            gap: 8px;
         }
-        .guest-list-item:last-child { border-bottom: none; }
-        .guest-name { font-weight: 600; }
-        .guest-group { font-size: 0.7rem; color: #c9a84c; }
 
-        /* Forms & Buttons */
-        .btn {
-            background: #c9a84c;
-            border: none;
-            padding: 10px 22px;
-            border-radius: 40px;
-            cursor: pointer;
-            font-family: inherit;
-            font-weight: 600;
-            transition: all 0.2s;
+        .guest-name {
+            font-weight: 500;
+            font-size: 0.85rem;
         }
-        .btn-primary { background: #c9a84c; color: #2c2418; }
-        .btn-primary:hover { background: #b8953a; transform: translateY(-1px); }
-        .btn-success { background: #27ae60; color: white; }
-        .btn-danger { background: #e74c3c; color: white; }
-        .btn-secondary { background: #e8dcc8; color: #5a4a35; }
-        .btn-sm { padding: 6px 14px; font-size: 0.75rem; }
 
-        .search-filter {
-            display: flex;
-            gap: 12px;
+        .guest-group {
+            font-size: 0.65rem;
+            color: #c9a84c;
+        }
+
+        .warning {
+            background: #fff3e0;
+            border-radius: 16px;
+            padding: 10px 15px;
             margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        .search-filter input, .search-filter select {
-            padding: 10px 16px;
-            border: 1px solid #e8dcc8;
-            border-radius: 40px;
-            font-family: inherit;
-            background: #fefcf8;
-            flex: 1;
-            min-width: 180px;
+            color: #b86b2c;
+            font-size: 0.8rem;
         }
 
-        /* Modal for Invitation Printing */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        .modal-content {
-            background: white;
-            border-radius: 24px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 85vh;
-            overflow-y: auto;
-            padding: 28px;
-            border: 1px solid #e8dcc8;
-        }
-        .address-block {
-            background: #fefcf8;
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid #e8dcc8;
-            margin: 15px 0;
-            font-family: monospace;
-            white-space: pre-wrap;
-        }
         .toast {
             position: fixed;
             bottom: 30px;
@@ -249,562 +297,652 @@ I've created a complete, all-in-one wedding planner app that combines your guest
             transform: translateX(-50%);
             background: #2c2418;
             color: white;
-            padding: 12px 28px;
+            padding: 10px 24px;
             border-radius: 40px;
-            z-index: 1100;
+            font-size: 0.8rem;
+            z-index: 1001;
             animation: fadeOut 2.5s forwards;
         }
+
         @keyframes fadeOut {
             0% { opacity: 1; }
             70% { opacity: 1; }
             100% { opacity: 0; visibility: hidden; }
         }
 
-        @media print {
-            body { background: white; padding: 0; margin: 0; }
-            .no-print { display: none; }
-            .table-card { break-inside: avoid; page-break-inside: avoid; }
-            .modal-overlay { position: static; display: block; }
-            .modal-content { box-shadow: none; padding: 10px; max-width: 100%; }
+        @media (max-width: 700px) {
+            .main-layout { flex-direction: column; }
+            .guests-area { position: static; }
         }
     </style>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
-<div id="app"></div>
+<div id="app">Loading wedding seating planner...</div>
 
-<script>
-    // ============================================================
-    // COMPLETE WEDDING PLANNER FOR DANIEL & LAURA
-    // Includes: Full guest list (64 guests + manual), Table allocations (32 tables + Bridal),
-    // Postal address management, Invitation printing, CSV/Excel export
-    // ============================================================
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // ---------- MASTER GUEST LIST (from your CSV + preloaded data) ----------
-    // Combined from both the CSV and the preloaded guest codes
-    const masterGuestList = [
-        // Bridal party & family
-        { id: "g1", name: "Stefan Guzzardi", group: "Groomsman", tablePref: "Bridal", address: "2 Eastgate Street, Pascoe Vale South VIC 3044", guestCount: 1, verified: "Stefan" },
-        { id: "g2", name: "Julian Lombardo", group: "Groomsman", tablePref: "Bridal", address: "49 Oakley Street, Avondale Heights VIC 3034", guestCount: 1, verified: "Julian" },
-        { id: "g3", name: "Matthew Ibrahim", group: "Groomsman", tablePref: "Bridal", address: "", guestCount: 1, notes: "NEED ADDRESS" },
-        { id: "g4", name: "Brad Hamilton", group: "Groomsman", tablePref: "Bridal", address: "36 William Street, Essendon VIC 3040", guestCount: 1 },
-        { id: "g5", name: "Carlo, Doreen & Teresa Di Pasquale", group: "Family", tablePref: "Bridal", address: "14 Wanaka Drive, Taylors Lakes VIC 3038", guestCount: 3 },
-        { id: "g6", name: "Father Aurelio Fragapane", group: "Clergy", tablePref: "Bridal", address: "", guestCount: 1, notes: "NEED ADDRESS" },
-        // Table 1
-        { id: "g7", name: "Vito, Carmel, John & Domenic Di Pasquale", group: "Family", address: "1 Rhode Island Court, Taylors Lakes VIC 3038", guestCount: 4 },
-        { id: "g8", name: "Tom & Cheryl Di Pasquale", group: "Family", address: "c/- Moreland Conveycing, 526 Sydney Road, Brunswick VIC 3056", guestCount: 2 },
-        // Table 2
-        { id: "g9", name: "Mick, Mim, Nicholas, Josephine & Anthony Mirarchi", group: "Family", address: "1 Collendina Close, Keilor East VIC 3033", guestCount: 5 },
-        { id: "g10", name: "Mick, Sonia, Julius & Danni Guzzardi", group: "Family", address: "2 Eastgate Street, Pascoe Vale South VIC 3044", guestCount: 4 },
-        { id: "g11", name: "Mario & Enza Rosssi", group: "Family", address: "", guestCount: 2, notes: "NEED ADDRESS" },
-        // Table 3
-        { id: "g12", name: "Silvio, Marisa, Celeste, Emily & Jack Lombardo", group: "Family", address: "49 Oakley Drive, Avondale Heights VIC 3034", guestCount: 5 },
-        { id: "g13", name: "Leo, Antonia, Joseph & Alessia Palumbo", group: "Family", address: "73 Steele Creek Drive, East Keilor VIC 3033", guestCount: 4 },
-        // Table 4
-        { id: "g14", name: "Tony, Rosa & Isabella Pisano", group: "Family", address: "14 Overland Place, Keilor East VIC 3033", guestCount: 3 },
-        { id: "g15", name: "Sam, Aleen, Sam, Alec & Marc Hovanessian", group: "Family", address: "54 Canning Street, Avondale Heights VIC 3034", guestCount: 5 },
-        { id: "g16", name: "Pina & Maria Scully", group: "Family", address: "3 Ilora Court, Glen Waverley VIC 3150", guestCount: 2 },
-        // Table 5
-        { id: "g17", name: "Brett, Melissa & Mikayla Hamilton", group: "Family", address: "36 William Street, Essendon VIC 3040", guestCount: 3 },
-        { id: "g18", name: "Sam & Michelle Ibrahim", group: "Family", address: "13 Brewster Street, Essendon VIC 3040", guestCount: 2 },
-        { id: "g19", name: "Domenic & partner Gizzi", group: "Family", address: "", guestCount: 2, notes: "NEED ADDRESS" },
-        // Table 6
-        { id: "g20", name: "Greg, Claudia, Joshua, Yvonne, Alessio & Amy Mantello", group: "Family", address: "1 Hasset Crescent, Keilor East VIC 3033", guestCount: 6 },
-        // Table 7 - work colleagues
-        { id: "g21", name: "Jason Chan +1", group: "Work", address: "", guestCount: 1, notes: "NEED ADDRESS" },
-        { id: "g22", name: "Michelle Hanvey +1", group: "Work", address: "", guestCount: 1, notes: "NEED ADDRESS" },
-        { id: "g23", name: "Philippe Phan +1", group: "Work", address: "", guestCount: 1 },
-        { id: "g24", name: "Ben Kerekes +1", group: "Work", address: "", guestCount: 1 },
-        { id: "g25", name: "S Surulimuthu +1", group: "Work", address: "", guestCount: 1 },
-        { id: "g26", name: "C Moors +1", group: "Work", address: "", guestCount: 1 },
-        { id: "g27", name: "N Tang +1", group: "Work", address: "", guestCount: 1 },
-        { id: "g28", name: "Raajpal Singh Chahl", group: "Work", address: "23 Spinifex St, Point Cook VIC 3030", guestCount: 1 },
-        // Table 8
-        { id: "g29", name: "Tania & Angelo Chellemi", group: "Friends", address: "", guestCount: 2, notes: "NEED ADDRESS" },
-        { id: "g30", name: "J Agosta +1", group: "Friends", address: "", guestCount: 1 },
-        { id: "g31", name: "Lim family", group: "Friends", address: "", guestCount: 2 },
-        { id: "g32", name: "Rob & Anna Barto", group: "Friends", address: "", guestCount: 2 },
-        { id: "g33", name: "M Modesti +1", group: "Friends", address: "", guestCount: 1 },
-        { id: "g34", name: "Johnny Xuerub +1", group: "Friends", address: "", guestCount: 1 },
-        // Table 9-32 abbreviated for brevity but fully functional - adding key entries
-        { id: "g35", name: "Dominic & Kimberley Chila", group: "Family", address: "16 Basalt Avenue, Keilor East VIC 3033", guestCount: 2 },
-        { id: "g36", name: "Domenico & Maria Iervasi", group: "Family", address: "4 Sophia Street, Sunshine West VIC 3020", guestCount: 2 },
-        { id: "g37", name: "Joe & Anita Trimboli", group: "Family", address: "84 Reynolds Parade, Pascoe Vale South VIC 3044", guestCount: 2 },
-        { id: "g38", name: "Remzi, Donna, Mark & Robert Asllanaj", group: "Family", address: "5 Gordon Street, Brunswick West VIC 3055", guestCount: 4 },
-        { id: "g39", name: "Ralph & Gloria Risoli", group: "Family", address: "65 Mitchell Parade, Pascoe Vale South VIC 3044", guestCount: 2 },
-        { id: "g40", name: "Frank & Mary Marcaccio", group: "Family", address: "34 Buckley Street, Essendon VIC 3030", guestCount: 2 },
-        // Add more from your data... I'll include representative sample but the system supports adding any guest manually
-    ];
+    const firebaseConfig = {
+        apiKey: "AIzaSyAH0rBpJUh3sRpBlQgrymQM1RLBDBiAPmE",
+        authDomain: "daniel-and-laura.firebaseapp.com",
+        projectId: "daniel-and-laura",
+        storageBucket: "daniel-and-laura.firebasestorage.app",
+        messagingSenderId: "363458517473",
+        appId: "1:363458517473:web:7eac683bc98623cb281aa0"
+    };
 
-    // Additional guests from preloaded list (Charlie Bevilacqua etc)
-    const additionalGuests = [
-        { id: "g41", name: "Charlie, Nadia, Olivia & Jaimen Bevilacqua", group: "Family", address: "PO BOX 360, West Pennant Hills NSW 2125", guestCount: 4 },
-        { id: "g42", name: "Theresa Pavia", group: "Family", address: "34 Laurence Avenue, Airport West VIC 3042", guestCount: 1 },
-        { id: "g43", name: "Marcello & Kylie Ioculano", group: "Family", address: "12a Balderrie Court, Gowanbrae VIC 3043", guestCount: 2 },
-        { id: "g44", name: "Frank & Teresa Taverna", group: "Family", address: "14 Ventnor Place, Keilor Downs VIC 3038", guestCount: 2 },
-        { id: "g45", name: "Frances & Alessia Giunta", group: "Family", address: "PO Box 142, Essendon North VIC 3041", guestCount: 2 },
-        { id: "g46", name: "Peter, Melinda & Nicholas Gavos", group: "Family", address: "8 Aldershot Drive, Keilor Downs VIC 3038", guestCount: 3 },
-        { id: "g47", name: "Nino & Belinda Muscara", group: "Family", address: "69 Mascoma Street, Strathmore VIC 3041", guestCount: 2 },
-        { id: "g48", name: "Deanna Spataro", group: "Family", address: "41 Hassett Crescent, Keilor East VIC 3033", guestCount: 1 },
-        { id: "g49", name: "Michele & Maria De Petro", group: "Family", address: "50 Middle Street, Ascot Vale VIC 3032", guestCount: 2 },
-        { id: "g50", name: "Bruno & Connie Martino", group: "Family", address: "11 Ardoch Street, Essendon VIC 3040", guestCount: 2 },
-    ];
+    const firebaseApp = initializeApp(firebaseConfig);
+    const db = getFirestore(firebaseApp);
 
-    let allGuests = [...masterGuestList, ...additionalGuests];
-    let manualGuests = [];
-    let tableAssignments = new Map(); // guestId -> tableId
-    let tables = new Map(); // tableId -> { name, guests: [] }
+    const TOTAL_TABLES = 32;
+    const BRIDAL_TABLE = "bridal";
+    const MAX_PER_TABLE = 11;
+    const MIN_PER_TABLE = 6;
 
-    // Table definitions: 32 tables + Bridal
+    let allGuests = [];
+    let tableMap = new Map();
+    let guestTableMap = new Map();
+    let currentSearch = "";
+
+    function showToast(msg) {
+        let toast = document.querySelector('.toast');
+        if (toast) toast.remove();
+        toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2500);
+    }
+
+    function showLoading(show) {
+        let el = document.querySelector('.loading-overlay');
+        if (show && !el) {
+            let div = document.createElement('div');
+            div.className = 'loading-overlay';
+            div.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:center;z-index:2000;';
+            div.innerHTML = '<div style="background:white;padding:20px 30px;border-radius:30px;">⏳ Loading...</div>';
+            document.body.appendChild(div);
+        } else if (!show && el) el.remove();
+    }
+
     function initTables() {
-        tables.clear();
-        tables.set("Bridal", { name: "👰 BRIDAL TABLE 🤵", guests: [] });
-        for (let i = 1; i <= 32; i++) {
-            tables.set(i.toString(), { name: `TABLE ${i}`, guests: [] });
+        tableMap.clear();
+        for (let i = 1; i <= TOTAL_TABLES; i++) {
+            tableMap.set(i.toString(), { name: `Table ${i}`, guests: [] });
         }
+        tableMap.set(BRIDAL_TABLE, { name: "👰 Bridal Table", guests: [] });
     }
 
-    // Load stored assignments from localStorage
-    function loadAssignments() {
-        const stored = localStorage.getItem("wedding_table_assignments");
-        if (stored) {
-            try {
-                const parsed = JSON.parse(stored);
-                tableAssignments = new Map(parsed);
-            } catch(e) {}
-        }
-        const storedTables = localStorage.getItem("wedding_tables_data");
-        if (storedTables) {
-            try {
-                const parsedTables = JSON.parse(storedTables);
-                for (let [tid, data] of Object.entries(parsedTables)) {
-                    if (tables.has(tid)) tables.set(tid, data);
+    async function loadSeatingFromFirebase() {
+        try {
+            const seatingDoc = await getDoc(doc(db, "wedding_seating", "master"));
+            if (seatingDoc.exists()) {
+                const data = seatingDoc.data();
+                if (data.tableMap) {
+                    const loadedMap = new Map();
+                    for (const [tid, tableData] of Object.entries(data.tableMap)) {
+                        loadedMap.set(tid, { 
+                            name: tableData.name || (tid === BRIDAL_TABLE ? "👰 Bridal Table" : `Table ${tid}`),
+                            guests: tableData.guests || [] 
+                        });
+                    }
+                    guestTableMap.clear();
+                    for (const [tid, table] of loadedMap.entries()) {
+                        if (table.guests) {
+                            for (const g of table.guests) {
+                                if (g && g.id) guestTableMap.set(g.id, tid);
+                            }
+                        }
+                    }
+                    return loadedMap;
                 }
-            } catch(e) {}
+            }
+        } catch (err) {
+            console.error("Error loading seating:", err);
         }
-        // Sync tables based on assignments
-        for (let [tid, table] of tables.entries()) table.guests = [];
-        for (let [guestId, tid] of tableAssignments.entries()) {
-            const guest = allGuests.find(g => g.id === guestId) || manualGuests.find(g => g.id === guestId);
-            if (guest && tables.has(tid)) tables.get(tid).guests.push(guest);
+        return null;
+    }
+
+    async function saveSeatingToFirebase() {
+        showLoading(true);
+        try {
+            const exportMap = {};
+            for (const [key, val] of tableMap.entries()) {
+                exportMap[key] = { name: val.name, guests: val.guests };
+            }
+            await setDoc(doc(db, "wedding_seating", "master"), {
+                tableMap: exportMap,
+                updatedAt: new Date().toISOString(),
+                totalGuests: allGuests.length,
+                seatedCount: Array.from(tableMap.values()).reduce((sum, t) => sum + t.guests.length, 0)
+            });
+            showToast("✓ Seating saved to Firebase!");
+        } catch (err) {
+            alert("Save failed: " + err.message);
+        } finally {
+            showLoading(false);
         }
     }
 
-    function saveAssignments() {
-        const assignmentsArray = Array.from(tableAssignments.entries());
-        localStorage.setItem("wedding_table_assignments", JSON.stringify(assignmentsArray));
-        const tablesObj = {};
-        for (let [tid, table] of tables.entries()) tablesObj[tid] = { name: table.name, guests: table.guests };
-        localStorage.setItem("wedding_tables_data", JSON.stringify(tablesObj));
+    // Parse CSV content and extract guest names with table assignments
+    function parseCSVAndAddGuests(csvText) {
+        const lines = csvText.split(/\r?\n/);
+        const headers = lines[0].split(',');
+        const tableIdx = headers.findIndex(h => h.replace(/"/g, '') === 'Table');
+        const guestNameIdx = headers.findIndex(h => h.replace(/"/g, '') === 'Guest Name');
+        const verifiedIdx = headers.findIndex(h => h.replace(/"/g, '') === 'Verified Names');
+        const countIdx = headers.findIndex(h => h.replace(/"/g, '') === 'Guest Count');
+        
+        if (tableIdx === -1 || guestNameIdx === -1) {
+            showToast("CSV format not recognized. Need 'Table' and 'Guest Name' columns.");
+            return [];
+        }
+        
+        const imported = [];
+        const seenGuests = new Set(allGuests.map(g => g.name.toLowerCase()));
+        
+        for (let i = 1; i < lines.length; i++) {
+            if (!lines[i].trim()) continue;
+            
+            // Simple CSV parsing (handles quoted fields)
+            let row = [];
+            let inQuote = false;
+            let current = '';
+            for (let ch of lines[i]) {
+                if (ch === '"') {
+                    inQuote = !inQuote;
+                } else if (ch === ',' && !inQuote) {
+                    row.push(current.trim());
+                    current = '';
+                } else {
+                    current += ch;
+                }
+            }
+            row.push(current.trim());
+            
+            if (row.length <= Math.max(tableIdx, guestNameIdx)) continue;
+            
+            let tableName = row[tableIdx].replace(/^"|"$/g, '').trim();
+            let guestNameRaw = row[guestNameIdx].replace(/^"|"$/g, '').trim();
+            let verifiedNames = verifiedIdx !== -1 ? row[verifiedIdx].replace(/^"|"$/g, '').trim() : '';
+            let guestCount = countIdx !== -1 ? parseInt(row[countIdx]) || 1 : 1;
+            
+            if (!tableName || !guestNameRaw || guestNameRaw === '' || guestNameRaw.toLowerCase() === 'guest name') continue;
+            
+            // Parse verified names to get individual guests
+            let individualNames = [];
+            if (verifiedNames && verifiedNames !== '') {
+                individualNames = verifiedNames.split(/[;,]+/).map(n => n.trim()).filter(n => n && n !== '?');
+            }
+            
+            // If no verified names, use guest name and maybe split by & or and
+            if (individualNames.length === 0) {
+                if (guestNameRaw.includes(' & ')) {
+                    individualNames = guestNameRaw.split(' & ').map(n => n.trim());
+                } else if (guestNameRaw.toLowerCase().includes(' and ')) {
+                    individualNames = guestNameRaw.split(/ and /i).map(n => n.trim());
+                } else if (guestNameRaw.includes(',')) {
+                    individualNames = guestNameRaw.split(',').map(n => n.trim());
+                } else {
+                    individualNames = [guestNameRaw];
+                }
+            }
+            
+            // Limit to guestCount
+            if (individualNames.length > guestCount) individualNames = individualNames.slice(0, guestCount);
+            
+            for (let name of individualNames) {
+                if (name && name !== '' && name !== '?' && !seenGuests.has(name.toLowerCase())) {
+                    imported.push({
+                        name: name,
+                        tableId: tableName.toLowerCase() === 'bridal' ? BRIDAL_TABLE : tableName,
+                        group: guestNameRaw,
+                        isImported: true
+                    });
+                    seenGuests.add(name.toLowerCase());
+                }
+            }
+        }
+        
+        return imported;
+    }
+
+    function addImportedGuestsToTables(guestsToAdd) {
+        let added = 0;
+        let skipped = 0;
+        
+        for (const guest of guestsToAdd) {
+            // Check if already exists
+            if (allGuests.some(g => g.name.toLowerCase() === guest.name.toLowerCase())) {
+                skipped++;
+                continue;
+            }
+            
+            const guestId = `imported_${Date.now()}_${Math.random().toString(36).substr(2, 6)}_${added}`;
+            const newGuest = {
+                id: guestId,
+                name: guest.name,
+                group: guest.group,
+                isImported: true
+            };
+            
+            allGuests.push(newGuest);
+            
+            // Find target table
+            let targetTableId = guest.tableId;
+            if (targetTableId === BRIDAL_TABLE) {
+                // Add to bridal table
+                const bridalTable = tableMap.get(BRIDAL_TABLE);
+                if (bridalTable) {
+                    bridalTable.guests.push({ ...newGuest });
+                    guestTableMap.set(guestId, BRIDAL_TABLE);
+                    added++;
+                }
+            } else {
+                // Try to parse as table number
+                let tableNum = parseInt(targetTableId);
+                if (isNaN(tableNum)) {
+                    // Try to extract number
+                    const match = targetTableId.match(/\d+/);
+                    if (match) tableNum = parseInt(match[0]);
+                }
+                
+                if (tableNum >= 1 && tableNum <= TOTAL_TABLES) {
+                    const table = tableMap.get(tableNum.toString());
+                    if (table && table.guests.length < MAX_PER_TABLE) {
+                        table.guests.push({ ...newGuest });
+                        guestTableMap.set(guestId, tableNum.toString());
+                        added++;
+                    } else {
+                        // Find a table with space
+                        let placed = false;
+                        for (let i = 1; i <= TOTAL_TABLES; i++) {
+                            const t = tableMap.get(i.toString());
+                            if (t && t.guests.length < MAX_PER_TABLE) {
+                                t.guests.push({ ...newGuest });
+                                guestTableMap.set(guestId, i.toString());
+                                added++;
+                                placed = true;
+                                break;
+                            }
+                        }
+                        if (!placed) {
+                            skipped++;
+                        }
+                    }
+                } else {
+                    // Put in first available table
+                    let placed = false;
+                    for (let i = 1; i <= TOTAL_TABLES; i++) {
+                        const t = tableMap.get(i.toString());
+                        if (t && t.guests.length < MAX_PER_TABLE) {
+                            t.guests.push({ ...newGuest });
+                            guestTableMap.set(guestId, i.toString());
+                            added++;
+                            placed = true;
+                            break;
+                        }
+                    }
+                    if (!placed) skipped++;
+                }
+            }
+        }
+        
+        return { added, skipped };
+    }
+
+    function getUnassignedGuests() {
+        return allGuests.filter(g => !guestTableMap.has(g.id));
     }
 
     function assignGuestToTable(guest, tableId) {
-        const table = tables.get(tableId);
+        const table = tableMap.get(tableId);
         if (!table) return false;
-        const oldTableId = tableAssignments.get(guest.id);
-        if (oldTableId) {
-            const oldTable = tables.get(oldTableId);
-            if (oldTable) oldTable.guests = oldTable.guests.filter(g => g.id !== guest.id);
+        
+        if (tableId !== BRIDAL_TABLE && table.guests.length >= MAX_PER_TABLE) {
+            showToast(`Table is full (max ${MAX_PER_TABLE} guests)`);
+            return false;
         }
-        table.guests.push(guest);
-        tableAssignments.set(guest.id, tableId);
-        saveAssignments();
+        
+        const oldTableId = guestTableMap.get(guest.id);
+        if (oldTableId) {
+            const oldTable = tableMap.get(oldTableId);
+            if (oldTable) {
+                oldTable.guests = oldTable.guests.filter(g => g.id !== guest.id);
+            }
+        }
+        
+        table.guests.push({ ...guest });
+        guestTableMap.set(guest.id, tableId);
         renderApp();
-        showToast(`${guest.name} assigned to ${table.name}`);
         return true;
     }
 
     function removeGuestFromTable(guestId, tableId) {
-        const table = tables.get(tableId);
+        const table = tableMap.get(tableId);
         if (table) {
             table.guests = table.guests.filter(g => g.id !== guestId);
-            tableAssignments.delete(guestId);
-            saveAssignments();
+            guestTableMap.delete(guestId);
             renderApp();
-            showToast("Guest removed from table");
         }
     }
 
-    function addManualGuest(name, address, guestCount) {
-        const newId = "manual_" + Date.now() + "_" + Math.random().toString(36).substr(2, 6);
-        const newGuest = {
-            id: newId,
-            name: name,
-            group: "Manual Entry",
-            address: address,
-            guestCount: parseInt(guestCount) || 1,
-            isManual: true
-        };
-        manualGuests.push(newGuest);
-        allGuests.push(newGuest);
-        saveManualGuests();
-        renderApp();
-        showToast(`Added ${name}`);
-        return newGuest;
-    }
-
-    function saveManualGuests() {
-        localStorage.setItem("wedding_manual_guests", JSON.stringify(manualGuests));
-    }
-    function loadManualGuests() {
-        const stored = localStorage.getItem("wedding_manual_guests");
-        if (stored) {
-            try {
-                manualGuests = JSON.parse(stored);
-                for (let m of manualGuests) {
-                    if (!allGuests.find(g => g.id === m.id)) allGuests.push(m);
-                }
-            } catch(e) {}
+    function resetAllSeating() {
+        if (confirm("⚠️ Reset all seating? This will clear all table assignments.")) {
+            initTables();
+            guestTableMap.clear();
+            renderApp();
+            showToast("Seating reset");
         }
     }
 
-    function getUnassignedGuests() {
-        return allGuests.filter(g => !tableAssignments.has(g.id));
+    function searchGuests(term) {
+        if (!term.trim()) return [];
+        const lower = term.toLowerCase();
+        return allGuests.filter(g => 
+            g.name.toLowerCase().includes(lower) || 
+            (g.group && g.group.toLowerCase().includes(lower))
+        );
     }
 
-    function getTotalGuestCount() {
-        return allGuests.reduce((sum, g) => sum + (g.guestCount || 1), 0);
-    }
-
-    function getSeatedCount() {
-        let seated = 0;
-        for (let table of tables.values()) seated += table.guests.reduce((s, g) => s + (g.guestCount || 1), 0);
-        return seated;
-    }
-
-    // Invitation Printing: Generate printable address labels
-    function printInvitationsForGuest(guest) {
-        if (!guest.address || guest.address.trim() === "") {
-            showToast(`No address for ${guest.name}. Cannot print.`);
-            return;
-        }
-        const win = window.open('', '_blank');
-        const invitationHTML = `
-            <!DOCTYPE html>
-            <html>
-            <head><title>Invitation: ${guest.name}</title>
-            <style>
-                body { font-family: 'Georgia', serif; margin: 0; padding: 40px; }
-                .invitation-card { max-width: 500px; margin: 0 auto; border: 2px solid #c9a84c; padding: 30px; border-radius: 20px; background: #fffcf5; }
-                .address-label { margin-top: 30px; border-top: 1px dashed #c9a84c; padding-top: 20px; font-family: monospace; }
-                .recipient { font-size: 1.1rem; font-weight: bold; margin-bottom: 8px; }
-                .address { font-size: 1rem; line-height: 1.4; white-space: pre-line; }
-                .wedding-details { text-align: center; margin-bottom: 30px; }
-                h2 { color: #c9a84c; }
-                @media print { body { padding: 0; } .no-print { display: none; } }
-            </style>
-            </head>
-            <body>
-                <div class="invitation-card">
-                    <div class="wedding-details">
-                        <h2>Daniel & Laura</h2>
-                        <p>invite you to celebrate their wedding</p>
-                        <p><strong>Saturday, 3rd October 2026</strong><br>Ceremony at 2:00 PM<br>Reception to follow</p>
-                        <p><em>📍 St. Augustine's Church, Keilor</em><br>Reception: The Grand Pavilion, Taylors Lakes</p>
-                    </div>
-                    <div class="address-label">
-                        <div class="recipient">${escapeHtml(guest.name)}</div>
-                        <div class="address">${escapeHtml(guest.address).replace(/\n/g, '<br>')}</div>
-                    </div>
-                    <p style="margin-top: 20px; font-size: 0.75rem; text-align: center;">Kindly RSVP by 1st August 2026</p>
-                </div>
-                <div class="no-print" style="text-align:center; margin-top:20px;"><button onclick="window.print()">Print Invitation</button></div>
-            </body>
-            </html>
-        `;
-        win.document.write(invitationHTML);
-        win.document.close();
-    }
-
-    function printAllInvitations() {
-        const guestsWithAddress = allGuests.filter(g => g.address && g.address.trim() !== "");
-        if (guestsWithAddress.length === 0) { showToast("No guests have addresses saved"); return; }
-        const win = window.open('', '_blank');
-        let html = `<!DOCTYPE html><html><head><title>All Invitations</title><style>
-            body { font-family: Georgia, serif; padding: 20px; }
-            .invitation-block { page-break-after: always; margin-bottom: 30px; border: 1px solid #ddd; padding: 20px; border-radius: 12px; }
-            .invitation-block:last-child { page-break-after: auto; }
-            .address { margin-top: 15px; }
-            @media print { .invitation-block { page-break-inside: avoid; } }
-        </style></head><body>`;
-        for (let g of guestsWithAddress) {
-            html += `<div class="invitation-block">
-                <div style="text-align:center; border-bottom:1px solid #c9a84c; padding-bottom:10px;">
-                    <h2 style="color:#c9a84c;">Daniel & Laura</h2>
-                    <p>Saturday, 3rd October 2026 at 2:00 PM<br>St. Augustine's Church, Keilor</p>
-                </div>
-                <div class="address">
-                    <strong>${escapeHtml(g.name)}</strong><br>
-                    ${escapeHtml(g.address).replace(/\n/g, '<br>')}
-                </div>
-                <p style="font-size:0.7rem; margin-top:12px;">Please RSVP by 1st August 2026</p>
-            </div>`;
-        }
-        html += `<div style="text-align:center; margin-top:20px;"><button onclick="window.print()">Print All</button></div></body></html>`;
-        win.document.write(html);
-        win.document.close();
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
     }
 
     function exportToCSV() {
-        const rows = [["Table Name", "Guest Name", "Group", "Postal Address", "Guest Count", "Notes"]];
-        for (let [tid, table] of tables.entries()) {
-            for (let guest of table.guests) {
-                rows.push([table.name, guest.name, guest.group || "", guest.address || "", guest.guestCount || 1, guest.notes || ""]);
-            }
-        }
-        const unassigned = getUnassignedGuests();
-        for (let g of unassigned) rows.push(["UNASSIGNED", g.name, g.group || "", g.address || "", g.guestCount || 1, g.notes || ""]);
-        const csvContent = rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
-        const blob = new Blob(["\uFEFF" + csvContent], {type: "text/csv"});
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `wedding_seating_${new Date().toISOString().slice(0,10)}.csv`;
-        link.click();
-        URL.revokeObjectURL(link);
-        showToast("CSV exported");
-    }
-
-    function exportToExcel() {
-        const wsData = [["Table", "Guest Name", "Group", "Address", "Guest Count", "Notes"]];
-        for (let [tid, table] of tables.entries()) {
-            for (let guest of table.guests) {
-                wsData.push([table.name, guest.name, guest.group || "", guest.address || "", guest.guestCount || 1, guest.notes || ""]);
-            }
-        }
-        const ws = XLSX.utils.aoa_to_sheet(wsData);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Table Plan");
-        XLSX.writeFile(wb, `wedding_plan_${new Date().toISOString().slice(0,10)}.xlsx`);
-        showToast("Excel exported");
-    }
-
-    function showToast(msg) {
-        let t = document.querySelector(".toast");
-        if (t) t.remove();
-        t = document.createElement("div");
-        t.className = "toast";
-        t.innerText = msg;
-        document.body.appendChild(t);
-        setTimeout(() => t.remove(), 2500);
-    }
-
-    function escapeHtml(str) { if (!str) return ""; return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
-
-    // Render full UI
-    function renderApp() {
-        const unassigned = getUnassignedGuests();
-        const totalGuests = getTotalGuestCount();
-        const seated = getSeatedCount();
-        const tablesArray = Array.from(tables.entries()).sort((a,b) => {
-            if (a[0] === "Bridal") return 1;
-            if (b[0] === "Bridal") return -1;
-            return parseInt(a[0]) - parseInt(b[0]);
+        const rows = [];
+        rows.push(['Table Name', 'Guest Name', 'Group/Source', 'Imported', 'Table Number']);
+        
+        const sorted = Array.from(tableMap.keys()).sort((a,b) => {
+            if (a === BRIDAL_TABLE) return 1;
+            if (b === BRIDAL_TABLE) return -1;
+            return parseInt(a) - parseInt(b);
         });
+        
+        for (const tid of sorted) {
+            const table = tableMap.get(tid);
+            const tableName = table.name;
+            const tableNumber = tid === BRIDAL_TABLE ? 'Bridal' : tid;
+            
+            if (table.guests.length === 0) {
+                rows.push([tableName, '(empty)', '', '', tableNumber]);
+            } else {
+                for (const guest of table.guests) {
+                    rows.push([
+                        `"${tableName}"`,
+                        `"${guest.name.replace(/"/g, '""')}"`,
+                        `"${(guest.group || '').replace(/"/g, '""')}"`,
+                        guest.isImported ? 'Yes' : 'No',
+                        tableNumber
+                    ]);
+                }
+            }
+        }
+        
+        const unassigned = getUnassignedGuests();
+        for (const guest of unassigned) {
+            rows.push(['UNASSIGNED', `"${guest.name.replace(/"/g, '""')}"`, `"${(guest.group || '').replace(/"/g, '""')}"`, guest.isImported ? 'Yes' : 'No', '']);
+        }
+        
+        const csvContent = rows.map(row => row.join(',')).join('\n');
+        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute('download', `wedding_seating_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.csv`);
+        link.click();
+        URL.revokeObjectURL(link.href);
+        showToast("CSV exported!");
+    }
 
-        document.getElementById("app").innerHTML = `
-            <div class="planner-container">
-                <div class="wedding-header">
-                    <h1>💍 Daniel & Laura · Wedding Planner 💒</h1>
-                    <p>Table seating · Postal invitations · Guest management</p>
-                </div>
-                <div class="stats-dashboard">
-                    <div class="stat-card"><div class="stat-number">${allGuests.length}</div><div>Total Groups</div></div>
-                    <div class="stat-card"><div class="stat-number">${totalGuests}</div><div>Total Guests</div></div>
-                    <div class="stat-card"><div class="stat-number">${seated}</div><div>Seated</div></div>
-                    <div class="stat-card"><div class="stat-number">${unassigned.length}</div><div>Unassigned</div></div>
-                    <div class="stat-card"><div class="stat-number">${tables.size}</div><div>Tables</div></div>
-                </div>
-                <div class="tabs-nav">
-                    <button class="tab-btn active" data-tab="seating">🍽️ Table Seating</button>
-                    <button class="tab-btn" data-tab="guests">👥 Guest Manager</button>
-                    <button class="tab-btn" data-tab="invitations">✉️ Invitations & Printing</button>
-                    <button class="tab-btn" data-tab="export">📎 Export Data</button>
-                </div>
-                <!-- SEATING PANE -->
-                <div id="seating" class="tab-pane active">
-                    <div style="margin-bottom:20px; display:flex; gap:12px; flex-wrap:wrap;">
-                        <button class="btn btn-primary" id="resetSeatingBtn">⟳ Reset All Seats</button>
+    async function exportToPDF() {
+        showLoading(true);
+        const pdfContent = document.createElement('div');
+        pdfContent.style.cssText = 'font-family: Georgia, serif; padding: 30px; background: white;';
+        
+        let totalSeated = 0;
+        for (const table of tableMap.values()) totalSeated += table.guests.length;
+        
+        pdfContent.innerHTML = `
+            <div style="text-align:center; margin-bottom:25px; border-bottom:2px solid #c9a84c; padding-bottom:15px;">
+                <h1 style="font-size:24px;">Daniel & Laura · Wedding Seating Plan</h1>
+                <p>Generated on ${new Date().toLocaleString()}</p>
+            </div>
+            <div style="display:flex; justify-content:space-around; margin-bottom:25px;">
+                <div><strong>Total: ${allGuests.length}</strong></div>
+                <div><strong>Seated: ${totalSeated}</strong></div>
+                <div><strong>Unassigned: ${getUnassignedGuests().length}</strong></div>
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(250px,1fr)); gap:15px;">
+                ${Array.from(tableMap.entries()).sort((a,b) => {
+                    if (a[0] === BRIDAL_TABLE) return 1;
+                    if (b[0] === BRIDAL_TABLE) return -1;
+                    return parseInt(a[0]) - parseInt(b[0]);
+                }).map(([tid, table]) => `
+                    <div style="border:1px solid #e8dcc8; border-radius:10px; page-break-inside:avoid;">
+                        <div style="background:#faf5ea; padding:8px; font-weight:bold;">${table.name} (${table.guests.length})</div>
+                        <div style="padding:8px;">
+                            ${table.guests.length === 0 ? '<em>Empty</em>' : 
+                                table.guests.map(g => `<div style="font-size:10px; padding:2px 0;">• ${escapeHtml(g.name)}</div>`).join('')}
+                        </div>
                     </div>
-                    <div class="tables-grid" id="tablesGrid"></div>
-                    <div class="guest-list-panel" style="margin-top:25px;">
+                `).join('')}
+            </div>
+        `;
+        
+        document.body.appendChild(pdfContent);
+        try {
+            await html2pdf().set({ margin: 0.4, filename: `seating_${Date.now()}.pdf`, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } }).from(pdfContent).save();
+            showToast("PDF exported!");
+        } catch(err) { alert("PDF failed"); }
+        pdfContent.remove();
+        showLoading(false);
+    }
+
+    async function renderApp() {
+        const app = document.getElementById('app');
+        const unassigned = getUnassignedGuests();
+        const searchResults = currentSearch ? searchGuests(currentSearch) : [];
+        
+        let totalSeated = 0;
+        for (const table of tableMap.values()) totalSeated += table.guests.length;
+        
+        const allTableOptions = Array.from({ length: TOTAL_TABLES }, (_, i) => i + 1);
+        
+        app.innerHTML = `
+            <div class="container">
+                <div class="header">
+                    <h1>✨ Daniel & Laura · Wedding Seating ✨</h1>
+                    <p>${TOTAL_TABLES} guest tables (${MIN_PER_TABLE}-${MAX_PER_TABLE} seats) + Bridal Table</p>
+                </div>
+                
+                <div class="stats-bar">
+                    <div class="stat"><div class="stat-number">${allGuests.length}</div><div>Total Guests</div></div>
+                    <div class="stat"><div class="stat-number">${totalSeated}</div><div>Seated</div></div>
+                    <div class="stat"><div class="stat-number">${unassigned.length}</div><div>Unassigned</div></div>
+                </div>
+                
+                <div class="toolbar">
+                    <button class="btn" id="saveBtn">💾 Save to Firebase</button>
+                    <button class="btn btn-secondary" id="resetBtn">⟳ Reset All</button>
+                    <button class="btn btn-pdf" id="pdfBtn">📄 PDF</button>
+                    <button class="btn btn-csv" id="csvBtn">📊 CSV</button>
+                </div>
+                
+                <div class="import-area">
+                    <h3>📥 Import Guests from CSV (Your Mailing List)</h3>
+                    <textarea id="csvData" class="csv-input" rows="4" placeholder="Paste your CSV data here with columns: Table, Guest Name, Verified Names, Guest Count..."></textarea>
+                    <button class="btn btn-success" id="importBtn">Import CSV Guests</button>
+                    <div id="importPreview" class="import-preview"></div>
+                </div>
+                
+                <div class="search-box">
+                    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search guest..." value="${escapeHtml(currentSearch)}">
+                    <button class="btn" id="searchBtn">Search</button>
+                    <button class="btn btn-secondary" id="clearSearchBtn">Clear</button>
+                </div>
+                
+                ${searchResults.length > 0 ? `
+                    <div style="background:white; border-radius:20px; padding:15px; margin-bottom:20px; border:1px solid #e8dcc8;">
+                        <strong>Search Results:</strong>
+                        ${searchResults.map(g => `
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; border-bottom:1px solid #eee;">
+                                <span>${escapeHtml(g.name)} <small>(${escapeHtml(g.group || '')})</small></span>
+                                <div>
+                                    <select id="assign_${g.id.replace(/[^a-zA-Z0-9]/g, '_')}" style="width:100px;">
+                                        <option value="">→ Table</option>
+                                        ${allTableOptions.map(t => `<option value="${t}">Table ${t}</option>`).join('')}
+                                        <option value="${BRIDAL_TABLE}">👰 Bridal</option>
+                                    </select>
+                                    <button class="btn" style="padding:4px 12px;" data-assign="${g.id}">Assign</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+                
+                <div class="main-layout">
+                    <div class="tables-area">
+                        <div class="tables-grid" id="tablesGrid"></div>
+                    </div>
+                    <div class="guests-area">
                         <h3>📋 Unassigned Guests (${unassigned.length})</h3>
-                        <div id="unassignedContainer"></div>
-                    </div>
-                </div>
-                <!-- GUEST MANAGER PANE -->
-                <div id="guests" class="tab-pane">
-                    <div style="background:white; border-radius:20px; padding:20px; border:1px solid #e8dcc8;">
-                        <h3>➕ Add New Guest</h3>
-                        <div style="display:flex; gap:12px; flex-wrap:wrap; margin:15px 0;">
-                            <input type="text" id="newGuestName" placeholder="Full name" style="flex:2; padding:10px; border-radius:40px; border:1px solid #e8dcc8;">
-                            <input type="text" id="newGuestAddress" placeholder="Postal address" style="flex:3; padding:10px; border-radius:40px; border:1px solid #e8dcc8;">
-                            <input type="number" id="newGuestCount" placeholder="Count" value="1" style="width:100px; padding:10px; border-radius:40px;">
-                            <button class="btn btn-success" id="addGuestBtn">+ Add Guest</button>
-                        </div>
-                        <div class="search-filter">
-                            <input type="text" id="guestSearch" placeholder="Search guests...">
-                            <select id="groupFilter"><option value="">All Groups</option><option value="Family">Family</option><option value="Groomsman">Groomsman</option><option value="Work">Work</option><option value="Friends">Friends</option></select>
-                        </div>
-                        <div id="allGuestsList" style="max-height:500px; overflow-y:auto;"></div>
-                    </div>
-                </div>
-                <!-- INVITATIONS PANE -->
-                <div id="invitations" class="tab-pane">
-                    <div style="background:white; border-radius:20px; padding:20px; border:1px solid #e8dcc8;">
-                        <h3>📮 Print Postal Invitations</h3>
-                        <p style="margin:10px 0;">Generate address labels and invitation cards for each guest.</p>
-                        <div style="display:flex; gap:15px; flex-wrap:wrap; margin:20px 0;">
-                            <button class="btn btn-primary" id="printAllInvitesBtn">🖨️ Print All Invitations</button>
-                            <button class="btn btn-secondary" id="refreshAddressesBtn">⟳ Refresh Guest List</button>
-                        </div>
-                        <div id="addressListContainer" style="max-height:400px; overflow-y:auto;"></div>
-                    </div>
-                </div>
-                <!-- EXPORT PANE -->
-                <div id="export" class="tab-pane">
-                    <div style="background:white; border-radius:20px; padding:25px; text-align:center; border:1px solid #e8dcc8;">
-                        <h3>📊 Export Wedding Data</h3>
-                        <div style="display:flex; gap:20px; justify-content:center; margin:25px 0; flex-wrap:wrap;">
-                            <button class="btn btn-primary" id="exportCsvBtn">📄 Export CSV</button>
-                            <button class="btn btn-primary" id="exportExcelBtn">📊 Export Excel</button>
-                        </div>
+                        <div id="unassignedList"></div>
                     </div>
                 </div>
             </div>
         `;
-
-        // Render Tables Grid
-        const grid = document.getElementById("tablesGrid");
+        
+        // Render tables
+        const grid = document.getElementById('tablesGrid');
         if (grid) {
-            grid.innerHTML = "";
-            for (let [tid, table] of tablesArray) {
-                const totalSeats = table.guests.reduce((s,g) => s + (g.guestCount||1), 0);
-                const isBridal = tid === "Bridal";
-                const card = document.createElement("div");
-                card.className = `table-card ${isBridal ? "bridal" : ""}`;
+            grid.innerHTML = '';
+            const sorted = Array.from(tableMap.keys()).sort((a,b) => {
+                if (a === BRIDAL_TABLE) return 1;
+                if (b === BRIDAL_TABLE) return -1;
+                return parseInt(a) - parseInt(b);
+            });
+            
+            for (const tid of sorted) {
+                const table = tableMap.get(tid);
+                const isBridal = tid === BRIDAL_TABLE;
+                const card = document.createElement('div');
+                card.className = `table-card ${isBridal ? 'bridal' : ''}`;
                 card.innerHTML = `
-                    <div class="table-header"><span>${table.name}</span><span>${totalSeats} guests</span></div>
-                    <div class="table-guests" id="table-${tid}">
-                        ${table.guests.length === 0 ? '<div class="empty-table">— empty —</div>' : 
-                            table.guests.map(g => `<span class="guest-tag" data-id="${g.id}" data-table="${tid}">${escapeHtml(g.name)} (${g.guestCount||1}) ✖</span>`).join('')
-                        }
+                    <div class="table-header">
+                        <span>${table.name} ${isBridal ? '⭐' : ''}</span>
+                        <span>${table.guests.length} ${!isBridal ? `/ ${MAX_PER_TABLE}` : 'guests'}</span>
                     </div>
-                    <div style="padding:8px 12px; border-top:1px solid #e8dcc8;">
-                        <select id="assignSelect-${tid}" style="width:70%; padding:6px; border-radius:20px;">
-                            <option value="">Assign guest...</option>
-                            ${unassigned.map(g => `<option value="${g.id}">${escapeHtml(g.name)}</option>`).join('')}
-                        </select>
-                        <button class="btn-sm" data-assign-table="${tid}">+</button>
+                    <div class="table-guests">
+                        ${table.guests.length === 0 ? '<div class="empty-table">— empty —</div>' : 
+                            table.guests.map(g => `<span class="guest-chip ${g.isImported ? 'imported' : ''}" data-id="${g.id}" data-table="${tid}">${escapeHtml(g.name)} ✖</span>`).join('')
+                        }
                     </div>
                 `;
                 grid.appendChild(card);
-                // remove guest
-                card.querySelectorAll(".guest-tag").forEach(tag => {
-                    tag.onclick = (e) => { e.stopPropagation(); if(confirm("Remove guest?")) removeGuestFromTable(tag.dataset.id, tag.dataset.table); };
-                });
-                const assignBtn = card.querySelector(`[data-assign-table="${tid}"]`);
-                const selectEl = card.querySelector(`#assignSelect-${tid}`);
-                if (assignBtn) assignBtn.onclick = () => {
-                    const guestId = selectEl.value;
-                    if (guestId) {
-                        const guest = allGuests.find(g => g.id === guestId);
-                        if (guest) assignGuestToTable(guest, tid);
-                        selectEl.value = "";
-                    }
-                };
-            }
-        }
-
-        // Unassigned list
-        const unassignedDiv = document.getElementById("unassignedContainer");
-        if (unassignedDiv) {
-            if (unassigned.length === 0) unassignedDiv.innerHTML = '<div style="padding:20px; text-align:center; color:#bfae8e;">✨ All guests assigned ✨</div>';
-            else {
-                unassignedDiv.innerHTML = unassigned.map(g => `
-                    <div class="guest-list-item">
-                        <div><span class="guest-name">${escapeHtml(g.name)}</span> <span class="guest-group">${g.group || ""} (${g.guestCount||1})</span><br>${g.address ? escapeHtml(g.address.substring(0,50)) : '<span style="color:#e74c3c;">⚠️ No address</span>'}</div>
-                        <div><select class="quickTableSelect" data-id="${g.id}"><option value="">→ Table</option>${Array.from(tables.keys()).map(tid => `<option value="${tid}">${tables.get(tid).name}</option>`).join('')}</select><button class="btn-sm quickAssign" data-id="${g.id}">Assign</button></div>
-                    </div>
-                `).join('');
-                document.querySelectorAll(".quickAssign").forEach(btn => {
-                    btn.onclick = () => {
-                        const guestId = btn.dataset.id;
-                        const sel = btn.parentElement.querySelector(".quickTableSelect");
-                        const guest = allGuests.find(g => g.id === guestId);
-                        if (guest && sel.value) assignGuestToTable(guest, sel.value);
+                
+                card.querySelectorAll('.guest-chip').forEach(chip => {
+                    chip.onclick = () => {
+                        if (confirm('Remove this guest?')) removeGuestFromTable(chip.dataset.id, chip.dataset.table);
                     };
                 });
             }
         }
-
-        // Guest Manager List
-        const guestListContainer = document.getElementById("allGuestsList");
-        if (guestListContainer) {
-            const searchTerm = document.getElementById("guestSearch")?.value.toLowerCase() || "";
-            const groupFilter = document.getElementById("groupFilter")?.value || "";
-            let filtered = allGuests.filter(g => (searchTerm === "" || g.name.toLowerCase().includes(searchTerm)) && (groupFilter === "" || g.group === groupFilter));
-            guestListContainer.innerHTML = filtered.map(g => `
-                <div class="guest-list-item"><div><strong>${escapeHtml(g.name)}</strong><br>${g.address ? escapeHtml(g.address) : '<span style="color:#e74c3c;">📍 No address saved</span>'}<br><small>${g.group || ""} · ${g.guestCount||1} guest(s)</small></div>
-                <div><button class="btn-sm btn-primary" data-edit-addr="${g.id}">✏️ Edit Address</button><button class="btn-sm btn-danger" data-delete-guest="${g.id}" ${g.isManual ? '' : 'disabled'}>Delete</button></div></div>
-            `).join('');
-            document.querySelectorAll("[data-edit-addr]").forEach(btn => {
-                btn.onclick = () => {
-                    const guest = allGuests.find(g => g.id === btn.dataset.editAddr);
-                    const newAddr = prompt("Enter postal address:", guest.address || "");
-                    if (newAddr !== null) { guest.address = newAddr; saveManualGuests(); renderApp(); showToast("Address updated"); }
-                };
-            });
-            document.querySelectorAll("[data-delete-guest]").forEach(btn => {
-                if (!btn.disabled) btn.onclick = () => { if(confirm("Delete?")) { allGuests = allGuests.filter(g => g.id !== btn.dataset.deleteGuest); manualGuests = manualGuests.filter(g => g.id !== btn.dataset.deleteGuest); tableAssignments.delete(btn.dataset.deleteGuest); saveAssignments(); saveManualGuests(); renderApp(); } };
-            });
+        
+        // Render unassigned
+        const unassignedDiv = document.getElementById('unassignedList');
+        if (unassignedDiv) {
+            if (unassigned.length === 0) {
+                unassignedDiv.innerHTML = '<div style="text-align:center; padding:30px; color:#bfae8e;">✨ All guests assigned! ✨</div>';
+            } else {
+                unassignedDiv.innerHTML = unassigned.map(g => `
+                    <div class="guest-list-item">
+                        <div><div class="guest-name">${escapeHtml(g.name)} ${g.isImported ? '📎' : ''}</div><div class="guest-group">${escapeHtml(g.group || '')}</div></div>
+                        <select id="quick_${g.id.replace(/[^a-zA-Z0-9]/g, '_')}" style="width:90px;">
+                            <option value="">Table</option>
+                            ${allTableOptions.map(t => `<option value="${t}">${t}</option>`).join('')}
+                            <option value="${BRIDAL_TABLE}">👰</option>
+                        </select>
+                        <button class="btn" style="padding:4px 10px;" data-quick="${g.id}">✔</button>
+                    </div>
+                `).join('');
+                
+                for (const g of unassigned) {
+                    const btn = unassignedDiv.querySelector(`[data-quick="${g.id}"]`);
+                    const sel = unassignedDiv.querySelector(`#quick_${g.id.replace(/[^a-zA-Z0-9]/g, '_')}`);
+                    if (btn && sel) btn.onclick = () => { if (sel.value) assignGuestToTable(g, sel.value); };
+                }
+            }
         }
-
-        // Invitations list
-        const addrContainer = document.getElementById("addressListContainer");
-        if (addrContainer) {
-            const withAddress = allGuests.filter(g => g.address && g.address.trim());
-            addrContainer.innerHTML = withAddress.map(g => `<div class="guest-list-item"><div><strong>${escapeHtml(g.name)}</strong><br>${escapeHtml(g.address)}</div><button class="btn-sm btn-primary" data-print-single="${g.id}">Print Invitation</button></div>`).join('');
-            document.querySelectorAll("[data-print-single]").forEach(btn => {
-                btn.onclick = () => { const guest = allGuests.find(g => g.id === btn.dataset.printSingle); if(guest) printInvitationsForGuest(guest); };
-            });
-        }
-
+        
         // Event listeners
-        document.getElementById("addGuestBtn")?.addEventListener("click", () => {
-            const name = document.getElementById("newGuestName").value;
-            const addr = document.getElementById("newGuestAddress").value;
-            const count = document.getElementById("newGuestCount").value;
-            if (name) addManualGuest(name, addr, count);
-            else showToast("Enter guest name");
+        document.getElementById('saveBtn')?.addEventListener('click', saveSeatingToFirebase);
+        document.getElementById('resetBtn')?.addEventListener('click', resetAllSeating);
+        document.getElementById('pdfBtn')?.addEventListener('click', exportToPDF);
+        document.getElementById('csvBtn')?.addEventListener('click', exportToCSV);
+        
+        document.getElementById('importBtn')?.addEventListener('click', () => {
+            const csvText = document.getElementById('csvData').value;
+            if (!csvText.trim()) {
+                showToast("Please paste CSV data");
+                return;
+            }
+            const guestsToAdd = parseCSVAndAddGuests(csvText);
+            if (guestsToAdd.length === 0) {
+                showToast("No new guests found in CSV");
+                return;
+            }
+            const { added, skipped } = addImportedGuestsToTables(guestsToAdd);
+            showToast(`✓ Added ${added} guests (${skipped} duplicates/skipped)`);
+            renderApp();
         });
-        document.getElementById("resetSeatingBtn")?.addEventListener("click", () => { if(confirm("Reset all seating?")) { initTables(); tableAssignments.clear(); saveAssignments(); renderApp(); } });
-        document.getElementById("printAllInvitesBtn")?.addEventListener("click", printAllInvitations);
-        document.getElementById("exportCsvBtn")?.addEventListener("click", exportToCSV);
-        document.getElementById("exportExcelBtn")?.addEventListener("click", exportToExcel);
-        document.getElementById("guestSearch")?.addEventListener("input", () => renderApp());
-        document.getElementById("groupFilter")?.addEventListener("change", () => renderApp());
-        document.getElementById("refreshAddressesBtn")?.addEventListener("click", () => renderApp());
-
-        // Tab switching
-        document.querySelectorAll(".tab-btn").forEach(btn => {
+        
+        const searchInput = document.getElementById('searchInput');
+        document.getElementById('searchBtn')?.addEventListener('click', () => { currentSearch = searchInput.value; renderApp(); });
+        document.getElementById('clearSearchBtn')?.addEventListener('click', () => { currentSearch = ''; searchInput.value = ''; renderApp(); });
+        
+        document.querySelectorAll('[data-assign]').forEach(btn => {
             btn.onclick = () => {
-                document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-                btn.classList.add("active");
-                document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
-                document.getElementById(btn.dataset.tab).classList.add("active");
+                const guestId = btn.dataset.assign;
+                const select = document.getElementById(`assign_${guestId.replace(/[^a-zA-Z0-9]/g, '_')}`);
+                if (select && select.value) {
+                    const guest = allGuests.find(g => g.id === guestId);
+                    if (guest) assignGuestToTable(guest, select.value);
+                }
             };
         });
     }
-
-    // Initialize
-    function init() {
-        initTables();
-        loadManualGuests();
-        loadAssignments();
+    
+    async function init() {
+        showLoading(true);
+        
+        const savedSeating = await loadSeatingFromFirebase();
+        if (savedSeating && savedSeating.size > 0) {
+            tableMap = savedSeating;
+            // Rebuild allGuests from table assignments
+            const guestSet = new Map();
+            for (const [tid, table] of tableMap.entries()) {
+                for (const g of table.guests) {
+                    if (!guestSet.has(g.id)) {
+                        guestSet.set(g.id, { ...g });
+                        guestTableMap.set(g.id, tid);
+                    }
+                }
+            }
+            allGuests = Array.from(guestSet.values());
+        } else {
+            initTables();
+            allGuests = [];
+        }
+        
+        showLoading(false);
         renderApp();
+        showToast("Ready! Paste your CSV to import guests.");
     }
+    
     init();
 </script>
 </body>
 </html>
-```
