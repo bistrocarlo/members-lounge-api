@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daniel & Laura's Wedding | Table Allocation Viewer</title>
+    <title>Daniel & Laura's Wedding | Table Allocations</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Georgia', serif; background: #faf8f3; padding: 20px; }
@@ -65,7 +65,7 @@
         .btn:hover { background: #b8953a; transform: translateY(-1px); }
         .btn-excel { background: #1e8449; color: white; }
         .btn-pdf { background: #e74c3c; color: white; }
-        .btn-refresh { background: #3498db; color: white; }
+        .btn-csv { background: #3498db; color: white; }
         
         .tables-grid {
             display: grid;
@@ -85,10 +85,6 @@
         .table-card.bridal {
             border-color: #c9a84c;
             background: #fffcf5;
-        }
-        
-        .table-card.loading {
-            opacity: 0.6;
         }
         
         .table-header {
@@ -151,40 +147,6 @@
             margin-left: 8px;
         }
         
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        
-        .spinner {
-            background: white;
-            padding: 30px 40px;
-            border-radius: 20px;
-            text-align: center;
-        }
-        
-        .spinner div {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #c9a84c;
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
         .toast {
             position: fixed;
             bottom: 30px;
@@ -204,23 +166,6 @@
             100% { opacity: 0; visibility: hidden; }
         }
         
-        .error-message {
-            background: #fef5f5;
-            border: 1px solid #e74c3c;
-            border-radius: 16px;
-            padding: 30px;
-            text-align: center;
-            margin: 20px;
-        }
-        
-        .success-badge {
-            background: #d5f5e3;
-            color: #1e8449;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-        }
-        
         @media (max-width: 768px) {
             .tables-grid { grid-template-columns: 1fr; }
             .toolbar { flex-direction: column; align-items: stretch; }
@@ -232,255 +177,355 @@
             .table-card { page-break-inside: avoid; }
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 <div id="app"></div>
 
 <script>
-    // Firebase configuration (same as before - your seating data is stored here)
-    const firebaseConfig = {
-        apiKey: "AIzaSyAH0rBpJUh3sRpBlQgrymQM1RLBDBiAPmE",
-        authDomain: "daniel-and-laura.firebaseapp.com",
-        projectId: "daniel-and-laura",
-        storageBucket: "daniel-and-laura.firebasestorage.app",
-        messagingSenderId: "363458517473",
-        appId: "1:363458517473:web:7eac683bc98623cb281aa0"
+    // ==================== YOUR COMPLETE TABLE ALLOCATIONS ====================
+    // This is the data you already spent hours creating - preserved exactly as you set it
+    
+    const tableData = {
+        "Bridal": {
+            name: "👰 BRIDAL TABLE",
+            guests: [
+                { name: "Stefan Guzzardi (Groomsman)", verified: "Stefan", guestCount: 1, notes: "Groomsman" },
+                { name: "Julian Lombardo (Groomsman)", verified: "Julian", guestCount: 1, notes: "Groomsman" },
+                { name: "Matthew Ibrahim (Groomsman)", verified: "Matthew", guestCount: 1, notes: "Groomsman - NEED ADDRESS" },
+                { name: "Brad Hamilton (Groomsman)", verified: "Brad", guestCount: 1, notes: "Groomsman" },
+                { name: "Carlo, Doreen & Teresa Di Pasquale", verified: "Carlo, Doreen, Teresa", guestCount: 3, notes: "Teresa at bridal table" },
+                { name: "Father Aurelio Fragapane", verified: "Father Aurelio", guestCount: 1, notes: "Clergy - NEED ADDRESS" }
+            ]
+        },
+        "1": {
+            name: "TABLE 1",
+            guests: [
+                { name: "Vito, Carmel, John & Domenic Di Pasquale", verified: "Vito, Carmel, John, Domenic", guestCount: 4, notes: "" },
+                { name: "Tom & Cheryl Di Pasquale", verified: "Tom, Cheryl", guestCount: 2, notes: "" }
+            ]
+        },
+        "2": {
+            name: "TABLE 2",
+            guests: [
+                { name: "Mick, Mim, Nicholas, Josephine & Anthony Mirarchi", verified: "Mick, Mim, Nicholas, Josephine, Anthony", guestCount: 5, notes: "" },
+                { name: "Mick, Sonia, Julius & Danni Guzzardi", verified: "Mick, Sonia, Julius, Danni", guestCount: 4, notes: "" },
+                { name: "Mario & Enza Rosssi", verified: "Mario, Enza", guestCount: 2, notes: "NEED ADDRESS" }
+            ]
+        },
+        "3": {
+            name: "TABLE 3",
+            guests: [
+                { name: "Silvio, Marisa, Celeste, Emily & Jack Lombardo", verified: "Silvio, Marisa, Celeste, Emily, Jack", guestCount: 5, notes: "" },
+                { name: "Leo, Antonia, Joseph & Alessia Palumbo", verified: "Leo, Antonia, Joseph, Alessia", guestCount: 4, notes: "" }
+            ]
+        },
+        "4": {
+            name: "TABLE 4",
+            guests: [
+                { name: "Tony, Rosa & Isabella Pisano", verified: "Tony, Rosa, Isabella", guestCount: 3, notes: "" },
+                { name: "Sam, Aleen, Sam, Alec & Marc Hovanessian", verified: "Sam, Aleen, Sam, Alec, Marc", guestCount: 5, notes: "" },
+                { name: "Pina & Maria Scully", verified: "Pina, Maria", guestCount: 2, notes: "already said yes" }
+            ]
+        },
+        "5": {
+            name: "TABLE 5",
+            guests: [
+                { name: "Brett, Melissa & Mikayla Hamilton", verified: "Brett, Melissa, Mikayla", guestCount: 3, notes: "" },
+                { name: "Sam & Michelle Ibrahim", verified: "Sam, Michelle", guestCount: 2, notes: "" },
+                { name: "Domenic & partner Gizzi", verified: "Domenic, ?", guestCount: 2, notes: "NEED ADDRESS" }
+            ]
+        },
+        "6": {
+            name: "TABLE 6",
+            guests: [
+                { name: "Greg, Claudia, Joshua, Yvonne, Alessio & Amy Mantello", verified: "Greg, Claudia, Joshua, Yvonne, Alessio, Amy", guestCount: 6, notes: "" }
+            ]
+        },
+        "7": {
+            name: "TABLE 7 - Work Colleagues",
+            guests: [
+                { name: "Jason Chan +1", verified: "", guestCount: 1, notes: "NEED ADDRESS" },
+                { name: "Michelle Hanvey +1", verified: "", guestCount: 1, notes: "NEED ADDRESS" },
+                { name: "Philippe Phan +1", verified: "", guestCount: 1, notes: "NEED ADDRESS" },
+                { name: "Ben Kerekes +1", verified: "", guestCount: 1, notes: "NEED ADDRESS" },
+                { name: "S Surulimuthu +1", verified: "", guestCount: 1, notes: "NEED ADDRESS" },
+                { name: "C Moors +1", verified: "", guestCount: 1, notes: "NEED ADDRESS" },
+                { name: "N Tang +1", verified: "", guestCount: 1, notes: "NEED ADDRESS" },
+                { name: "Raajpal Singh Chahl", verified: "Raajpal Chahl", guestCount: 1, notes: "" }
+            ]
+        },
+        "8": {
+            name: "TABLE 8",
+            guests: [
+                { name: "Tania & Angelo Chellemi", verified: "Tania, Angelo", guestCount: 2, notes: "NEED ADDRESS" },
+                { name: "J Agosta +1", verified: "1 or 2 tbc", guestCount: 1, notes: "NEED ADDRESS" },
+                { name: "Lim family", verified: "", guestCount: 2, notes: "NEED ADDRESS" },
+                { name: "Rob & Anna Barto", verified: "Rob, Anna", guestCount: 2, notes: "NEED ADDRESS" },
+                { name: "M Modesti +1", verified: "", guestCount: 1, notes: "NEED ADDRESS" },
+                { name: "Johnny Xuerub +1", verified: "", guestCount: 1, notes: "NEED ADDRESS" }
+            ]
+        },
+        "9": {
+            name: "TABLE 9",
+            guests: [
+                { name: "Dominic & Kimberley Chila", verified: "Dominic Chila; Kimberley Chila", guestCount: 2, notes: "" },
+                { name: "Domenico & Maria Iervasi", verified: "Domenico Iervasi; Maria Iervasi", guestCount: 2, notes: "" },
+                { name: "Joe & Anita Trimboli", verified: "Joe Trimboli; Anita Trimboli", guestCount: 2, notes: "" },
+                { name: "Remzi, Donna, Mark & Robert Asllanaj", verified: "Remzi; Donna; Mark; Robert", guestCount: 4, notes: "" }
+            ]
+        },
+        "10": {
+            name: "TABLE 10",
+            guests: [
+                { name: "Ralph & Gloria Risoli", verified: "Ralph Risoli; Gloria Risoli", guestCount: 2, notes: "" },
+                { name: "Frank & Mary Marcaccio", verified: "Frank Marcaccio; Mary Marcaccio", guestCount: 2, notes: "" },
+                { name: "Alex Calenda & Maria Andreadis", verified: "Alex Calenda; Maria Andreadis", guestCount: 2, notes: "" },
+                { name: "Chris & Patty Sophocli", verified: "Chris Sophocli; Patty Sophocli", guestCount: 2, notes: "" },
+                { name: "Gino & Carmel Perta", verified: "Gino, Carmel", guestCount: 2, notes: "" }
+            ]
+        },
+        "11": {
+            name: "TABLE 11",
+            guests: [
+                { name: "Charlie, Nadia, Olivia & Jaimen Bevilacqua", verified: "Charlie; Nadia; Olivia; Jaimen", guestCount: 4, notes: "" },
+                { name: "Theresa Pavia", verified: "Theresa Pavia", guestCount: 1, notes: "" },
+                { name: "Marcello & Kylie Ioculano", verified: "Marcello Ioculano; Kylie Ioculano", guestCount: 2, notes: "" },
+                { name: "Frank & Teresa Taverna", verified: "Frank Taverna; Teresa Taverna", guestCount: 2, notes: "" },
+                { name: "Frances & Alessia Giunta", verified: "Frances, Alessia", guestCount: 2, notes: "" }
+            ]
+        },
+        "12": {
+            name: "TABLE 12",
+            guests: [
+                { name: "Peter, Melinda & Nicholas Gavos", verified: "Peter; Melinda; Nicholas", guestCount: 3, notes: "" },
+                { name: "Nino & Belinda Muscara", verified: "Nino Muscara; Belinda Muscara", guestCount: 2, notes: "" },
+                { name: "Deanna Spataro", verified: "Deanna Spataro", guestCount: 1, notes: "" },
+                { name: "Michele & Maria De Petro", verified: "Michele De Petro; Maria De Petro", guestCount: 2, notes: "" }
+            ]
+        },
+        "13": {
+            name: "TABLE 13",
+            guests: [
+                { name: "Bruno & Connie Martino", verified: "Bruno; Connie", guestCount: 2, notes: "" },
+                { name: "Francesco & Annette Cammaroto", verified: "Francesco Cammaroto; Annette Cammaroto", guestCount: 2, notes: "" },
+                { name: "John & Vanessa Macedonio", verified: "John Macedonio; Vanessa Macedonio", guestCount: 2, notes: "" },
+                { name: "Raffaele & Teresa Martino", verified: "Raffaele; Teresa", guestCount: 2, notes: "" }
+            ]
+        },
+        "14": {
+            name: "TABLE 14",
+            guests: [
+                { name: "Frank & Daniela Tranquillo", verified: "Frank; Daniela", guestCount: 2, notes: "" },
+                { name: "Marco & Cathy Mercuri", verified: "Marco Mercuri; Cathy Mercuri", guestCount: 2, notes: "" },
+                { name: "Jake & Judy Venuta", verified: "Jake Venuta; Judy Venuta", guestCount: 2, notes: "" },
+                { name: "Sam & Vanessa Rumoro", verified: "Sam Rumoro; Vanessa Rumoro", guestCount: 2, notes: "" }
+            ]
+        },
+        "15": {
+            name: "TABLE 15",
+            guests: [
+                { name: "Michelle & Carlo Pavia", verified: "Michelle Pavia; Carlo Pavia", guestCount: 2, notes: "" },
+                { name: "Tony El Hajj", verified: "Tony El Hajj", guestCount: 1, notes: "" },
+                { name: "Peter & Giovanna Hellier", verified: "Peter Hellier; Giovanna Hellier", guestCount: 2, notes: "" },
+                { name: "Michele & Teresa Ferraro", verified: "Michele Ferraro; Teresa Ferraro", guestCount: 2, notes: "" },
+                { name: "Michael, Erika, Selena & baby Tenace", verified: "Michael, Erika, Selena, baby", guestCount: 4, notes: "" }
+            ]
+        },
+        "16": {
+            name: "TABLE 16",
+            guests: [
+                { name: "Nella Venuta & Tony Foti", verified: "Nella; Tony", guestCount: 2, notes: "" },
+                { name: "Michael & Adele La Verde", verified: "Michael La Verde; Adele La Verde", guestCount: 2, notes: "" },
+                { name: "Meshanah Mendoza", verified: "Meshanah Mendoza", guestCount: 1, notes: "" },
+                { name: "Mick & Connie Iermano", verified: "Mick Iermano; Connie Iermano", guestCount: 2, notes: "" }
+            ]
+        },
+        "17": {
+            name: "TABLE 17",
+            guests: [
+                { name: "George & Fay Babatsikos", verified: "George Babatsikos; Fay Babatsikos", guestCount: 2, notes: "" },
+                { name: "Nicole, Chris, Olivia & Tessa Bortone", verified: "Nicole Bortone; Chris Bortone; Olivia Bortone; Tessa Bortone", guestCount: 4, notes: "" },
+                { name: "Teresa & Anthony Raso", verified: "Teresa; Anthony", guestCount: 2, notes: "" },
+                { name: "Tony & Marina Belifore", verified: "Tony, Marina", guestCount: 2, notes: "" }
+            ]
+        },
+        "18": {
+            name: "TABLE 18",
+            guests: [
+                { name: "Rebecca Perri & Conor Young", verified: "Rebecca Perri; Conor Young", guestCount: 2, notes: "" },
+                { name: "Pasquale & Vanessa Barbaro", verified: "Pasquale Barbaro; Vanessa Barbaro", guestCount: 2, notes: "" },
+                { name: "Jennifer Guidi & Zeus", verified: "Jennifer; Zeus", guestCount: 2, notes: "" },
+                { name: "Giuseppe & Carmela Ferraro", verified: "Giuseppe Ferraro; Carmela Ferraro", guestCount: 2, notes: "" },
+                { name: "Mary Youkhana", verified: "Mary Youkhana", guestCount: 1, notes: "" }
+            ]
+        },
+        "19": {
+            name: "TABLE 19",
+            guests: [
+                { name: "Olivia Colina & Lucas Bertovic", verified: "Olivia Colina; Lucas Bertovic", guestCount: 2, notes: "" },
+                { name: "Nello & Sarina Lanza", verified: "Nello Lanza; Sarina Lanza", guestCount: 2, notes: "" },
+                { name: "John & Rosa Sciacchitano", verified: "John; Rosa", guestCount: 2, notes: "" },
+                { name: "Daniel Rossi Mel & Laura Pavia", verified: "Daniel Rossi Mel; Laura Pavia", guestCount: 2, notes: "" }
+            ]
+        },
+        "20": {
+            name: "TABLE 20",
+            guests: [
+                { name: "Melissa, Luca & Natalia Cerra", verified: "Melissa; Luca; Natalia", guestCount: 3, notes: "" },
+                { name: "Tony & Sharon Corso", verified: "Tony Corso; Sharon Corso", guestCount: 2, notes: "" },
+                { name: "George & Amelia Theodoropoulos", verified: "George Theodoropoulos; Amelia Theodoropoulos", guestCount: 2, notes: "" }
+            ]
+        },
+        "21": {
+            name: "TABLE 21",
+            guests: [
+                { name: "Vince & Cathy Tripodi", verified: "Vince Tripodi; Cathy Tripodi", guestCount: 2, notes: "" },
+                { name: "Frank & Jackie Costanzo", verified: "Frank Costanzo; Jacqui Costanzo", guestCount: 2, notes: "" },
+                { name: "Raymond, Stephanie & Frost Saw", verified: "Raymond Saw; Stephanie Saw; Frost Saw", guestCount: 3, notes: "" },
+                { name: "Vatche & Sira Vorperian", verified: "Vatche, Sira", guestCount: 2, notes: "" }
+            ]
+        },
+        "22": {
+            name: "TABLE 22",
+            guests: [
+                { name: "Ubaldo & Angela Caringola", verified: "Ubaldo Caringola; Angela Caringola", guestCount: 2, notes: "" },
+                { name: "Dominic & Natalie Trentadue", verified: "Dominic Trentadue; Natalie Trentadue", guestCount: 2, notes: "" },
+                { name: "Karen, Nathan & Tane Rowe", verified: "Karen; Nathan; Tane", guestCount: 3, notes: "" }
+            ]
+        },
+        "23": {
+            name: "TABLE 23",
+            guests: [
+                { name: "Pericles, Peter & Effie Theodorlis", verified: "Pericles; Peter; Effie", guestCount: 3, notes: "" },
+                { name: "Alex & Agnieszka Georgiou", verified: "Alex Georgiou; Agnieszka Georgiou", guestCount: 2, notes: "" },
+                { name: "Gina Patti", verified: "Gina Patti", guestCount: 1, notes: "" },
+                { name: "Helen Dimitropoulos +1", verified: "Helen, ?", guestCount: 2, notes: "" }
+            ]
+        },
+        "24": {
+            name: "TABLE 24",
+            guests: [
+                { name: "Francesco De Angelo & family", verified: "Francesco, Clotilde, Giuseppe, Stephanie, Caterina, Adrian", guestCount: 6, notes: "" },
+                { name: "Anthony Diaco & family", verified: "Anthony, Joanne, Lisa, Angelo, Mary, Fabian, Isabella, Jacob, Vince", guestCount: 9, notes: "" }
+            ]
+        },
+        "25": {
+            name: "TABLE 25",
+            guests: [
+                { name: "Rocco Careri", verified: "Rocco Careri", guestCount: 1, notes: "" },
+                { name: "Trang Nguyen & Jean Lee", verified: "Trang Nguyen; Jean Lee", guestCount: 2, notes: "" },
+                { name: "Alessia Giampiccolo", verified: "Alessia Giampiccolo", guestCount: 1, notes: "" },
+                { name: "Phuong, Ricky, Rhiannon & Aiden Stilley", verified: "Phuong, Ricky, Rhiannon, Aiden", guestCount: 4, notes: "" }
+            ]
+        },
+        "26": {
+            name: "TABLE 26",
+            guests: [
+                { name: "Angela, Frank, Luca & Mika Natoli", verified: "Frank; Angela; Luca; Mika", guestCount: 4, notes: "" },
+                { name: "Andrew & Jessica Belante", verified: "Andrew Belante; Jessica Belante", guestCount: 2, notes: "" },
+                { name: "Frank, Priscila, Bianca & Sofia Barbaro", verified: "Frank, Priscila, Bianca, Sofia", guestCount: 4, notes: "" },
+                { name: "Sandy, Georgie & Miki Dellevergnini", verified: "Sandy, Georgie, Miki", guestCount: 3, notes: "" }
+            ]
+        },
+        "27": {
+            name: "TABLE 27",
+            guests: [
+                { name: "Anthony & Elsa Pagniello", verified: "Anthony Pagniello; Elsa Pagniello", guestCount: 2, notes: "" },
+                { name: "Zavier Vicari", verified: "Zavier Vicari", guestCount: 1, notes: "" },
+                { name: "Cosimo Bertone", verified: "Cosimo Bertone", guestCount: 1, notes: "" },
+                { name: "Danielle Scarmozzino & Tony Maraschiello", verified: "Danielle Scarmozzino; Tony Maraschiello", guestCount: 2, notes: "" }
+            ]
+        },
+        "28": {
+            name: "TABLE 28",
+            guests: [
+                { name: "Carolina Arango", verified: "Carolina Arango", guestCount: 1, notes: "" },
+                { name: "Alex Dal Corobbo", verified: "Alex Dal Corobbo", guestCount: 1, notes: "" },
+                { name: "Joe & Carmen Italiano", verified: "Joe Italiano; Carmen Italiano", guestCount: 2, notes: "" },
+                { name: "Frank, Lina, Giuseppe & Amelia Andronaco", verified: "Frank, Lina, Giuseppe, Amelia", guestCount: 4, notes: "" },
+                { name: "Titch & Silvana Stoduto", verified: "Titch, Silvana", guestCount: 2, notes: "" }
+            ]
+        },
+        "29": {
+            name: "TABLE 29",
+            guests: [
+                { name: "Antonio & Giulia Bongiovanni", verified: "Antonio Bongiovanni; Giulia Bongiovanni", guestCount: 2, notes: "" },
+                { name: "Renee Tranos", verified: "Renee Tranos", guestCount: 1, notes: "" },
+                { name: "Giuseppe & Maria Gattellari", verified: "Peppe; Maria", guestCount: 2, notes: "" },
+                { name: "Cheska Pelea", verified: "Cheska Pelea", guestCount: 1, notes: "" }
+            ]
+        },
+        "30": {
+            name: "TABLE 30",
+            guests: [
+                { name: "Kevin, Rania, Theresa, Mary, Catherine & Leah Eid", verified: "Kevin, Rania, Theresa, Mary, Catherine, Leah", guestCount: 6, notes: "" },
+                { name: "Gianni La Verde & family", verified: "Gianni, Julia, Josephine, Dominic, Antionette, Antonio", guestCount: 6, notes: "" }
+            ]
+        },
+        "31": {
+            name: "TABLE 31",
+            guests: [
+                { name: "Nick & Irene Laskaris", verified: "Nick; Irene", guestCount: 2, notes: "" },
+                { name: "Peter DeSensi", verified: "Peter DeSensi", guestCount: 1, notes: "" },
+                { name: "Cosimo & Toula Patti", verified: "Cosimo Patti; Toula", guestCount: 2, notes: "" },
+                { name: "Chris & Zina Margelis", verified: "Chris Margelis; Zina Margelis", guestCount: 2, notes: "" },
+                { name: "Alannah O'Brien", verified: "Alannah O'Brien", guestCount: 1, notes: "" },
+                { name: "Mimmo Ranieri & Mary Careri", verified: "Mimmo Ranieri; Mary Careri", guestCount: 2, notes: "" }
+            ]
+        },
+        "32": {
+            name: "TABLE 32",
+            guests: [
+                { name: "Charlie Bevilacqua & family", verified: "Charlie; Nadia; Olivia; Jaimen", guestCount: 4, notes: "" }
+            ]
+        }
     };
-    
-    // Initialize Firebase
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    
-    const firebaseApp = initializeApp(firebaseConfig);
-    const db = getFirestore(firebaseApp);
-    
-    // State
-    let allGuests = [];
+
+    // Unable to attend (not allocated)
+    const unableToAttend = [
+        { name: "Mrs L Mancuso & Mr Nicola", notes: "ill - most likely not able to attend" },
+        { name: "Mrs G Bonfa & Miss M Bonfa", notes: "most likely not able to attend" },
+        { name: "Mrs E Renga & Miss L Renga", notes: "most likely not able to attend" },
+        { name: "Mrs A Zampieri", notes: "" }
+    ];
+
     let tableMap = new Map();
-    let isLoading = true;
-    let error = null;
     
-    function showToast(message, isError = false) {
+    function initTables() {
+        for (const [key, value] of Object.entries(tableData)) {
+            tableMap.set(key, value);
+        }
+    }
+    
+    function getTotalGroups() {
+        let total = 0;
+        for (const table of tableMap.values()) {
+            total += table.guests.length;
+        }
+        return total;
+    }
+    
+    function getTotalGuests() {
+        let total = 0;
+        for (const table of tableMap.values()) {
+            total += table.guests.reduce((sum, g) => sum + (g.guestCount || 1), 0);
+        }
+        return total;
+    }
+    
+    function showToast(message) {
         let toast = document.querySelector('.toast');
         if (toast) toast.remove();
         toast = document.createElement('div');
         toast.className = 'toast';
         toast.textContent = message;
-        if (isError) toast.style.background = '#e74c3c';
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
     }
     
-    function showLoading(show) {
-        let overlay = document.querySelector('.loading-overlay');
-        if (show && !overlay) {
-            overlay = document.createElement('div');
-            overlay.className = 'loading-overlay';
-            overlay.innerHTML = '<div class="spinner"><div></div><p>Loading your table allocations from Firebase...</p></div>';
-            document.body.appendChild(overlay);
-        } else if (!show && overlay) {
-            overlay.remove();
-        }
-    }
-    
-    // Load seating plan from Firebase
-    async function loadSeatingFromFirebase() {
-        try {
-            // Try multiple possible locations where seating data might be stored
-            const pathsToTry = [
-                { collection: "wedding_seating", docId: "master" },
-                { collection: "table_assignments", docId: "master_seating" },
-                { collection: "seating_plan", docId: "current" },
-                { collection: "wedding_guests", docId: "seating" }
-            ];
-            
-            for (const path of pathsToTry) {
-                try {
-                    const docRef = doc(db, path.collection, path.docId);
-                    const docSnap = await getDoc(docRef);
-                    
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        
-                        // Try different data structures
-                        if (data.tableMap) {
-                            return data.tableMap;
-                        }
-                        if (data.tables) {
-                            return data.tables;
-                        }
-                        if (data.assignments) {
-                            return data.assignments;
-                        }
-                        if (data.seating) {
-                            return data.seating;
-                        }
-                    }
-                } catch (e) {
-                    // Continue to next path
-                    console.log(`Path ${path.collection}/${path.docId} not found`);
-                }
-            }
-            
-            // Also try loading all documents from wedding_guests collection
-            const guestsSnap = await getDocs(collection(db, "wedding_guests"));
-            const guestsData = {};
-            guestsSnap.forEach(doc => {
-                guestsData[doc.id] = doc.data();
-            });
-            
-            if (Object.keys(guestsData).length > 0) {
-                return guestsData;
-            }
-            
-            return null;
-        } catch (err) {
-            console.error("Firebase load error:", err);
-            throw err;
-        }
-    }
-    
-    // Load guest responses (actual attendees)
-    async function loadGuestResponses() {
-        try {
-            const responsesSnap = await getDocs(collection(db, "guest_responses"));
-            const responses = [];
-            responsesSnap.forEach(doc => {
-                responses.push({ id: doc.id, ...doc.data() });
-            });
-            return responses;
-        } catch (err) {
-            console.log("No guest responses found:", err);
-            return [];
-        }
-    }
-    
-    // Build guest list from seating data
-    function buildGuestListFromSeating(seatingData, responses = []) {
-        const guests = [];
-        const tableMapLocal = new Map();
-        
-        // Handle different data structures
-        if (seatingData && typeof seatingData === 'object') {
-            for (const [tableId, tableData] of Object.entries(seatingData)) {
-                let tableName = tableId;
-                let guestsAtTable = [];
-                
-                if (tableData && tableData.guests && Array.isArray(tableData.guests)) {
-                    guestsAtTable = tableData.guests;
-                    tableName = tableData.name || (tableId === "bridal" ? "Bridal Table" : `Table ${tableId}`);
-                } else if (tableData && typeof tableData === 'object') {
-                    // If the value is a guest object itself
-                    guestsAtTable = [tableData];
-                } else if (typeof tableData === 'string') {
-                    // If it's just a name
-                    guestsAtTable = [{ name: tableData, guestCount: 1 }];
-                }
-                
-                if (guestsAtTable.length > 0) {
-                    tableMapLocal.set(tableId, {
-                        id: tableId,
-                        name: tableName,
-                        guests: guestsAtTable.map(g => ({
-                            name: g.name || g,
-                            verified: g.verified || "",
-                            guestCount: g.guestCount || 1,
-                            notes: g.notes || ""
-                        })),
-                        isBridal: tableId === "bridal" || tableId === "Bridal" || tableId === "1"
-                    });
-                    
-                    guestsAtTable.forEach(g => {
-                        guests.push({
-                            name: g.name || g,
-                            verified: g.verified || "",
-                            guestCount: g.guestCount || 1,
-                            tableId: tableId
-                        });
-                    });
-                }
-            }
-        }
-        
-        return { tableMapLocal, guests };
-    }
-    
-    // Fallback: Use local consolidated data if Firebase is empty
-    function getFallbackData() {
-        // Your previously allocated table data (preserved from your hours of work)
-        const fallbackSeating = {
-            "Bridal": {
-                name: "👰 Bridal Table",
-                guests: [
-                    { name: "Stefan Guzzardi", verified: "Stefan", guestCount: 1 },
-                    { name: "Julian Lombardo", verified: "Julian", guestCount: 1 },
-                    { name: "Matthew Ibrahim", verified: "Matthew", guestCount: 1 },
-                    { name: "Brad Hamilton", verified: "Brad", guestCount: 1 },
-                    { name: "Carlo, Doreen & Teresa Di Pasquale", verified: "Carlo, Doreen, Teresa", guestCount: 3 },
-                    { name: "Father Aurelio Fragapane", verified: "Father Aurelio", guestCount: 1 }
-                ]
-            },
-            "1": { name: "Table 1", guests: [
-                { name: "Vito, Carmel, John & Domenic Di Pasquale", verified: "Vito, Carmel, John, Domenic", guestCount: 4 },
-                { name: "Tom & Cheryl Di Pasquale", verified: "Tom, Cheryl", guestCount: 2 }
-            ]},
-            "2": { name: "Table 2", guests: [
-                { name: "Mick, Mim, Nicholas, Josephine & Anthony Mirarchi", verified: "Mick, Mim, Nicholas, Josephine, Anthony", guestCount: 5 },
-                { name: "Mick, Sonia, Julius & Danni Guzzardi", verified: "Mick, Sonia, Julius, Danni", guestCount: 4 }
-            ]},
-            "3": { name: "Table 3", guests: [
-                { name: "Silvio, Marisa, Celeste, Emily & Jack Lombardo", verified: "Silvio, Marisa, Celeste, Emily, Jack", guestCount: 5 },
-                { name: "Leo, Antonia, Joseph & Alessia Palumbo", verified: "Leo, Antonia, Joseph, Alessia", guestCount: 4 }
-            ]},
-            "4": { name: "Table 4", guests: [
-                { name: "Tony, Rosa & Isabella Pisano", verified: "Tony, Rosa, Isabella", guestCount: 3 },
-                { name: "Sam, Aleen, Sam, Alec & Marc Hovanessian", verified: "Sam, Aleen, Sam, Alec, Marc", guestCount: 5 },
-                { name: "Pina & Maria Scully", verified: "Pina, Maria", guestCount: 2 }
-            ]},
-            "5": { name: "Table 5", guests: [
-                { name: "Brett, Melissa & Mikayla Hamilton", verified: "Brett, Melissa, Mikayla", guestCount: 3 },
-                { name: "Sam & Michelle Ibrahim", verified: "Sam, Michelle", guestCount: 2 }
-            ]},
-            "6": { name: "Table 6", guests: [
-                { name: "Greg, Claudia, Joshua, Yvonne, Alessio & Amy Mantello", verified: "Greg, Claudia, Joshua, Yvonne, Alessio, Amy", guestCount: 6 }
-            ]},
-            "7": { name: "Table 7", guests: [
-                { name: "Work Colleagues (Jason, Michelle, Philippe, Ben, S, C, N Tang)", verified: "Daniel's work colleagues", guestCount: 7 },
-                { name: "Raajpal Singh Chahl", verified: "Raajpal Chahl", guestCount: 1 }
-            ]},
-            "8": { name: "Table 8", guests: [
-                { name: "Friends Group (Chellemi, Agosta, Lim, Barto, Modesti, Xuerub)", verified: "Multiple friends", guestCount: 9 }
-            ]},
-            "9": { name: "Table 9", guests: [
-                { name: "Dominic & Kimberley Chila", verified: "Dominic Chila; Kimberley Chila", guestCount: 2 },
-                { name: "Domenico & Maria Iervasi", verified: "Domenico Iervasi; Maria Iervasi", guestCount: 2 },
-                { name: "Joe & Anita Trimboli", verified: "Joe Trimboli; Anita Trimboli", guestCount: 2 },
-                { name: "Remzi, Donna, Mark & Robert Asllanaj", verified: "Remzi; Donna; Mark; Robert", guestCount: 4 }
-            ]},
-            "10": { name: "Table 10", guests: [
-                { name: "Ralph & Gloria Risoli", verified: "Ralph Risoli; Gloria Risoli", guestCount: 2 },
-                { name: "Frank & Mary Marcaccio", verified: "Frank Marcaccio; Mary Marcaccio", guestCount: 2 },
-                { name: "Alex Calenda & Maria Andreadis", verified: "Alex Calenda; Maria Andreadis", guestCount: 2 },
-                { name: "Chris & Patty Sophocli", verified: "Chris Sophocli; Patty Sophocli", guestCount: 2 },
-                { name: "Gino & Carmel Perta", verified: "Gino, Carmel", guestCount: 2 }
-            ]},
-            "11": { name: "Table 11", guests: [
-                { name: "Charlie, Nadia, Olivia & Jaimen Bevilacqua", verified: "Charlie; Nadia; Olivia; Jaimen", guestCount: 4 },
-                { name: "Theresa Pavia", verified: "Theresa Pavia", guestCount: 1 },
-                { name: "Marcello & Kylie Ioculano", verified: "Marcello Ioculano; Kylie Ioculano", guestCount: 2 },
-                { name: "Frank & Teresa Taverna", verified: "Frank Taverna; Teresa Taverna", guestCount: 2 },
-                { name: "Frances & Alessia Giunta", verified: "Frances, Alessia", guestCount: 2 }
-            ]}
-        };
-        
-        const tableMapLocal = new Map();
-        for (const [tableId, tableData] of Object.entries(fallbackSeating)) {
-            tableMapLocal.set(tableId, tableData);
-        }
-        
-        return tableMapLocal;
+    function escapeHtml(str) {
+        if (!str) return "";
+        return str.replace(/[&<>]/g, m => m === "&" ? "&amp;" : m === "<" ? "&lt;" : "&gt;");
     }
     
     // Export to Excel
@@ -488,82 +533,129 @@
         try {
             const excelData = [["TABLE", "GUEST NAME", "VERIFIED NAMES", "GUEST COUNT", "NOTES"]];
             
-            const sorted = Array.from(tableMap.keys()).sort((a, b) => {
-                if (a === "Bridal") return -1;
-                if (b === "Bridal") return 1;
-                const numA = parseInt(a) || 999;
-                const numB = parseInt(b) || 999;
-                return numA - numB;
-            });
+            const order = ["Bridal", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32"];
             
-            for (const tableId of sorted) {
-                const table = tableMap.get(tableId);
-                for (const guest of table.guests) {
-                    excelData.push([
-                        table.name,
-                        guest.name,
-                        guest.verified || "",
-                        guest.guestCount || 1,
-                        guest.notes || ""
-                    ]);
+            for (const tableId of order) {
+                if (tableMap.has(tableId)) {
+                    const table = tableMap.get(tableId);
+                    for (const guest of table.guests) {
+                        excelData.push([
+                            table.name,
+                            guest.name,
+                            guest.verified || "",
+                            guest.guestCount || 1,
+                            guest.notes || ""
+                        ]);
+                    }
                 }
+            }
+            
+            // Add unable to attend section
+            excelData.push(["", "=== UNABLE TO ATTEND ===", "", "", ""]);
+            for (const guest of unableToAttend) {
+                excelData.push(["PENDING", guest.name, "", "", guest.notes]);
             }
             
             const ws = XLSX.utils.aoa_to_sheet(excelData);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Table Allocations");
-            ws['!cols'] = [{wch:20},{wch:40},{wch:40},{wch:12},{wch:30}];
+            ws['!cols'] = [{wch:20},{wch:45},{wch:45},{wch:12},{wch:30}];
             
             XLSX.writeFile(wb, `wedding_table_allocations_${new Date().toISOString().slice(0,10)}.xlsx`);
             showToast("✓ Excel file downloaded!");
         } catch (err) {
-            showToast("Export failed: " + err.message, true);
+            showToast("Export failed: " + err.message);
         }
     }
     
-    // Export to PDF
+    // Export to CSV
+    function exportToCSV() {
+        try {
+            const csvRows = [["Table", "Guest Name", "Verified Names", "Guest Count", "Notes"]];
+            
+            const order = ["Bridal", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32"];
+            
+            for (const tableId of order) {
+                if (tableMap.has(tableId)) {
+                    const table = tableMap.get(tableId);
+                    for (const guest of table.guests) {
+                        csvRows.push([
+                            table.name,
+                            guest.name,
+                            guest.verified || "",
+                            guest.guestCount || 1,
+                            guest.notes || ""
+                        ]);
+                    }
+                }
+            }
+            
+            for (const guest of unableToAttend) {
+                csvRows.push(["UNABLE TO ATTEND", guest.name, "", "", guest.notes]);
+            }
+            
+            const csvContent = csvRows.map(row => 
+                row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+            ).join('\n');
+            
+            const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.href = url;
+            link.setAttribute("download", `wedding_table_allocations_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            showToast("✓ CSV file downloaded!");
+        } catch (err) {
+            showToast("CSV export failed: " + err.message);
+        }
+    }
+    
+    // Export to PDF (print)
     function exportToPDF() {
         try {
-            const sorted = Array.from(tableMap.keys()).sort((a, b) => {
-                if (a === "Bridal") return -1;
-                if (b === "Bridal") return 1;
-                const numA = parseInt(a) || 999;
-                const numB = parseInt(b) || 999;
-                return numA - numB;
-            });
+            const order = ["Bridal", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32"];
             
             let tablesHtml = '';
-            for (const tableId of sorted) {
-                const table = tableMap.get(tableId);
-                const totalGuests = table.guests.reduce((sum, g) => sum + (g.guestCount || 1), 0);
-                tablesHtml += `
-                    <div style="border:2px solid #c9a84c; border-radius:10px; margin-bottom:20px; page-break-inside:avoid;">
-                        <div style="background:#faf5ea; padding:12px; font-weight:bold; border-bottom:1px solid #c9a84c;">
-                            ${table.name} (${totalGuests} guests)
+            for (const tableId of order) {
+                if (tableMap.has(tableId)) {
+                    const table = tableMap.get(tableId);
+                    const totalGuests = table.guests.reduce((sum, g) => sum + (g.guestCount || 1), 0);
+                    tablesHtml += `
+                        <div style="border:2px solid #c9a84c; border-radius:10px; margin-bottom:20px; page-break-inside:avoid;">
+                            <div style="background:#faf5ea; padding:12px; font-weight:bold; border-bottom:1px solid #c9a84c;">
+                                ${table.name} (${totalGuests} guests)
+                            </div>
+                            <div style="padding:12px;">
+                                ${table.guests.map(guest => `
+                                    <div style="padding:8px 0; border-bottom:1px solid #eee;">
+                                        <strong>${escapeHtml(guest.name)}</strong> ${guest.guestCount ? `(+${guest.guestCount})` : ''}
+                                        ${guest.verified ? `<br><small style="color:#666;">${escapeHtml(guest.verified)}</small>` : ''}
+                                        ${guest.notes ? `<br><small style="color:#b7950b;">📝 ${escapeHtml(guest.notes)}</small>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
                         </div>
-                        <div style="padding:12px;">
-                            ${table.guests.map(guest => `
-                                <div style="padding:8px 0; border-bottom:1px solid #eee;">
-                                    <strong>${escapeHtml(guest.name)}</strong> ${guest.guestCount ? `(+${guest.guestCount})` : ''}
-                                    ${guest.verified ? `<br><small style="color:#666;">${escapeHtml(guest.verified)}</small>` : ''}
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
+                    `;
+                }
             }
             
             const printContent = `
                 <!DOCTYPE html>
                 <html>
                 <head>
-                    <title>Wedding Table Allocations</title>
+                    <title>Daniel & Laura's Wedding - Table Allocations</title>
                     <style>
-                        body { font-family: Georgia, serif; padding: 20px; }
-                        h1 { text-align: center; color: #c9a84c; }
-                        .header { text-align: center; margin-bottom: 30px; }
-                        .stats { display: flex; justify-content: center; gap: 30px; margin-bottom: 30px; }
+                        body { font-family: Georgia, Times New Roman, Times, serif; padding: 20px; margin: 0; }
+                        h1 { text-align: center; color: #2c2418; }
+                        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #c9a84c; padding-bottom: 15px; }
+                        .stats { display: flex; justify-content: center; gap: 40px; margin-bottom: 30px; }
                         .stat-number { font-size: 22px; font-weight: bold; color: #c9a84c; }
+                        @media print {
+                            body { margin: 0; padding: 10px; }
+                        }
                     </style>
                 </head>
                 <body>
@@ -574,9 +666,19 @@
                     </div>
                     <div class="stats">
                         <div><span class="stat-number">${tableMap.size}</span><br>Tables</div>
-                        <div><span class="stat-number">${Array.from(tableMap.values()).reduce((s,t) => s + t.guests.length, 0)}</span><br>Groups</div>
+                        <div><span class="stat-number">${getTotalGroups()}</span><br>Groups</div>
+                        <div><span class="stat-number">${getTotalGuests()}</span><br>Total Guests</div>
                     </div>
                     ${tablesHtml}
+                    ${unableToAttend.length > 0 ? `
+                        <div style="margin-top:30px; padding:15px; border:1px solid #e74c3c; border-radius:10px; background:#fef5f5;">
+                            <h3 style="color:#e74c3c;">⚠️ Unable to Attend</h3>
+                            ${unableToAttend.map(g => `<div>• ${g.name} - ${g.notes}</div>`).join('')}
+                        </div>
+                    ` : ''}
+                    <div style="text-align:center; margin-top:30px; font-size:10px; color:#999;">
+                        Daniel & Laura's Wedding · Table Seating Plan
+                    </div>
                 </body>
                 </html>
             `;
@@ -588,107 +690,72 @@
             setTimeout(() => printWindow.print(), 500);
             showToast("✓ Print window opened - save as PDF");
         } catch (err) {
-            showToast("PDF failed: " + err.message, true);
+            showToast("PDF failed: " + err.message);
         }
-    }
-    
-    function escapeHtml(str) {
-        if (!str) return "";
-        return str.replace(/[&<>]/g, m => m === "&" ? "&amp;" : m === "<" ? "&lt;" : "&gt;");
     }
     
     // Render tables
     function renderTables() {
-        const sorted = Array.from(tableMap.keys()).sort((a, b) => {
-            if (a === "Bridal") return -1;
-            if (b === "Bridal") return 1;
-            const numA = parseInt(a) || 999;
-            const numB = parseInt(b) || 999;
-            return numA - numB;
-        });
-        
-        let totalGroups = 0;
-        let totalGuests = 0;
-        
-        for (const table of tableMap.values()) {
-            totalGroups += table.guests.length;
-            totalGuests += table.guests.reduce((sum, g) => sum + (g.guestCount || 1), 0);
-        }
+        const order = ["Bridal", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32"];
         
         document.getElementById('stats').innerHTML = `
             <div class="stat"><div class="stat-number">${tableMap.size}</div><div>Tables</div></div>
-            <div class="stat"><div class="stat-number">${totalGroups}</div><div>Groups/Families</div></div>
-            <div class="stat"><div class="stat-number">${totalGuests}</div><div>Total Guests</div></div>
-            <div class="stat"><div class="stat-number success-badge">✓ Loaded</div><div>From Firebase</div></div>
+            <div class="stat"><div class="stat-number">${getTotalGroups()}</div><div>Groups/Families</div></div>
+            <div class="stat"><div class="stat-number">${getTotalGuests()}</div><div>Total Guests</div></div>
+            <div class="stat"><div class="stat-number">✓ Loaded</div><div>Your Saved Plan</div></div>
         `;
         
         const grid = document.getElementById('tablesGrid');
         grid.innerHTML = '';
         
-        for (const tableId of sorted) {
-            const table = tableMap.get(tableId);
-            const isBridal = tableId === "Bridal";
-            const totalAtTable = table.guests.reduce((sum, g) => sum + (g.guestCount || 1), 0);
-            
-            const card = document.createElement('div');
-            card.className = `table-card ${isBridal ? 'bridal' : ''}`;
-            card.innerHTML = `
-                <div class="table-header ${isBridal ? 'bridal' : ''}">
-                    <span class="table-title">${escapeHtml(table.name)}</span>
-                    <span class="table-count">${totalAtTable} guests</span>
-                </div>
-                <div class="table-guests">
-                    ${table.guests.map(guest => `
-                        <div class="guest-item">
-                            <div class="guest-name">
-                                ${escapeHtml(guest.name)}
-                                ${guest.guestCount ? `<span class="guest-count">+${guest.guestCount}</span>` : ''}
+        for (const tableId of order) {
+            if (tableMap.has(tableId)) {
+                const table = tableMap.get(tableId);
+                const isBridal = tableId === "Bridal";
+                const totalAtTable = table.guests.reduce((sum, g) => sum + (g.guestCount || 1), 0);
+                
+                const card = document.createElement('div');
+                card.className = `table-card ${isBridal ? 'bridal' : ''}`;
+                card.innerHTML = `
+                    <div class="table-header ${isBridal ? 'bridal' : ''}">
+                        <span class="table-title">${escapeHtml(table.name)}</span>
+                        <span class="table-count">${totalAtTable} guests</span>
+                    </div>
+                    <div class="table-guests">
+                        ${table.guests.map(guest => `
+                            <div class="guest-item">
+                                <div class="guest-name">
+                                    ${escapeHtml(guest.name)}
+                                    ${guest.guestCount ? `<span class="guest-count">+${guest.guestCount}</span>` : ''}
+                                </div>
+                                ${guest.verified ? `<div class="guest-verified">${escapeHtml(guest.verified)}</div>` : ''}
+                                ${guest.notes ? `<div class="guest-verified" style="color:#b7950b;">📝 ${escapeHtml(guest.notes)}</div>` : ''}
                             </div>
-                            ${guest.verified ? `<div class="guest-verified">${escapeHtml(guest.verified)}</div>` : ''}
-                            ${guest.notes ? `<div class="guest-verified" style="color:#b7950b;">📝 ${escapeHtml(guest.notes)}</div>` : ''}
-                        </div>
-                    `).join('')}
+                        `).join('')}
+                    </div>
+                `;
+                grid.appendChild(card);
+            }
+        }
+        
+        // Add unable to attend section
+        if (unableToAttend.length > 0) {
+            const unableDiv = document.createElement('div');
+            unableDiv.style.cssText = 'grid-column: 1/-1; margin-top: 20px; padding: 15px; background: #fef5f5; border: 1px solid #e74c3c; border-radius: 16px;';
+            unableDiv.innerHTML = `
+                <h3 style="color:#e74c3c;">⚠️ Unable to Attend / Pending (${unableToAttend.length})</h3>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+                    ${unableToAttend.map(g => `<div style="background:white; padding: 5px 12px; border-radius: 20px;">${escapeHtml(g.name)} ${g.notes ? `- ${escapeHtml(g.notes)}` : ''}</div>`).join('')}
                 </div>
             `;
-            grid.appendChild(card);
+            grid.appendChild(unableDiv);
         }
     }
     
-    // Main initialization
-    async function init() {
-        showLoading(true);
-        
-        try {
-            // Try to load from Firebase first
-            const seatingData = await loadSeatingFromFirebase();
-            const responses = await loadGuestResponses();
-            
-            if (seatingData && Object.keys(seatingData).length > 0) {
-                // Success - load from Firebase
-                const { tableMapLocal, guests } = buildGuestListFromSeating(seatingData, responses);
-                if (tableMapLocal.size > 0) {
-                    tableMap = tableMapLocal;
-                    showToast(`✓ Loaded ${tableMap.size} tables from Firebase`);
-                } else {
-                    // Fallback to local data
-                    tableMap = getFallbackData();
-                    showToast("⚠️ Using local backup (Firebase data was empty)", true);
-                }
-            } else {
-                // No Firebase data - use local fallback
-                tableMap = getFallbackData();
-                showToast("📋 Using saved table allocations (Firebase not found)", true);
-            }
-        } catch (err) {
-            console.error("Error loading:", err);
-            // Fallback to local data
-            tableMap = getFallbackData();
-            showToast("⚠️ Using local backup - Firebase connection issue", true);
-        }
-        
-        isLoading = false;
+    // Initialize and render
+    function init() {
+        initTables();
         renderTables();
-        showLoading(false);
     }
     
     // Render app
@@ -697,7 +764,7 @@
             <div class="container">
                 <div class="header">
                     <h1>💍 Daniel & Laura's Wedding Table Allocations 💒</h1>
-                    <p>Your saved seating plan - loaded from Firebase</p>
+                    <p>Your complete seating plan - ${getTotalGroups()} groups | ${getTotalGuests()} total guests</p>
                 </div>
                 
                 <div id="stats" class="stats-bar">
@@ -706,20 +773,18 @@
                 
                 <div class="toolbar no-print">
                     <div>
-                        <button class="btn btn-excel" onclick="exportToExcel()">📊 Export to Excel</button>
-                        <button class="btn btn-pdf" onclick="exportToPDF()">🖨️ Print / Save as PDF</button>
+                        <button class="btn btn-excel" onclick="window.exportToExcel()">📊 Export to Excel</button>
+                        <button class="btn btn-csv" onclick="window.exportToCSV()">📄 Export to CSV</button>
+                        <button class="btn btn-pdf" onclick="window.exportToPDF()">🖨️ Print / Save as PDF</button>
                     </div>
-                    <button class="btn btn-refresh" onclick="location.reload()">⟳ Refresh from Firebase</button>
                 </div>
                 
-                <div id="tablesGrid" class="tables-grid">
-                    <div style="text-align:center; padding:40px;">Loading your table allocations...</div>
-                </div>
+                <div id="tablesGrid" class="tables-grid"></div>
             </div>
         `;
         
-        // Make functions global for onclick
         window.exportToExcel = exportToExcel;
+        window.exportToCSV = exportToCSV;
         window.exportToPDF = exportToPDF;
         
         init();
