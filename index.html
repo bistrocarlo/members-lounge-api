@@ -2,84 +2,119 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewfit=cover">
-    <title>Monday Night Soccer | Ultimate Edition 🏆⚽</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Apex Performance | Monday Night Soccer Elite</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
         *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-        body{background:#f0f2f5;font-family:'Inter',sans-serif;}
-        .app{max-width:500px;margin:0 auto;background:#f0f2f5;min-height:100vh;padding-bottom:20px;}
-        .header{background:linear-gradient(135deg,#1a1a2e,#16213e);color:white;padding:14px 20px;text-align:center;border-bottom:1px solid #e9ecef;position:sticky;top:0;z-index:20;}
-        .logo-icon{width:52px;height:52px;background:linear-gradient(135deg,#e94560,#ff6b6b);border-radius:16px;display:inline-flex;align-items:center;justify-content:center;margin:0 auto 6px;box-shadow:0 4px 15px rgba(233,69,96,0.3);}
-        .logo-icon i{font-size:26px;color:white;}
-        .header h1{font-size:18px;font-weight:800;letter-spacing:-0.5px;}
-        .user-row{background:rgba(255,255,255,0.15);padding:5px 14px;border-radius:40px;display:inline-flex;align-items:center;gap:10px;margin-top:6px;font-size:12px;backdrop-filter:blur(10px);}
-        .user-row button{background:#dc3545;border:none;padding:4px 12px;border-radius:40px;color:white;font-weight:500;font-size:11px;cursor:pointer;}
-        .top-nav{background:white;padding:10px 12px;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;border-bottom:1px solid #e9ecef;position:sticky;top:75px;z-index:15;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
-        .nav-module{background:#f0f2f5;border:none;padding:8px 14px;border-radius:40px;font-size:12px;font-weight:600;color:#5a626e;cursor:pointer;transition:all 0.2s;}
-        .nav-module.active{background:#e94560;color:white;box-shadow:0 2px 8px rgba(233,69,96,0.3);}
-        .module-container{padding:16px;display:none;}
-        .module-container.active-module{display:block;animation:fadeIn 0.3s ease;}
-        @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-        .card{background:white;border-radius:24px;padding:18px;margin-bottom:14px;border:1px solid #e9ecef;box-shadow:0 2px 8px rgba(0,0,0,0.04);transition:transform 0.2s, box-shadow 0.2s;}
-        .card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,0.08);}
-        .card h2{font-size:17px;font-weight:800;margin-bottom:14px;border-left:4px solid #e94560;padding-left:12px;color:#1a1a2e;}
-        .attendance-card{background:linear-gradient(135deg,#e94560,#ff6b6b);color:white;border-radius:28px;padding:24px 20px;text-align:center;margin-bottom:16px;box-shadow:0 8px 25px rgba(233,69,96,0.3);}
-        .big-buttons{display:flex;gap:14px;margin:16px 0 12px;}
-        .btn-play-big{background:#28a745;flex:1;padding:14px;border-radius:60px;font-weight:800;font-size:16px;border:none;color:white;cursor:pointer;transition:transform 0.1s;}
-        .btn-play-big:active{transform:scale(0.97);}
-        .btn-sit-big{background:#dc3545;flex:1;padding:14px;border-radius:60px;font-weight:800;font-size:16px;border:none;color:white;cursor:pointer;transition:transform 0.1s;}
-        .profile-item{background:#f8f9fa;border-radius:20px;margin-bottom:10px;display:flex;align-items:center;gap:12px;padding:12px;transition:all 0.2s;}
-        .profile-item:hover{background:#e9ecef;}
-        .profile-avatar{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:18px;flex-shrink:0;box-shadow:0 4px 10px rgba(0,0,0,0.1);}
-        .player-avatar-small{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:12px;margin-right:5px;flex-shrink:0;}
-        .profile-badge{background:white;border-radius:40px;padding:3px 10px;font-size:11px;font-weight:600;display:inline-block;margin-right:6px;margin-bottom:4px;color:#495057;border:1px solid #e9ecef;}
-        .ranking-table{width:100%;border-collapse:collapse;}
-        .ranking-table th,.ranking-table td{padding:10px 8px;text-align:left;border-bottom:1px solid #e9ecef;}
-        .ranking-table th{font-weight:800;color:#e94560;font-size:12px;}
-        .rank-number{font-weight:800;color:#e94560;width:35px;}
-        .power-rank-card{background:linear-gradient(135deg,#1a1a2e,#16213e);color:white;border-radius:20px;padding:16px;margin-bottom:12px;display:flex;align-items:center;gap:12px;}
-        .power-rank-number{font-size:32px;font-weight:900;color:#e94560;min-width:50px;}
-        .power-rank-info{flex:1;}
-        .power-rank-name{font-weight:700;font-size:16px;}
-        .match-card{background:white;border-radius:20px;margin-bottom:14px;border:1px solid #e9ecef;overflow:hidden;}
-        .match-header{background:#f8f9fa;padding:12px 16px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;border-bottom:1px solid #e9ecef;}
-        .match-result{background:#e94560;color:white;padding:4px 14px;border-radius:40px;font-weight:700;font-size:13px;}
-        .teams-section{padding:16px;background:#1a2a3a;}
-        .team-yellow{background:#ffc107;color:#2c2c2c;font-weight:800;text-align:center;padding:6px;border-radius:60px;margin-bottom:8px;}
-        .team-orange{background:#fd7e14;color:white;font-weight:800;text-align:center;padding:6px;border-radius:60px;margin-bottom:8px;}
-        .score-big{text-align:center;margin-top:12px;font-size:22px;font-weight:800;background:rgba(0,0,0,0.6);border-radius:60px;padding:8px;color:#ffd700;}
-        .achievement-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;}
-        .achievement-badge{background:linear-gradient(135deg,#f8f9fa,#e9ecef);border-radius:16px;padding:12px;text-align:center;transition:all 0.2s;}
-        .achievement-badge.earned{background:linear-gradient(135deg,#ffd700,#ffed4e);box-shadow:0 4px 15px rgba(255,215,0,0.3);}
-        .achievement-icon{font-size:28px;margin-bottom:6px;}
-        .trash-talk-card{background:linear-gradient(135deg,#fff5f5,#ffe0e0);border-radius:20px;padding:16px;margin-bottom:12px;border-left:4px solid #e94560;}
-        .streak-fire{background:#ff6b6b;color:white;border-radius:40px;padding:2px 10px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:4px;}
-        .guest-section{background:#e6f7e6;border-radius:20px;padding:16px;margin-bottom:14px;border:1px solid #b3e6b3;}
-        .guest-tag{display:inline-block;background:#d4edda;border-radius:40px;padding:4px 12px;margin:4px;font-size:12px;}
-        .guest-badge{background:#28a745;color:white;border-radius:40px;padding:2px 8px;font-size:9px;margin-left:6px;}
-        .attendee-tag{display:inline-flex;align-items:center;gap:8px;background:white;padding:6px 12px;border-radius:40px;font-size:13px;margin:4px;box-shadow:0 1px 2px rgba(0,0,0,0.05);}
-        .whatsapp-share{background:#25D366;color:white;border:none;margin-top:8px;width:100%;padding:10px;border-radius:60px;font-weight:600;cursor:pointer;}
-        .timer-display{font-size:54px;font-weight:800;font-family:monospace;color:#e94560;background:#f0f2f5;border-radius:20px;padding:12px;margin-bottom:16px;text-align:center;}
-        .flex-btns{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;}
-        .info-bar{background:#e8f0fe;border-radius:16px;padding:12px;font-size:12px;margin-bottom:16px;text-align:center;color:#e94560;font-weight:600;}
-        .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;}
-        .modal-content{background:white;border-radius:32px;padding:24px;max-width:340px;width:90%;max-height:80vh;overflow-y:auto;}
-        select,input{width:100%;padding:12px;border:1.5px solid #e9ecef;border-radius:60px;margin:8px 0;font-size:14px;font-family:'Inter',sans-serif;}
-        button{background:#e94560;color:white;border:none;padding:10px 20px;border-radius:60px;font-weight:700;cursor:pointer;transition:all 0.2s;}
-        .btn-outline{background:white;color:#e94560;border:2px solid #e94560;}
-        @media (max-width:450px){.team-row{flex-direction:column;}}
-        .remove-attendee-btn{background:#dc3545;border:none;color:white;border-radius:40px;padding:3px 8px;font-size:10px;cursor:pointer;}
+        body{background:#0a0c10;font-family:'Inter',sans-serif;}
+        .app{max-width:500px;margin:0 auto;background:#0a0c10;min-height:100vh;padding-bottom:20px;}
+        
+        /* Premium Header - Airline Style */
+        .header{background:linear-gradient(135deg,#0f1117,#06080c);border-bottom:1px solid rgba(255,255,255,0.08);padding:20px 20px;position:sticky;top:0;z-index:30;backdrop-filter:blur(20px);}
+        .logo-section{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px;}
+        .logo-icon{width:48px;height:48px;background:linear-gradient(135deg,#00d4ff,#7b2f9d);border-radius:14px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(0,212,255,0.25);}
+        .logo-icon i{font-size:24px;color:white;}
+        .logo-text h1{font-size:20px;font-weight:700;letter-spacing:-0.5px;background:linear-gradient(135deg,#fff,#a0a0b0);-webkit-background-clip:text;background-clip:text;color:transparent;}
+        .logo-text p{font-size:9px;letter-spacing:2px;color:#5a5a70;margin-top:2px;}
+        .tier-badge{background:rgba(0,212,255,0.12);border-radius:40px;padding:4px 12px;font-size:10px;font-weight:600;color:#00d4ff;border:1px solid rgba(0,212,255,0.3);}
+        .user-status{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);}
+        .user-info{display:flex;align-items:center;gap:10px;}
+        .user-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#00d4ff,#7b2f9d);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;box-shadow:0 2px 8px rgba(0,212,255,0.3);}
+        .user-details{line-height:1.3;}
+        .user-name{font-size:14px;font-weight:600;color:white;}
+        .user-tier{font-size:9px;color:#00d4ff;}
+        .btn-logout{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);padding:6px 14px;border-radius:30px;font-size:11px;font-weight:500;color:#a0a0b0;cursor:pointer;transition:0.2s;}
+        
+        /* Navigation - Premium Minimal */
+        .top-nav{background:#0f1117;padding:12px 16px;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;border-bottom:1px solid rgba(255,255,255,0.05);position:sticky;top:95px;z-index:25;backdrop-filter:blur(12px);}
+        .nav-module{background:rgba(255,255,255,0.03);border:none;padding:8px 16px;border-radius:40px;font-size:12px;font-weight:500;color:#8a8a9e;cursor:pointer;transition:all 0.2s;letter-spacing:0.3px;}
+        .nav-module i{margin-right:6px;font-size:11px;}
+        .nav-module.active{background:#00d4ff;color:#0a0c10;box-shadow:0 4px 12px rgba(0,212,255,0.3);}
+        
+        .module-container{padding:20px;display:none;}
+        .module-container.active-module{display:block;animation:fadeUp 0.4s cubic-bezier(0.2,0.9,0.4,1.1);}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+        
+        /* Premium Cards */
+        .card{background:rgba(18,20,28,0.8);backdrop-filter:blur(10px);border-radius:28px;padding:20px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.06);transition:all 0.2s;}
+        .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+        .card-header h2{font-size:16px;font-weight:600;color:white;letter-spacing:-0.2px;}
+        .card-header i{color:#00d4ff;font-size:18px;}
+        
+        /* Attendance Hub - Concierge Style */
+        .match-status-card{background:linear-gradient(135deg,#0f1117,#080a10);border-radius:32px;padding:24px;margin-bottom:20px;border:1px solid rgba(0,212,255,0.15);position:relative;overflow:hidden;}
+        .match-status-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#00d4ff,#7b2f9d,#00d4ff);}
+        .match-date{font-size:11px;color:#5a5a70;letter-spacing:1px;margin-bottom:6px;}
+        .match-title{font-size:22px;font-weight:700;color:white;margin-bottom:4px;}
+        .match-venue{font-size:12px;color:#8a8a9e;display:flex;align-items:center;gap:6px;margin-bottom:20px;}
+        .rsvp-buttons{display:flex;gap:12px;margin:16px 0;}
+        .btn-primary{flex:1;background:#00d4ff;border:none;padding:14px;border-radius:60px;font-weight:700;font-size:14px;color:#0a0c10;cursor:pointer;transition:0.2s;}
+        .btn-secondary{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);padding:14px;border-radius:60px;font-weight:600;font-size:14px;color:#a0a0b0;cursor:pointer;}
+        .rsvp-status{font-size:12px;color:#00d4ff;margin-top:12px;display:flex;align-items:center;gap:8px;}
+        
+        /* Player Grid */
+        .player-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+        .player-chip{background:rgba(255,255,255,0.04);border-radius:60px;padding:6px 14px;display:inline-flex;align-items:center;gap:8px;font-size:12px;color:#e0e0e8;border:1px solid rgba(255,255,255,0.06);}
+        .guest-chip{background:rgba(0,212,255,0.08);border-color:rgba(0,212,255,0.2);}
+        
+        /* Power Rankings - Luxe */
+        .rank-card-premium{background:linear-gradient(135deg,#13161f,#0d0f15);border-radius:20px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:14px;border:1px solid rgba(255,255,255,0.05);}
+        .rank-number-premium{width:44px;height:44px;background:rgba(0,212,255,0.1);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#00d4ff;}
+        .rank-info-premium{flex:1;}
+        .rank-name-premium{font-weight:600;color:white;margin-bottom:4px;}
+        .rank-stats-premium{font-size:10px;color:#6a6a80;display:flex;gap:12px;}
+        .rank-points{font-weight:700;color:#00d4ff;}
+        
+        /* Stats Tables - Clean */
+        .stats-table{width:100%;}
+        .stats-table tr{border-bottom:1px solid rgba(255,255,255,0.04);}
+        .stats-table td{padding:12px 6px;color:#c0c0d0;font-size:13px;}
+        .stats-table td:first-child{font-weight:500;}
+        .stat-number{font-weight:700;color:#00d4ff;}
+        
+        /* Achievement Cards */
+        .achievement-card-premium{background:rgba(255,255,255,0.02);border-radius:20px;padding:14px;text-align:center;border:1px solid rgba(255,255,255,0.04);}
+        .achievement-card-premium.earned{background:linear-gradient(135deg,rgba(0,212,255,0.08),rgba(123,47,157,0.08));border-color:rgba(0,212,255,0.3);}
+        .achievement-icon{font-size:28px;margin-bottom:8px;}
+        
+        /* Trash Talk - Refined */
+        .comment-card-premium{background:rgba(255,255,255,0.02);border-radius:20px;padding:16px;margin-bottom:12px;border-left:3px solid #00d4ff;}
+        .comment-author{font-size:12px;font-weight:600;color:#00d4ff;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+        .comment-text{font-size:13px;color:#d0d0e0;line-height:1.4;}
+        
+        /* Timer */
+        .timer-premium{background:linear-gradient(135deg,#13161f,#0d0f15);border-radius:40px;padding:28px;text-align:center;border:1px solid rgba(0,212,255,0.2);}
+        .timer-display{font-size:56px;font-weight:800;font-feature-settings:'tnum';color:#00d4ff;letter-spacing:2px;}
+        
+        /* Inputs */
+        .input-premium{width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:60px;padding:14px 18px;color:white;font-size:14px;margin:8px 0;}
+        .input-premium:focus{outline:none;border-color:#00d4ff;}
+        
+        button, .btn-glass{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:60px;padding:12px 20px;font-weight:500;cursor:pointer;transition:0.2s;color:white;}
+        button:hover{background:rgba(0,212,255,0.15);border-color:#00d4ff;}
+        
+        .text-accent{color:#00d4ff;}
+        .text-muted{color:#5a5a70;font-size:11px;}
+        
+        .modal-premium{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:1000;}
+        .modal-content-premium{background:#111318;border-radius:36px;padding:28px;max-width:340px;width:90%;border:1px solid rgba(0,212,255,0.2);}
+        
+        .whatsapp-share{background:#25D366;color:white;border:none;}
+        .flex-between{display:flex;justify-content:space-between;align-items:center;}
+        .mt-3{margin-top:12px;}
+        .mb-2{margin-bottom:8px;}
+        i{margin-right:4px;}
     </style>
 </head>
 <body>
-<div class="app" id="app"><div style="text-align:center; padding:40px;"><i class="fas fa-spinner fa-spin"></i> Loading Ultimate Monday Night Soccer...</div></div>
+<div class="app" id="app"><div style="text-align:center;padding:60px;color:#5a5a70;"><i class="fas fa-spinner fa-spin"></i> Loading Apex Platform...</div></div>
 
 <script>
-    // ==================== FIREBASE CONFIG ====================
+    // Firebase Configuration
     const firebaseConfig = {
         apiKey: "AIzaSyCWlFqDJyENgrUOhiLXCjSEi4Mk_54SA1w",
         authDomain: "monday-night-soccer-hub.firebaseapp.com",
@@ -90,409 +125,249 @@
     };
     
     let db = null, firebaseReady = false;
-    try { 
-        firebase.initializeApp(firebaseConfig); 
-        db = firebase.firestore(); 
-        firebaseReady = true; 
-        console.log("✅ Firebase connected");
-    } catch(e) { console.warn("⚠️ Offline mode", e); }
+    try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); firebaseReady = true; } catch(e) { console.warn(e); }
     
-    // ==================== MASTER DATA ====================
-    const FIXED_PLAYERS_LIST = [
-        "Alex Rowe", "Ali Mekawy", "Carlo Pavia", "Charlie Pavia", "Chris Del Monaco", 
-        "Chris Margelis", "Chris Sophocli", "Danny Sammartino", "Dante Sammartino", 
-        "David", "Dimitri", "Enzo", "Farid", "Faros", "Frank Marcaccio", 
-        "George Babatsikos", "George Theodoropoulos", "Ivan", "James Zoumis", 
-        "James Martino", "Joe Trimboli", "Joseph", "Kiarash Piani", "Leo", "Manoli", 
-        "Marco Mercuri", "Mario", "Morris Del Monte", "Nector Laskaris", "Paul Hardalas", 
-        "Perri Theodorlis", "Peter Disensi", "Ralph Risoli", "Rocco Mammoliti", 
-        "Paul Salustro", "Stevan Brankovic", "Theo", "Tony El Hajj", "Vasilis"
+    // Master Data
+    const PLAYERS_MASTER = [
+        "Alex Rowe", "Ali Mekawy", "Carlo Pavia", "Charlie Pavia", "Chris Del Monaco", "Chris Margelis", "Chris Sophocli",
+        "Danny Sammartino", "Dante Sammartino", "David", "Dimitri", "Enzo", "Farid", "Faros", "Frank Marcaccio",
+        "George Babatsikos", "George Theodoropoulos", "Ivan", "James Zoumis", "James Martino", "Joe Trimboli", "Joseph",
+        "Kiarash Piani", "Leo", "Manoli", "Marco Mercuri", "Mario", "Morris Del Monte", "Nector Laskaris", "Paul Hardalas",
+        "Perri Theodorlis", "Peter Disensi", "Ralph Risoli", "Rocco Mammoliti", "Paul Salustro", "Stevan Brankovic", "Theo", "Tony El Hajj", "Vasilis"
     ].sort();
     
-    const ACHIEVEMENTS = [
-        { id: "hattrick", name: "Hat Trick Hero", desc: "3+ goals in a match", icon: "⚽⚽⚽" },
-        { id: "playmaker", name: "Playmaker", desc: "3+ assists in a match", icon: "🎯" },
-        { id: "ironman", name: "Iron Man", desc: "10 consecutive games", icon: "💪" },
-        { id: "loyalty", name: "Loyalty", desc: "20 total games", icon: "❤️" },
-        { id: "mvp", name: "MVP", desc: "Man of the Match", icon: "🏆" },
-        { id: "debut", name: "Debutant", desc: "First game played", icon: "🌟" }
-    ];
+    // Tier System: Bronze, Silver, Gold, Platinum, Diamond, Apex
+    const getTier = (games) => {
+        if(games >= 50) return { name: "APEX", color: "#00d4ff", icon: "👑", min: 50 };
+        if(games >= 30) return { name: "DIAMOND", color: "#7b2f9d", icon: "💎", min: 30 };
+        if(games >= 20) return { name: "PLATINUM", color: "#e5e5e5", icon: "⭐", min: 20 };
+        if(games >= 10) return { name: "GOLD", color: "#ffd700", icon: "🏅", min: 10 };
+        if(games >= 5) return { name: "SILVER", color: "#c0c0c0", icon: "🥈", min: 5 };
+        return { name: "BRONZE", color: "#cd7f32", icon: "🥉", min: 0 };
+    };
     
-    const TRASH_TALK_TEMPLATES = [
-        "🧂 Is it me or is it salty in here? 🧂", "🚫 Nice try, maybe stick to training 🚫",
-        "💀 That defending was a public health hazard 💀", "🎯 My grandma could've scored that 🎯",
-        "😴 Did you guys forget there was a game today? 😴", "📉 Your form is dropping faster than my phone's battery 📉"
-    ];
-    
-    // ==================== GLOBAL STATE ====================
-    let players = [...FIXED_PLAYERS_LIST];
+    let players = [...PLAYERS_MASTER];
     let playerProfiles = {};
     let teamAssignments = {};
     let matchResults = {};
     let attendance = [];
     let guests = [];
-    let trashTalkPosts = [];
-    let isAdminLoggedIn = false, currentUser = null;
-    let weeklyCaptain = "Football Freedom";
-    let timerInterval = null, currentHalf = 1, timeLeft = 45 * 60;
-    let chatUnsubscribe = null;
-    let weatherData = { temp: "18°C", condition: "Clear", icon: "fa-sun", rainChance: 10 };
+    let currentUser = null;
+    let isAdmin = false;
+    let chatUnsub = null;
+    let weatherData = { temp: "18°", condition: "Clear", icon: "fa-sun", rain: 5 };
     
-    // ==================== HELPER FUNCTIONS ====================
-    function getCurrentGameWeekStr(){ 
-        const d = new Date();
-        const day = d.getDay();
-        const diff = (day === 0 ? -6 : 1) - day;
-        const monday = new Date(d);
-        monday.setDate(d.getDate() + diff);
-        monday.setHours(20,0,0,0);
-        if(monday < d) monday.setDate(monday.getDate() + 7);
-        return monday.toISOString().split('T')[0];
-    }
+    function getGameWeek(){ const d=new Date(); const day=d.getDay(); const diff=(day===0?-6:1)-day; const m=new Date(d); m.setDate(d.getDate()+diff); if(m<d) m.setDate(m.getDate()+7); return m.toISOString().split('T')[0]; }
+    const CURRENT_WEEK = getGameWeek();
+    function getWeekLabel(){ const m=new Date(CURRENT_WEEK); return `Mon ${m.toLocaleDateString('en-AU',{day:'numeric',month:'short'})}`; }
     
-    function getCurrentGameLabel(){ 
-        const m = new Date(getCurrentGameWeekStr());
-        return `Mon ${m.toLocaleDateString('en-AU',{day:'numeric',month:'short'})}`;
-    }
+    function getAllParticipants(date){ return { players: attendance.filter(a=>a.gameDate===date && a.status==='in').map(a=>a.player), guests: guests.filter(g=>g.gameDate===date).map(g=>({name:g.guestName, addedBy:g.addedBy})) }; }
+    function escapeHtml(s){ return String(s).replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
+    function getInitials(n){ return n.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2); }
+    function getAvatarColor(n){ const c=['#00d4ff','#7b2f9d','#28a745','#ffd700']; let h=0; for(let i=0;i<n.length;i++) h=((h<<5)-h)+n.charCodeAt(i); return c[Math.abs(h)%c.length]; }
+    function renderMini(n){ return `<div style="width:28px;height:28px;border-radius:50%;background:${getAvatarColor(n)};display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;margin-right:6px;">${getInitials(n)}</div>`; }
     
-    const CURRENT_GAME_STR = getCurrentGameWeekStr();
-    
-    function getPastWeeks(){ 
-        const weeks = [];
-        const today = new Date();
-        for(let i = 1; i <= 10; i++){
-            const past = new Date(today);
-            past.setDate(past.getDate() - (i * 7));
-            const pastMonday = new Date(past);
-            const day = pastMonday.getDay();
-            const diff = (day === 0 ? -6 : 1) - day;
-            pastMonday.setDate(pastMonday.getDate() + diff);
-            weeks.push({ dateStr: pastMonday.toISOString().split('T')[0], label: `Mon ${pastMonday.toLocaleDateString('en-AU',{day:'numeric',month:'short'})}` });
-        }
-        return weeks;
-    }
-    
-    function getAllParticipants(gameDate){ 
-        const playersIn = attendance.filter(a => a.gameDate === gameDate && a.status === 'in').map(a => a.player); 
-        const guestsIn = guests.filter(g => g.gameDate === gameDate).map(g => ({ name: g.guestName, addedBy: g.addedBy })); 
-        return { players: playersIn, guests: guestsIn }; 
-    }
-    
-    function escapeHtml(s){ return String(s).replace(/[&<>]/g, m=> ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
-    function getInitials(n){ return n.split(' ').map(x=>x[0]).join('').toUpperCase().substring(0,2); }
-    function getAvatarColor(n){ const c=['#e94560','#28a745','#dc3545','#fd7e14','#6f42c1','#20c997']; let h=0; for(let i=0;i<n.length;i++) h=((h<<5)-h)+n.charCodeAt(i); return c[Math.abs(h)%c.length]; }
-    function renderAvatar(n,s=48){ return `<div class="profile-avatar" style="background:${getAvatarColor(n)};width:${s}px;height:${s}px;font-size:${s/2.5}px;">${getInitials(n)}</div>`; }
-    function renderMiniAvatar(n,s=28){ return `<div class="player-avatar-small" style="background:${getAvatarColor(n)};width:${s}px;height:${s}px;font-size:${s/2}px;">${getInitials(n)}</div>`; }
-    
-    function calculatePlayerStats(){
+    // Stats Engine
+    function calculateStats(){
         let stats = new Map();
-        for(let p of players) stats.set(p, { goals: 0, assists: 0, gamesPlayed: 0, mvps: 0, streak: 0, bestStreak: 0 });
-        attendance.forEach(a => { if(a.status === 'in' && stats.has(a.player)) stats.get(a.player).gamesPlayed++; });
-        for(let p of players){ const opening = playerProfiles[p]?.openingBalanceGames || 0; if(stats.has(p)) stats.get(p).gamesPlayed += opening; }
-        for(let match of Object.values(matchResults)){
-            if(match.goals) for(let [scorer, cnt] of Object.entries(match.goals)) if(stats.has(scorer)) stats.get(scorer).goals += cnt;
-            if(match.assists) for(let [assister, cnt] of Object.entries(match.assists)) if(stats.has(assister)) stats.get(assister).assists += cnt;
-            if(match.mvp && stats.has(match.mvp)) stats.get(match.mvp).mvps++;
-        }
+        players.forEach(p => stats.set(p, { goals:0, assists:0, games:0, mvps:0 }));
+        attendance.forEach(a => { if(a.status==='in' && stats.has(a.player)) stats.get(a.player).games++; });
+        Object.values(matchResults).forEach(m => {
+            if(m.goals) Object.entries(m.goals).forEach(([p,c]) => { if(stats.has(p)) stats.get(p).goals += c; });
+            if(m.assists) Object.entries(m.assists).forEach(([p,c]) => { if(stats.has(p)) stats.get(p).assists += c; });
+            if(m.mvp && stats.has(m.mvp)) stats.get(m.mvp).mvps++;
+        });
         return stats;
     }
     
     function getPowerRankings(){
-        const stats = calculatePlayerStats();
-        const rankings = [];
-        for(let [name, s] of stats){
-            const score = (s.goals * 3) + (s.assists * 2) + (s.gamesPlayed * 1) + (s.mvps * 5);
-            rankings.push({ name, score, goals: s.goals, assists: s.assists, games: s.gamesPlayed, mvps: s.mvps });
-        }
-        return rankings.sort((a,b) => b.score - a.score);
+        const stats = calculateStats();
+        return Array.from(stats.entries()).map(([name,s]) => ({ name, score: (s.goals*3)+(s.assists*2)+(s.games*1)+(s.mvps*8), goals:s.goals, assists:s.assists, games:s.games, mvps:s.mvps })).sort((a,b)=>b.score-a.score);
     }
     
-    function getPlayerAchievements(playerName){
-        const stats = calculatePlayerStats();
-        const playerStats = stats.get(playerName);
-        if(!playerStats) return [];
-        const earned = [];
-        for(let match of Object.values(matchResults)){
-            if(match.goals && match.goals[playerName] >= 3 && !earned.find(a=>a.id==="hattrick")) earned.push({...ACHIEVEMENTS.find(a=>a.id==="hattrick"), earned:true});
-            if(match.assists && match.assists[playerName] >= 3 && !earned.find(a=>a.id==="playmaker")) earned.push({...ACHIEVEMENTS.find(a=>a.id==="playmaker"), earned:true});
-        }
-        if(playerStats.gamesPlayed >= 10 && !earned.find(a=>a.id==="ironman")) earned.push({...ACHIEVEMENTS.find(a=>a.id==="ironman"), earned:true});
-        if(playerStats.gamesPlayed >= 20 && !earned.find(a=>a.id==="loyalty")) earned.push({...ACHIEVEMENTS.find(a=>a.id==="loyalty"), earned:true});
-        if(playerStats.mvps >= 1 && !earned.find(a=>a.id==="mvp")) earned.push({...ACHIEVEMENTS.find(a=>a.id==="mvp"), earned:true});
-        if(playerStats.gamesPlayed >= 1 && !earned.find(a=>a.id==="debut")) earned.push({...ACHIEVEMENTS.find(a=>a.id==="debut"), earned:true});
-        return earned;
+    // Firebase Ops
+    async function saveAttendance(a){ if(firebaseReady&&db) await db.collection("attendance").doc(`${a.player}_${a.gameDate}`).set(a); const idx=attendance.findIndex(x=>x.player===a.player&&x.gameDate===a.gameDate); if(idx!==-1) attendance[idx]=a; else attendance.push(a); refreshUI(); }
+    async function saveGuest(g){ if(firebaseReady&&db) await db.collection("guests").doc(`${g.guestName}_${g.gameDate}`).set(g); guests.push(g); refreshUI(); }
+    async function saveTeamAssignments(date,assign){ teamAssignments[date]=assign; if(firebaseReady&&db) await db.collection("config").doc("teamAssignments").set(teamAssignments); refreshUI(); }
+    async function addGuest(name,date){ if(!currentUser) return; if(guests.some(g=>g.gameDate===date && g.guestName===name)) return; await saveGuest({ guestName:name, gameDate:date, addedBy:currentUser.name }); }
+    async function setAttendance(status){ if(!currentUser) return; await saveAttendance({ player:currentUser.name, gameDate:CURRENT_WEEK, status }); }
+    async function loadData(){
+        if(!firebaseReady||!db) return;
+        const [profDoc,tDoc,rDoc,attSnap,guestSnap] = await Promise.all([db.collection("config").doc("playerProfiles").get(), db.collection("config").doc("teamAssignments").get(), db.collection("config").doc("matchResults").get(), db.collection("attendance").get(), db.collection("guests").get()]);
+        if(profDoc.exists) playerProfiles=profDoc.data();
+        if(tDoc.exists) teamAssignments=tDoc.data();
+        if(rDoc.exists) matchResults=rDoc.data();
+        attendance=attSnap.docs.map(d=>d.data());
+        guests=guestSnap.docs.map(d=>d.data());
+        players.forEach(p=>{ if(!playerProfiles[p]) playerProfiles[p]={games:0}; });
+        refreshUI();
+        fetchWeather();
     }
     
     async function fetchWeather(){
         try{
-            const r = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-37.77&longitude=144.97&hourly=temperature_2m,precipitation_probability,weathercode&timezone=Australia/Melbourne&forecast_days=7');
-            const d = await r.json();
-            const target = CURRENT_GAME_STR;
+            const res=await fetch('https://api.open-meteo.com/v1/forecast?latitude=-37.77&longitude=144.97&hourly=temperature_2m,precipitation_probability,weathercode&timezone=Australia/Melbourne&forecast_days=7');
+            const d=await res.json();
             for(let i=0;i<d.hourly.time.length;i++){
-                const hd = d.hourly.time[i].split('T')[0];
-                const hr = parseInt(d.hourly.time[i].split('T')[1].substring(0,2));
-                if(hd === target && hr === 20){
-                    const t = Math.round(d.hourly.temperature_2m[i]);
-                    const code = d.hourly.weathercode[i];
-                    let cond="Clear", icon="fa-sun";
-                    if(code===0){ cond="Clear"; icon="fa-sun"; }
-                    else if(code===1||code===2){ cond="Partly cloudy"; icon="fa-cloud-sun"; }
-                    else if(code===3){ cond="Overcast"; icon="fa-cloud"; }
-                    else if(code>=51&&code<=67){ cond="Light rain"; icon="fa-cloud-rain"; }
-                    else if(code>=80&&code<=99){ cond="Rain/storm"; icon="fa-cloud-bolt"; }
-                    weatherData = { temp:`${t}°C`, condition:cond, icon, rainChance:d.hourly.precipitation_probability[i]||0 };
+                if(d.hourly.time[i].split('T')[0]===CURRENT_WEEK && parseInt(d.hourly.time[i].split('T')[1].substring(0,2))===20){
+                    weatherData={ temp:`${Math.round(d.hourly.temperature_2m[i])}°C`, condition:d.hourly.weathercode[i]<=1?"Clear":"Partly Cloudy", icon:d.hourly.weathercode[i]<=1?"fa-sun":"fa-cloud-sun", rain:d.hourly.precipitation_probability[i]||0 };
                     break;
                 }
             }
-        } catch(e){}
-        renderWeatherPage();
+        }catch(e){}
+        renderWeather();
     }
     
-    // ==================== FIREBASE OPERATIONS ====================
-    async function saveAttendance(a){ 
-        if(firebaseReady && db) await db.collection("attendance").doc(`${a.player}_${a.gameDate}`).set(a); 
-        const idx = attendance.findIndex(x=>x.player===a.player && x.gameDate===a.gameDate); 
-        if(idx !== -1) attendance[idx] = a; else attendance.push(a); 
-        refreshAll(); 
-    }
+    function refreshUI(){ renderHome(); renderTeams(); renderRankings(); renderAchievements(); renderHistory(); renderProfile(); renderAdmin(); renderTimer(); renderChat(); renderWeather(); }
     
-    async function saveGuest(g){ 
-        if(firebaseReady && db) await db.collection("guests").doc(`${g.guestName}_${g.gameDate}`).set(g); 
-        guests.push(g); refreshAll(); 
-    }
-    
-    async function saveTeamAssignments(date, assign){ 
-        teamAssignments[date] = assign; 
-        if(firebaseReady && db) await db.collection("config").doc("teamAssignments").set(teamAssignments); 
-        refreshAll(); 
-    }
-    
-    async function saveMatchResult(date, yellow, orange, goals, assists, mvp, injuries){ 
-        matchResults[date] = { yellowScore:yellow, orangeScore:orange, goals, assists:assists||{}, mvp, injuries:injuries||[], timestamp:Date.now() }; 
-        if(firebaseReady && db) await db.collection("config").doc("matchResults").set(matchResults); 
-        refreshAll(); alert("✅ Match saved! Rankings updated!");
-    }
-    
-    async function addGuestToWeek(guestName, gameDate){ 
-        if(!currentUser) return alert("Login to add a guest");
-        if(guests.some(g=>g.gameDate===gameDate && g.guestName===guestName.trim())){ alert("Guest already added"); return false; }
-        await saveGuest({ guestName:guestName.trim(), gameDate, addedBy:currentUser.name, timestamp:Date.now() });
-        alert(`✅ ${guestName} added!`);
-        return true;
-    }
-    
-    async function addTrashTalk(text){
-        if(!currentUser) return alert("Login to talk trash!");
-        const post = { author: currentUser.name, text: text, timestamp: Date.now() };
-        if(firebaseReady && db) await db.collection("trashTalk").add(post);
-        trashTalkPosts.unshift(post);
-        renderTrashTalkPage();
-    }
-    
-    async function loadTrashTalk(){
-        if(!firebaseReady || !db) return;
-        const snap = await db.collection("trashTalk").orderBy("timestamp","desc").limit(50).get();
-        trashTalkPosts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderTrashTalkPage();
-    }
-    
-    async function setAttendance(status){ 
-        if(!currentUser){ alert("Login required"); return; } 
-        await saveAttendance({ player:currentUser.name, gameDate:CURRENT_GAME_STR, status }); 
-    }
-    
-    async function loadData(){ 
-        if(!firebaseReady || !db) return; 
-        try{ 
-            const [profDoc, tDoc, rDoc, attSnap, guestSnap] = await Promise.all([
-                db.collection("config").doc("playerProfiles").get(), 
-                db.collection("config").doc("teamAssignments").get(), 
-                db.collection("config").doc("matchResults").get(), 
-                db.collection("attendance").get(), 
-                db.collection("guests").get()
-            ]);
-            if(profDoc.exists) playerProfiles = profDoc.data(); 
-            if(tDoc.exists) teamAssignments = tDoc.data(); 
-            if(rDoc.exists) matchResults = rDoc.data(); 
-            attendance = attSnap.docs.map(d=>d.data()); 
-            guests = guestSnap.docs.map(d=>d.data()); 
-            for(let p of players) if(!playerProfiles[p]) playerProfiles[p] = {age:'—', position:'—', yearJoined:'—', gamesPlayed:0, openingBalanceGames:0}; 
-            refreshAll(); 
-            fetchWeather();
-            loadTrashTalk();
-        } catch(e){ console.warn(e); } 
-    }
-    
-    function refreshAll(){ 
-        renderHomePage(); renderTeamsPage(); renderHistoryPage(); renderProfilesPage(); 
-        renderRankingsPage(); renderAchievementsPage(); renderTrashTalkPage(); 
-        renderTimerPage(); renderChatPage(); renderWeatherPage();
-        if(isAdminLoggedIn) renderAdminPage(); 
-    }
-    
-    // ==================== RENDER PAGES ====================
-    function renderHomePage(){ 
-        const c = document.getElementById("homeContainer"); if(!c) return; 
-        const gl = getCurrentGameLabel(); 
-        const status = attendance.find(a=>a.gameDate===CURRENT_GAME_STR && a.player===currentUser?.name)?.status; 
-        const parts = getAllParticipants(CURRENT_GAME_STR);
-        const powerRank = getPowerRankings().slice(0,3);
-        c.innerHTML = `
-            <div class="info-bar"><i class="fas fa-fire"></i> Power Rankings Live! <i class="fas fa-trophy"></i></div>
-            <div class="attendance-card"><h2>${gl}</h2><div>📍 Clifton Park | 8:00pm</div>
-            <div class="big-buttons"><button id="homePlayBtn" class="btn-play-big">✅ I'M IN</button><button id="homeSitBtn" class="btn-sit-big">❌ CAN'T PLAY</button></div>
-            <div>${status==='in'?'✓ You\'re playing! ⚡':(status==='out'?'✗ Marked as out':'Tap to confirm')}</div></div>
-            <div class="card"><h2>🏆 Power Rankings Top 3</h2>${powerRank.map((p,i)=>`<div class="power-rank-card"><div class="power-rank-number">#${i+1}</div><div class="power-rank-info"><div class="power-rank-name">${renderMiniAvatar(p.name)} ${escapeHtml(p.name)}</div><div class="power-rank-stats">⚽ ${p.goals} goals | 🎯 ${p.assists} assists</div></div><div>${i===0?'👑':(i===1?'🥈':'🥉')}</div></div>`).join('')}</div>
-            <div class="playing-list"><div>🟢 Confirmed (${parts.players.length})</div><div>${parts.players.map(p=>`<span class="attendee-tag">${renderMiniAvatar(p)} ${escapeHtml(p)} <button class="remove-attendee-btn" data-player="${escapeHtml(p)}" data-date="${CURRENT_GAME_STR}">✖</button></span>`).join('') || 'None'}</div></div>
-            <div class="guest-section"><div>🎭 Guests (${parts.guests.length})</div><div>${parts.guests.map(g=>`<span class="guest-tag">${renderMiniAvatar(g.name)} ${escapeHtml(g.name)} <span class="guest-badge">by ${escapeHtml(g.addedBy)}</span></span>`).join('') || 'No guests'}</div>
-            <div style="margin-top:12px;"><input id="guestNameHome" placeholder="Bring a mate!"><button id="addGuestHomeBtn">➕ Add Guest</button></div></div>
+    // Premium Rendering
+    function renderHome(){
+        const c=document.getElementById("homeContainer"); if(!c) return;
+        const parts=getAllParticipants(CURRENT_WEEK);
+        const stats=calculateStats();
+        const userStats=currentUser?stats.get(currentUser.name):null;
+        const tier=currentUser?getTier(userStats?.games||0):{name:"GUEST",color:"#5a5a70"};
+        const powerTop=getPowerRankings().slice(0,3);
+        c.innerHTML=`
+            <div class="match-status-card">
+                <div class="match-date">NEXT FIXTURE • ${CURRENT_WEEK}</div>
+                <div class="match-title">APEX SERIES • ROUND ${Math.floor(Math.random()*100)+1}</div>
+                <div class="match-venue"><i class="fas fa-map-pin"></i> Clifton Park Elite • 20:00 KICKOFF</div>
+                <div class="rsvp-buttons"><button class="btn-primary" id="rsvpIn"><i class="fas fa-check-circle"></i> CONFIRM PARTICIPATION</button><button class="btn-secondary" id="rsvpOut"><i class="fas fa-times-circle"></i> DECLINE</button></div>
+                <div class="rsvp-status"><i class="fas ${currentUser&&attendance.find(a=>a.player===currentUser.name&&a.gameDate===CURRENT_WEEK&&a.status==='in')?'fa-check-circle text-accent':'fa-clock'}"></i> ${currentUser?(attendance.find(a=>a.player===currentUser.name&&a.gameDate===CURRENT_WEEK&&a.status==='in')?"CONFIRMED • READY":"PENDING RESPONSE"):"LOGIN TO ENGAGE"}</div>
+            </div>
+            <div class="card"><div class="card-header"><h2><i class="fas fa-chart-line"></i> POWER RANKINGS</h2><i class="fas fa-arrow-trend-up"></i></div>${powerTop.map((p,i)=>`<div class="rank-card-premium"><div class="rank-number-premium">#${i+1}</div><div class="rank-info-premium"><div class="rank-name-premium">${renderMini(p.name)} ${p.name}</div><div class="rank-stats-premium"><span>⚽ ${p.goals}</span><span>🎯 ${p.assists}</span><span>🏆 ${p.mvps}</span></div></div><div class="rank-points">${p.score} pts</div></div>`).join('')}</div>
+            <div class="card"><div class="card-header"><h2><i class="fas fa-users"></i> ROSTER • ${parts.players.length} CONFIRMED</h2><i class="fas fa-futbol"></i></div><div class="player-grid">${parts.players.map(p=>`<div class="player-chip">${renderMini(p)} ${p}</div>`).join('')||'<span class="text-muted">Awaiting confirmations</span>'}</div></div>
+            <div class="card"><div class="card-header"><h2><i class="fas fa-user-plus"></i> GUEST ACCESS</h2><i class="fas fa-crown"></i></div><div class="player-grid">${parts.guests.map(g=>`<div class="player-chip guest-chip">${renderMini(g.name)} ${g.name}<span style="font-size:9px;margin-left:6px;">+${g.addedBy}</span></div>`).join('')||'<span class="text-muted">No guests invited</span>'}</div><div class="mt-3"><input id="guestInput" class="input-premium" placeholder="Nominate guest • Full name"><button id="addGuestBtn" class="btn-glass" style="width:100%;margin-top:6px;"><i class="fas fa-plus"></i> ISSUE INVITATION</button></div></div>
         `;
-        document.getElementById("homePlayBtn")?.addEventListener("click",()=>setAttendance("in")); 
-        document.getElementById("homeSitBtn")?.addEventListener("click",()=>setAttendance("out")); 
-        document.getElementById("addGuestHomeBtn")?.addEventListener("click",()=>{ const val = document.getElementById("guestNameHome")?.value.trim(); if(val) addGuestToWeek(val, CURRENT_GAME_STR); });
-        document.querySelectorAll(".remove-attendee-btn").forEach(btn=>btn.addEventListener("click",async()=>{ if(confirm("Remove?")){ attendance = attendance.filter(a=>!(a.player===btn.dataset.player && a.gameDate===btn.dataset.date)); refreshAll(); } }));
+        document.getElementById("rsvpIn")?.addEventListener("click",()=>setAttendance("in"));
+        document.getElementById("rsvpOut")?.addEventListener("click",()=>setAttendance("out"));
+        document.getElementById("addGuestBtn")?.addEventListener("click",()=>{ const val=document.getElementById("guestInput")?.value.trim(); if(val) addGuest(val, CURRENT_WEEK); });
     }
     
-    function renderTeamsPage(){ 
-        const c = document.getElementById("page-teamswk"); if(!c) return; 
-        const gl = getCurrentGameLabel(); 
-        const parts = getAllParticipants(CURRENT_GAME_STR); 
-        const allList = [...parts.players.map(p=>({name:p})), ...parts.guests.map(g=>({name:g.name, isG:true}))]; 
-        const assign = teamAssignments[CURRENT_GAME_STR] || {}; 
-        const yellow = allList.filter(p=>assign[p.name]==="yellow"), orange = allList.filter(p=>assign[p.name]==="orange");
-        c.innerHTML = `<div class="info-bar">⚡ ${gl} • Captain: ${weeklyCaptain}</div><div class="card"><div class="team-row"><div class="team-box"><div class="team-yellow">🟡 YELLOW (${yellow.length})</div><div class="player-list">${yellow.map(p=>`<div class="player-tag">${renderMiniAvatar(p.name)} ${escapeHtml(p.name)}${p.isG?' 🎭':''}</div>`).join('')||'—'}</div></div><div class="team-box"><div class="team-orange">🟠 ORANGE (${orange.length})</div><div class="player-list">${orange.map(p=>`<div class="player-tag">${renderMiniAvatar(p.name)} ${escapeHtml(p.name)}${p.isG?' 🎭':''}</div>`).join('')||'—'}</div></div></div></div><button id="shareTeamsBtn" class="whatsapp-share"><i class="fab fa-whatsapp"></i> Share Team Sheet</button>`;
-        document.getElementById("shareTeamsBtn")?.addEventListener("click",()=>{ const sheet = `⚽ MONDAY NIGHT SOCCER - ${gl}\n🟡 Yellow: ${yellow.map(p=>p.name).join(', ')}\n🟠 Orange: ${orange.map(p=>p.name).join(', ')}`; window.open(`https://wa.me/?text=${encodeURIComponent(sheet)}`,'_blank'); });
+    function renderTeams(){
+        const c=document.getElementById("page-teamswk"); if(!c) return;
+        const parts=getAllParticipants(CURRENT_WEEK);
+        const all=[...parts.players, ...parts.guests.map(g=>g.name)];
+        const assign=teamAssignments[CURRENT_WEEK]||{};
+        const yellow=all.filter(p=>assign[p]==="yellow"), orange=all.filter(p=>assign[p]==="orange");
+        c.innerHTML=`<div class="card"><div class="card-header"><h2><i class="fas fa-shield-alt"></i> TACTICAL ASSIGNMENT</h2><i class="fas fa-chart-simple"></i></div><div style="display:flex;gap:12px;flex-wrap:wrap;"><div style="flex:1;background:rgba(255,193,7,0.08);border-radius:24px;padding:16px;"><div style="font-weight:700;color:#ffc107;margin-bottom:12px;"><i class="fas fa-star"></i> YELLOW SQUAD • ${yellow.length}</div><div class="player-grid">${yellow.map(p=>`<div class="player-chip">${renderMini(p)} ${p}</div>`).join('')||'—'}</div></div><div style="flex:1;background:rgba(253,126,20,0.08);border-radius:24px;padding:16px;"><div style="font-weight:700;color:#fd7e14;margin-bottom:12px;"><i class="fas fa-fire"></i> ORANGE SQUAD • ${orange.length}</div><div class="player-grid">${orange.map(p=>`<div class="player-chip">${renderMini(p)} ${p}</div>`).join('')||'—'}</div></div></div><button id="shareTeamsBtn" class="whatsapp-share mt-3"><i class="fab fa-whatsapp"></i> DISPATCH LINEUP</button></div>`;
+        document.getElementById("shareTeamsBtn")?.addEventListener("click",()=>{ const msg=`⚽ APEX MONDAY NIGHT • ${getWeekLabel()}\n🟡 YELLOW: ${yellow.join(', ')}\n🟠 ORANGE: ${orange.join(', ')}`; window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank'); });
     }
     
-    function renderRankingsPage(){
-        const c = document.getElementById("page-rankings"); if(!c) return;
-        const powerRank = getPowerRankings();
-        const stats = calculatePlayerStats();
-        c.innerHTML = `<div class="card"><h2><i class="fas fa-chart-line"></i> Power Rankings</h2><p style="font-size:11px;">Formula: Goals×3 + Assists×2 + Games + MVPs×5</p><table class="ranking-table"><thead><tr><th>#</th><th>Player</th><th>Score</th><th>G</th><th>A</th><th>MVP</th></tr></thead><tbody>${powerRank.slice(0,15).map((p,i)=>`<tr><td class="rank-number">${i+1}${i===0?'👑':(i===1?'🥈':(i===2?'🥉':''))}</td><td>${renderMiniAvatar(p.name)} ${escapeHtml(p.name)}</td><td><strong>${p.score}</strong></td><td>${p.goals}</td><td>${p.assists}</td><td>${p.mvps}</td></tr>`).join('')}</tbody></table></div><div class="card"><h2>⚽ All-Time Goals</h2><table class="ranking-table"><tbody>${[...stats.entries()].sort((a,b)=>b[1].goals - a[1].goals).slice(0,10).map(([name,s],i)=>`<tr><td>${i+1}</td><td>${renderMiniAvatar(name)} ${escapeHtml(name)}</td><td><strong>${s.goals}</strong></td></tr>`).join('')}</tbody></table></div>`;
+    function renderRankings(){
+        const c=document.getElementById("page-rankings"); if(!c) return;
+        const ranks=getPowerRankings();
+        c.innerHTML=`<div class="card"><div class="card-header"><h2><i class="fas fa-trophy"></i> APEX LEADERBOARD</h2><i class="fas fa-chart-line"></i></div><table class="stats-table"><tbody>${ranks.slice(0,15).map((p,i)=>`<tr><td style="width:40px;">#${i+1}</td><td>${renderMini(p.name)} ${p.name}</td><td class="stat-number">${p.score}</td><td>⚽${p.goals}</td><td>🎯${p.assists}</td></tr>`).join('')}</tbody></table></div><div class="card"><div class="card-header"><h2><i class="fas fa-fire"></i> ELITE MARKS</h2><i class="fas fa-medal"></i></div><table class="stats-table"><tr><td>TOP GOALS</td><td>${ranks[0]?.name||'—'}</td><td class="stat-number">${ranks[0]?.goals||0}</td></tr><tr><td>TOP ASSISTS</td><td>${[...ranks].sort((a,b)=>b.assists-a.assists)[0]?.name||'—'}</td><td class="stat-number">${[...ranks].sort((a,b)=>b.assists-a.assists)[0]?.assists||0}</td></tr></table></div>`;
     }
     
-    function renderAchievementsPage(){
-        const c = document.getElementById("page-achievements"); if(!c) return;
-        let html = `<div class="card"><h2><i class="fas fa-medal"></i> Achievements</h2>`;
-        if(currentUser){
-            const earned = getPlayerAchievements(currentUser.name);
-            html += `<div class="achievement-grid">${ACHIEVEMENTS.map(a => `<div class="achievement-badge ${earned.some(e=>e.id===a.id)?'earned':''}"><div class="achievement-icon">${a.icon}</div><div class="achievement-name">${a.name}</div><div class="achievement-desc">${a.desc}</div>${earned.some(e=>e.id===a.id)?'✓':'🔒'}</div>`).join('')}</div>`;
-        } else { html += `<p>Login to see your achievements!</p>`; }
-        c.innerHTML = html;
+    function renderAchievements(){
+        const c=document.getElementById("page-achievements"); if(!c) return;
+        if(!currentUser){ c.innerHTML=`<div class="card"><div class="card-header"><h2><i class="fas fa-lock"></i> HALL OF FAME</h2><i class="fas fa-shield"></i></div><p class="text-muted">Authenticate to access legacy records</p></div>`; return; }
+        const stats=calculateStats().get(currentUser.name);
+        const tier=getTier(stats?.games||0);
+        const achievements=[
+            { id:"debut", name:"FIRST COMMISSION", icon:"🌟", earned:stats?.games>=1 },
+            { id:"tier_bronze", name:"BRONZE STATUS", icon:"🥉", earned:stats?.games>=5 },
+            { id:"tier_silver", name:"SILVER STATUS", icon:"🥈", earned:stats?.games>=10 },
+            { id:"tier_gold", name:"GOLD STATUS", icon:"🏅", earned:stats?.games>=20 },
+            { id:"tier_platinum", name:"PLATINUM ELITE", icon:"⭐", earned:stats?.games>=30 },
+            { id:"hattrick", name:"HAT TRICK HERO", icon:"⚽⚽⚽", earned:Object.values(matchResults).some(m=>m.goals?.[currentUser.name]>=3) },
+            { id:"mvp", name:"MATCH MVP", icon:"🏆", earned:stats?.mvps>=1 }
+        ];
+        c.innerHTML=`<div class="card"><div class="card-header"><h2><i class="fas fa-id-card"></i> APEX STATUS: ${tier.name}</h2><i class="fas ${tier.icon}"></i></div><div style="background:rgba(0,212,255,0.08);border-radius:20px;padding:16px;margin-bottom:16px;text-align:center;"><div style="font-size:28px;">${tier.icon}</div><div style="font-size:12px;color:#8a8a9e;">${stats?.games||0} MATCHES • ${stats?.goals||0} GOALS</div></div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">${achievements.map(a=>`<div class="achievement-card-premium ${a.earned?'earned':''}"><div class="achievement-icon">${a.icon}</div><div>${a.name}</div>${a.earned?'<span class="text-accent" style="font-size:9px;">ACQUIRED</span>':'<span style="font-size:9px;">LOCKED</span>'}</div>`).join('')}</div></div>`;
     }
     
-    function renderTrashTalkPage(){
-        const c = document.getElementById("page-trashtalk"); if(!c) return;
-        c.innerHTML = `<div class="card"><h2><i class="fas fa-comment-dots"></i> Trash Talk 🗣️</h2><div style="display:flex; gap:8px; margin-bottom:16px;"><input id="trashInput" placeholder="Talk your trash..." style="flex:1;"><button id="postTrashBtn">Post</button></div><div id="trashList">${trashTalkPosts.map(post=>`<div class="trash-talk-card"><div class="trash-talk-author">${renderMiniAvatar(post.author)} ${escapeHtml(post.author)}</div><div class="trash-talk-text">"${escapeHtml(post.text)}"</div><div class="trash-talk-time">${new Date(post.timestamp).toLocaleString()}</div></div>`).join('')||'<p>No trash talk yet. Be first! 🔥</p>'}</div><button id="randomTrashBtn" class="btn-outline"><i class="fas fa-dice"></i> Random Roast</button></div>`;
-        document.getElementById("postTrashBtn")?.addEventListener("click",()=>{ const inp = document.getElementById("trashInput"); if(inp?.value.trim()) addTrashTalk(inp.value.trim()); inp.value=""; });
-        document.getElementById("randomTrashBtn")?.addEventListener("click",()=>{ addTrashTalk(TRASH_TALK_TEMPLATES[Math.floor(Math.random()*TRASH_TALK_TEMPLATES.length)]); });
+    function renderHistory(){
+        const c=document.getElementById("page-history"); if(!c) return;
+        const pastWeeks=Array.from({length:8},(_,i)=>{ const d=new Date(); d.setDate(d.getDate()-(i+1)*7); const day=d.getDay(); const diff=(day===0?-6:1)-day; d.setDate(d.getDate()+diff); return { date:d.toISOString().split('T')[0], label:`${d.toLocaleDateString('en-AU',{day:'numeric',month:'short'})}` }; });
+        c.innerHTML=`<div class="card"><div class="card-header"><h2><i class="fas fa-clock-rotate-left"></i> ARCHIVE • PREVIOUS FIXTURES</h2><i class="fas fa-database"></i></div>${pastWeeks.map(w=>{ const m=matchResults[w.date]||{yellowScore:0,orangeScore:0,goals:{},mvp:''}; return `<div style="background:rgba(255,255,255,0.02);border-radius:16px;padding:14px;margin-bottom:10px;"><div class="flex-between"><span style="font-size:12px;color:#8a8a9e;">${w.label}</span><span style="color:#00d4ff;">🟡 ${m.yellowScore} - ${m.orangeScore} 🟠</span></div><div class="text-muted" style="margin-top:6px;">MVP: ${m.mvp||'—'} | ⚽ ${Object.keys(m.goals||{}).join(', ')||'no goals'}</div></div>`; }).join('')}</div>`;
     }
     
-    function renderHistoryPage(){ 
-        const c = document.getElementById("page-history"); if(!c) return; 
-        const past = getPastWeeks(); 
-        c.innerHTML = `<div class="card"><h2>📖 Match History</h2>${past.map(w=>{ const m=matchResults[w.dateStr]||{yellowScore:0,orangeScore:0,goals:{},mvp:''}; return `<div class="match-card"><div class="match-header"><div>${w.label}</div><div class="match-result">🟡 ${m.yellowScore} - ${m.orangeScore} 🟠</div></div><div class="goals-section"><strong>⚽ Goals:</strong> ${Object.entries(m.goals).map(([p,c])=>`${p}(${c})`).join(', ')||'none'}<br><strong>🏆 MVP:</strong> ${m.mvp||'—'}</div></div>`; }).join('')}</div>`; 
+    function renderProfile(){
+        const c=document.getElementById("page-profiles"); if(!c) return;
+        c.innerHTML=`<div class="card"><div class="card-header"><h2><i class="fas fa-users-viewfinder"></i> ATHLETE DIRECTORY</h2><i class="fas fa-id-badge"></i></div>${players.map(p=>`<div class="flex-between" style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);"><div>${renderMini(p)} ${p}</div><div class="text-muted">${playerProfiles[p]?.position||'Utility'}</div></div>`).join('')}</div>`;
     }
     
-    function renderProfilesPage(){ 
-        const c = document.getElementById("page-profiles"); if(!c) return; 
-        let h = `<div class="card"><h2>👤 Player Profiles</h2>`; 
-        for(let p of players){ const prof = playerProfiles[p] || {age:'—', position:'—', yearJoined:'—'}; h += `<div class="profile-item">${renderAvatar(p)}<div><div>⚽ ${escapeHtml(p)}</div><div><span class="profile-badge">🎂 ${prof.age}</span><span class="profile-badge">⚽ ${prof.position}</span><span class="profile-badge">📅 ${prof.yearJoined}</span></div></div></div>`; } 
-        c.innerHTML = h; 
+    function renderWeather(){
+        const c=document.getElementById("page-weather"); if(!c) return;
+        c.innerHTML=`<div class="card"><div class="card-header"><h2><i class="fas fa-cloud-sun"></i> METEOROLOGICAL REPORT</h2><i class="fas ${weatherData.icon}"></i></div><div style="text-align:center;padding:16px;"><i class="fas ${weatherData.icon}" style="font-size:48px;color:#00d4ff;"></i><div style="font-size:36px;font-weight:700;margin:8px 0;">${weatherData.temp}</div><div>${weatherData.condition} • Precipitation ${weatherData.rain}%</div><div class="text-muted mt-3">Kickoff: 20:00 • Clifton Park Pitch</div></div></div>`;
     }
     
-    function renderWeatherPage(){ 
-        const c = document.getElementById("page-weather"); if(!c) return; 
-        c.innerHTML = `<div class="card"><h2>🌤️ Match Forecast ${getCurrentGameLabel()}</h2><div style="background:#e8f0fe;border-radius:20px;padding:20px;text-align:center;"><i class="fas ${weatherData.icon}" style="font-size:48px;color:#e94560;"></i><h3>${weatherData.condition}</h3><h1 style="font-size:48px;">${weatherData.temp}</h1><p>Rain chance: ${weatherData.rainChance}%</p><p>📍 Clifton Park, 8:00pm</p></div></div>`;
-    }
-    
-    function renderTimerPage(){ 
-        const c = document.getElementById("page-timer"); if(!c) return; 
-        c.innerHTML = `<div class="card"><div class="timer-display" id="timerDisplay">45:00</div><div class="flex-btns"><button id="timerStartBtn" style="background:#28a745;">▶ Start</button><button id="timerPauseBtn" style="background:#ffc107;">⏸ Pause</button><button id="timerResetBtn" style="background:#dc3545;">⟳ Reset</button></div><div class="half-status" id="currentHalf">FIRST HALF</div></div>`;
-        let time = 2700, half = 1, interval;
-        const update = () => { document.getElementById("timerDisplay").innerText = `${Math.floor(time/60)}:${(time%60).toString().padStart(2,'0')}`; document.getElementById("currentHalf").innerText = half === 1 ? "FIRST HALF" : "SECOND HALF"; };
-        document.getElementById("timerStartBtn")?.addEventListener("click",()=>{ if(interval) clearInterval(interval); interval = setInterval(()=>{ if(time<=0){ clearInterval(interval); alert("Half over!"); if(half===1){ half=2; time=2700; update(); } } else { time--; update(); } },1000); });
-        document.getElementById("timerPauseBtn")?.addEventListener("click",()=>{ if(interval) clearInterval(interval); });
-        document.getElementById("timerResetBtn")?.addEventListener("click",()=>{ if(interval) clearInterval(interval); time=2700; half=1; update(); });
+    function renderTimer(){
+        const c=document.getElementById("page-timer"); if(!c) return;
+        let time=2700, half=1, iv;
+        c.innerHTML=`<div class="timer-premium"><div class="timer-display" id="apexTimer">45:00</div><div class="flex-between" style="gap:10px;margin-top:16px;"><button id="startTimer" class="btn-glass" style="flex:1;"><i class="fas fa-play"></i> START</button><button id="pauseTimer" class="btn-glass" style="flex:1;"><i class="fas fa-pause"></i> PAUSE</button><button id="resetTimer" class="btn-glass" style="flex:1;"><i class="fas fa-undo"></i> RESET</button></div><div id="halfIndicator" style="margin-top:14px;font-size:12px;color:#00d4ff;">FIRST HALF</div></div>`;
+        const update=()=>{ document.getElementById("apexTimer")&&(document.getElementById("apexTimer").innerText=`${Math.floor(time/60)}:${(time%60).toString().padStart(2,'0')}`); document.getElementById("halfIndicator")&&(document.getElementById("halfIndicator").innerText=half===1?"FIRST HALF":"SECOND HALF"); };
+        document.getElementById("startTimer")?.addEventListener("click",()=>{ if(iv) clearInterval(iv); iv=setInterval(()=>{ if(time<=0){ clearInterval(iv); if(half===1){ half=2; time=2700; update(); } else alert("FULL TIME • MATCH CONCLUDED"); } else { time--; update(); } },1000); });
+        document.getElementById("pauseTimer")?.addEventListener("click",()=>{ if(iv) clearInterval(iv); });
+        document.getElementById("resetTimer")?.addEventListener("click",()=>{ if(iv) clearInterval(iv); time=2700; half=1; update(); });
         update();
     }
     
-    function renderChatPage(){ 
-        const c = document.getElementById("page-chat"); if(!c) return; 
-        c.innerHTML = `<div class="card"><h2>💬 Team Chat</h2><div id="chatMessagesList" style="height:350px;overflow-y:auto;background:#f8f9fa;border-radius:20px;padding:12px;margin-bottom:12px;"></div><div style="display:flex;gap:8px;"><input id="chatInput" placeholder="Type message..." style="flex:1;"><button id="chatSendBtn">Send</button></div></div>`;
-        if(firebaseReady && db){ if(chatUnsubscribe) chatUnsubscribe(); chatUnsubscribe = db.collection("chatMessages").orderBy("timestamp","asc").onSnapshot(snap=>{ const div = document.getElementById("chatMessagesList"); if(!div) return; let h = ""; snap.forEach(doc=>{ const m=doc.data(); h += `<div><strong>${escapeHtml(m.name)}</strong><div style="background:#e9ecef;border-radius:12px;padding:8px;margin-top:4px;">${escapeHtml(m.message)}</div></div>`; }); div.innerHTML = h || "<div style='text-align:center;'>No messages</div>"; div.scrollTop = div.scrollHeight; }); }
-        document.getElementById("chatSendBtn")?.addEventListener("click", async()=>{ const inp = document.getElementById("chatInput"); if(inp?.value.trim() && currentUser && firebaseReady && db){ await db.collection("chatMessages").add({ name:currentUser.name, message:inp.value.trim(), timestamp:firebase.firestore.FieldValue.serverTimestamp() }); inp.value = ""; } });
+    function renderChat(){
+        const c=document.getElementById("page-chat"); if(!c) return;
+        c.innerHTML=`<div class="card"><div class="card-header"><h2><i class="fas fa-comment-dots"></i> TEAM COMMS</h2><i class="fas fa-waveform"></i></div><div id="chatMsgs" style="height:320px;overflow-y:auto;margin-bottom:12px;background:rgba(0,0,0,0.2);border-radius:20px;padding:12px;"></div><div style="display:flex;gap:8px;"><input id="chatIn" class="input-premium" placeholder="Secure channel message..."><button id="chatSend" class="btn-glass">SEND</button></div></div>`;
+        if(firebaseReady&&db){ if(chatUnsub) chatUnsub(); chatUnsub=db.collection("chatMessages").orderBy("timestamp","asc").onSnapshot(snap=>{ const div=document.getElementById("chatMsgs"); if(!div) return; let h=""; snap.forEach(doc=>{ const m=doc.data(); h+=`<div style="margin-bottom:12px;"><span style="color:#00d4ff;font-size:11px;">${escapeHtml(m.name)}</span><div style="background:rgba(255,255,255,0.04);border-radius:16px;padding:8px 12px;margin-top:4px;font-size:12px;">${escapeHtml(m.message)}</div></div>`; }); div.innerHTML=h||"<div class='text-muted' style='text-align:center;padding:20px;'>No transmissions</div>"; div.scrollTop=div.scrollHeight; }); }
+        document.getElementById("chatSend")?.addEventListener("click",async()=>{ const inp=document.getElementById("chatIn"); if(inp?.value.trim()&&currentUser&&firebaseReady&&db){ await db.collection("chatMessages").add({ name:currentUser.name, message:inp.value.trim(), timestamp:firebase.firestore.FieldValue.serverTimestamp() }); inp.value=""; } });
     }
     
-    function renderAdminPage(){ 
-        const cont = document.getElementById("page-admin"); 
-        if(!isAdminLoggedIn){ if(cont) cont.innerHTML = `<div class="card"><h2>🔒 Admin</h2><button id="adminLoginBtn">Admin Login</button></div>`; document.getElementById("adminLoginBtn")?.addEventListener("click",()=>{ if(prompt("Password:")==="admin123"){ isAdminLoggedIn=true; refreshAll(); } }); return; }
-        const pastWeeks = getPastWeeks();
-        const allWeeks = [{ dateStr: CURRENT_GAME_STR, label: `${getCurrentGameLabel()} (CURRENT)` }, ...pastWeeks];
-        cont.innerHTML = `<div class="card"><h2>⚙️ Admin Panel</h2><select id="adminWeekSelect"><option value="">-- Select Week --</option>${allWeeks.map(w=>`<option value="${w.dateStr}">${w.label}</option>`).join('')}</select><button id="loadWeekBtn">Load & Edit Teams</button><div id="adminTeamWorkspace"></div></div><div class="card"><h2>📝 Add Result</h2><select id="resultWeekSelect"><option value="">-- Select Week --</option>${allWeeks.map(w=>`<option value="${w.dateStr}">${w.label}</option>`).join('')}</select><div id="resultFormArea"></div></div>`;
-        
-        document.getElementById("loadWeekBtn")?.addEventListener("click", async() => {
-            const week = document.getElementById("adminWeekSelect").value;
-            if(!week) return;
-            const participants = getAllParticipants(week);
-            const allPeople = [...participants.players, ...participants.guests.map(g=>g.name)];
-            const currentAssign = teamAssignments[week] || {};
-            const workspace = document.getElementById("adminTeamWorkspace");
-            workspace.innerHTML = `<div><h3>${week}</h3><div id="unassignedList"></div><div style="display:flex;gap:12px;"><div style="flex:1;background:#fff3cd;border-radius:16px;padding:12px;"><div class="team-yellow">🟡 YELLOW</div><div id="yellowList"></div></div><div style="flex:1;background:#ffe8e0;border-radius:16px;padding:12px;"><div class="team-orange">🟠 ORANGE</div><div id="orangeList"></div></div></div><button id="saveTeamsBtn">💾 Save Teams</button></div>`;
-            const refresh = () => {
-                const yellow=[], orange=[], unassigned=[];
-                allPeople.forEach(p => { if(currentAssign[p]==="yellow") yellow.push(p); else if(currentAssign[p]==="orange") orange.push(p); else unassigned.push(p); });
-                document.getElementById("yellowList").innerHTML = yellow.map(p=>`<div>${renderMiniAvatar(p)} ${p} <button class="removeBtn" data-p="${p}">✖</button></div>`).join('')||'—';
-                document.getElementById("orangeList").innerHTML = orange.map(p=>`<div>${renderMiniAvatar(p)} ${p} <button class="removeBtn" data-p="${p}">✖</button></div>`).join('')||'—';
-                document.getElementById("unassignedList").innerHTML = unassigned.map(p=>`<span style="display:inline-block;margin:4px;">${renderMiniAvatar(p)} ${p} <button class="assignYellow" data-p="${p}">🟡</button> <button class="assignOrange" data-p="${p}">🟠</button></span>`).join('')||'✅ All assigned';
-                document.querySelectorAll(".assignYellow").forEach(btn=>btn.addEventListener("click",()=>{ currentAssign[btn.dataset.p]="yellow"; refresh(); }));
-                document.querySelectorAll(".assignOrange").forEach(btn=>btn.addEventListener("click",()=>{ currentAssign[btn.dataset.p]="orange"; refresh(); }));
-                document.querySelectorAll(".removeBtn").forEach(btn=>btn.addEventListener("click",()=>{ delete currentAssign[btn.dataset.p]; refresh(); }));
+    function renderAdmin(){
+        const c=document.getElementById("page-admin"); if(!c) return;
+        if(!isAdmin){ c.innerHTML=`<div class="card"><div class="card-header"><h2><i class="fas fa-lock"></i> COMMAND CENTER</h2><i class="fas fa-key"></i></div><button id="adminAuth" class="btn-glass" style="width:100%;">AUTHORIZE ACCESS</button></div>`; document.getElementById("adminAuth")?.addEventListener("click",()=>{ if(prompt("Security credentials:")==="apex2025"){ isAdmin=true; refreshUI(); } }); return; }
+        const weeks=[{date:CURRENT_WEEK,label:`${getWeekLabel()} (ACTIVE)`}, ...[...Array(5)].map((_,i)=>{ const d=new Date(); d.setDate(d.getDate()-(i+1)*7); const day=d.getDay(); const diff=(day===0?-6:1)-day; d.setDate(d.getDate()+diff); return{date:d.toISOString().split('T')[0],label:d.toLocaleDateString('en-AU',{day:'numeric',month:'short'})}; })];
+        c.innerHTML=`<div class="card"><div class="card-header"><h2><i class="fas fa-sliders-h"></i> TACTICAL OVERRIDE</h2><i class="fas fa-microchip"></i></div><select id="adminWeekSelect" class="input-premium">${weeks.map(w=>`<option value="${w.date}">${w.label}</option>`).join('')}</select><button id="loadAdminTeams" class="btn-glass mt-3" style="width:100%;">LOAD ROSTER</button><div id="adminTeamPanel" class="mt-3"></div><button id="autoBalanceBtn" class="btn-primary mt-3" style="width:100%;background:#7b2f9d;">AI BALANCE SQUADS</button></div>`;
+        document.getElementById("loadAdminTeams")?.addEventListener("click",async()=>{
+            const week=document.getElementById("adminWeekSelect").value;
+            const parts=getAllParticipants(week);
+            const all=[...parts.players, ...parts.guests.map(g=>g.name)];
+            const curr=teamAssignments[week]||{};
+            const panel=document.getElementById("adminTeamPanel");
+            panel.innerHTML=`<div style="display:flex;gap:12px;flex-wrap:wrap;"><div style="flex:1;"><div style="color:#ffc107;">YELLOW</div><div id="yellowListAdmin"></div></div><div style="flex:1;"><div style="color:#fd7e14;">ORANGE</div><div id="orangeListAdmin"></div></div></div><div class="mt-3"><div>UNASSIGNED</div><div id="unassignedAdmin"></div></div><button id="commitTeamsBtn" class="btn-glass mt-3">COMMIT FORMATION</button>`;
+            const refresh=()=>{
+                const yellow=[], orange=[], unassign=[];
+                all.forEach(p=>{ if(curr[p]==="yellow") yellow.push(p); else if(curr[p]==="orange") orange.push(p); else unassign.push(p); });
+                document.getElementById("yellowListAdmin").innerHTML=yellow.map(p=>`<div class="player-chip" style="display:flex;justify-content:space-between;margin:4px 0;">${renderMini(p)} ${p}<button class="removeBtn" data-p="${p}" style="background:none;border:none;color:#ff4444;margin-left:8px;">✖</button></div>`).join('')||'—';
+                document.getElementById("orangeListAdmin").innerHTML=orange.map(p=>`<div class="player-chip" style="display:flex;justify-content:space-between;">${renderMini(p)} ${p}<button class="removeBtn" data-p="${p}" style="background:none;border:none;color:#ff4444;">✖</button></div>`).join('')||'—';
+                document.getElementById("unassignedAdmin").innerHTML=unassign.map(p=>`<div class="player-chip" style="display:inline-flex;margin:4px;">${renderMini(p)} ${p}<button class="assignYellowBtn" data-p="${p}" style="background:#ffc107;margin-left:6px;">🟡</button><button class="assignOrangeBtn" data-p="${p}" style="background:#fd7e14;">🟠</button></div>`).join('')||'All assigned';
+                document.querySelectorAll(".assignYellowBtn").forEach(btn=>btn.addEventListener("click",()=>{ curr[btn.dataset.p]="yellow"; refresh(); }));
+                document.querySelectorAll(".assignOrangeBtn").forEach(btn=>btn.addEventListener("click",()=>{ curr[btn.dataset.p]="orange"; refresh(); }));
+                document.querySelectorAll(".removeBtn").forEach(btn=>btn.addEventListener("click",()=>{ delete curr[btn.dataset.p]; refresh(); }));
             };
             refresh();
-            document.getElementById("saveTeamsBtn")?.addEventListener("click", async()=>{ await saveTeamAssignments(week, currentAssign); alert("Teams saved!"); });
+            document.getElementById("commitTeamsBtn")?.addEventListener("click",async()=>{ await saveTeamAssignments(week, curr); alert("Tactical assignment locked."); });
         });
-        
-        document.getElementById("resultWeekSelect")?.addEventListener("change", async(e) => {
-            const week = e.target.value;
-            if(!week) return;
-            const participants = getAllParticipants(week);
-            const allPlayers = [...participants.players, ...participants.guests.map(g=>g.name)];
-            const opts = allPlayers.map(p=>`<option>${escapeHtml(p)}</option>`).join('');
-            document.getElementById("resultFormArea").innerHTML = `<div><input type="number" id="yScore" placeholder="Yellow Score"><input type="number" id="oScore" placeholder="Orange Score"><div><label>Goals</label><div id="goalsDiv"></div><button id="addGoalBtn">+ Goal</button></div><div><label>MVP</label><select id="mvpSelect">${opts}</select></div><button id="saveResultBtn">Save</button></div>`;
-            let goals = [];
-            const rebuild = () => { document.getElementById("goalsDiv").innerHTML = goals.map((g,i)=>`<div><select class="goalPlayer">${opts}</select><input type="number" class="goalCount" value="${g.count}" style="width:60px;"><button class="removeGoal" data-i="${i}">✖</button></div>`).join('')||'No goals'; };
-            document.getElementById("addGoalBtn")?.addEventListener("click",()=>{ goals.push({player:"",count:1}); rebuild(); });
-            document.getElementById("saveResultBtn")?.addEventListener("click", async()=>{
-                const y = parseInt(document.getElementById("yScore")?.value)||0, o = parseInt(document.getElementById("oScore")?.value)||0;
-                const goalsObj = {};
-                goals.forEach(g=>{ if(g.player) goalsObj[g.player] = (goalsObj[g.player]||0)+g.count; });
-                const mvp = document.getElementById("mvpSelect")?.value;
-                await saveMatchResult(week, y, o, goalsObj, {}, mvp, []);
-            });
+        document.getElementById("autoBalanceBtn")?.addEventListener("click",async()=>{
+            const week=document.getElementById("adminWeekSelect").value;
+            const parts=getAllParticipants(week);
+            const all=[...parts.players, ...parts.guests.map(g=>g.name)];
+            const shuffled=[...all]; for(let i=shuffled.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]; }
+            const half=Math.ceil(shuffled.length/2);
+            const balanced={}; shuffled.forEach((p,idx)=>{ balanced[p]=idx<half?"yellow":"orange"; });
+            await saveTeamAssignments(week, balanced);
+            alert("AI squad optimization complete.");
         });
     }
     
-    // ==================== LOGIN ====================
-    function showLoginModal(){ 
-        const modal = document.createElement('div'); modal.className = 'modal'; 
-        modal.innerHTML = `<div class="modal-content"><div style="text-align:center"><i class="fas fa-futbol fa-3x" style="color:#e94560;"></i></div><h3>Monday Night Soccer</h3><select id="loginSelect"><option value="">Select your name</option>${FIXED_PLAYERS_LIST.map(p=>`<option>${escapeHtml(p)}</option>`).join('')}</select><button id="doLoginBtn">Login</button><button id="adminLoginModalBtn" style="margin-top:8px;background:#6c757d;">Admin</button></div>`;
-        document.body.appendChild(modal); 
-        document.getElementById("doLoginBtn").onclick = ()=>{ const val = document.getElementById("loginSelect").value; if(val){ currentUser={name:val}; isAdminLoggedIn=false; modal.remove(); document.getElementById("userNameDisplay").innerText=val; document.getElementById("logoutBtn").style.display="inline-block"; refreshAll(); } };
-        document.getElementById("adminLoginModalBtn").onclick = ()=>{ if(prompt("Password:")==="admin123"){ isAdminLoggedIn=true; currentUser={name:"Admin"}; modal.remove(); document.getElementById("userNameDisplay").innerText="Admin"; document.getElementById("logoutBtn").style.display="inline-block"; refreshAll(); } };
+    // Login System
+    function showLogin(){
+        const modal=document.createElement('div'); modal.className='modal-premium';
+        modal.innerHTML=`<div class="modal-content-premium"><div style="text-align:center;margin-bottom:20px;"><i class="fas fa-futbol" style="font-size:48px;color:#00d4ff;"></i><h3 style="margin-top:8px;">APEX ATHLETE ACCESS</h3></div><select id="loginSelect" class="input-premium"><option value="">SELECT PROFILE</option>${PLAYERS_MASTER.map(p=>`<option>${p}</option>`).join('')}</select><button id="loginBtn" class="btn-primary" style="width:100%;margin-top:12px;">ENTER PLATFORM</button><button id="adminModalBtn" class="btn-glass" style="width:100%;margin-top:8px;">COMMAND ACCESS</button></div>`;
+        document.body.appendChild(modal);
+        document.getElementById("loginBtn").onclick=()=>{ const val=document.getElementById("loginSelect").value; if(val){ currentUser={name:val}; isAdmin=false; modal.remove(); document.getElementById("userName").innerText=val; const stats=calculateStats().get(val); const tier=getTier(stats?.games||0); document.getElementById("userTier").innerHTML=`${tier.icon} ${tier.name}`; document.getElementById("logoutBtn").style.display="flex"; refreshUI(); } };
+        document.getElementById("adminModalBtn").onclick=()=>{ if(prompt("ADMIN CODE:")==="apex2025"){ currentUser={name:"COMMANDER"}; isAdmin=true; modal.remove(); document.getElementById("userName").innerText="COMMANDER"; document.getElementById("userTier").innerHTML="👑 APEX"; document.getElementById("logoutBtn").style.display="flex"; refreshUI(); } };
     }
     
-    function logout(){ currentUser=null; isAdminLoggedIn=false; document.getElementById("userNameDisplay").innerText="Not logged in"; document.getElementById("logoutBtn").style.display="none"; showLoginModal(); refreshAll(); }
+    function logout(){ currentUser=null; isAdmin=false; document.getElementById("userName").innerText="UNAUTHENTICATED"; document.getElementById("userTier").innerHTML="—"; document.getElementById("logoutBtn").style.display="none"; showLogin(); refreshUI(); }
     
-    // ==================== INIT ====================
-    function initApp(){ 
-        const appDiv = document.getElementById("app"); 
-        appDiv.innerHTML = `<div class="header"><div class="logo-icon"><i class="fas fa-futbol"></i></div><h1>MONDAY NIGHT SOCCER</h1><div class="user-row"><span id="userNameDisplay">Not logged in</span><button id="logoutBtn" style="display:none;">Logout</button></div></div><div class="top-nav"><button class="nav-module active" data-module="home">🏠 Home</button><button class="nav-module" data-module="teamswk">⚽ Teams</button><button class="nav-module" data-module="rankings">📊 Rankings</button><button class="nav-module" data-module="achievements">🏅 Achievements</button><button class="nav-module" data-module="trashtalk">🗣️ Trash Talk</button><button class="nav-module" data-module="history">📖 History</button><button class="nav-module" data-module="profiles">👤 Profiles</button><button class="nav-module" data-module="weather">🌤️ Weather</button><button class="nav-module" data-module="timer">⏱️ Timer</button><button class="nav-module" data-module="chat">💬 Chat</button><button class="nav-module" data-module="admin">🔧 Admin</button></div><div id="homeContainer" class="module-container active-module"></div><div id="page-teamswk" class="module-container"></div><div id="page-rankings" class="module-container"></div><div id="page-achievements" class="module-container"></div><div id="page-trashtalk" class="module-container"></div><div id="page-history" class="module-container"></div><div id="page-profiles" class="module-container"></div><div id="page-weather" class="module-container"></div><div id="page-timer" class="module-container"></div><div id="page-chat" class="module-container"></div><div id="page-admin" class="module-container"></div>`;
+    function init(){
+        const app=document.getElementById("app");
+        app.innerHTML=`<div class="header"><div class="logo-section"><div class="logo-icon"><i class="fas fa-chart-line"></i></div><div class="logo-text"><h1>APEX PERFORMANCE</h1><p>MONDAY NIGHT SOCCER • ELITE TIER</p></div><div class="tier-badge"><i class="fas fa-crown"></i> SEASON 2025</div></div><div class="user-status"><div class="user-info"><div class="user-avatar" id="userAvatar">👤</div><div class="user-details"><div class="user-name" id="userName">UNAUTHENTICATED</div><div class="user-tier" id="userTier">—</div></div></div><button id="logoutBtn" class="btn-logout" style="display:none;"><i class="fas fa-sign-out-alt"></i> EXIT</button></div></div><div class="top-nav"><button class="nav-module active" data-module="home"><i class="fas fa-tachometer-alt"></i> DASH</button><button class="nav-module" data-module="teamswk"><i class="fas fa-users"></i> SQUADS</button><button class="nav-module" data-module="rankings"><i class="fas fa-chart-line"></i> RANK</button><button class="nav-module" data-module="achievements"><i class="fas fa-medal"></i> HONORS</button><button class="nav-module" data-module="history"><i class="fas fa-history"></i> ARCHIVE</button><button class="nav-module" data-module="profiles"><i class="fas fa-id-card"></i> ROSTER</button><button class="nav-module" data-module="weather"><i class="fas fa-cloud-sun"></i> CLIMATE</button><button class="nav-module" data-module="timer"><i class="fas fa-stopwatch"></i> CLOCK</button><button class="nav-module" data-module="chat"><i class="fas fa-comments"></i> COMMS</button><button class="nav-module" data-module="admin"><i class="fas fa-terminal"></i> CMD</button></div><div id="homeContainer" class="module-container active-module"></div><div id="page-teamswk" class="module-container"></div><div id="page-rankings" class="module-container"></div><div id="page-achievements" class="module-container"></div><div id="page-history" class="module-container"></div><div id="page-profiles" class="module-container"></div><div id="page-weather" class="module-container"></div><div id="page-timer" class="module-container"></div><div id="page-chat" class="module-container"></div><div id="page-admin" class="module-container"></div>`;
         document.querySelectorAll(".nav-module").forEach(btn=>{ btn.addEventListener("click",()=>{ document.querySelectorAll(".nav-module").forEach(b=>b.classList.remove("active")); btn.classList.add("active"); const mod=btn.dataset.module; document.querySelectorAll(".module-container").forEach(c=>c.classList.remove("active-module")); document.getElementById(mod==="home"?"homeContainer":`page-${mod}`).classList.add("active-module"); }); });
-        document.getElementById("logoutBtn").onclick = logout; 
-        if(firebaseReady) loadData().then(()=>showLoginModal()); else { showLoginModal(); refreshAll(); fetchWeather(); }
+        document.getElementById("logoutBtn").onclick=logout;
+        if(firebaseReady) loadData().then(()=>showLogin()); else { showLogin(); refreshUI(); fetchWeather(); }
     }
-    initApp();
+    init();
 </script>
 </body>
 </html>
