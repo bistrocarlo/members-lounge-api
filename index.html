@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>The Members Lounge - Cake Management</title>
+    <title>The Members Lounge - Cake Management System</title>
     <style>
         * { box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif; }
         body { background: #f5f3f0; margin: 0; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; }
+        .container { max-width: 1000px; margin: 0 auto; }
         .card { background: white; border-radius: 24px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         h1 { margin: 0 0 8px 0; font-size: 1.8rem; color: #2c3e2f; }
         h2 { font-size: 1.3rem; margin: 0 0 15px 0; }
@@ -18,41 +18,47 @@
         button { background: #2c5f2d; color: white; font-weight: bold; border: none; cursor: pointer; transition: 0.2s; }
         button:hover { background: #1f4520; }
         .cake-item { background: #fefaf5; border-left: 5px solid #d4a373; padding: 12px; margin-bottom: 12px; border-radius: 16px; }
-        .cake-room { font-weight: bold; color: #2c5f2d; }
         .filter-group { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
         .filter-group select, .filter-group input { width: auto; flex: 1; margin-bottom: 0; }
         .info-text { font-size: 0.8rem; color: #7f6b5e; margin-top: 8px; }
-        .delete-btn, .received-btn, .print-label-btn { padding: 6px 12px; font-size: 0.75rem; width: auto; margin-top: 6px; margin-right: 6px; }
-        .received-btn { background: #4a7c59; }
-        .print-label-btn { background: #2c5f2d; }
-        .delete-btn { background: #c9b6a0; color: #2c2a24; }
-        .staff-badge { background: #2c5f2d20; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; display: inline-block; margin-top: 6px; }
-        .status-badge { background: #f0c0a0; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; }
+        .btn-small { padding: 6px 12px; font-size: 0.75rem; width: auto; margin-top: 6px; margin-right: 6px; }
+        .btn-received { background: #4a7c59; }
+        .btn-print { background: #2c5f2d; }
+        .btn-delete { background: #c9b6a0; color: #2c2a24; }
+        .status-badge { background: #f0c0a0; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; display: inline-block; }
         .status-received { background: #a0d4a0; }
-        .tab-bar { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
+        .tab-bar { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; flex-wrap: wrap; }
         .tab { padding: 12px 20px; cursor: pointer; border-radius: 40px 40px 0 0; background: #eee; }
         .tab.active { background: #2c5f2d; color: white; }
         .pin-panel { background: #fff3e0; padding: 15px; border-radius: 20px; margin-bottom: 20px; }
         .action-buttons { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
         
+        /* Docket Print Styles */
         @media print {
             body * { visibility: hidden; }
-            .print-label-container, .print-label-container * { visibility: visible; }
-            .print-label-container { position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 10px; }
+            .docket-print, .docket-print * { visibility: visible; }
+            .docket-print { position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 15px; background: white; }
             .no-print { display: none !important; }
             button { display: none; }
         }
-        .print-label-container {
+        .docket-print {
             background: white;
             padding: 20px;
             border: 2px solid #2c5f2d;
-            border-radius: 16px;
-            max-width: 350px;
+            border-radius: 12px;
+            max-width: 550px;
+            margin: 0 auto;
             font-family: monospace;
         }
-        .label-title { font-size: 1.2rem; font-weight: bold; text-align: center; border-bottom: 2px dashed #ccc; padding-bottom: 8px; margin-bottom: 12px; }
-        .label-row { margin: 8px 0; font-size: 0.85rem; }
-        .label-code { background: #f0f0f0; padding: 8px; font-family: monospace; font-size: 0.8rem; text-align: center; margin-top: 12px; border-radius: 8px; }
+        .docket-title { font-size: 1.4rem; font-weight: bold; text-align: center; color: #2c5f2d; border-bottom: 2px solid #2c5f2d; padding-bottom: 8px; margin-bottom: 15px; }
+        .docket-section { margin: 15px 0; padding: 10px; background: #f9f9f9; border-radius: 8px; }
+        .docket-row { margin: 8px 0; font-size: 0.85rem; }
+        .docket-label { font-weight: bold; display: inline-block; width: 140px; }
+        .barcode { text-align: center; margin: 15px 0; font-family: 'Courier New', monospace; letter-spacing: 2px; }
+        .signature-line { border-top: 1px dashed #999; margin-top: 15px; padding-top: 8px; font-size: 0.75rem; text-align: center; }
+        hr { margin: 10px 0; }
+        .storage-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
+        .storage-tag { background: #e0e0e0; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; }
     </style>
 </head>
 <body>
@@ -62,15 +68,16 @@
         <div class="tab" data-tab="staff">👥 Staff Dashboard</div>
     </div>
 
+    <!-- Customer Tab -->
     <div id="customerTab">
         <div class="card">
             <h1>🎂 The Members Lounge</h1>
-            <div class="sub">Tell us about your cake delivery</div>
+            <div class="sub">Complete this form for your cake delivery</div>
 
             <label>👤 Guest(s) of honour</label>
-            <input type="text" id="guestName" placeholder="e.g., Sarah (turning 40), Mr & Mrs Smith">
+            <input type="text" id="guestName" placeholder="e.g., Sarah's 40th, Mr & Mrs Smith">
 
-            <label>🎉 Party room</label>
+            <label>🎉 Party room (where function is held)</label>
             <select id="customerPartyRoom">
                 <option value="">-- Select room --</option>
                 <option>The Members Lounge</option>
@@ -87,20 +94,42 @@
             <label>📦 Cake delivery date</label>
             <input type="date" id="deliveryDate">
 
-            <label>⏰ Approximate delivery time</label>
+            <label>⏰ Cake delivery time</label>
             <input type="time" id="deliveryTime">
 
-            <label>📝 Storage instructions</label>
-            <textarea id="instructions" rows="3" placeholder="e.g., Keep refrigerated, Fragile cake, Nut allergy"></textarea>
+            <label>❄️ What time should cake be taken out of fridge?</label>
+            <input type="time" id="takeOutTime" placeholder="e.g., 19:00 (1 hour before serving)">
 
-            <label>🍰 Your name (optional)</label>
+            <label>🍰 What time will cake be served?</label>
+            <input type="time" id="serveTime" placeholder="e.g., 20:00">
+
+            <label>📝 Storage instructions</label>
+            <textarea id="instructions" rows="3" placeholder="e.g., Keep refrigerated, Remove from box, Nut allergy, Specific plating instructions..."></textarea>
+
+            <label>📍 Preferred storage location (optional)</label>
+            <select id="preferredStorage">
+                <option value="">-- Staff will assign based on availability --</option>
+                <option>Main Cool Room</option>
+                <option>Main Dry Room</option>
+                <option>Kitchen Cool Room</option>
+                <option>Members Lounge Bar Cool Room</option>
+                <option>Members Lounge Bar Dry Room</option>
+                <option>Ballroom Cool Room</option>
+                <option>Ballroom Bar</option>
+                <option>Ballroom Cake Table</option>
+                <option>Bistroteca Cake Table</option>
+                <option>Ottimo Room (as instructed)</option>
+            </select>
+
+            <label>🍰 Your name (contact person)</label>
             <input type="text" id="customerName" placeholder="e.g., Maria Smith">
 
             <button id="submitCakeBtn">📨 Submit cake delivery</button>
-            <div class="info-text">✅ Staff will receive your instructions.</div>
+            <div class="info-text">✅ You will receive a docket with barcode. Staff will mark storage location upon arrival.</div>
         </div>
     </div>
 
+    <!-- Staff Tab -->
     <div id="staffTab" style="display:none;">
         <div class="card">
             <div id="pinPanel" class="pin-panel no-print">
@@ -108,12 +137,13 @@
                 <input type="password" id="pinInput" placeholder="Enter 4-digit PIN">
                 <button id="unlockBtn">Unlock dashboard</button>
                 <button id="printSummaryBtn" style="background:#6b4c3b; margin-top:10px;">📄 Print today's summary</button>
+                <div class="info-text">Default PIN: 2024 (change in code)</div>
             </div>
             <div id="staffDashboard" style="display:none;">
                 <h2>📋 Cake deliveries</h2>
                 <div class="filter-group no-print">
                     <select id="filterPartyRoom"><option value="">All party rooms</option></select>
-                    <input type="date" id="filterDate" placeholder="Filter by date">
+                    <input type="date" id="filterDate" placeholder="Filter by delivery date">
                     <select id="filterStatus"><option value="">All status</option><option value="pending">Pending</option><option value="received">Received</option></select>
                 </div>
                 <div id="cakeList">Loading...</div>
@@ -124,9 +154,6 @@
 
 <script type="module">
     // ========== 🔥 REPLACE WITH YOUR FIREBASE CONFIG ==========
-    // Go to Firebase Console > Project Settings > General > Your apps
-    // Copy the entire firebaseConfig object here:
-    
     const firebaseConfig = {
         apiKey: "YOUR_API_KEY",
         authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -145,6 +172,20 @@
     const cakesRef = collection(db, "cakeSubmissions");
 
     const STAFF_PIN = "2024";
+
+    // Storage locations list for staff to choose from
+    const storageLocations = [
+        "Main Cool Room",
+        "Main Dry Room", 
+        "Kitchen Cool Room",
+        "Members Lounge Bar Cool Room",
+        "Members Lounge Bar Dry Room",
+        "Ballroom Cool Room",
+        "Ballroom Bar",
+        "Ballroom Cake Table",
+        "Bistroteca Cake Table",
+        "Ottimo Room (as instructed)"
+    ];
 
     // Tab switching
     document.querySelectorAll(".tab").forEach(tab => {
@@ -180,56 +221,90 @@
         }
     });
 
-    document.getElementById("printSummaryBtn")?.addEventListener("click", async () => {
-        const snapshot = await getDocs(query(cakesRef, orderBy("deliveryDate", "asc")));
-        const cakes = [];
-        snapshot.forEach(doc => cakes.push({ id: doc.id, ...doc.data() }));
-        
-        const today = new Date().toISOString().split('T')[0];
-        const pendingToday = cakes.filter(c => c.deliveryDate === today && c.status === "pending");
-        
-        let printHtml = `<!DOCTYPE html><html><head><title>Cake Summary - ${today}</title>
-        <style>
-            body { font-family: monospace; padding: 20px; }
-            h1 { color: #2c5f2d; }
-            .item { border-bottom: 1px solid #ccc; padding: 12px 0; margin-bottom: 12px; }
-            .label { font-weight: bold; display: inline-block; width: 140px; }
-        </style>
-        </head><body>
-        <h1>🍰 The Members Lounge - Cake Summary</h1>
-        <p><strong>Date:</strong> ${today}</p>
-        <p><strong>Expected today:</strong> ${pendingToday.length}</p>
-        <hr>`;
-        
-        pendingToday.forEach(cake => {
-            printHtml += `<div class="item">
-                <div><span class="label">🎂 Guest:</span> ${escapeHtml(cake.guestOfHonour)}</div>
-                <div><span class="label">🎉 Room:</span> ${escapeHtml(cake.partyRoom)}</div>
-                <div><span class="label">📅 Function:</span> ${escapeHtml(cake.functionDate || cake.deliveryDate)}</div>
-                <div><span class="label">📦 Delivery:</span> ${escapeHtml(cake.deliveryDate)} at ${escapeHtml(cake.deliveryTime)}</div>
-                <div><span class="label">📝 Storage:</span> ${escapeHtml(cake.instructions)}</div>
-                <div><span class="label">👤 Submitted:</span> ${escapeHtml(cake.customerName)}</div>
-                <div><span class="label">✅ Received by:</span> _______________</div>
-                <div><span class="label">🔑 Code:</span> ${cake.id.substring(0, 8)}</div>
-            </div>`;
-        });
-        
-        if (pendingToday.length === 0) printHtml += "<p>✨ No cakes scheduled for today.</p>";
-        printHtml += `</body></html>`;
+    // Generate barcode-like string
+    function generateBarcode(id) {
+        return id.substring(0, 8).toUpperCase() + "-" + Math.floor(Math.random() * 10000);
+    }
+
+    // Print full docket
+    function printDocket(cake) {
+        const barcode = generateBarcode(cake.id);
+        const docketHtml = `<!DOCTYPE html>
+        <html>
+        <head>
+            <title>Cake Docket - ${escapeHtml(cake.guestOfHonour)}</title>
+            <style>
+                body { font-family: monospace; padding: 20px; background: white; }
+                .docket-print { max-width: 550px; margin: 0 auto; background: white; padding: 20px; border: 2px solid #2c5f2d; border-radius: 12px; }
+                .docket-title { font-size: 1.4rem; font-weight: bold; text-align: center; color: #2c5f2d; border-bottom: 2px solid #2c5f2d; padding-bottom: 8px; margin-bottom: 15px; }
+                .docket-section { margin: 15px 0; padding: 10px; background: #f9f9f9; border-radius: 8px; }
+                .docket-row { margin: 8px 0; font-size: 0.85rem; }
+                .docket-label { font-weight: bold; display: inline-block; width: 150px; }
+                .barcode { text-align: center; margin: 15px 0; font-family: 'Courier New', monospace; font-size: 1.2rem; letter-spacing: 3px; }
+                .signature-line { border-top: 1px dashed #999; margin-top: 15px; padding-top: 8px; font-size: 0.7rem; text-align: center; }
+                hr { margin: 10px 0; }
+                .storage-confirm { background: #e8f0e8; padding: 10px; text-align: center; border-radius: 8px; margin-top: 10px; }
+                @media print { body { margin: 0; padding: 0; } }
+            </style>
+        </head>
+        <body>
+            <div class="docket-print">
+                <div class="docket-title">🎂 THE MEMBERS LOUNGE<br>CAKE DOCKET / MANIFEST</div>
+                
+                <div class="docket-section">
+                    <div class="docket-row"><span class="docket-label">🎂 Guest of Honour:</span> ${escapeHtml(cake.guestOfHonour)}</div>
+                    <div class="docket-row"><span class="docket-label">🎉 Party Room:</span> ${escapeHtml(cake.partyRoom)}</div>
+                    <div class="docket-row"><span class="docket-label">📅 Function Date:</span> ${escapeHtml(cake.functionDate)}</div>
+                    <div class="docket-row"><span class="docket-label">📦 Delivery Date:</span> ${escapeHtml(cake.deliveryDate)} at ${escapeHtml(cake.deliveryTime)}</div>
+                    <div class="docket-row"><span class="docket-label">❄️ Take out of fridge at:</span> ${escapeHtml(cake.takeOutTime || "Not specified")}</div>
+                    <div class="docket-row"><span class="docket-label">🍰 Serve cake at:</span> ${escapeHtml(cake.serveTime || "Not specified")}</div>
+                    <div class="docket-row"><span class="docket-label">📝 Storage Instructions:</span><br> ${escapeHtml(cake.instructions)}</div>
+                </div>
+
+                <div class="docket-section">
+                    <div class="docket-row"><span class="docket-label">📍 STORAGE LOCATION (Staff to complete):</span></div>
+                    <div class="storage-confirm">
+                        <strong>✓ Cake stored in:</strong> _________________________<br>
+                        <small>Options: Main Cool Room, Main Dry Room, Kitchen, Members Lounge Bar Cool/Dry, Ballroom Cool/Bar/Cake Table, Bistroteca Cake Table, Ottimo Room</small>
+                    </div>
+                </div>
+
+                <div class="barcode">
+                    ██████████████████████████████████████<br>
+                    &nbsp;&nbsp;&nbsp;${barcode}&nbsp;&nbsp;&nbsp;<br>
+                    ██████████████████████████████████████
+                </div>
+
+                <div class="docket-row"><span class="docket-label">👤 Submitted by (customer):</span> ${escapeHtml(cake.customerName)}</div>
+                <div class="docket-row"><span class="docket-label">✅ Received by (staff):</span> ${cake.receivedBy ? escapeHtml(cake.receivedBy) : "_________________________"}</div>
+                <div class="docket-row"><span class="docket-label">🕒 Date/Time received:</span> ${cake.receivedAt ? new Date(cake.receivedAt).toLocaleString() : "_________________________"}</div>
+                
+                <div class="signature-line">
+                    Customer copy - proof of storage<br>
+                    Staff signature: _________________________ &nbsp;&nbsp; Date: _________
+                </div>
+                <div style="text-align:center; font-size:0.6rem; margin-top:15px;">The Members Lounge - Cake Tracking System v2.0</div>
+            </div>
+            <script>window.print(); setTimeout(() => window.close(), 800);<\/script>
+        </body>
+        </html>`;
         
         const win = window.open();
-        win.document.write(printHtml);
+        win.document.write(docketHtml);
         win.document.close();
-        win.print();
-    });
+    }
 
+    // Customer submission
     document.getElementById("submitCakeBtn")?.addEventListener("click", async () => {
         const guest = document.getElementById("guestName").value.trim();
         const partyRoom = document.getElementById("customerPartyRoom").value;
         const functionDate = document.getElementById("functionDate").value;
         const deliveryDate = document.getElementById("deliveryDate").value;
         const deliveryTime = document.getElementById("deliveryTime").value;
+        const takeOutTime = document.getElementById("takeOutTime").value;
+        const serveTime = document.getElementById("serveTime").value;
         const instructions = document.getElementById("instructions").value.trim();
+        const preferredStorage = document.getElementById("preferredStorage").value;
         const customerName = document.getElementById("customerName").value.trim();
 
         if (!guest) { alert("Please enter guest(s) of honour"); return; }
@@ -237,30 +312,40 @@
         if (!functionDate) { alert("Please select function date"); return; }
         if (!deliveryDate) { alert("Please select delivery date"); return; }
 
-        await addDoc(cakesRef, {
+        const docRef = await addDoc(cakesRef, {
             guestOfHonour: guest,
             partyRoom: partyRoom,
             functionDate: functionDate,
             deliveryDate: deliveryDate,
             deliveryTime: deliveryTime || "Not specified",
+            takeOutTime: takeOutTime || "Not specified",
+            serveTime: serveTime || "Not specified",
             instructions: instructions || "No special instructions",
+            preferredStorage: preferredStorage || "Staff to assign",
             customerName: customerName || "Anonymous",
             status: "pending",
             submittedAt: new Date().toISOString(),
             receivedBy: null,
-            receivedAt: null
+            receivedAt: null,
+            actualStorage: null
         });
 
-        alert("✅ Cake delivery submitted!");
+        alert("✅ Cake delivery submitted! Your docket will be available when staff logs the cake.");
+        
+        // Reset form
         document.getElementById("guestName").value = "";
         document.getElementById("customerPartyRoom").value = "";
         document.getElementById("functionDate").value = "";
         document.getElementById("deliveryDate").value = "";
         document.getElementById("deliveryTime").value = "";
+        document.getElementById("takeOutTime").value = "";
+        document.getElementById("serveTime").value = "";
         document.getElementById("instructions").value = "";
+        document.getElementById("preferredStorage").value = "";
         document.getElementById("customerName").value = "";
     });
 
+    // Staff functions
     const partyRooms = ["The Members Lounge", "Bistroteca", "The Ottimo Room", "Sala Reggio Ballroom", "Fior", "Club 84"];
     let currentCakes = [];
     
@@ -288,42 +373,6 @@
         filterStatus.addEventListener("change", () => renderCakes(currentCakes, filterPartyRoom.value, filterDate.value, filterStatus.value, cakeListDiv));
     }
 
-    function printLabel(cake) {
-        const labelHtml = `<!DOCTYPE html>
-        <html>
-        <head><title>Cake Label</title>
-        <style>
-            body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f0f0f0; }
-            .print-label-container { background: white; padding: 20px; border: 2px solid #2c5f2d; border-radius: 16px; width: 320px; font-family: monospace; }
-            .label-title { font-size: 1.3rem; font-weight: bold; text-align: center; border-bottom: 2px dashed #ccc; padding-bottom: 8px; margin-bottom: 12px; color: #2c5f2d; }
-            .label-row { margin: 10px 0; font-size: 0.85rem; }
-            .label-code { background: #f0f0f0; padding: 8px; text-align: center; margin-top: 12px; border-radius: 8px; }
-            .label-label { font-weight: bold; display: inline-block; width: 110px; }
-        </style>
-        </head>
-        <body>
-            <div class="print-label-container">
-                <div class="label-title">🎂 THE MEMBERS LOUNGE</div>
-                <div class="label-row"><span class="label-label">👤 Guest:</span> ${escapeHtml(cake.guestOfHonour)}</div>
-                <div class="label-row"><span class="label-label">🎉 Room:</span> ${escapeHtml(cake.partyRoom)}</div>
-                <div class="label-row"><span class="label-label">📅 Function:</span> ${escapeHtml(cake.functionDate || cake.deliveryDate)}</div>
-                <div class="label-row"><span class="label-label">📦 Delivery:</span> ${escapeHtml(cake.deliveryDate)} at ${escapeHtml(cake.deliveryTime)}</div>
-                <div class="label-row"><span class="label-label">📝 Storage:</span> ${escapeHtml(cake.instructions)}</div>
-                <hr>
-                <div class="label-row"><span class="label-label">👤 Submitted:</span> ${escapeHtml(cake.customerName)}</div>
-                <div class="label-row"><span class="label-label">✅ Received:</span> ${cake.receivedBy ? escapeHtml(cake.receivedBy) : "_______________"}</div>
-                <div class="label-row"><span class="label-label">🕒 Date:</span> ${cake.receivedAt ? new Date(cake.receivedAt).toLocaleString() : "_______________"}</div>
-                <div class="label-code">🔑 ${cake.id.substring(0, 8).toUpperCase()}</div>
-                <div style="text-align:center; font-size:0.7rem; margin-top:12px;">Attach to cake box</div>
-            </div>
-            <script>window.print(); setTimeout(() => window.close(), 500);<\/script>
-        </body>
-        </html>`;
-        const win = window.open();
-        win.document.write(labelHtml);
-        win.document.close();
-    }
-
     async function renderCakes(cakesArray, partyFilter, dateFilter, statusFilter, container) {
         let filtered = cakesArray;
         if (partyFilter) filtered = filtered.filter(c => c.partyRoom === partyFilter);
@@ -331,48 +380,69 @@
         if (statusFilter) filtered = filtered.filter(c => c.status === statusFilter);
 
         if (filtered.length === 0) {
-            container.innerHTML = "<div style='padding:20px;text-align:center;color:#aaa'>✨ No cakes</div>";
+            container.innerHTML = "<div style='padding:20px;text-align:center;color:#aaa'>✨ No cake deliveries</div>";
             return;
         }
 
         container.innerHTML = filtered.map(cake => `
             <div class="cake-item">
                 <strong>🎂 ${escapeHtml(cake.guestOfHonour)}</strong><br>
-                <span class="cake-room">🎉 ${escapeHtml(cake.partyRoom)}</span><br>
-                📅 Function: ${escapeHtml(cake.functionDate || cake.deliveryDate)}<br>
-                📦 Delivery: ${escapeHtml(cake.deliveryDate)} at ${escapeHtml(cake.deliveryTime)}<br>
-                📝 ${escapeHtml(cake.instructions.substring(0, 60))}${cake.instructions.length > 60 ? '…' : ''}<br>
-                <span class="staff-badge">👤 ${escapeHtml(cake.customerName)}</span>
-                <span class="status-badge ${cake.status === 'received' ? 'status-received' : ''}">${cake.status === 'pending' ? 'Pending' : '✓ Received'}</span>
-                ${cake.receivedBy ? `<br><small>✅ ${escapeHtml(cake.receivedBy)} on ${new Date(cake.receivedAt).toLocaleString()}</small>` : ''}
+                🎉 ${escapeHtml(cake.partyRoom)}<br>
+                📅 Function: ${escapeHtml(cake.functionDate)} | 📦 Delivery: ${escapeHtml(cake.deliveryDate)} at ${escapeHtml(cake.deliveryTime)}<br>
+                ❄️ Take out: ${escapeHtml(cake.takeOutTime)} | 🍰 Serve: ${escapeHtml(cake.serveTime)}<br>
+                📝 ${escapeHtml(cake.instructions.substring(0, 50))}${cake.instructions.length > 50 ? '…' : ''}<br>
+                <span class="status-badge ${cake.status === 'received' ? 'status-received' : ''}">${cake.status === 'pending' ? '⏳ Pending receipt' : '✓ Received'}</span>
+                ${cake.receivedBy ? `<br><small>✅ Received by: ${escapeHtml(cake.receivedBy)} on ${new Date(cake.receivedAt).toLocaleString()}</small>` : ''}
+                ${cake.actualStorage ? `<br><small>📍 Stored in: ${escapeHtml(cake.actualStorage)}</small>` : ''}
                 <div class="action-buttons">
-                    ${cake.status === 'pending' ? `<button class="received-btn" data-id="${cake.id}">✅ Mark received</button>` : ''}
-                    <button class="print-label-btn" data-cake='${JSON.stringify(cake).replace(/'/g, "&#39;")}'>🖨️ Print label</button>
-                    <button class="delete-btn" data-id="${cake.id}">🗑️ Remove</button>
+                    ${cake.status === 'pending' ? `
+                        <button class="btn-small btn-received receive-btn" data-id="${cake.id}">✅ Mark received & choose storage</button>
+                    ` : ''}
+                    <button class="btn-small btn-print print-docket-btn" data-cake='${JSON.stringify(cake).replace(/'/g, "&#39;")}'>🖨️ Print docket</button>
+                    <button class="btn-small btn-delete delete-btn" data-id="${cake.id}">🗑️ Delete</button>
                 </div>
             </div>
         `).join("");
 
-        document.querySelectorAll(".received-btn").forEach(btn => {
+        // Receive button with storage selection
+        document.querySelectorAll(".receive-btn").forEach(btn => {
             btn.addEventListener("click", async () => {
                 const id = btn.getAttribute("data-id");
-                const staffName = prompt("Enter your name:");
+                const staffName = prompt("Enter your name (staff):");
                 if (!staffName) return;
+                
+                // Show storage options
+                let storageOptions = storageLocations.join("\n");
+                let storage = prompt(`Select storage location (enter number):\n\n${storageOptions.map((s, i) => `${i+1}. ${s}`).join("\n")}\n\nOr type custom location:`);
+                
+                let actualStorage = "";
+                if (storage && !isNaN(storage) && storage >= 1 && storage <= storageOptions.length) {
+                    actualStorage = storageLocations[parseInt(storage) - 1];
+                } else if (storage) {
+                    actualStorage = storage;
+                } else {
+                    actualStorage = "Not specified";
+                }
+                
                 await updateDoc(doc(db, "cakeSubmissions", id), {
                     status: "received",
                     receivedBy: staffName,
-                    receivedAt: new Date().toISOString()
+                    receivedAt: new Date().toISOString(),
+                    actualStorage: actualStorage
                 });
+                alert(`✅ Cake marked as received.\n📍 Stored in: ${actualStorage}`);
             });
         });
 
-        document.querySelectorAll(".print-label-btn").forEach(btn => {
+        // Print docket
+        document.querySelectorAll(".print-docket-btn").forEach(btn => {
             btn.addEventListener("click", () => {
                 const cakeData = JSON.parse(btn.getAttribute("data-cake"));
-                printLabel(cakeData);
+                printDocket(cakeData);
             });
         });
 
+        // Delete
         document.querySelectorAll(".delete-btn").forEach(btn => {
             btn.addEventListener("click", async () => {
                 const id = btn.getAttribute("data-id");
@@ -383,6 +453,53 @@
         });
     }
 
+    // Print summary
+    document.getElementById("printSummaryBtn")?.addEventListener("click", async () => {
+        const snapshot = await getDocs(query(cakesRef, orderBy("deliveryDate", "asc")));
+        const cakes = [];
+        snapshot.forEach(doc => cakes.push({ id: doc.id, ...doc.data() }));
+        
+        const today = new Date().toISOString().split('T')[0];
+        const todaysCakes = cakes.filter(c => c.deliveryDate === today);
+        
+        let printHtml = `<!DOCTYPE html><html><head><title>Cake Summary - ${today}</title>
+        <style>
+            body { font-family: monospace; padding: 20px; }
+            h1 { color: #2c5f2d; }
+            .item { border-bottom: 1px solid #ccc; padding: 12px 0; margin-bottom: 12px; }
+            .label { font-weight: bold; display: inline-block; width: 140px; }
+            @media print { body { margin: 0; padding: 10px; } }
+        </style>
+        </head><body>
+        <h1>🍰 The Members Lounge - Daily Cake Summary</h1>
+        <p><strong>Date:</strong> ${today}</p>
+        <p><strong>Total cakes expected:</strong> ${todaysCakes.length}</p>
+        <hr>`;
+        
+        todaysCakes.forEach(cake => {
+            printHtml += `<div class="item">
+                <div><span class="label">🎂 Guest:</span> ${escapeHtml(cake.guestOfHonour)}</div>
+                <div><span class="label">🎉 Room:</span> ${escapeHtml(cake.partyRoom)}</div>
+                <div><span class="label">📅 Function:</span> ${escapeHtml(cake.functionDate)}</div>
+                <div><span class="label">⏰ Delivery:</span> ${escapeHtml(cake.deliveryTime)}</div>
+                <div><span class="label">❄️ Take out:</span> ${escapeHtml(cake.takeOutTime)}</div>
+                <div><span class="label">🍰 Serve:</span> ${escapeHtml(cake.serveTime)}</div>
+                <div><span class="label">📝 Instructions:</span> ${escapeHtml(cake.instructions)}</div>
+                <div><span class="label">📍 Storage:</span> ${cake.actualStorage || "Not yet assigned"}</div>
+                <div><span class="label">✅ Received:</span> ${cake.receivedBy || "Pending"} ${cake.receivedAt ? new Date(cake.receivedAt).toLocaleString() : ""}</div>
+                <div><span class="label">🔑 Code:</span> ${cake.id.substring(0, 8).toUpperCase()}</div>
+            </div>`;
+        });
+        
+        if (todaysCakes.length === 0) printHtml += "<p>✨ No cakes scheduled for today.</p>";
+        printHtml += `</body></html>`;
+        
+        const win = window.open();
+        win.document.write(printHtml);
+        win.document.close();
+        win.print();
+    });
+
     function escapeHtml(str) { 
         if (!str) return "";
         return str.replace(/[&<>]/g, function(m){
@@ -390,8 +507,6 @@
             if(m==='<') return '&lt;';
             if(m==='>') return '&gt;';
             return m;
-        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-            return c;
         });
     }
 </script>
