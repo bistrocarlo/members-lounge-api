@@ -22,8 +22,9 @@
         .filter-group { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
         .filter-group select, .filter-group input { width: auto; flex: 1; margin-bottom: 0; }
         .info-text { font-size: 0.8rem; color: #7f6b5e; margin-top: 8px; }
-        .delete-btn, .received-btn { padding: 6px 12px; font-size: 0.75rem; width: auto; margin-top: 6px; margin-right: 6px; }
+        .delete-btn, .received-btn, .print-label-btn { padding: 6px 12px; font-size: 0.75rem; width: auto; margin-top: 6px; margin-right: 6px; }
         .received-btn { background: #4a7c59; }
+        .print-label-btn { background: #2c5f2d; }
         .delete-btn { background: #c9b6a0; color: #2c2a24; }
         .staff-badge { background: #2c5f2d20; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; display: inline-block; margin-top: 6px; }
         .status-badge { background: #f0c0a0; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; }
@@ -32,18 +33,35 @@
         .tab { padding: 12px 20px; cursor: pointer; border-radius: 40px 40px 0 0; background: #eee; }
         .tab.active { background: #2c5f2d; color: white; }
         .pin-panel { background: #fff3e0; padding: 15px; border-radius: 20px; margin-bottom: 20px; }
-        hr { margin: 15px 0; }
+        .action-buttons { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+        
+        @media print {
+            body * { visibility: hidden; }
+            .print-label-container, .print-label-container * { visibility: visible; }
+            .print-label-container { position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 10px; }
+            .no-print { display: none !important; }
+            button { display: none; }
+        }
+        .print-label-container {
+            background: white;
+            padding: 20px;
+            border: 2px solid #2c5f2d;
+            border-radius: 16px;
+            max-width: 350px;
+            font-family: monospace;
+        }
+        .label-title { font-size: 1.2rem; font-weight: bold; text-align: center; border-bottom: 2px dashed #ccc; padding-bottom: 8px; margin-bottom: 12px; }
+        .label-row { margin: 8px 0; font-size: 0.85rem; }
+        .label-code { background: #f0f0f0; padding: 8px; font-family: monospace; font-size: 0.8rem; text-align: center; margin-top: 12px; border-radius: 8px; }
     </style>
 </head>
 <body>
 <div class="container">
-    <!-- Tab Bar -->
-    <div class="tab-bar">
+    <div class="tab-bar no-print">
         <div class="tab active" data-tab="customer">🍰 Customer Submit</div>
         <div class="tab" data-tab="staff">👥 Staff Dashboard</div>
     </div>
 
-    <!-- Customer Tab -->
     <div id="customerTab">
         <div class="card">
             <h1>🎂 The Members Lounge</h1>
@@ -55,44 +73,50 @@
             <label>🎉 Party room</label>
             <select id="customerPartyRoom">
                 <option value="">-- Select room --</option>
-                <option>The Members Lounge</option><option>Bistroteca</option><option>The Ottimo Room</option>
-                <option>Sala Reggio Ballroom</option><option>Fior</option><option>Club 84</option>
+                <option>The Members Lounge</option>
+                <option>Bistroteca</option>
+                <option>The Ottimo Room</option>
+                <option>Sala Reggio Ballroom</option>
+                <option>Fior</option>
+                <option>Club 84</option>
             </select>
 
-            <label>📅 Delivery date</label>
+            <label>📅 Date of function (party date)</label>
+            <input type="date" id="functionDate">
+
+            <label>📦 Cake delivery date</label>
             <input type="date" id="deliveryDate">
 
             <label>⏰ Approximate delivery time</label>
-            <input type="time" id="deliveryTime" placeholder="e.g., 14:30">
+            <input type="time" id="deliveryTime">
 
-            <label>📦 Storage instructions</label>
-            <textarea id="instructions" rows="3" placeholder="e.g., Keep refrigerated, Fragile cake, Nut allergy, Remove from box before serving..."></textarea>
+            <label>📝 Storage instructions</label>
+            <textarea id="instructions" rows="3" placeholder="e.g., Keep refrigerated, Fragile cake, Nut allergy"></textarea>
 
-            <label>🍰 Your name (optional – so we know who to thank)</label>
+            <label>🍰 Your name (optional)</label>
             <input type="text" id="customerName" placeholder="e.g., Maria Smith">
 
             <button id="submitCakeBtn">📨 Submit cake delivery</button>
-            <div class="info-text">✅ Staff will receive your instructions. Please arrive with your cake on the selected date.</div>
+            <div class="info-text">✅ Staff will receive your instructions.</div>
         </div>
     </div>
 
-    <!-- Staff Tab (hidden by default, requires PIN) -->
     <div id="staffTab" style="display:none;">
-        <div class="card" id="staffContent">
-            <div id="pinPanel" class="pin-panel">
+        <div class="card">
+            <div id="pinPanel" class="pin-panel no-print">
                 <label>🔐 Staff PIN</label>
                 <input type="password" id="pinInput" placeholder="Enter 4-digit PIN">
                 <button id="unlockBtn">Unlock dashboard</button>
-                <div class="info-text">Ask manager for PIN</div>
+                <button id="printSummaryBtn" style="background:#6b4c3b; margin-top:10px;">📄 Print today's summary</button>
             </div>
             <div id="staffDashboard" style="display:none;">
                 <h2>📋 Cake deliveries</h2>
-                <div class="filter-group">
+                <div class="filter-group no-print">
                     <select id="filterPartyRoom"><option value="">All party rooms</option></select>
                     <input type="date" id="filterDate" placeholder="Filter by date">
                     <select id="filterStatus"><option value="">All status</option><option value="pending">Pending</option><option value="received">Received</option></select>
                 </div>
-                <div id="cakeList">Loading cakes...</div>
+                <div id="cakeList">Loading...</div>
             </div>
         </div>
     </div>
@@ -100,6 +124,9 @@
 
 <script type="module">
     // ========== 🔥 REPLACE WITH YOUR FIREBASE CONFIG ==========
+    // Go to Firebase Console > Project Settings > General > Your apps
+    // Copy the entire firebaseConfig object here:
+    
     const firebaseConfig = {
         apiKey: "YOUR_API_KEY",
         authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -111,13 +138,13 @@
     // ============================================================
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const cakesRef = collection(db, "cakeSubmissions");
 
-    const STAFF_PIN = "2024"; // Change this to your preferred 4-digit PIN
+    const STAFF_PIN = "2024";
 
     // Tab switching
     document.querySelectorAll(".tab").forEach(tab => {
@@ -153,43 +180,89 @@
         }
     });
 
-    // Customer submission
+    document.getElementById("printSummaryBtn")?.addEventListener("click", async () => {
+        const snapshot = await getDocs(query(cakesRef, orderBy("deliveryDate", "asc")));
+        const cakes = [];
+        snapshot.forEach(doc => cakes.push({ id: doc.id, ...doc.data() }));
+        
+        const today = new Date().toISOString().split('T')[0];
+        const pendingToday = cakes.filter(c => c.deliveryDate === today && c.status === "pending");
+        
+        let printHtml = `<!DOCTYPE html><html><head><title>Cake Summary - ${today}</title>
+        <style>
+            body { font-family: monospace; padding: 20px; }
+            h1 { color: #2c5f2d; }
+            .item { border-bottom: 1px solid #ccc; padding: 12px 0; margin-bottom: 12px; }
+            .label { font-weight: bold; display: inline-block; width: 140px; }
+        </style>
+        </head><body>
+        <h1>🍰 The Members Lounge - Cake Summary</h1>
+        <p><strong>Date:</strong> ${today}</p>
+        <p><strong>Expected today:</strong> ${pendingToday.length}</p>
+        <hr>`;
+        
+        pendingToday.forEach(cake => {
+            printHtml += `<div class="item">
+                <div><span class="label">🎂 Guest:</span> ${escapeHtml(cake.guestOfHonour)}</div>
+                <div><span class="label">🎉 Room:</span> ${escapeHtml(cake.partyRoom)}</div>
+                <div><span class="label">📅 Function:</span> ${escapeHtml(cake.functionDate || cake.deliveryDate)}</div>
+                <div><span class="label">📦 Delivery:</span> ${escapeHtml(cake.deliveryDate)} at ${escapeHtml(cake.deliveryTime)}</div>
+                <div><span class="label">📝 Storage:</span> ${escapeHtml(cake.instructions)}</div>
+                <div><span class="label">👤 Submitted:</span> ${escapeHtml(cake.customerName)}</div>
+                <div><span class="label">✅ Received by:</span> _______________</div>
+                <div><span class="label">🔑 Code:</span> ${cake.id.substring(0, 8)}</div>
+            </div>`;
+        });
+        
+        if (pendingToday.length === 0) printHtml += "<p>✨ No cakes scheduled for today.</p>";
+        printHtml += `</body></html>`;
+        
+        const win = window.open();
+        win.document.write(printHtml);
+        win.document.close();
+        win.print();
+    });
+
     document.getElementById("submitCakeBtn")?.addEventListener("click", async () => {
         const guest = document.getElementById("guestName").value.trim();
         const partyRoom = document.getElementById("customerPartyRoom").value;
-        const date = document.getElementById("deliveryDate").value;
-        const time = document.getElementById("deliveryTime").value;
+        const functionDate = document.getElementById("functionDate").value;
+        const deliveryDate = document.getElementById("deliveryDate").value;
+        const deliveryTime = document.getElementById("deliveryTime").value;
         const instructions = document.getElementById("instructions").value.trim();
         const customerName = document.getElementById("customerName").value.trim();
 
-        if (!guest) { alert("Please enter guest(s) of honour name"); return; }
+        if (!guest) { alert("Please enter guest(s) of honour"); return; }
         if (!partyRoom) { alert("Please select party room"); return; }
-        if (!date) { alert("Please select delivery date"); return; }
+        if (!functionDate) { alert("Please select function date"); return; }
+        if (!deliveryDate) { alert("Please select delivery date"); return; }
 
         await addDoc(cakesRef, {
             guestOfHonour: guest,
             partyRoom: partyRoom,
-            deliveryDate: date,
-            deliveryTime: time || "Not specified",
+            functionDate: functionDate,
+            deliveryDate: deliveryDate,
+            deliveryTime: deliveryTime || "Not specified",
             instructions: instructions || "No special instructions",
             customerName: customerName || "Anonymous",
             status: "pending",
-            timestamp: new Date().toISOString(),
+            submittedAt: new Date().toISOString(),
             receivedBy: null,
             receivedAt: null
         });
 
-        alert("✅ Cake delivery submitted! Staff have been notified.");
+        alert("✅ Cake delivery submitted!");
         document.getElementById("guestName").value = "";
         document.getElementById("customerPartyRoom").value = "";
+        document.getElementById("functionDate").value = "";
         document.getElementById("deliveryDate").value = "";
         document.getElementById("deliveryTime").value = "";
         document.getElementById("instructions").value = "";
         document.getElementById("customerName").value = "";
     });
 
-    // Staff functions
     const partyRooms = ["The Members Lounge", "Bistroteca", "The Ottimo Room", "Sala Reggio Ballroom", "Fior", "Club 84"];
+    let currentCakes = [];
     
     function loadStaffDashboard() {
         const filterPartyRoom = document.getElementById("filterPartyRoom");
@@ -197,7 +270,6 @@
         const filterStatus = document.getElementById("filterStatus");
         const cakeListDiv = document.getElementById("cakeList");
 
-        // Populate party filter
         filterPartyRoom.innerHTML = '<option value="">All party rooms</option>';
         partyRooms.forEach(room => {
             const opt = document.createElement("option"); opt.value = room; opt.textContent = room;
@@ -206,22 +278,50 @@
 
         const q = query(cakesRef, orderBy("deliveryDate", "asc"));
         onSnapshot(q, (snapshot) => {
-            const cakes = [];
-            snapshot.forEach(doc => cakes.push({ id: doc.id, ...doc.data() }));
-            renderCakes(cakes, filterPartyRoom.value, filterDate.value, filterStatus.value, cakeListDiv);
+            currentCakes = [];
+            snapshot.forEach(doc => currentCakes.push({ id: doc.id, ...doc.data() }));
+            renderCakes(currentCakes, filterPartyRoom.value, filterDate.value, filterStatus.value, cakeListDiv);
         });
 
-        filterPartyRoom.addEventListener("change", () => renderAgain());
-        filterDate.addEventListener("change", () => renderAgain());
-        filterStatus.addEventListener("change", () => renderAgain());
+        filterPartyRoom.addEventListener("change", () => renderCakes(currentCakes, filterPartyRoom.value, filterDate.value, filterStatus.value, cakeListDiv));
+        filterDate.addEventListener("change", () => renderCakes(currentCakes, filterPartyRoom.value, filterDate.value, filterStatus.value, cakeListDiv));
+        filterStatus.addEventListener("change", () => renderCakes(currentCakes, filterPartyRoom.value, filterDate.value, filterStatus.value, cakeListDiv));
+    }
 
-        function renderAgain() {
-            const currentCakes = [];
-            onSnapshot(q, (snapshot) => {
-                snapshot.forEach(doc => currentCakes.push({ id: doc.id, ...doc.data() }));
-                renderCakes(currentCakes, filterPartyRoom.value, filterDate.value, filterStatus.value, cakeListDiv);
-            }, { once: true });
-        }
+    function printLabel(cake) {
+        const labelHtml = `<!DOCTYPE html>
+        <html>
+        <head><title>Cake Label</title>
+        <style>
+            body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f0f0f0; }
+            .print-label-container { background: white; padding: 20px; border: 2px solid #2c5f2d; border-radius: 16px; width: 320px; font-family: monospace; }
+            .label-title { font-size: 1.3rem; font-weight: bold; text-align: center; border-bottom: 2px dashed #ccc; padding-bottom: 8px; margin-bottom: 12px; color: #2c5f2d; }
+            .label-row { margin: 10px 0; font-size: 0.85rem; }
+            .label-code { background: #f0f0f0; padding: 8px; text-align: center; margin-top: 12px; border-radius: 8px; }
+            .label-label { font-weight: bold; display: inline-block; width: 110px; }
+        </style>
+        </head>
+        <body>
+            <div class="print-label-container">
+                <div class="label-title">🎂 THE MEMBERS LOUNGE</div>
+                <div class="label-row"><span class="label-label">👤 Guest:</span> ${escapeHtml(cake.guestOfHonour)}</div>
+                <div class="label-row"><span class="label-label">🎉 Room:</span> ${escapeHtml(cake.partyRoom)}</div>
+                <div class="label-row"><span class="label-label">📅 Function:</span> ${escapeHtml(cake.functionDate || cake.deliveryDate)}</div>
+                <div class="label-row"><span class="label-label">📦 Delivery:</span> ${escapeHtml(cake.deliveryDate)} at ${escapeHtml(cake.deliveryTime)}</div>
+                <div class="label-row"><span class="label-label">📝 Storage:</span> ${escapeHtml(cake.instructions)}</div>
+                <hr>
+                <div class="label-row"><span class="label-label">👤 Submitted:</span> ${escapeHtml(cake.customerName)}</div>
+                <div class="label-row"><span class="label-label">✅ Received:</span> ${cake.receivedBy ? escapeHtml(cake.receivedBy) : "_______________"}</div>
+                <div class="label-row"><span class="label-label">🕒 Date:</span> ${cake.receivedAt ? new Date(cake.receivedAt).toLocaleString() : "_______________"}</div>
+                <div class="label-code">🔑 ${cake.id.substring(0, 8).toUpperCase()}</div>
+                <div style="text-align:center; font-size:0.7rem; margin-top:12px;">Attach to cake box</div>
+            </div>
+            <script>window.print(); setTimeout(() => window.close(), 500);<\/script>
+        </body>
+        </html>`;
+        const win = window.open();
+        win.document.write(labelHtml);
+        win.document.close();
     }
 
     async function renderCakes(cakesArray, partyFilter, dateFilter, statusFilter, container) {
@@ -231,7 +331,7 @@
         if (statusFilter) filtered = filtered.filter(c => c.status === statusFilter);
 
         if (filtered.length === 0) {
-            container.innerHTML = "<div style='padding:20px;text-align:center;color:#aaa'>✨ No cake deliveries match</div>";
+            container.innerHTML = "<div style='padding:20px;text-align:center;color:#aaa'>✨ No cakes</div>";
             return;
         }
 
@@ -239,23 +339,24 @@
             <div class="cake-item">
                 <strong>🎂 ${escapeHtml(cake.guestOfHonour)}</strong><br>
                 <span class="cake-room">🎉 ${escapeHtml(cake.partyRoom)}</span><br>
-                📅 ${escapeHtml(cake.deliveryDate)} at ${escapeHtml(cake.deliveryTime)}<br>
-                📦 <strong>Storage:</strong> ${escapeHtml(cake.instructions)}<br>
-                <span class="staff-badge">👤 Submitted by: ${escapeHtml(cake.customerName)}</span><br>
-                <span class="status-badge ${cake.status === 'received' ? 'status-received' : ''}">📌 ${cake.status === 'pending' ? 'Pending receipt' : '✓ Received'}</span>
-                ${cake.receivedBy ? `<br><small>✅ Received by: ${escapeHtml(cake.receivedBy)} on ${new Date(cake.receivedAt).toLocaleString()}</small>` : ''}
-                <div style="margin-top: 10px;">
-                    ${cake.status === 'pending' ? `<button class="received-btn" data-id="${cake.id}">✅ Mark as received</button>` : ''}
-                    <button class="delete-btn" data-id="${cake.id}">🗑️ Remove entry</button>
+                📅 Function: ${escapeHtml(cake.functionDate || cake.deliveryDate)}<br>
+                📦 Delivery: ${escapeHtml(cake.deliveryDate)} at ${escapeHtml(cake.deliveryTime)}<br>
+                📝 ${escapeHtml(cake.instructions.substring(0, 60))}${cake.instructions.length > 60 ? '…' : ''}<br>
+                <span class="staff-badge">👤 ${escapeHtml(cake.customerName)}</span>
+                <span class="status-badge ${cake.status === 'received' ? 'status-received' : ''}">${cake.status === 'pending' ? 'Pending' : '✓ Received'}</span>
+                ${cake.receivedBy ? `<br><small>✅ ${escapeHtml(cake.receivedBy)} on ${new Date(cake.receivedAt).toLocaleString()}</small>` : ''}
+                <div class="action-buttons">
+                    ${cake.status === 'pending' ? `<button class="received-btn" data-id="${cake.id}">✅ Mark received</button>` : ''}
+                    <button class="print-label-btn" data-cake='${JSON.stringify(cake).replace(/'/g, "&#39;")}'>🖨️ Print label</button>
+                    <button class="delete-btn" data-id="${cake.id}">🗑️ Remove</button>
                 </div>
             </div>
         `).join("");
 
-        // Mark as received
         document.querySelectorAll(".received-btn").forEach(btn => {
             btn.addEventListener("click", async () => {
                 const id = btn.getAttribute("data-id");
-                const staffName = prompt("Enter your name (staff member):");
+                const staffName = prompt("Enter your name:");
                 if (!staffName) return;
                 await updateDoc(doc(db, "cakeSubmissions", id), {
                     status: "received",
@@ -265,11 +366,17 @@
             });
         });
 
-        // Delete
+        document.querySelectorAll(".print-label-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const cakeData = JSON.parse(btn.getAttribute("data-cake"));
+                printLabel(cakeData);
+            });
+        });
+
         document.querySelectorAll(".delete-btn").forEach(btn => {
             btn.addEventListener("click", async () => {
                 const id = btn.getAttribute("data-id");
-                if (confirm("Delete this cake delivery record?")) {
+                if (confirm("Delete this record?")) {
                     await deleteDoc(doc(db, "cakeSubmissions", id));
                 }
             });
@@ -283,6 +390,8 @@
             if(m==='<') return '&lt;';
             if(m==='>') return '&gt;';
             return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
         });
     }
 </script>
