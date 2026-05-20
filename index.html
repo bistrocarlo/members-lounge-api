@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>HUNGERBALL ACADEMY | Possession Pyramid · Live Grading · Match Selection</title>
+    <title>HUNGERBALL ACADEMY | AFA + Gambetta Individuation System</title>
     <style>
         * {
             margin: 0;
@@ -14,38 +14,45 @@
         body {
             font-family: 'Poppins', 'Segoe UI', system-ui, monospace;
             background: #0a0604;
-            background-image: repeating-linear-gradient(45deg, #1a0e08 0px, #1a0e08 2px, #0f0906 2px, #0f0906 8px);
+            background-image: radial-gradient(circle at 10% 20%, #1a120c 0%, #050302 100%);
             color: #f0e0c8;
             padding: 1rem;
             min-height: 100vh;
         }
 
         .app-container {
-            max-width: 1500px;
+            max-width: 1600px;
             margin: 0 auto;
         }
 
         /* header */
-        .hunger-header {
+        .afa-header {
             text-align: center;
-            border-bottom: 4px solid #b43b0c;
+            border-bottom: 3px solid #75aadb;
             padding-bottom: 0.8rem;
             margin-bottom: 1.5rem;
         }
-        .hunger-header h1 {
-            font-size: 2.2rem;
+        .afa-header h1 {
+            font-size: 2rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #ff8248, #b0300a);
+            background: linear-gradient(135deg, #75aadb, #2c5a8c, #b43b0c);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
-        .rule-line {
-            background: #1f1109cc;
-            padding: 0.3rem 1rem;
-            border-radius: 60px;
-            font-size: 0.75rem;
-            display: inline-block;
+        .badge-row {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 0.5rem 0;
+        }
+        .badge {
+            background: #1f292ecc;
+            padding: 0.2rem 1rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: bold;
         }
 
         /* main grid */
@@ -55,40 +62,40 @@
             gap: 1.5rem;
         }
         .panel {
-            background: #0d0a07cc;
-            backdrop-filter: blur(12px);
+            background: #0f0c09cc;
+            backdrop-filter: blur(10px);
             border-radius: 1.8rem;
             padding: 1.2rem;
-            border: 1px solid #b9512a66;
+            border: 1px solid #75aadb55;
         }
         .panel-left {
             flex: 1.8;
-            min-width: 280px;
+            min-width: 300px;
         }
         .panel-right {
-            flex: 1.2;
+            flex: 1.3;
             min-width: 280px;
         }
         .section-title {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: 700;
-            border-left: 6px solid #b43b0c;
+            border-left: 5px solid #75aadb;
             padding-left: 0.7rem;
             margin-bottom: 1rem;
         }
 
-        /* forms */
+        /* form */
         .add-player-form {
-            background: #1f1610;
+            background: #1f1a15;
             padding: 1rem;
             border-radius: 1.2rem;
-            margin-bottom: 1.2rem;
+            margin-bottom: 1rem;
             display: flex;
             flex-wrap: wrap;
             gap: 0.5rem;
         }
         .add-player-form input, .add-player-form select {
-            background: #2c1d14;
+            background: #2c241e;
             border: none;
             color: #ffdec2;
             padding: 0.5rem;
@@ -98,7 +105,7 @@
             min-width: 100px;
         }
         .btn {
-            background: #b43b0c;
+            background: #2c5a8c;
             border: none;
             color: white;
             font-weight: bold;
@@ -107,77 +114,54 @@
             cursor: pointer;
             transition: 0.1s;
         }
-        .btn-small {
-            background: #b9512a;
-            padding: 0.2rem 0.8rem;
-            font-size: 0.75rem;
+        .btn-hunger {
+            background: #b43b0c;
         }
         .btn-outline {
-            background: #3e2a1e;
-            border: 1px solid #b9512a;
+            background: #2c241e;
+            border: 1px solid #75aadb;
         }
 
-        /* player table */
+        /* player cards */
+        .player-card {
+            background: #1f1813;
+            border-radius: 1rem;
+            padding: 0.6rem;
+            margin-bottom: 0.5rem;
+            border-left: 4px solid #75aadb;
+        }
+        .individuation-tag {
+            font-size: 0.7rem;
+            background: #2c5a8c55;
+            border-radius: 12px;
+            padding: 0.1rem 0.4rem;
+            display: inline-block;
+        }
         .player-table {
             width: 100%;
+            font-size: 0.75rem;
             border-collapse: collapse;
-            font-size: 0.8rem;
         }
         .player-table th, .player-table td {
-            padding: 0.5rem 0.3rem;
-            border-bottom: 1px solid #b9512a55;
+            padding: 0.4rem 0.2rem;
+            border-bottom: 1px solid #75aadb33;
             text-align: left;
         }
-        .position-badge {
-            background: #2a1a10;
-            border-radius: 20px;
-            padding: 0.1rem 0.5rem;
-            font-size: 0.7rem;
-        }
-        .eliminated {
-            opacity: 0.5;
-            background: #2a0c04;
-            text-decoration: line-through;
-        }
-
-        /* grading zone */
-        .grading-zone {
-            background: #1f130c;
-            border-radius: 1.2rem;
-            padding: 1rem;
-            margin: 1rem 0;
-        }
-        .midweek-card {
-            background: #2c1d14;
-            border-radius: 1rem;
-            padding: 0.8rem;
-            margin: 0.5rem 0;
-        }
-        .rank-list {
-            max-height: 250px;
-            overflow-y: auto;
-        }
-        .player-rank-item {
+        .rank-item {
             display: flex;
             justify-content: space-between;
-            background: #1f140e;
+            background: #1f1813;
             margin: 0.3rem 0;
             padding: 0.4rem;
             border-radius: 0.8rem;
+            font-size: 0.8rem;
         }
-        .match-selection {
-            background: #2a631033;
-            border-left: 4px solid #ffaa44;
-            padding: 0.6rem;
-            margin-top: 0.6rem;
+        .afa-phase {
+            background: #0f2a33aa;
+            padding: 0.5rem;
             border-radius: 1rem;
-        }
-
-        .danger-alert {
-            background: #4a1300aa;
-            padding: 0.6rem;
-            border-radius: 1rem;
-            margin: 0.5rem 0;
+            margin: 0.8rem 0;
+            font-size: 0.75rem;
         }
         footer {
             margin-top: 2rem;
@@ -192,278 +176,212 @@
 </head>
 <body>
 <div class="app-container">
-    <div class="hunger-header">
-        <h1>⚔️ HUNGERBALL ACADEMY ⚔️</h1>
-        <p>The Ball is a Prized Possession • Survival Pyramid U13→U20 • Midweek Grading → Weekend Warriors</p>
-        <div class="rule-line">🔥 concede >3 goals = TEAM ELIMINATION · individual involvement ranking · positional selection 🔥</div>
+    <div class="afa-header">
+        <h1>⚡ HUNGERBALL ACADEMY ⚡</h1>
+        <p>AFA Official Guidelines · Gambetta Individuation · The Ball is Prized Possession</p>
+        <div class="badge-row">
+            <span class="badge">📋 AFA Initiation (6-12)</span>
+            <span class="badge">🎯 AFA Specialization (13-15)</span>
+            <span class="badge">🏆 AFA High Performance (16-20)</span>
+            <span class="badge">🧬 Gambetta Individuation Active</span>
+        </div>
     </div>
 
     <div class="academy-grid">
-        <!-- LEFT PANEL: PLAYER MANAGEMENT + PYRAMID OVERVIEW -->
+        <!-- LEFT PANEL: PLAYERS + INDIVIDUATION PROFILES -->
         <div class="panel panel-left">
-            <div class="section-title">📋 SQUAD REGISTRY · ADD PLAYER</div>
+            <div class="section-title">📝 REGISTER PLAYER (AFA Age Phase)</div>
             <div class="add-player-form" id="addPlayerForm">
                 <input type="text" id="playerName" placeholder="Full name" autocomplete="off">
                 <select id="playerPosition">
-                    <option value="GK">GK</option><option value="RB">RB</option><option value="CB">CB</option><option value="LB">LB</option>
-                    <option value="CDM">CDM</option><option value="CM">CM</option><option value="CAM">CAM</option>
-                    <option value="RW">RW</option><option value="LW">LW</option><option value="ST">ST</option>
+                    <option value="GK">GK</option><option value="RB">RB</option><option value="CB">CB</option>
+                    <option value="LB">LB</option><option value="CDM">CDM</option><option value="CM">CM</option>
+                    <option value="CAM">CAM</option><option value="RW">RW</option><option value="LW">LW</option><option value="ST">ST</option>
                 </select>
-                <input type="date" id="playerDob">
-                <select id="playerAgeGroup">
-                    <option value="U13">U13</option><option value="U14">U14</option><option value="U15">U15</option>
-                    <option value="U16">U16</option><option value="U17">U17</option><option value="U18">U18</option>
-                    <option value="U19">U19</option><option value="U20">U20</option>
+                <input type="date" id="playerDob" placeholder="Date of Birth">
+                <select id="playerDominantFoot">
+                    <option value="Right">Right</option><option value="Left">Left</option><option value="Ambidextrous">Ambidextrous</option>
                 </select>
-                <button type="button" class="btn" id="addPlayerBtn">+ ADD PLAYER</button>
+                <button type="button" class="btn" id="addPlayerBtn">+ ADD & ASSESS INDIVIDUATION</button>
             </div>
 
-            <div style="overflow-x: auto;">
+            <div class="section-title">👥 SQUAD · AFA PHASE & INDIVIDUATION</div>
+            <div style="overflow-x: auto; max-height: 380px; overflow-y: auto;">
                 <table class="player-table" id="playersTable">
-                    <thead><tr><th>Name</th><th>Pos</th><th>AgeGrp</th><th>Involvement</th><th>Status</th><th></th></tr></thead>
+                    <thead><tr><th>Player</th><th>Pos</th><th>AFA Phase</th><th>Individuation Profile</th><th>Hunger Score</th><th></th></tr></thead>
                     <tbody id="playersTableBody"></tbody>
                 </table>
             </div>
 
-            <div class="grading-zone">
-                <div class="section-title" style="margin-bottom: 0.5rem;">🏟️ MIDWEEK IN-HOUSE GAME (GRADING)</div>
-                <button id="simulateMidweekBtn" class="btn" style="background:#8b5a2b;">⚡ SIMULATE MIDWEEK GAME (UPDATE INVOLVEMENT)</button>
-                <div id="midweekLog" class="midweek-card" style="margin-top: 0.6rem; font-size:0.8rem;">No grading yet. Click to run internal match & update player scores.</div>
+            <div class="afa-phase">
+                <strong>🇦🇷 AFA DEVELOPMENT GUIDELINES (Integrated)</strong><br>
+                • <strong>Initiation (6-12):</strong> Ball mastery, 1v1 fun, no positional fixation → Gambetta: broad motor learning<br>
+                • <strong>Specialization (13-15):</strong> Positional awareness, tactical periodization, possessive play → Gambetta: individuated technical reps<br>
+                • <strong>High Performance (16-20):</strong> Competitive overload, decision-making under pressure, AFA match model<br>
+                🔥 <em>Our Hunger overlay: ball is sacred, concede >3 = elimination, individual involvement tracking.</em>
             </div>
-
-            <div class="danger-alert" id="pyramidStatus">
-                🏆 CURRENT PYRAMID: U13 champion: <strong>Hunger Wolves</strong> | Next challenger: Vipers U13
-            </div>
-            <button id="advancePyramidBtn" class="btn btn-outline" style="margin-right:0.5rem;">➡️ ADVANCE WINNER (next age group)</button>
-            <button id="resetPyramidBtn" class="btn btn-outline">🔄 RESET PYRAMID (U13 restart)</button>
         </div>
 
-        <!-- RIGHT PANEL: RANKINGS + POSITIONAL GRADING + WEEKEND SELECTION -->
+        <!-- RIGHT PANEL: INDIVIDUATION + GRADING + SELECTION -->
         <div class="panel panel-right">
-            <div class="section-title">📊 OVERALL INVOLVEMENT RANKING</div>
-            <div id="globalRankingList" class="rank-list"></div>
+            <div class="section-title">🧬 GAMBETTA INDIVIDUATION ENGINE</div>
+            <div id="individuationSummary" class="afa-phase" style="background:#1f1813;">
+                Select a player to see their unique developmental fingerprint.
+            </div>
 
-            <div class="section-title" style="margin-top: 1rem;">🎯 POSITIONAL GRADING (Top per position)</div>
-            <div id="positionalRanking" class="rank-list"></div>
+            <div class="section-title">🏟️ MIDWEEK GRADING (AFA-based involvement)</div>
+            <button id="simulateMidweekBtn" class="btn btn-hunger" style="width:100%;">⚡ SIMULATE INTERNAL GAME (Update Scores)</button>
+            <div id="gradingLog" style="background:#1f1813; border-radius:1rem; padding:0.5rem; margin-top:0.6rem; font-size:0.75rem;"></div>
 
-            <div class="section-title" style="margin-top: 1rem;">⭐ WEEKEND MATCH OFFICIAL LINEUP</div>
-            <div id="weekendSelection" class="match-selection">No selection yet. Run 'SELECT FOR WEEKEND' after midweek grading.</div>
-            <button id="selectWeekendBtn" class="btn" style="margin-top: 0.6rem; width:100%;">🎯 SELECT BEST XI (per position + involvement)</button>
-            <button id="resetAllDataBtn" class="btn btn-outline" style="margin-top: 0.6rem; background:#3a1c10;">⚠️ RESET FULL ACADEMY (delete all players)</button>
+            <div class="section-title" style="margin-top:1rem;">📊 OVERALL HUNGER RANKING</div>
+            <div id="globalRanking" style="max-height:180px; overflow-y:auto;"></div>
+
+            <div class="section-title">⭐ WEEKEND OFFICIAL SELECTION (AFA Position Model)</div>
+            <div id="weekendSelection" style="background:#1f1813; border-radius:1rem; padding:0.6rem; margin:0.5rem 0;"></div>
+            <button id="selectWeekendBtn" class="btn" style="width:100%; margin-bottom:0.5rem;">🎯 SELECT BEST XI (per AFA positional criteria)</button>
+            <button id="resetPyramidBtn" class="btn-outline btn" style="width:100%;">🔄 RESET PYRAMID / RESTORE DEFAULTS</button>
         </div>
     </div>
-    <footer>🐺 HUNGERBALL ACADEMY: Midweek internal game updates involvement → positional ranking → highest graded players selected for weekend official match.</footer>
+    <footer>⚽ AFA Official Pathway + Gambetta Individuation: each player develops unique physiological/psychological traits. Ball possession as sacred hunger.</footer>
 </div>
 
 <script>
-    // ----------------------------- PLAYER DATA MODEL -------------------------
+    // ------------------- PLAYER MODEL WITH INDIVIDUATION -------------------
     let players = [];
 
-    // Pyramid state (U13 -> U20 survival)
-    let currentAgeIndex = 0;         // 0 = U13
-    let currentChampionTeam = "Hunger Wolves";
-    let challengerTeamName = "Vipers";
-    let pyramidEliminated = false;    // if current champion conceded >3 in last match simulation, team eliminated.
-
-    // Helper: load/save localstorage
-    function saveData() {
-        const state = {
-            players,
-            currentAgeIndex,
-            currentChampionTeam,
-            challengerTeamName,
-            pyramidEliminated
-        };
-        localStorage.setItem("hungerballAcademy", JSON.stringify(state));
+    // AFA phase based on age
+    function getAFAPhase(dobStr) {
+        if(!dobStr) return "Initiation (U12)";
+        const age = new Date().getFullYear() - new Date(dobStr).getFullYear();
+        if(age <= 12) return "Initiation (6-12)";
+        if(age <= 15) return "Specialization (13-15)";
+        return "High Performance (16-20)";
     }
 
-    function loadData() {
-        const saved = localStorage.getItem("hungerballAcademy");
-        if(saved) {
-            try {
-                const data = JSON.parse(saved);
-                players = data.players || [];
-                currentAgeIndex = data.currentAgeIndex ?? 0;
-                currentChampionTeam = data.currentChampionTeam ?? "Hunger Wolves";
-                challengerTeamName = data.challengerTeamName ?? "Vipers";
-                pyramidEliminated = data.pyramidEliminated ?? false;
-            } catch(e) {}
-        }
-        if(players.length === 0) {
-            // Seed some demo players
-            players = [
-                { id: Date.now()+1, name: "Lucas Mendoza", position: "ST", dob: "2012-05-12", ageGroup: "U13", involvement: 42, eliminated: false },
-                { id: Date.now()+2, name: "Mateo Rojas", position: "CM", dob: "2012-08-22", ageGroup: "U13", involvement: 38, eliminated: false },
-                { id: Date.now()+3, name: "Santiago Cruz", position: "CB", dob: "2012-02-01", ageGroup: "U13", involvement: 29, eliminated: false },
-                { id: Date.now()+4, name: "Thiago Paredes", position: "LW", dob: "2012-11-11", ageGroup: "U13", involvement: 51, eliminated: false },
-                { id: Date.now()+5, name: "Benicio Flores", position: "GK", dob: "2012-07-19", ageGroup: "U13", involvement: 33, eliminated: false },
-                { id: Date.now()+6, name: "Joaquin Lema", position: "RB", dob: "2012-09-03", ageGroup: "U13", involvement: 27, eliminated: false },
-                { id: Date.now()+7, name: "Facundo Vera", position: "CDM", dob: "2011-12-10", ageGroup: "U14", involvement: 44, eliminated: false },
-            ];
-        }
-        renderAll();
+    // Gambetta Individuation Profile: based on position + random but consistent "fingerprint"
+    // Each player gets unique physiological & psychological traits that influence development
+    function generateIndividuationProfile(player) {
+        const profiles = [
+            { name: "Explosive Psoas", desc: "Fast twitch, acceleration bursts", bonus: "speed dribble" },
+            { name: "Elastic Ankles", desc: "Tight ball control, quick cuts", bonus: "close possession" },
+            { name: "Peripheral Vision", desc: "Sees space, scanning constant", bonus: "decision making" },
+            { name: "Low Center of Gravity", desc: "Shield dominant, hard to dispossess", bonus: "protection" },
+            { name: "Rhythmic Dribbler", desc: "Change of pace expert", bonus: "gambetta feint" },
+            { name: "High Workload", desc: "Endless motor, high pressure recovery", bonus: "aggressive regain" }
+        ];
+        // deterministic based on id + name to keep same profile across sessions
+        let hash = (player.id + player.name.length).toString();
+        let index = hash.charCodeAt(hash.length % hash.length) % profiles.length;
+        return profiles[index];
     }
 
-    function addPlayer(name, position, dob, ageGroup) {
+    // Helper: compute hunger involvement (initial random but based on individuation)
+    function computeInitialHunger(player, profile) {
+        let base = 25;
+        if(profile.name === "Explosive Psoas") base += 10;
+        if(profile.name === "Low Center of Gravity") base += 12;
+        if(profile.name === "Rhythmic Dribbler") base += 8;
+        return base + Math.floor(Math.random() * 25);
+    }
+
+    // Add player with full AFA + Gambetta individuation
+    function addPlayer(name, position, dob, dominantFoot) {
         if(!name.trim()) return;
+        const id = Date.now();
+        const afaPhase = getAFAPhase(dob);
         const newPlayer = {
-            id: Date.now(),
-            name: name.trim(),
-            position: position,
-            dob: dob,
-            ageGroup: ageGroup,
+            id, name: name.trim(), position, dob, dominantFoot, afaPhase,
             involvement: 0,
-            eliminated: false
+            eliminated: false,
+            individuation: null
         };
+        const profile = generateIndividuationProfile(newPlayer);
+        newPlayer.individuation = profile;
+        newPlayer.involvement = computeInitialHunger(newPlayer, profile);
         players.push(newPlayer);
         saveData();
         renderAll();
     }
 
-    // MIDWEEK IN-HOUSE GAME: simulate internal matches that update involvement based on position + random hunger factor
+    // Midweek grading (involvement update based on individuation bonus + afa phase modifier)
     function simulateMidweekGame() {
-        // Only non-eliminated players can improve
-        let activePlayers = players.filter(p => !p.eliminated);
-        if(activePlayers.length === 0) {
-            document.getElementById("midweekLog").innerHTML = "❌ No active players (all eliminated?). Add players or reset pyramid.";
+        let active = players.filter(p => !p.eliminated);
+        if(active.length === 0) {
+            document.getElementById("gradingLog").innerHTML = "❌ No active players available. Add players first.";
             return;
         }
-        let log = "⚡ MIDWEEK GRADING RESULTS:<br>";
-        activePlayers.forEach(p => {
-            // involvement gain based on position and randomness (hunger aggression)
-            let base = 15;
-            if(p.position === "ST" || p.position === "LW" || p.position === "RW") base += 8;
-            if(p.position === "CM" || p.position === "CAM") base += 6;
-            if(p.position === "GK") base += 4;
-            let gain = Math.floor(Math.random() * 25) + base;
+        let log = "🔥 MIDWEEK GRADING (AFA + Gambetta Individuation):<br>";
+        active.forEach(p => {
+            let gain = 12 + Math.floor(Math.random() * 20);
+            // individuation bonus
+            if(p.individuation && p.individuation.name === "Explosive Psoas") gain += 8;
+            if(p.individuation && p.individuation.name === "Low Center of Gravity") gain += 7;
+            if(p.individuation && p.individuation.name === "Rhythmic Dribbler") gain += 9;
+            if(p.individuation && p.individuation.name === "Elastic Ankles") gain += 6;
+            if(p.afaPhase === "Specialization (13-15)") gain += 5;
+            if(p.afaPhase === "High Performance (16-20)") gain += 8;
             p.involvement += gain;
-            log += `🔥 ${p.name} (${p.position}) +${gain} → ${p.involvement} pts<br>`;
+            log += `⚡ ${p.name} (${p.position}) | ${p.individuation?.name || "standard"} +${gain} → ${p.involvement} pts<br>`;
         });
-        // Also add pyramid survival effect: if pyramid eliminated, champion team can't be updated but players from current age group get penalty
-        const currentAgeGroup = getCurrentAgeGroupString();
-        if(pyramidEliminated) {
-            let eliminatedGroupPlayers = players.filter(p => p.ageGroup === currentAgeGroup && !p.eliminated);
-            eliminatedGroupPlayers.forEach(p => { p.involvement = Math.max(0, p.involvement - 15); });
-            log += `<span style="color:#ff8866;">⚠️ Pyramid elimination: ${currentAgeGroup} players lost -15 involvement.</span><br>`;
-        }
-        document.getElementById("midweekLog").innerHTML = log;
+        document.getElementById("gradingLog").innerHTML = log;
         saveData();
         renderAll();
     }
 
-    function getCurrentAgeGroupString() {
-        const groups = ["U13","U14","U15","U16","U17","U18","U19","U20"];
-        return groups[currentAgeIndex] || "U13";
-    }
-
-    // Pyramind advance: if champion not eliminated, move to next age group
-    function advancePyramid() {
-        if(pyramidEliminated) {
-            document.getElementById("midweekLog").innerHTML = "❌ Cannot advance: current champion team is ELIMINATED (conceded >3). Reset pyramid first.";
+    // Select Weekend Team based on AFA positional model + hunger involvement
+    function selectWeekendXI() {
+        let active = players.filter(p => !p.eliminated);
+        if(active.length === 0) {
+            document.getElementById("weekendSelection").innerHTML = "No eligible players. Add players & run midweek grading.";
             return;
         }
-        const nextIdx = currentAgeIndex + 1;
-        if(nextIdx >= 8) {
-            document.getElementById("midweekLog").innerHTML = "🏆🏆 ULTIMATE GAUNTLET VICTORY! ACADEMY LEGENDS! 🏆🏆";
-            return;
-        }
-        currentAgeIndex = nextIdx;
-        // reset challenger name for new age group
-        challengerTeamName = `Vipers ${getCurrentAgeGroupString()}`;
-        pyramidEliminated = false;
-        saveData();
-        document.getElementById("midweekLog").innerHTML = `🚀 CHAMPION ${currentChampionTeam} advances to ${getCurrentAgeGroupString()}! Challenger: ${challengerTeamName}`;
-        renderAll();
-    }
-
-    function resetPyramid() {
-        currentAgeIndex = 0;
-        currentChampionTeam = "Hunger Wolves";
-        challengerTeamName = "Vipers U13";
-        pyramidEliminated = false;
-        // players are not eliminated by pyramid reset but we keep their involvement; they just restart challenge.
-        saveData();
-        document.getElementById("midweekLog").innerHTML = "🔄 Pyramid reset to U13. Champion Hunger Wolves defends against Vipers U13.";
-        renderAll();
-    }
-
-    // SELECTION FOR WEEKEND MATCH: based on positional ranking + involvement
-    function selectWeekendLineup() {
-        const activePlayers = players.filter(p => !p.eliminated);
-        if(activePlayers.length === 0) {
-            document.getElementById("weekendSelection").innerHTML = "No eligible players. Add players or reset academy.";
-            return;
-        }
-        // Group by position: need best GK, best RB, best CB, best LB, best CDM, best CM, best CAM, best RW, best LW, best ST (flexible 11)
-        const positionsOrder = ["GK", "RB", "CB", "LB", "CDM", "CM", "CAM", "RW", "LW", "ST"];
-        // we'll pick top per position, and for multiple CB/CM we can take top 2 etc. But we make 11 players: 1 GK, 2 CB, 2 CM etc basic.
-        let selectedMap = new Map(); // position -> best player(s)
-        // get best per position
+        // Best per position (AFA typical 4-3-3 or flexible)
+        const positions = ["GK", "RB", "CB", "LB", "CDM", "CM", "CAM", "RW", "LW", "ST"];
         let bestPerPos = {};
-        for(let pos of positionsOrder) {
-            let posPlayers = activePlayers.filter(p => p.position === pos).sort((a,b) => b.involvement - a.involvement);
-            if(posPlayers.length > 0) bestPerPos[pos] = posPlayers[0];
+        for(let pos of positions) {
+            let candidates = active.filter(p => p.position === pos).sort((a,b) => b.involvement - a.involvement);
+            if(candidates.length) bestPerPos[pos] = candidates[0];
         }
-        // Build starting XI:
-        let starting = [];
-        if(bestPerPos["GK"]) starting.push(bestPerPos["GK"]);
-        // defense: RB, LB, and top 2 CB if exist
-        if(bestPerPos["RB"]) starting.push(bestPerPos["RB"]);
-        if(bestPerPos["LB"]) starting.push(bestPerPos["LB"]);
-        let allCB = activePlayers.filter(p => p.position === "CB").sort((a,b) => b.involvement - a.involvement);
-        if(allCB.length >= 1) starting.push(allCB[0]);
-        if(allCB.length >= 2) starting.push(allCB[1]);
-        // midfield: CDM, CM, CAM (take best)
-        if(bestPerPos["CDM"]) starting.push(bestPerPos["CDM"]);
-        let allCM = activePlayers.filter(p => p.position === "CM").sort((a,b) => b.involvement - a.involvement);
-        if(allCM.length >= 1) starting.push(allCM[0]);
-        if(bestPerPos["CAM"]) starting.push(bestPerPos["CAM"]);
-        // wingers & ST
-        if(bestPerPos["RW"]) starting.push(bestPerPos["RW"]);
-        if(bestPerPos["LW"]) starting.push(bestPerPos["LW"]);
-        if(bestPerPos["ST"]) starting.push(bestPerPos["ST"]);
-        // fill remaining slots with highest involvement regardless pos to make 11
-        let remainingSlots = 11 - starting.length;
-        if(remainingSlots > 0) {
-            let alreadySelectedIds = new Set(starting.map(p => p.id));
-            let otherPlayers = activePlayers.filter(p => !alreadySelectedIds.has(p.id)).sort((a,b) => b.involvement - a.involvement);
-            for(let i=0; i<remainingSlots && i<otherPlayers.length; i++) {
-                starting.push(otherPlayers[i]);
-            }
+        let startingXI = [];
+        if(bestPerPos["GK"]) startingXI.push(bestPerPos["GK"]);
+        if(bestPerPos["RB"]) startingXI.push(bestPerPos["RB"]);
+        if(bestPerPos["LB"]) startingXI.push(bestPerPos["LB"]);
+        let cbs = active.filter(p => p.position === "CB").sort((a,b)=>b.involvement - a.involvement);
+        if(cbs[0]) startingXI.push(cbs[0]);
+        if(cbs[1]) startingXI.push(cbs[1]);
+        if(bestPerPos["CDM"]) startingXI.push(bestPerPos["CDM"]);
+        let cms = active.filter(p => p.position === "CM").sort((a,b)=>b.involvement - a.involvement);
+        if(cms[0]) startingXI.push(cms[0]);
+        if(bestPerPos["CAM"]) startingXI.push(bestPerPos["CAM"]);
+        if(bestPerPos["RW"]) startingXI.push(bestPerPos["RW"]);
+        if(bestPerPos["LW"]) startingXI.push(bestPerPos["LW"]);
+        if(bestPerPos["ST"]) startingXI.push(bestPerPos["ST"]);
+        // fill remaining with highest involvement
+        let selectedIds = new Set(startingXI.map(p=>p.id));
+        let others = active.filter(p=>!selectedIds.has(p.id)).sort((a,b)=>b.involvement - a.involvement);
+        while(startingXI.length < 11 && others.length) {
+            startingXI.push(others.shift());
         }
-        // render weekend lineup
-        const weekendDiv = document.getElementById("weekendSelection");
-        if(starting.length === 0) weekendDiv.innerHTML = "No lineup generated.";
-        else {
-            let html = `<strong>🔥 OFFICIAL WEEKEND MATCH SQUAD (Top ranked by position)</strong><br>`;
-            starting.forEach(p => {
-                html += `⚡ ${p.name} (${p.position}) · ${p.involvement} pts<br>`;
-            });
-            weekendDiv.innerHTML = html;
-        }
-        saveData();
+        let html = `<strong>🏆 OFFICIAL WEEKEND LINEUP (AFA Gambetta Model)</strong><br>`;
+        startingXI.forEach(p => {
+            html += `🔥 ${p.name} (${p.position}) · ${p.involvement} pts · Ind: ${p.individuation?.name || "—"}<br>`;
+        });
+        document.getElementById("weekendSelection").innerHTML = html;
     }
 
-    // RENDER all UI: players table, global ranking, positional ranking
-    function renderAll() {
-        renderPlayersTable();
-        renderGlobalRanking();
-        renderPositionalRanking();
-        updatePyramidStatusText();
-    }
-
+    // UI RENDERING
     function renderPlayersTable() {
         const tbody = document.getElementById("playersTableBody");
         if(!tbody) return;
         tbody.innerHTML = "";
         players.forEach(p => {
             const row = tbody.insertRow();
-            if(p.eliminated) row.classList.add("eliminated");
-            row.insertCell(0).innerText = p.name;
-            row.insertCell(1).innerHTML = `<span class="position-badge">${p.position}</span>`;
-            row.insertCell(2).innerText = p.ageGroup;
-            row.insertCell(3).innerText = p.involvement;
-            row.insertCell(4).innerText = p.eliminated ? "ELIMINATED" : "ACTIVE";
+            if(p.eliminated) row.style.opacity = "0.5";
+            row.insertCell(0).innerHTML = `<strong>${p.name}</strong><br><span style="font-size:0.6rem;">${p.dominantFoot || "Right"}</span>`;
+            row.insertCell(1).innerText = p.position;
+            row.insertCell(2).innerText = p.afaPhase;
+            row.insertCell(3).innerHTML = `<span class="individuation-tag">${p.individuation?.name || "assessing"}</span><br><span style="font-size:0.6rem;">${p.individuation?.desc?.substring(0,25) || ""}</span>`;
+            row.insertCell(4).innerText = p.involvement;
             const delBtn = document.createElement("button");
             delBtn.innerText = "❌";
             delBtn.style.background = "none";
@@ -476,74 +394,105 @@
         });
     }
 
+    function renderGlobalRanking() {
+        const active = players.filter(p => !p.eliminated).sort((a,b)=>b.involvement - a.involvement);
+        const container = document.getElementById("globalRanking");
+        if(active.length === 0) { container.innerHTML = "No active players."; return; }
+        container.innerHTML = active.map(p => `<div class="rank-item"><span>${p.name} (${p.position}) · ${p.individuation?.name || ""}</span><span>${p.involvement} pts</span></div>`).join("");
+    }
+
+    function updateIndividuationDetail() {
+        // optional: show first player's individuation in detail or provide click
+        if(players.length) {
+            const p = players[0];
+            document.getElementById("individuationSummary").innerHTML = `
+                <strong>🧬 Gambetta Individuation Active:</strong><br>
+                Player: ${p.name}<br>
+                Profile: ${p.individuation?.name}<br>
+                Description: ${p.individuation?.desc}<br>
+                Bonus: ${p.individuation?.bonus}<br>
+                <span style="font-size:0.7rem;">✅ Each player develops unique physiological traits → tailored dribbling & retention.</span>
+            `;
+        } else {
+            document.getElementById("individuationSummary").innerHTML = "Add a player to see Gambetta individuation fingerprint.";
+        }
+    }
+
     function removePlayer(id) {
         players = players.filter(p => p.id !== id);
         saveData();
         renderAll();
     }
 
-    function renderGlobalRanking() {
-        const active = players.filter(p => !p.eliminated).sort((a,b) => b.involvement - a.involvement);
-        const container = document.getElementById("globalRankingList");
-        if(active.length === 0) { container.innerHTML = "<div>No active players.</div>"; return; }
-        container.innerHTML = active.map(p => `<div class="player-rank-item"><span>${p.name} (${p.ageGroup}) ${p.position}</span><span style="font-weight:bold;">${p.involvement} pts</span></div>`).join("");
+    function resetPyramid() {
+        // Reset all players' eliminated flag and involvement moderately
+        players.forEach(p => {
+            p.eliminated = false;
+            p.involvement = Math.max(20, p.involvement);
+        });
+        saveData();
+        renderAll();
+        document.getElementById("gradingLog").innerHTML = "Pyramid reset. All players reactivated.";
     }
 
-    function renderPositionalRanking() {
-        const active = players.filter(p => !p.eliminated);
-        const positions = ["GK","RB","CB","LB","CDM","CM","CAM","RW","LW","ST"];
-        const container = document.getElementById("positionalRanking");
-        let html = "";
-        for(let pos of positions) {
-            let posPlayers = active.filter(p => p.position === pos).sort((a,b) => b.involvement - a.involvement);
-            if(posPlayers.length > 0) {
-                let top = posPlayers[0];
-                html += `<div class="player-rank-item"><span>🥇 ${pos} · ${top.name}</span><span>${top.involvement} pts</span></div>`;
-            } else {
-                html += `<div class="player-rank-item"><span>${pos} · no player</span><span>—</span></div>`;
-            }
+    function saveData() {
+        localStorage.setItem("hungerballAFA", JSON.stringify({ players }));
+    }
+
+    function loadData() {
+        const saved = localStorage.getItem("hungerballAFA");
+        if(saved) {
+            try {
+                const data = JSON.parse(saved);
+                players = data.players || [];
+                // re-validate individuation for missing
+                players.forEach(p => {
+                    if(!p.individuation) {
+                        p.individuation = generateIndividuationProfile(p);
+                    }
+                    if(!p.afaPhase) p.afaPhase = getAFAPhase(p.dob);
+                    if(p.involvement === undefined) p.involvement = computeInitialHunger(p, p.individuation);
+                });
+            } catch(e) {}
         }
-        container.innerHTML = html;
-    }
-
-    function updatePyramidStatusText() {
-        const statusDiv = document.getElementById("pyramidStatus");
-        const currentAge = getCurrentAgeGroupString();
-        let elimMsg = pyramidEliminated ? " ⚠️ CHAMPION ELIMINATED (conceded >3)" : "";
-        statusDiv.innerHTML = `🏆 PYRAMID: ${currentAge} · Champion: ${currentChampionTeam} vs ${challengerTeamName}${elimMsg}<br>⚡ Concede >3 goals = team eliminated. Winner stays.`;
-    }
-
-    function resetFullAcademy() {
-        if(confirm("⚠️ DELETE ALL PLAYERS AND RESET PYRAMID? This cannot be undone.")) {
-            players = [];
-            currentAgeIndex = 0;
-            currentChampionTeam = "Hunger Wolves";
-            challengerTeamName = "Vipers U13";
-            pyramidEliminated = false;
-            saveData();
-            renderAll();
-            document.getElementById("weekendSelection").innerHTML = "Academy reset. Add players to begin.";
-            document.getElementById("midweekLog").innerHTML = "Academy reset. Use 'Add Player' to build your hunger squad.";
+        if(players.length === 0) {
+            // Seed demonstration players with proper AFA & individuation
+            const seedIds = [1001,1002,1003];
+            players = [
+                { id:1001, name:"Lucas Romero", position:"CM", dob:"2010-06-15", dominantFoot:"Right", eliminated:false, involvement:0, afaPhase:"" },
+                { id:1002, name:"Mateo Acosta", position:"ST", dob:"2009-04-22", dominantFoot:"Left", eliminated:false, involvement:0, afaPhase:"" },
+                { id:1003, name:"Benicio Luna", position:"CB", dob:"2011-09-10", dominantFoot:"Right", eliminated:false, involvement:0, afaPhase:"" },
+            ];
+            players.forEach(p => {
+                p.afaPhase = getAFAPhase(p.dob);
+                const prof = generateIndividuationProfile(p);
+                p.individuation = prof;
+                p.involvement = computeInitialHunger(p, prof);
+            });
         }
+        renderAll();
     }
 
-    // Event listeners
+    function renderAll() {
+        renderPlayersTable();
+        renderGlobalRanking();
+        updateIndividuationDetail();
+    }
+
+    // Event Listeners
     document.getElementById("addPlayerBtn")?.addEventListener("click", () => {
         const name = document.getElementById("playerName").value;
         const pos = document.getElementById("playerPosition").value;
         const dob = document.getElementById("playerDob").value;
-        const ageGroup = document.getElementById("playerAgeGroup").value;
-        if(!name) { alert("Enter player name"); return; }
-        if(!dob) { alert("Enter date of birth"); return; }
-        addPlayer(name, pos, dob, ageGroup);
+        const foot = document.getElementById("playerDominantFoot").value;
+        if(!name || !dob) { alert("Enter name and date of birth"); return; }
+        addPlayer(name, pos, dob, foot);
         document.getElementById("playerName").value = "";
         document.getElementById("playerDob").value = "";
     });
     document.getElementById("simulateMidweekBtn")?.addEventListener("click", simulateMidweekGame);
-    document.getElementById("advancePyramidBtn")?.addEventListener("click", advancePyramid);
+    document.getElementById("selectWeekendBtn")?.addEventListener("click", selectWeekendXI);
     document.getElementById("resetPyramidBtn")?.addEventListener("click", resetPyramid);
-    document.getElementById("selectWeekendBtn")?.addEventListener("click", selectWeekendLineup);
-    document.getElementById("resetAllDataBtn")?.addEventListener("click", resetFullAcademy);
 
     loadData();
 </script>
