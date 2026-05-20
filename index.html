@@ -3,512 +3,549 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>The Members Lounge - Cake Management System</title>
+    <title>El Camino Gambeta: Argentine Football Pathway | Dribbling Revolution</title>
     <style>
-        * { box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif; }
-        body { background: #f5f3f0; margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; }
-        .card { background: white; border-radius: 24px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        h1 { margin: 0 0 8px 0; font-size: 1.8rem; color: #2c3e2f; }
-        h2 { font-size: 1.3rem; margin: 0 0 15px 0; }
-        .sub { color: #5e6f5d; margin-bottom: 20px; font-size: 0.9rem; }
-        label { font-weight: 600; display: block; margin-top: 14px; margin-bottom: 5px; font-size: 0.85rem; }
-        input, select, textarea, button { width: 100%; padding: 12px; border-radius: 40px; border: 1px solid #ddd; font-size: 1rem; margin-bottom: 8px; }
-        textarea { border-radius: 20px; resize: vertical; }
-        button { background: #2c5f2d; color: white; font-weight: bold; border: none; cursor: pointer; transition: 0.2s; }
-        button:hover { background: #1f4520; }
-        .cake-item { background: #fefaf5; border-left: 5px solid #d4a373; padding: 12px; margin-bottom: 12px; border-radius: 16px; }
-        .filter-group { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
-        .filter-group select, .filter-group input { width: auto; flex: 1; margin-bottom: 0; }
-        .info-text { font-size: 0.8rem; color: #7f6b5e; margin-top: 8px; }
-        .btn-small { padding: 6px 12px; font-size: 0.75rem; width: auto; margin-top: 6px; margin-right: 6px; }
-        .btn-received { background: #4a7c59; }
-        .btn-print { background: #2c5f2d; }
-        .btn-delete { background: #c9b6a0; color: #2c2a24; }
-        .status-badge { background: #f0c0a0; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; display: inline-block; }
-        .status-received { background: #a0d4a0; }
-        .tab-bar { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; flex-wrap: wrap; }
-        .tab { padding: 12px 20px; cursor: pointer; border-radius: 40px 40px 0 0; background: #eee; }
-        .tab.active { background: #2c5f2d; color: white; }
-        .pin-panel { background: #fff3e0; padding: 15px; border-radius: 20px; margin-bottom: 20px; }
-        .action-buttons { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-        
-        /* Docket Print Styles */
-        @media print {
-            body * { visibility: hidden; }
-            .docket-print, .docket-print * { visibility: visible; }
-            .docket-print { position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 15px; background: white; }
-            .no-print { display: none !important; }
-            button { display: none; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .docket-print {
-            background: white;
-            padding: 20px;
-            border: 2px solid #2c5f2d;
-            border-radius: 12px;
-            max-width: 550px;
+
+        body {
+            font-family: 'Poppins', system-ui, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(145deg, #1a472a 0%, #0e2a1a 100%);
+            color: #f5f2e8;
+            padding: 1.5rem;
+            min-height: 100vh;
+        }
+
+        /* main container */
+        .app-container {
+            max-width: 1300px;
             margin: 0 auto;
-            font-family: monospace;
         }
-        .docket-title { font-size: 1.4rem; font-weight: bold; text-align: center; color: #2c5f2d; border-bottom: 2px solid #2c5f2d; padding-bottom: 8px; margin-bottom: 15px; }
-        .docket-section { margin: 15px 0; padding: 10px; background: #f9f9f9; border-radius: 8px; }
-        .docket-row { margin: 8px 0; font-size: 0.85rem; }
-        .docket-label { font-weight: bold; display: inline-block; width: 140px; }
-        .barcode { text-align: center; margin: 15px 0; font-family: 'Courier New', monospace; letter-spacing: 2px; }
-        .signature-line { border-top: 1px dashed #999; margin-top: 15px; padding-top: 8px; font-size: 0.75rem; text-align: center; }
-        hr { margin: 10px 0; }
-        .storage-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
-        .storage-tag { background: #e0e0e0; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; }
+
+        /* header argentine style */
+        .hero {
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 3px solid #ffb347;
+            padding-bottom: 1.2rem;
+        }
+
+        .hero h1 {
+            font-size: 2.2rem;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #FFD966, #FFB347);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            font-style: italic;
+            background: rgba(0,0,0,0.4);
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            margin-top: 0.5rem;
+        }
+
+        .subhead {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: 500;
+            background: #00000066;
+            backdrop-filter: blur(4px);
+            padding: 0.8rem;
+            border-radius: 60px;
+            display: inline-block;
+            width: auto;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* two column layout: steps + mindset */
+        .pathway-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .steps-panel {
+            flex: 2;
+            min-width: 280px;
+            background: rgba(10, 25, 15, 0.75);
+            backdrop-filter: blur(8px);
+            border-radius: 2rem;
+            padding: 1.5rem;
+            box-shadow: 0 20px 35px -12px black;
+            border: 1px solid rgba(255, 180, 70, 0.4);
+        }
+
+        .mindset-panel {
+            flex: 1.2;
+            min-width: 250px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            border-radius: 2rem;
+            padding: 1.5rem;
+            border-left: 6px solid #ffb347;
+            box-shadow: 0 20px 30px -12px black;
+        }
+
+        /* steps header */
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            border-left: 8px solid #ffb347;
+            padding-left: 0.8rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* step cards */
+        .step-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .step-card {
+            background: #1f3b2c;
+            border-radius: 1.5rem;
+            padding: 0rem 0rem 0rem 0rem;
+            transition: all 0.2s ease;
+            border: 1px solid #ffb34755;
+            overflow: hidden;
+        }
+
+        .step-header {
+            background: #2c4a35;
+            padding: 0.9rem 1.2rem;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
+        }
+
+        .step-header:hover {
+            background: #3d6249;
+        }
+
+        .step-number {
+            background: #ffb347;
+            color: #1e2a1a;
+            border-radius: 40px;
+            padding: 0.2rem 0.8rem;
+            font-weight: 800;
+            margin-right: 1rem;
+        }
+
+        .step-title {
+            font-size: 1.2rem;
+            letter-spacing: -0.2px;
+            flex: 1;
+        }
+
+        .step-icon {
+            font-size: 1.6rem;
+            transition: transform 0.2s;
+        }
+
+        .step-content {
+            padding: 1rem 1.2rem 1.4rem 1.2rem;
+            background: #112217dd;
+            border-top: 1px solid #ffb34744;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .drill-highlight {
+            background: #00000055;
+            padding: 0.6rem;
+            border-radius: 1rem;
+            margin: 0.8rem 0 0 0;
+            font-weight: 500;
+            border-left: 4px solid #ffb347;
+        }
+
+        .badge-gambetta {
+            background: #ffb347;
+            color: #1e3a1e;
+            font-weight: bold;
+            padding: 0.2rem 0.5rem;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+
+        .mindset-quote {
+            font-size: 1rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #1f2c1e;
+            border-radius: 1rem;
+            font-style: italic;
+            border-left: 4px solid #ffb347;
+        }
+
+        .mindset-principle {
+            display: flex;
+            gap: 12px;
+            margin: 1.2rem 0;
+            align-items: start;
+        }
+
+        .principle-icon {
+            font-size: 1.8rem;
+        }
+
+        /* progress tracker */
+        .progress-area {
+            margin-top: 2rem;
+            background: #0d2818cc;
+            border-radius: 1.8rem;
+            padding: 1.2rem 1.8rem;
+            backdrop-filter: blur(4px);
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar-bg {
+            background-color: #2d3e2c;
+            border-radius: 40px;
+            height: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #ffb347, #ffdd88);
+            width: 0%;
+            height: 100%;
+            border-radius: 40px;
+            transition: width 0.3s ease;
+        }
+
+        .checklist-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin-top: 1rem;
+            justify-content: center;
+        }
+
+        .check-btn {
+            background: #2c4a30;
+            border: none;
+            color: #f0ead0;
+            padding: 0.4rem 1rem;
+            border-radius: 60px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.1s;
+            font-family: inherit;
+            font-size: 0.8rem;
+        }
+
+        .check-btn.completed {
+            background: #ffb347;
+            color: #122011;
+            text-decoration: line-through;
+            filter: drop-shadow(0 2px 4px gold);
+        }
+
+        .reset-btn {
+            background: #ffb34755;
+            border: 1px solid #ffb347;
+            color: white;
+            margin-left: 1rem;
+            padding: 0.3rem 1rem;
+            border-radius: 2rem;
+            cursor: pointer;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 780px) {
+            body {
+                padding: 1rem;
+            }
+            .hero h1 {
+                font-size: 1.7rem;
+            }
+            .step-title {
+                font-size: 0.95rem;
+            }
+        }
+        button {
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="tab-bar no-print">
-        <div class="tab active" data-tab="customer">🍰 Customer Submit</div>
-        <div class="tab" data-tab="staff">👥 Staff Dashboard</div>
+<div class="app-container">
+    <div class="hero">
+        <h1>⚽ LA GAMBETA REVOLUTION ⚡</h1>
+        <p>Argentine Football Pathway · Never Lose the Ball · Dribbling as Art</p>
+        <div class="subhead">🇦🇷 "La Pelota no se devuelve, se lleva puesta" — The ball is never given away, it’s taken forward 🇦🇷</div>
     </div>
 
-    <!-- Customer Tab -->
-    <div id="customerTab">
-        <div class="card">
-            <h1>🎂 The Members Lounge</h1>
-            <div class="sub">Complete this form for your cake delivery</div>
-
-            <label>👤 Guest(s) of honour</label>
-            <input type="text" id="guestName" placeholder="e.g., Sarah's 40th, Mr & Mrs Smith">
-
-            <label>🎉 Party room (where function is held)</label>
-            <select id="customerPartyRoom">
-                <option value="">-- Select room --</option>
-                <option>The Members Lounge</option>
-                <option>Bistroteca</option>
-                <option>The Ottimo Room</option>
-                <option>Sala Reggio Ballroom</option>
-                <option>Fior</option>
-                <option>Club 84</option>
-            </select>
-
-            <label>📅 Date of function (party date)</label>
-            <input type="date" id="functionDate">
-
-            <label>📦 Cake delivery date</label>
-            <input type="date" id="deliveryDate">
-
-            <label>⏰ Cake delivery time</label>
-            <input type="time" id="deliveryTime">
-
-            <label>❄️ What time should cake be taken out of fridge?</label>
-            <input type="time" id="takeOutTime" placeholder="e.g., 19:00 (1 hour before serving)">
-
-            <label>🍰 What time will cake be served?</label>
-            <input type="time" id="serveTime" placeholder="e.g., 20:00">
-
-            <label>📝 Storage instructions</label>
-            <textarea id="instructions" rows="3" placeholder="e.g., Keep refrigerated, Remove from box, Nut allergy, Specific plating instructions..."></textarea>
-
-            <label>📍 Preferred storage location (optional)</label>
-            <select id="preferredStorage">
-                <option value="">-- Staff will assign based on availability --</option>
-                <option>Main Cool Room</option>
-                <option>Main Dry Room</option>
-                <option>Kitchen Cool Room</option>
-                <option>Members Lounge Bar Cool Room</option>
-                <option>Members Lounge Bar Dry Room</option>
-                <option>Ballroom Cool Room</option>
-                <option>Ballroom Bar</option>
-                <option>Ballroom Cake Table</option>
-                <option>Bistroteca Cake Table</option>
-                <option>Ottimo Room (as instructed)</option>
-            </select>
-
-            <label>🍰 Your name (contact person)</label>
-            <input type="text" id="customerName" placeholder="e.g., Maria Smith">
-
-            <button id="submitCakeBtn">📨 Submit cake delivery</button>
-            <div class="info-text">✅ You will receive a docket with barcode. Staff will mark storage location upon arrival.</div>
-        </div>
-    </div>
-
-    <!-- Staff Tab -->
-    <div id="staffTab" style="display:none;">
-        <div class="card">
-            <div id="pinPanel" class="pin-panel no-print">
-                <label>🔐 Staff PIN</label>
-                <input type="password" id="pinInput" placeholder="Enter 4-digit PIN">
-                <button id="unlockBtn">Unlock dashboard</button>
-                <button id="printSummaryBtn" style="background:#6b4c3b; margin-top:10px;">📄 Print today's summary</button>
-                <div class="info-text">Default PIN: 2024 (change in code)</div>
+    <div class="pathway-grid">
+        <!-- STEP BY STEP PROGRAMME -->
+        <div class="steps-panel">
+            <div class="section-title">
+                <span>🥾 PROGRAMA DE CAMINOS</span> 
+                <span style="font-size:0.9rem;">Gambetta Method · Argentine DNA</span>
             </div>
-            <div id="staffDashboard" style="display:none;">
-                <h2>📋 Cake deliveries</h2>
-                <div class="filter-group no-print">
-                    <select id="filterPartyRoom"><option value="">All party rooms</option></select>
-                    <input type="date" id="filterDate" placeholder="Filter by delivery date">
-                    <select id="filterStatus"><option value="">All status</option><option value="pending">Pending</option><option value="received">Received</option></select>
+            <div class="step-list" id="stepsContainer">
+                <!-- steps injected via JS but static content generated here for clarity but will use JS to manage dynamic completion & mindset -->
+            </div>
+            <div class="progress-area">
+                <div class="progress-label">
+                    <span>🏆 Progreso del Campeón</span>
+                    <span id="completionCounter">0/10 pasos completados</span>
                 </div>
-                <div id="cakeList">Loading...</div>
+                <div class="progress-bar-bg">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+                    <button id="resetProgressBtn" class="reset-btn">⟳ Reiniciar progreso</button>
+                </div>
+                <div class="checklist-grid" id="quickChecklist">
+                    <!-- dynamic checklist of steps -->
+                </div>
+            </div>
+        </div>
+
+        <!-- MINDSET + ARGENTINE PHILOSOPHY -->
+        <div class="mindset-panel">
+            <div class="section-title" style="font-size:1.4rem; border-left-color:#ffb347;">🧠 MENTALIDAD ALBICELESTE</div>
+            <div class="mindset-quote">
+                “Un dribbler argentino no teme al contacto. La gambeta es engaño, ritmo y picardía.” — adaptado de Gambetta & Menotti
+            </div>
+            <div class="mindset-principle">
+                <div class="principle-icon">🎭</div>
+                <div><strong>Engaño constante</strong><br>Fintas, cambios de ritmo, mirada al vacío. El rival nunca debe adivinar tu próximo movimiento.</div>
+            </div>
+            <div class="mindset-principle">
+                <div class="principle-icon">🩸</div>
+                <div><strong>PASIÓN Y REBELDÍA</strong><br>Nunca dar la espalda al arco. Proteger la pelota con el cuerpo. Jugar con el pecho hacia adelante.</div>
+            </div>
+            <div class="mindset-principle">
+                <div class="principle-icon">⚡</div>
+                <div><strong>Toque al ras & control orientado</strong><br>El primer toque siempre abre espacio. Superficie de contacto: empeine interno/externo, gambeta corta.</div>
+            </div>
+            <div class="mindset-principle">
+                <div class="principle-icon">🔄</div>
+                <div><strong>Giro & Protección</strong><br>Usar el cuerpo como escudo. Cuando te presionan, giro de 180° y búsqueda de línea de pase o avance.</div>
+            </div>
+            <div class="mindset-quote" style="margin-top: 1rem;">
+                📍 <strong>Filosofía Gambetta:</strong> “La eficiencia del dribbling no es regatear a 10 rivales, sino mantener la posesión bajo presión y progresar. Cada contacto cuenta.”
+            </div>
+            <div style="margin-top: 1rem; background: #00000066; border-radius: 1rem; padding: 0.8rem; text-align:center;">
+                💡 CLAVE: Nunca pierdas de vista la pelota y el rival a la vez. Usa los bordes del pie, cambios de peso. Entrena con conos pero imagina defensores.
             </div>
         </div>
     </div>
+    <footer>
+        🟦🟨 Método revolucionario: Camino Argentino + Sistema Gambetta · Cada paso entrena posesión, agilidad y decisión. "La pelota no se negocia"
+    </footer>
 </div>
 
-<script type="module">
-    // ========== 🔥 REPLACE WITH YOUR FIREBASE CONFIG ==========
-    const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_PROJECT_ID.firebasestorage.app",
-        messagingSenderId: "YOUR_SENDER_ID",
-        appId: "YOUR_APP_ID"
-    };
-    // ============================================================
-
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const cakesRef = collection(db, "cakeSubmissions");
-
-    const STAFF_PIN = "2024";
-
-    // Storage locations list for staff to choose from
-    const storageLocations = [
-        "Main Cool Room",
-        "Main Dry Room", 
-        "Kitchen Cool Room",
-        "Members Lounge Bar Cool Room",
-        "Members Lounge Bar Dry Room",
-        "Ballroom Cool Room",
-        "Ballroom Bar",
-        "Ballroom Cake Table",
-        "Bistroteca Cake Table",
-        "Ottimo Room (as instructed)"
+<script>
+    // --------------------------------------------------------------
+    // Definición del programa revolucionario: 10 pasos secuenciales
+    // Basado en la filosofía Argentina + Gambetta (dribbling y no pérdida)
+    // Cada step contiene: titulo, descripcion, drill específico, mentalidad asociada
+    // --------------------------------------------------------------
+    const stepsData = [
+        {
+            title: "🏁 FUNDAMENTO: Toque Mágico & Protección",
+            description: "Dominio del balón con las 3 superficies (interno, externo, empeine). Ejercicio en pareja: toques continuos protegiendo el balón con el brazo extendido. Cambio de dirección cada 3 toques.",
+            drill: "⚡ Ejercicio Gambetta: 'El Escudo' - Con un compañero, mantener la posesión en un cuadrado de 4x4 metros. Priorizar 2 toques y girar protegiendo. Objetivo: 10 posesiones seguidas sin perder el balón."
+        },
+        {
+            title: "🌀 CAMBIO DE RITMO (La Pelota No Se Devuelve)",
+            description: "Entrenar transiciones rápidas de pausa a explosión. Slalom entre conos primero lento, luego sprint. Amagues de cuerpo. Aprendé el 'trancito' argentino.",
+            drill: "🥌 Circuito: 5 conos en zigzag. Acercarse lento a cada cono, hacer una finta de hombro, acelerar. Regresar driblando con protección. No perder el control."
+        },
+        {
+            title: "🕺 LA GAMBETA CLÁSICA (Engaño de cadera)",
+            description: "Movimiento esencial del fútbol argentino: amague hacia un lado, empujar el balón hacia el otro con el externo. Practicar estático y luego en movimiento.",
+            drill: "🎯 1vs1 en pasillo de 10 metros: Atacante frente a defensor pasivo. Realizar gambeta de cadera y superar la línea. El defensor intenta tocar balón, pero sin tackle fuerte."
+        },
+        {
+            title: "🧩 GIRO & PROGRESIÓN (Cuerpo entre balón y rival)",
+            description: "Proteger el balón con el cuerpo, girar y salir. Giro de 180° orientado hacia espacio libre. Clave para no perder la pelota bajo presión.",
+            drill: "🔄 'El Reloj Argentino': Círculo de 5m. Recibir presión por la espalda, pivotear con la pierna lejana, salir conduciendo. Realizar 10 giros por sesión."
+        },
+        {
+            title: "⚡ CONTROL ORIENTADO Y PRIMER TOQUE",
+            description: "Recibir de espaldas y abrir el cuerpo hacia adelante. Primer toque direccional para evitar marca. Gam betta llama a esto 'romper líneas con sutileza'.",
+            drill: "📦 Pared con un compañero: lanzamiento potente, control orientado hacia portería o cono, conducción. Sin perder tiempo. 3 series de 10 repeticiones."
+        },
+        {
+            title: "🥇 1 VS 1 BAJO PRESIÓN (Posesión Superior)",
+            description: "Escenarios reales de partido. Aprender a driblar sin perder la calma, usar fintas y protecciones. Objetivo: avanzar o despejar marcador.",
+            drill: "👥 1v1 en espacio 10x10m. El que roba balón se convierte en atacante. Mantener posesión durante 8 segundos antes de intentar driblar hacia la meta. Se valora la retención."
+        },
+        {
+            title: "🎭 GAMBETA DOBLE (Finta + Cambio de dirección)",
+            description: "Combinación de dos amagues seguidos para desequilibrar. Finta de pase, finta de disparo y luego gambeta rápida. Típica de extremos argentinos.",
+            drill: "🏃‍♂️ Secuencia: Acercarse al cono, simular tiro, arrastrar balón hacia atrás y salir por el costado opuesto. Repetir 20 veces cada pierna."
+        },
+        {
+            title: "🛡️ POSSESSION BAJO ASEDIO (Rondo a la Argentina)",
+            description: "Juego de posición tipo rondo 4 contra 2 con regla especial: el jugador que pierde el balón hace 5 abdominales. Énfasis en driblar en lugar de pase fácil.",
+            drill: "🎯 Rondo 4v2 en círculo de 6m. Regla: mínimo 2 toques, se permite 'break the line' conduciendo. Quien es robado o pierde, penalización. Entrena valentía."
+        },
+        {
+            title: "🏟️ TRANSICIÓN Y DESMARQUE CON BALÓN",
+            description: "Moverse sin balón y recibir en espacios reducidos. Combinar pase y dribbling inmediato. Filosofía: el pase es para avanzar, no para deshacerse del balón.",
+            drill: "♟️ Juego 3 contra 3 más comodines. Obligación: después de recibir, el jugador debe encarar y pasar o driblar. No se permite retroceder más de 3 segundos."
+        },
+        {
+            title: "👑 MASTERCLASS: EL DIEGO / MESSI MODE",
+            description: "Dribbling en velocidad con cambios súbitos. Entrenar conducción a máxima velocidad + frenar + gambeta hacia adentro. Integración total de recursos.",
+            drill: "🌟 'La Joya': recorrido con 4 estaciones de defensores fijos (maniquíes). Hacer dribbling diferente en cada uno: Gambeta, doble gambeta, giro protector, taconazo. objetivo cero pérdidas."
+        }
     ];
 
-    // Tab switching
-    document.querySelectorAll(".tab").forEach(tab => {
-        tab.addEventListener("click", () => {
-            document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-            tab.classList.add("active");
-            const tabName = tab.getAttribute("data-tab");
-            document.getElementById("customerTab").style.display = tabName === "customer" ? "block" : "none";
-            document.getElementById("staffTab").style.display = tabName === "staff" ? "block" : "none";
-            if (tabName === "staff") checkPinAndLoad();
-        });
-    });
+    // Estado de completado (localStorage)
+    let completedSteps = new Array(stepsData.length).fill(false);
 
-    function checkPinAndLoad() {
-        const savedPin = sessionStorage.getItem("staffPin");
-        if (savedPin === STAFF_PIN) {
-            document.getElementById("pinPanel").style.display = "none";
-            document.getElementById("staffDashboard").style.display = "block";
-            loadStaffDashboard();
-        } else {
-            document.getElementById("pinPanel").style.display = "block";
-            document.getElementById("staffDashboard").style.display = "none";
-        }
-    }
-
-    document.getElementById("unlockBtn")?.addEventListener("click", () => {
-        const pin = document.getElementById("pinInput").value;
-        if (pin === STAFF_PIN) {
-            sessionStorage.setItem("staffPin", pin);
-            checkPinAndLoad();
-        } else {
-            alert("Incorrect PIN");
-        }
-    });
-
-    // Generate barcode-like string
-    function generateBarcode(id) {
-        return id.substring(0, 8).toUpperCase() + "-" + Math.floor(Math.random() * 10000);
-    }
-
-    // Print full docket
-    function printDocket(cake) {
-        const barcode = generateBarcode(cake.id);
-        const docketHtml = `<!DOCTYPE html>
-        <html>
-        <head>
-            <title>Cake Docket - ${escapeHtml(cake.guestOfHonour)}</title>
-            <style>
-                body { font-family: monospace; padding: 20px; background: white; }
-                .docket-print { max-width: 550px; margin: 0 auto; background: white; padding: 20px; border: 2px solid #2c5f2d; border-radius: 12px; }
-                .docket-title { font-size: 1.4rem; font-weight: bold; text-align: center; color: #2c5f2d; border-bottom: 2px solid #2c5f2d; padding-bottom: 8px; margin-bottom: 15px; }
-                .docket-section { margin: 15px 0; padding: 10px; background: #f9f9f9; border-radius: 8px; }
-                .docket-row { margin: 8px 0; font-size: 0.85rem; }
-                .docket-label { font-weight: bold; display: inline-block; width: 150px; }
-                .barcode { text-align: center; margin: 15px 0; font-family: 'Courier New', monospace; font-size: 1.2rem; letter-spacing: 3px; }
-                .signature-line { border-top: 1px dashed #999; margin-top: 15px; padding-top: 8px; font-size: 0.7rem; text-align: center; }
-                hr { margin: 10px 0; }
-                .storage-confirm { background: #e8f0e8; padding: 10px; text-align: center; border-radius: 8px; margin-top: 10px; }
-                @media print { body { margin: 0; padding: 0; } }
-            </style>
-        </head>
-        <body>
-            <div class="docket-print">
-                <div class="docket-title">🎂 THE MEMBERS LOUNGE<br>CAKE DOCKET / MANIFEST</div>
-                
-                <div class="docket-section">
-                    <div class="docket-row"><span class="docket-label">🎂 Guest of Honour:</span> ${escapeHtml(cake.guestOfHonour)}</div>
-                    <div class="docket-row"><span class="docket-label">🎉 Party Room:</span> ${escapeHtml(cake.partyRoom)}</div>
-                    <div class="docket-row"><span class="docket-label">📅 Function Date:</span> ${escapeHtml(cake.functionDate)}</div>
-                    <div class="docket-row"><span class="docket-label">📦 Delivery Date:</span> ${escapeHtml(cake.deliveryDate)} at ${escapeHtml(cake.deliveryTime)}</div>
-                    <div class="docket-row"><span class="docket-label">❄️ Take out of fridge at:</span> ${escapeHtml(cake.takeOutTime || "Not specified")}</div>
-                    <div class="docket-row"><span class="docket-label">🍰 Serve cake at:</span> ${escapeHtml(cake.serveTime || "Not specified")}</div>
-                    <div class="docket-row"><span class="docket-label">📝 Storage Instructions:</span><br> ${escapeHtml(cake.instructions)}</div>
-                </div>
-
-                <div class="docket-section">
-                    <div class="docket-row"><span class="docket-label">📍 STORAGE LOCATION (Staff to complete):</span></div>
-                    <div class="storage-confirm">
-                        <strong>✓ Cake stored in:</strong> _________________________<br>
-                        <small>Options: Main Cool Room, Main Dry Room, Kitchen, Members Lounge Bar Cool/Dry, Ballroom Cool/Bar/Cake Table, Bistroteca Cake Table, Ottimo Room</small>
-                    </div>
-                </div>
-
-                <div class="barcode">
-                    ██████████████████████████████████████<br>
-                    &nbsp;&nbsp;&nbsp;${barcode}&nbsp;&nbsp;&nbsp;<br>
-                    ██████████████████████████████████████
-                </div>
-
-                <div class="docket-row"><span class="docket-label">👤 Submitted by (customer):</span> ${escapeHtml(cake.customerName)}</div>
-                <div class="docket-row"><span class="docket-label">✅ Received by (staff):</span> ${cake.receivedBy ? escapeHtml(cake.receivedBy) : "_________________________"}</div>
-                <div class="docket-row"><span class="docket-label">🕒 Date/Time received:</span> ${cake.receivedAt ? new Date(cake.receivedAt).toLocaleString() : "_________________________"}</div>
-                
-                <div class="signature-line">
-                    Customer copy - proof of storage<br>
-                    Staff signature: _________________________ &nbsp;&nbsp; Date: _________
-                </div>
-                <div style="text-align:center; font-size:0.6rem; margin-top:15px;">The Members Lounge - Cake Tracking System v2.0</div>
-            </div>
-            <script>window.print(); setTimeout(() => window.close(), 800);<\/script>
-        </body>
-        </html>`;
-        
-        const win = window.open();
-        win.document.write(docketHtml);
-        win.document.close();
-    }
-
-    // Customer submission
-    document.getElementById("submitCakeBtn")?.addEventListener("click", async () => {
-        const guest = document.getElementById("guestName").value.trim();
-        const partyRoom = document.getElementById("customerPartyRoom").value;
-        const functionDate = document.getElementById("functionDate").value;
-        const deliveryDate = document.getElementById("deliveryDate").value;
-        const deliveryTime = document.getElementById("deliveryTime").value;
-        const takeOutTime = document.getElementById("takeOutTime").value;
-        const serveTime = document.getElementById("serveTime").value;
-        const instructions = document.getElementById("instructions").value.trim();
-        const preferredStorage = document.getElementById("preferredStorage").value;
-        const customerName = document.getElementById("customerName").value.trim();
-
-        if (!guest) { alert("Please enter guest(s) of honour"); return; }
-        if (!partyRoom) { alert("Please select party room"); return; }
-        if (!functionDate) { alert("Please select function date"); return; }
-        if (!deliveryDate) { alert("Please select delivery date"); return; }
-
-        const docRef = await addDoc(cakesRef, {
-            guestOfHonour: guest,
-            partyRoom: partyRoom,
-            functionDate: functionDate,
-            deliveryDate: deliveryDate,
-            deliveryTime: deliveryTime || "Not specified",
-            takeOutTime: takeOutTime || "Not specified",
-            serveTime: serveTime || "Not specified",
-            instructions: instructions || "No special instructions",
-            preferredStorage: preferredStorage || "Staff to assign",
-            customerName: customerName || "Anonymous",
-            status: "pending",
-            submittedAt: new Date().toISOString(),
-            receivedBy: null,
-            receivedAt: null,
-            actualStorage: null
-        });
-
-        alert("✅ Cake delivery submitted! Your docket will be available when staff logs the cake.");
-        
-        // Reset form
-        document.getElementById("guestName").value = "";
-        document.getElementById("customerPartyRoom").value = "";
-        document.getElementById("functionDate").value = "";
-        document.getElementById("deliveryDate").value = "";
-        document.getElementById("deliveryTime").value = "";
-        document.getElementById("takeOutTime").value = "";
-        document.getElementById("serveTime").value = "";
-        document.getElementById("instructions").value = "";
-        document.getElementById("preferredStorage").value = "";
-        document.getElementById("customerName").value = "";
-    });
-
-    // Staff functions
-    const partyRooms = ["The Members Lounge", "Bistroteca", "The Ottimo Room", "Sala Reggio Ballroom", "Fior", "Club 84"];
-    let currentCakes = [];
-    
-    function loadStaffDashboard() {
-        const filterPartyRoom = document.getElementById("filterPartyRoom");
-        const filterDate = document.getElementById("filterDate");
-        const filterStatus = document.getElementById("filterStatus");
-        const cakeListDiv = document.getElementById("cakeList");
-
-        filterPartyRoom.innerHTML = '<option value="">All party rooms</option>';
-        partyRooms.forEach(room => {
-            const opt = document.createElement("option"); opt.value = room; opt.textContent = room;
-            filterPartyRoom.appendChild(opt);
-        });
-
-        const q = query(cakesRef, orderBy("deliveryDate", "asc"));
-        onSnapshot(q, (snapshot) => {
-            currentCakes = [];
-            snapshot.forEach(doc => currentCakes.push({ id: doc.id, ...doc.data() }));
-            renderCakes(currentCakes, filterPartyRoom.value, filterDate.value, filterStatus.value, cakeListDiv);
-        });
-
-        filterPartyRoom.addEventListener("change", () => renderCakes(currentCakes, filterPartyRoom.value, filterDate.value, filterStatus.value, cakeListDiv));
-        filterDate.addEventListener("change", () => renderCakes(currentCakes, filterPartyRoom.value, filterDate.value, filterStatus.value, cakeListDiv));
-        filterStatus.addEventListener("change", () => renderCakes(currentCakes, filterPartyRoom.value, filterDate.value, filterStatus.value, cakeListDiv));
-    }
-
-    async function renderCakes(cakesArray, partyFilter, dateFilter, statusFilter, container) {
-        let filtered = cakesArray;
-        if (partyFilter) filtered = filtered.filter(c => c.partyRoom === partyFilter);
-        if (dateFilter) filtered = filtered.filter(c => c.deliveryDate === dateFilter);
-        if (statusFilter) filtered = filtered.filter(c => c.status === statusFilter);
-
-        if (filtered.length === 0) {
-            container.innerHTML = "<div style='padding:20px;text-align:center;color:#aaa'>✨ No cake deliveries</div>";
-            return;
-        }
-
-        container.innerHTML = filtered.map(cake => `
-            <div class="cake-item">
-                <strong>🎂 ${escapeHtml(cake.guestOfHonour)}</strong><br>
-                🎉 ${escapeHtml(cake.partyRoom)}<br>
-                📅 Function: ${escapeHtml(cake.functionDate)} | 📦 Delivery: ${escapeHtml(cake.deliveryDate)} at ${escapeHtml(cake.deliveryTime)}<br>
-                ❄️ Take out: ${escapeHtml(cake.takeOutTime)} | 🍰 Serve: ${escapeHtml(cake.serveTime)}<br>
-                📝 ${escapeHtml(cake.instructions.substring(0, 50))}${cake.instructions.length > 50 ? '…' : ''}<br>
-                <span class="status-badge ${cake.status === 'received' ? 'status-received' : ''}">${cake.status === 'pending' ? '⏳ Pending receipt' : '✓ Received'}</span>
-                ${cake.receivedBy ? `<br><small>✅ Received by: ${escapeHtml(cake.receivedBy)} on ${new Date(cake.receivedAt).toLocaleString()}</small>` : ''}
-                ${cake.actualStorage ? `<br><small>📍 Stored in: ${escapeHtml(cake.actualStorage)}</small>` : ''}
-                <div class="action-buttons">
-                    ${cake.status === 'pending' ? `
-                        <button class="btn-small btn-received receive-btn" data-id="${cake.id}">✅ Mark received & choose storage</button>
-                    ` : ''}
-                    <button class="btn-small btn-print print-docket-btn" data-cake='${JSON.stringify(cake).replace(/'/g, "&#39;")}'>🖨️ Print docket</button>
-                    <button class="btn-small btn-delete delete-btn" data-id="${cake.id}">🗑️ Delete</button>
-                </div>
-            </div>
-        `).join("");
-
-        // Receive button with storage selection
-        document.querySelectorAll(".receive-btn").forEach(btn => {
-            btn.addEventListener("click", async () => {
-                const id = btn.getAttribute("data-id");
-                const staffName = prompt("Enter your name (staff):");
-                if (!staffName) return;
-                
-                // Show storage options
-                let storageOptions = storageLocations.join("\n");
-                let storage = prompt(`Select storage location (enter number):\n\n${storageOptions.map((s, i) => `${i+1}. ${s}`).join("\n")}\n\nOr type custom location:`);
-                
-                let actualStorage = "";
-                if (storage && !isNaN(storage) && storage >= 1 && storage <= storageOptions.length) {
-                    actualStorage = storageLocations[parseInt(storage) - 1];
-                } else if (storage) {
-                    actualStorage = storage;
-                } else {
-                    actualStorage = "Not specified";
+    function loadProgress() {
+        const saved = localStorage.getItem("gambeta_pathway_progress");
+        if(saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if(Array.isArray(parsed) && parsed.length === stepsData.length) {
+                    completedSteps = parsed;
                 }
-                
-                await updateDoc(doc(db, "cakeSubmissions", id), {
-                    status: "received",
-                    receivedBy: staffName,
-                    receivedAt: new Date().toISOString(),
-                    actualStorage: actualStorage
-                });
-                alert(`✅ Cake marked as received.\n📍 Stored in: ${actualStorage}`);
-            });
-        });
+            } catch(e) {}
+        }
+        updateAllUI();
+    }
 
-        // Print docket
-        document.querySelectorAll(".print-docket-btn").forEach(btn => {
+    function saveProgress() {
+        localStorage.setItem("gambeta_pathway_progress", JSON.stringify(completedSteps));
+        updateAllUI();
+    }
+
+    function toggleStep(index) {
+        completedSteps[index] = !completedSteps[index];
+        saveProgress();
+    }
+
+    function resetProgress() {
+        completedSteps = new Array(stepsData.length).fill(false);
+        saveProgress();
+    }
+
+    function updateAllUI() {
+        renderStepsList();
+        updateProgressBarAndCounter();
+        renderQuickChecklist();
+    }
+
+    function renderStepsList() {
+        const container = document.getElementById("stepsContainer");
+        if(!container) return;
+        container.innerHTML = "";
+        stepsData.forEach((step, idx) => {
+            const isCompleted = completedSteps[idx];
+            const card = document.createElement("div");
+            card.className = "step-card";
+            // header click to toggle
+            const header = document.createElement("div");
+            header.className = "step-header";
+            header.setAttribute("data-idx", idx);
+            header.innerHTML = `
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                    <span class="step-number">PASO ${idx+1}</span>
+                    <span class="step-title">${step.title}</span>
+                </div>
+                <span class="step-icon">${isCompleted ? '✅' : '🔘'}</span>
+            `;
+            header.addEventListener("click", (e) => {
+                e.stopPropagation();
+                toggleStep(idx);
+            });
+            const contentDiv = document.createElement("div");
+            contentDiv.className = "step-content";
+            contentDiv.innerHTML = `
+                <div style="margin-bottom: 10px;">📘 ${step.description}</div>
+                <div class="drill-highlight">
+                    <span class="badge-gambetta">🏋️ EJERCICIO GAMBETTA</span> ${step.drill}
+                </div>
+                <div style="margin-top: 12px; font-size:0.85rem; display:flex; justify-content:flex-end;">
+                    ${isCompleted ? '✓ Completado · Felicitaciones' : '⚡ Haz clic arriba para marcar cuando domines'}
+                </div>
+            `;
+            card.appendChild(header);
+            card.appendChild(contentDiv);
+            container.appendChild(card);
+        });
+    }
+
+    function updateProgressBarAndCounter() {
+        const total = stepsData.length;
+        const completedCount = completedSteps.filter(v => v === true).length;
+        const percent = (completedCount / total) * 100;
+        const fillEl = document.getElementById("progressFill");
+        if(fillEl) fillEl.style.width = `${percent}%`;
+        const counterSpan = document.getElementById("completionCounter");
+        if(counterSpan) counterSpan.innerText = `${completedCount}/${total} pasos completados`;
+    }
+
+    function renderQuickChecklist() {
+        const checklistDiv = document.getElementById("quickChecklist");
+        if(!checklistDiv) return;
+        checklistDiv.innerHTML = "";
+        stepsData.forEach((step, idx) => {
+            const btn = document.createElement("button");
+            btn.className = `check-btn ${completedSteps[idx] ? 'completed' : ''}`;
+            btn.innerText = `${idx+1}. ${step.title.substring(0, 24)}`;
             btn.addEventListener("click", () => {
-                const cakeData = JSON.parse(btn.getAttribute("data-cake"));
-                printDocket(cakeData);
+                toggleStep(idx);
             });
+            checklistDiv.appendChild(btn);
         });
-
-        // Delete
-        document.querySelectorAll(".delete-btn").forEach(btn => {
-            btn.addEventListener("click", async () => {
-                const id = btn.getAttribute("data-id");
-                if (confirm("Delete this record?")) {
-                    await deleteDoc(doc(db, "cakeSubmissions", id));
-                }
-            });
-        });
+        const resetBtn = document.getElementById("resetProgressBtn");
+        if(resetBtn) {
+            // already event attached ensure no duplicates
+            resetBtn.replaceWith(resetBtn.cloneNode(true));
+            const newReset = document.getElementById("resetProgressBtn");
+            if(newReset) newReset.addEventListener("click", resetProgress);
+        }
     }
 
-    // Print summary
-    document.getElementById("printSummaryBtn")?.addEventListener("click", async () => {
-        const snapshot = await getDocs(query(cakesRef, orderBy("deliveryDate", "asc")));
-        const cakes = [];
-        snapshot.forEach(doc => cakes.push({ id: doc.id, ...doc.data() }));
-        
-        const today = new Date().toISOString().split('T')[0];
-        const todaysCakes = cakes.filter(c => c.deliveryDate === today);
-        
-        let printHtml = `<!DOCTYPE html><html><head><title>Cake Summary - ${today}</title>
-        <style>
-            body { font-family: monospace; padding: 20px; }
-            h1 { color: #2c5f2d; }
-            .item { border-bottom: 1px solid #ccc; padding: 12px 0; margin-bottom: 12px; }
-            .label { font-weight: bold; display: inline-block; width: 140px; }
-            @media print { body { margin: 0; padding: 10px; } }
-        </style>
-        </head><body>
-        <h1>🍰 The Members Lounge - Daily Cake Summary</h1>
-        <p><strong>Date:</strong> ${today}</p>
-        <p><strong>Total cakes expected:</strong> ${todaysCakes.length}</p>
-        <hr>`;
-        
-        todaysCakes.forEach(cake => {
-            printHtml += `<div class="item">
-                <div><span class="label">🎂 Guest:</span> ${escapeHtml(cake.guestOfHonour)}</div>
-                <div><span class="label">🎉 Room:</span> ${escapeHtml(cake.partyRoom)}</div>
-                <div><span class="label">📅 Function:</span> ${escapeHtml(cake.functionDate)}</div>
-                <div><span class="label">⏰ Delivery:</span> ${escapeHtml(cake.deliveryTime)}</div>
-                <div><span class="label">❄️ Take out:</span> ${escapeHtml(cake.takeOutTime)}</div>
-                <div><span class="label">🍰 Serve:</span> ${escapeHtml(cake.serveTime)}</div>
-                <div><span class="label">📝 Instructions:</span> ${escapeHtml(cake.instructions)}</div>
-                <div><span class="label">📍 Storage:</span> ${cake.actualStorage || "Not yet assigned"}</div>
-                <div><span class="label">✅ Received:</span> ${cake.receivedBy || "Pending"} ${cake.receivedAt ? new Date(cake.receivedAt).toLocaleString() : ""}</div>
-                <div><span class="label">🔑 Code:</span> ${cake.id.substring(0, 8).toUpperCase()}</div>
-            </div>`;
-        });
-        
-        if (todaysCakes.length === 0) printHtml += "<p>✨ No cakes scheduled for today.</p>";
-        printHtml += `</body></html>`;
-        
-        const win = window.open();
-        win.document.write(printHtml);
-        win.document.close();
-        win.print();
-    });
-
-    function escapeHtml(str) { 
-        if (!str) return "";
-        return str.replace(/[&<>]/g, function(m){
-            if(m==='&') return '&amp;';
-            if(m==='<') return '&lt;';
-            if(m==='>') return '&gt;';
-            return m;
-        });
+    // Re-attach reset event after dynamic, and initial load.
+    function init() {
+        loadProgress();
+        const resetBtn = document.getElementById("resetProgressBtn");
+        if(resetBtn) resetBtn.addEventListener("click", resetProgress);
     }
+    
+    init();
 </script>
 </body>
 </html>
