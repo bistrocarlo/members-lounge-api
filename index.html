@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>THE GAUNTLET | Survival Football Pyramid (U13 → U20)</title>
+    <title>HUNGERBALL ACADEMY | Possession Pyramid · Live Grading · Match Selection</title>
     <style>
         * {
             margin: 0;
@@ -16,491 +16,536 @@
             background: #0a0604;
             background-image: repeating-linear-gradient(45deg, #1a0e08 0px, #1a0e08 2px, #0f0906 2px, #0f0906 8px);
             color: #f0e0c8;
-            padding: 1.2rem;
+            padding: 1rem;
             min-height: 100vh;
         }
 
         .app-container {
-            max-width: 1400px;
+            max-width: 1500px;
             margin: 0 auto;
         }
 
-        /* header - gladiator style */
-        .arena-header {
+        /* header */
+        .hunger-header {
             text-align: center;
             border-bottom: 4px solid #b43b0c;
             padding-bottom: 0.8rem;
             margin-bottom: 1.5rem;
         }
-
-        .arena-header h1 {
+        .hunger-header h1 {
             font-size: 2.2rem;
             font-weight: 800;
-            letter-spacing: -1px;
             background: linear-gradient(135deg, #ff8248, #b0300a);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
-
         .rule-line {
             background: #1f1109cc;
-            padding: 0.5rem;
+            padding: 0.3rem 1rem;
             border-radius: 60px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             display: inline-block;
-            margin-top: 0.5rem;
-        }
-
-        /* elimination warning */
-        .elimination-alert {
-            background: #2a0c04aa;
-            border-left: 8px solid #ff3300;
-            padding: 0.8rem;
-            margin-bottom: 1.5rem;
-            border-radius: 1rem;
-            text-align: center;
-            font-weight: bold;
         }
 
         /* main grid */
-        .pyramid-grid {
+        .academy-grid {
             display: flex;
             flex-wrap: wrap;
             gap: 1.5rem;
         }
-
-        .match-panel {
-            flex: 2;
+        .panel {
             background: #0d0a07cc;
             backdrop-filter: blur(12px);
             border-radius: 1.8rem;
-            padding: 1.3rem;
+            padding: 1.2rem;
             border: 1px solid #b9512a66;
         }
-
-        .standings-panel {
-            flex: 1.3;
-            background: #0d0a07cc;
-            backdrop-filter: blur(12px);
-            border-radius: 1.8rem;
-            padding: 1.3rem;
-            border-right: 4px solid #b43b0c;
+        .panel-left {
+            flex: 1.8;
+            min-width: 280px;
         }
-
+        .panel-right {
+            flex: 1.2;
+            min-width: 280px;
+        }
         .section-title {
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             font-weight: 700;
             border-left: 6px solid #b43b0c;
             padding-left: 0.7rem;
             margin-bottom: 1rem;
         }
 
-        /* team cards */
-        .team-card {
+        /* forms */
+        .add-player-form {
             background: #1f1610;
-            border-radius: 1.2rem;
             padding: 1rem;
-            margin-bottom: 1rem;
-            border-bottom: 2px solid #b9512a55;
-        }
-
-        .team-name {
-            font-size: 1.3rem;
-            font-weight: bold;
+            border-radius: 1.2rem;
+            margin-bottom: 1.2rem;
             display: flex;
-            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
-
-        .score-input {
+        .add-player-form input, .add-player-form select {
             background: #2c1d14;
             border: none;
-            color: #ffc89c;
-            font-size: 1.5rem;
-            width: 70px;
-            text-align: center;
-            border-radius: 1rem;
-            font-weight: bold;
-            padding: 0.2rem;
+            color: #ffdec2;
+            padding: 0.5rem;
+            border-radius: 2rem;
+            font-family: inherit;
+            flex: 1;
+            min-width: 100px;
         }
-
-        .simulate-btn {
+        .btn {
             background: #b43b0c;
             border: none;
             color: white;
             font-weight: bold;
-            padding: 0.8rem;
+            padding: 0.5rem 1rem;
             border-radius: 2rem;
-            width: 100%;
             cursor: pointer;
-            margin: 0.8rem 0;
-            font-size: 1rem;
+            transition: 0.1s;
+        }
+        .btn-small {
+            background: #b9512a;
+            padding: 0.2rem 0.8rem;
+            font-size: 0.75rem;
+        }
+        .btn-outline {
+            background: #3e2a1e;
+            border: 1px solid #b9512a;
         }
 
-        .simulate-btn:active {
-            background: #8b2c06;
+        /* player table */
+        .player-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+        .player-table th, .player-table td {
+            padding: 0.5rem 0.3rem;
+            border-bottom: 1px solid #b9512a55;
+            text-align: left;
+        }
+        .position-badge {
+            background: #2a1a10;
+            border-radius: 20px;
+            padding: 0.1rem 0.5rem;
+            font-size: 0.7rem;
+        }
+        .eliminated {
+            opacity: 0.5;
+            background: #2a0c04;
+            text-decoration: line-through;
         }
 
-        .danger-zone {
+        /* grading zone */
+        .grading-zone {
+            background: #1f130c;
+            border-radius: 1.2rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .midweek-card {
+            background: #2c1d14;
+            border-radius: 1rem;
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+        }
+        .rank-list {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .player-rank-item {
+            display: flex;
+            justify-content: space-between;
+            background: #1f140e;
+            margin: 0.3rem 0;
+            padding: 0.4rem;
+            border-radius: 0.8rem;
+        }
+        .match-selection {
+            background: #2a631033;
+            border-left: 4px solid #ffaa44;
+            padding: 0.6rem;
+            margin-top: 0.6rem;
+            border-radius: 1rem;
+        }
+
+        .danger-alert {
             background: #4a1300aa;
             padding: 0.6rem;
             border-radius: 1rem;
             margin: 0.5rem 0;
         }
-
-        .winner-badge {
-            background: #b97f2e;
-            color: #1c0a02;
-            padding: 0.2rem 0.6rem;
-            border-radius: 2rem;
-            font-weight: bold;
-        }
-
-        /* player ranking table */
-        .player-list {
-            max-height: 380px;
-            overflow-y: auto;
-        }
-
-        .player-row {
-            display: flex;
-            justify-content: space-between;
-            background: #1f140e;
-            margin: 0.3rem 0;
-            padding: 0.5rem;
-            border-radius: 0.8rem;
-            align-items: center;
-        }
-
-        .player-name {
-            font-weight: 500;
-        }
-
-        .player-score {
-            background: #2a1a10;
-            padding: 0.2rem 0.6rem;
-            border-radius: 2rem;
-            font-family: monospace;
-            font-weight: bold;
-        }
-
-        .rank-highlight {
-            color: #ffaa55;
-        }
-
-        .selection-btn {
-            background: #b9512a;
-            border: none;
-            color: white;
-            padding: 0.3rem 0.7rem;
-            border-radius: 2rem;
-            cursor: pointer;
-            margin-left: 0.3rem;
-            font-size: 0.7rem;
-        }
-
-        .selected-tag {
-            background: #2a6310;
-            padding: 0.2rem 0.5rem;
-            border-radius: 1rem;
-            font-size: 0.7rem;
-        }
-
-        .reset-pyramid {
-            background: #3e2a1e;
-            border: 1px solid #b9512a;
-            padding: 0.4rem 1rem;
-            border-radius: 2rem;
-            cursor: pointer;
-            margin-top: 0.8rem;
-            width: 100%;
-        }
-
         footer {
             margin-top: 2rem;
             text-align: center;
             font-size: 0.7rem;
             opacity: 0.6;
         }
+        @media (max-width: 800px) {
+            .add-player-form { flex-direction: column; }
+        }
     </style>
 </head>
 <body>
 <div class="app-container">
-    <div class="arena-header">
-        <h1>⚔️ THE GAUNTLET ⚔️</h1>
-        <p>U13 → U20 Survival Pyramid | Concede >3 Goals = ELIMINATION</p>
-        <div class="rule-line">🏆 WINNER STAYS ON · SAT/SUN MATCH DAY: TOP RANKED PLAYERS SELECTED 🏆</div>
+    <div class="hunger-header">
+        <h1>⚔️ HUNGERBALL ACADEMY ⚔️</h1>
+        <p>The Ball is a Prized Possession • Survival Pyramid U13→U20 • Midweek Grading → Weekend Warriors</p>
+        <div class="rule-line">🔥 concede >3 goals = TEAM ELIMINATION · individual involvement ranking · positional selection 🔥</div>
     </div>
 
-    <div class="elimination-alert">
-        ⚠️ U13 RULE: If your team concedes MORE THAN 3 GOALS → The team is DONE. No more games. Players eliminated from pyramid. ⚠️
-    </div>
-
-    <div class="pyramid-grid">
-        <!-- MATCH SIMULATION / CURRENT BATTLE -->
-        <div class="match-panel">
-            <div class="section-title">🔥 CURRENT MATCH · WINNER STAYS ON</div>
-            <div id="matchArea">
-                <!-- dynamic match display -->
+    <div class="academy-grid">
+        <!-- LEFT PANEL: PLAYER MANAGEMENT + PYRAMID OVERVIEW -->
+        <div class="panel panel-left">
+            <div class="section-title">📋 SQUAD REGISTRY · ADD PLAYER</div>
+            <div class="add-player-form" id="addPlayerForm">
+                <input type="text" id="playerName" placeholder="Full name" autocomplete="off">
+                <select id="playerPosition">
+                    <option value="GK">GK</option><option value="RB">RB</option><option value="CB">CB</option><option value="LB">LB</option>
+                    <option value="CDM">CDM</option><option value="CM">CM</option><option value="CAM">CAM</option>
+                    <option value="RW">RW</option><option value="LW">LW</option><option value="ST">ST</option>
+                </select>
+                <input type="date" id="playerDob">
+                <select id="playerAgeGroup">
+                    <option value="U13">U13</option><option value="U14">U14</option><option value="U15">U15</option>
+                    <option value="U16">U16</option><option value="U17">U17</option><option value="U18">U18</option>
+                    <option value="U19">U19</option><option value="U20">U20</option>
+                </select>
+                <button type="button" class="btn" id="addPlayerBtn">+ ADD PLAYER</button>
             </div>
-            <div id="eliminationMessage" style="margin-top: 0.8rem; font-weight: bold; color: #ff7744;"></div>
-            <button id="nextOpponentBtn" class="simulate-btn" style="background:#4a6b2c;">➡️ ADVANCE WINNER (NEXT AGE GROUP)</button>
-            <button id="resetGauntletBtn" class="reset-pyramid">🔄 RESET FULL PYRAMID (U13 RESTART)</button>
+
+            <div style="overflow-x: auto;">
+                <table class="player-table" id="playersTable">
+                    <thead><tr><th>Name</th><th>Pos</th><th>AgeGrp</th><th>Involvement</th><th>Status</th><th></th></tr></thead>
+                    <tbody id="playersTableBody"></tbody>
+                </table>
+            </div>
+
+            <div class="grading-zone">
+                <div class="section-title" style="margin-bottom: 0.5rem;">🏟️ MIDWEEK IN-HOUSE GAME (GRADING)</div>
+                <button id="simulateMidweekBtn" class="btn" style="background:#8b5a2b;">⚡ SIMULATE MIDWEEK GAME (UPDATE INVOLVEMENT)</button>
+                <div id="midweekLog" class="midweek-card" style="margin-top: 0.6rem; font-size:0.8rem;">No grading yet. Click to run internal match & update player scores.</div>
+            </div>
+
+            <div class="danger-alert" id="pyramidStatus">
+                🏆 CURRENT PYRAMID: U13 champion: <strong>Hunger Wolves</strong> | Next challenger: Vipers U13
+            </div>
+            <button id="advancePyramidBtn" class="btn btn-outline" style="margin-right:0.5rem;">➡️ ADVANCE WINNER (next age group)</button>
+            <button id="resetPyramidBtn" class="btn btn-outline">🔄 RESET PYRAMID (U13 restart)</button>
         </div>
 
-        <!-- PLAYER RANKINGS & SELECTION -->
-        <div class="standings-panel">
-            <div class="section-title">📊 PLAYER RANKINGS (Involvement Score)</div>
-            <div id="playerRankingList" class="player-list">
-                <!-- dynamic ranking based on involvement -->
-            </div>
-            <div class="section-title" style="margin-top: 1rem;">⭐ SELECTED FOR MATCH DAY (SAT/SUN)</div>
-            <div id="selectedPlayersList" style="background:#1f130c; border-radius:1rem; padding:0.6rem; min-height: 80px;">
-                No selection yet. Highest ranked after matches get picked.
-            </div>
-            <button id="autoSelectBtn" class="selection-btn" style="width:100%; margin-top:0.6rem;">🎯 SELECT TOP RANKED (Match Day)</button>
+        <!-- RIGHT PANEL: RANKINGS + POSITIONAL GRADING + WEEKEND SELECTION -->
+        <div class="panel panel-right">
+            <div class="section-title">📊 OVERALL INVOLVEMENT RANKING</div>
+            <div id="globalRankingList" class="rank-list"></div>
+
+            <div class="section-title" style="margin-top: 1rem;">🎯 POSITIONAL GRADING (Top per position)</div>
+            <div id="positionalRanking" class="rank-list"></div>
+
+            <div class="section-title" style="margin-top: 1rem;">⭐ WEEKEND MATCH OFFICIAL LINEUP</div>
+            <div id="weekendSelection" class="match-selection">No selection yet. Run 'SELECT FOR WEEKEND' after midweek grading.</div>
+            <button id="selectWeekendBtn" class="btn" style="margin-top: 0.6rem; width:100%;">🎯 SELECT BEST XI (per position + involvement)</button>
+            <button id="resetAllDataBtn" class="btn btn-outline" style="margin-top: 0.6rem; background:#3a1c10;">⚠️ RESET FULL ACADEMY (delete all players)</button>
         </div>
     </div>
-    <footer>
-        🩸 Concede >3 = Elimination. Individual involvement score = goals + assists + tackles + dribbles. Winners climb U13→U14→...→U20. Only the best survive selection.
-    </footer>
+    <footer>🐺 HUNGERBALL ACADEMY: Midweek internal game updates involvement → positional ranking → highest graded players selected for weekend official match.</footer>
 </div>
 
 <script>
-    // Pyramid definition: age groups from U13 to U20 (8 levels)
-    const AGE_GROUPS = ["U13", "U14", "U15", "U16", "U17", "U18", "U19", "U20"];
-    
-    // Current state: which age group is fighting? and which team is the current champion (winner stays)
-    let currentAgeIndex = 0;      // start U13
-    let currentChampionTeam = "The Wolves";   // winner team name
-    
-    // Player pool: each player has name, ageGroup, involvementScore (updated after matches), isEliminated flag
-    let players = [
-        { id: 1, name: "Lucas M.", ageGroup: "U13", involvement: 0, eliminated: false, selectedForMatch: false },
-        { id: 2, name: "Mateo R.", ageGroup: "U13", involvement: 0, eliminated: false, selectedForMatch: false },
-        { id: 3, name: "Santiago C.", ageGroup: "U13", involvement: 0, eliminated: false, selectedForMatch: false },
-        { id: 4, name: "Thiago P.", ageGroup: "U13", involvement: 0, eliminated: false, selectedForMatch: false },
-        { id: 5, name: "Benicio F.", ageGroup: "U13", involvement: 0, eliminated: false, selectedForMatch: false },
-        { id: 6, name: "Joaquin L.", ageGroup: "U13", involvement: 0, eliminated: false, selectedForMatch: false },
-        { id: 7, name: "Facundo V.", ageGroup: "U13", involvement: 0, eliminated: false, selectedForMatch: false },
-        // Additional players for older groups (they appear when advancing)
-        { id: 8, name: "Nicolas D.", ageGroup: "U14", involvement: 0, eliminated: false, selectedForMatch: false },
-        { id: 9, name: "Franco Z.", ageGroup: "U14", involvement: 0, eliminated: false, selectedForMatch: false },
-        { id: 10, name: "Lautaro H.", ageGroup: "U14", involvement: 0, eliminated: false, selectedForMatch: false },
-        { id: 11, name: "Geronimo W.", ageGroup: "U15", involvement: 0, eliminated: false, selectedForMatch: false },
-        { id: 12, name: "Nahuel K.", ageGroup: "U15", involvement: 0, eliminated: false, selectedForMatch: false },
-        { id: 13, name: "Exequiel B.", ageGroup: "U16", involvement: 0, eliminated: false, selectedForMatch: false },
-        { id: 14, name: "Alan S.", ageGroup: "U17", involvement: 0, eliminated: false, selectedForMatch: false },
-        { id: 15, name: "Rodrigo M.", ageGroup: "U18", involvement: 0, eliminated: false, selectedForMatch: false },
-        { id: 16, name: "Tomas G.", ageGroup: "U19", involvement: 0, eliminated: false, selectedForMatch: false },
-        { id: 17, name: "Emiliano C.", ageGroup: "U20", involvement: 0, eliminated: false, selectedForMatch: false },
-    ];
+    // ----------------------------- PLAYER DATA MODEL -------------------------
+    let players = [];
 
-    // Opponent team data (challenger name)
-    let challengerTeamName = "Vipers FC";  // can be generic
-    let currentMatchResult = null; // store last scores
-    
-    // Helper: Update UI
-    function renderMatchArea() {
-        const container = document.getElementById("matchArea");
-        const currentAge = AGE_GROUPS[currentAgeIndex];
-        const eliminatedPlayers = players.filter(p => p.ageGroup === currentAge && p.eliminated);
-        const activePlayers = players.filter(p => p.ageGroup === currentAge && !p.eliminated);
-        
-        container.innerHTML = `
-            <div class="team-card">
-                <div class="team-name">
-                    <span>🏆 CHAMPION: ${currentChampionTeam}</span>
-                    <span class="winner-badge">WINNER STAYS</span>
-                </div>
-                <div style="font-size:0.8rem;">Age: ${currentAge} · ${activePlayers.length} active players</div>
-            </div>
-            <div class="team-card">
-                <div class="team-name">
-                    <span>⚔️ CHALLENGER: ${challengerTeamName}</span>
-                    <span>Age: ${currentAge}</span>
-                </div>
-                <div style="margin: 0.6rem 0;">
-                    <label>Champion Goals: <input type="number" id="championGoals" class="score-input" value="2" min="0"></label>
-                    <label style="margin-left: 1rem;">Challenger Goals: <input type="number" id="challengerGoals" class="score-input" value="1" min="0"></label>
-                </div>
-                <button id="simulateMatchBtn" class="simulate-btn">⚔️ SIMULATE MATCH (UPDATE INVOLVEMENT & CHECK ELIMINATION)</button>
-            </div>
-            ${eliminatedPlayers.length > 0 ? `<div class="danger-zone">💀 ELIMINATED PLAYERS (${currentAge}): ${eliminatedPlayers.map(p=>p.name).join(', ')}</div>` : ''}
-        `;
-        
-        const simBtn = document.getElementById("simulateMatchBtn");
-        if(simBtn) simBtn.addEventListener("click", simulateMatch);
-    }
-    
-    function simulateMatch() {
-        const champGoals = parseInt(document.getElementById("championGoals")?.value || 0);
-        const challGoals = parseInt(document.getElementById("challengerGoals")?.value || 0);
-        const currentAge = AGE_GROUPS[currentAgeIndex];
-        
-        // ELIMINATION RULE: if champion (The Wolves) concede >3 goals => team eliminated
-        const championConceded = challGoals;
-        let eliminatedTeam = false;
-        let eliminationMessage = "";
-        
-        if(championConceded > 3) {
-            eliminatedTeam = true;
-            eliminationMessage = `💀 ELIMINATION! ${currentChampionTeam} conceded ${championConceded} goals (>3). The team is DONE. No more games for them.`;
-            // Mark all players in current age group as eliminated (can't play)
-            players.forEach(p => {
-                if(p.ageGroup === currentAge && !p.eliminated) {
-                    p.eliminated = true;
-                }
-            });
-        } else {
-            eliminationMessage = `✅ ${currentChampionTeam} survived! Conceded ${championConceded} goals (≤3). Team advances.`;
-        }
-        
-        // Update involvement scores based on match performance (individual stat simulation)
-        // Each active player gets involvement increase: random + goals/assists influence
-        const activePlayersInMatch = players.filter(p => p.ageGroup === currentAge && !p.eliminated);
-        activePlayersInMatch.forEach(p => {
-            let involvementGain = Math.floor(Math.random() * 30) + 10; // base 10-40
-            if(champGoals > challGoals && currentChampionTeam === "The Wolves") involvementGain += 20; // winners bonus
-            if(champGoals < challGoals) involvementGain += 5; // fighting spirit
-            p.involvement += involvementGain;
-        });
-        
-        // If champion lost but not eliminated (conceded <=3 but lost on goals?) the rule is only elimination on >3 goals.
-        // Winner stays on logic: if champion wins (champGoals > challGoals) they remain champion and proceed to next age group later.
-        // But our "advance winner" button will move champion to next age.
-        // If champion lost but not eliminated? Gauntlet rule: winner stays on = champion only remains if they WIN?
-        // According to description: winner stays on another, then under 14's come in. So champion must win to continue.
-        // But elimination is separate: concede >3 = dead. If champion loses but conceded ≤3, they are not eliminated but they lose champion status? 
-        // Let's refine: "winner stays on" means the winning team keeps the crown. So if champion loses (champGoals < challGoals), they lose crown.
-        let matchWinner = "";
-        if(champGoals > challGoals) {
-            matchWinner = currentChampionTeam;
-        } else if(challGoals > champGoals) {
-            matchWinner = challengerTeamName;
-            // Crown passes to challenger if champion lost fair
-            if(!eliminatedTeam) {
-                currentChampionTeam = challengerTeamName;
-                eliminationMessage += ` 👑 ${challengerTeamName} wins the crown!`;
-            }
-        } else {
-            matchWinner = "DRAW — champion retains";
-        }
-        
-        document.getElementById("eliminationMessage").innerHTML = `<span style="color:#ffaa66;">${eliminationMessage}<br>🏅 Match winner: ${matchWinner}</span>`;
-        
-        // re-render match area and rankings
-        renderMatchArea();
-        renderRankings();
-        saveToLocal();
-    }
-    
-    function advanceWinnerToNextAge() {
-        const nextAgeIndex = currentAgeIndex + 1;
-        if(nextAgeIndex >= AGE_GROUPS.length) {
-            document.getElementById("eliminationMessage").innerHTML = "🏆🏆 THE GAUNTLET IS COMPLETE! ULTIMATE CHAMPIONS! 🏆🏆";
-            return;
-        }
-        // check if current team still has active players (not fully eliminated)
-        const activeCurrent = players.filter(p => p.ageGroup === AGE_GROUPS[currentAgeIndex] && !p.eliminated);
-        if(activeCurrent.length === 0) {
-            document.getElementById("eliminationMessage").innerHTML = "❌ Cannot advance: current team is ELIMINATED. Reset pyramid to restart.";
-            return;
-        }
-        // Move champion to next age group
-        currentAgeIndex = nextAgeIndex;
-        // Reset challenger name for the new age bracket
-        challengerTeamName = `${AGE_GROUPS[currentAgeIndex]} All-Stars`;
-        // Keep the same champion team name (winner stays)
-        document.getElementById("eliminationMessage").innerHTML = `🚀 CHAMPION ${currentChampionTeam} advances to ${AGE_GROUPS[currentAgeIndex]}! Next challenger: ${challengerTeamName}`;
-        renderMatchArea();
-        renderRankings();
-        saveToLocal();
-    }
-    
-    // Player rankings: sort by involvement, show only non-eliminated and from all age groups (but selection for match day)
-    function renderRankings() {
-        const activePlayers = players.filter(p => !p.eliminated).sort((a,b) => b.involvement - a.involvement);
-        const rankingDiv = document.getElementById("playerRankingList");
-        rankingDiv.innerHTML = activePlayers.map(p => `
-            <div class="player-row">
-                <span class="player-name">${p.name} (${p.ageGroup})</span>
-                <span class="player-score">🏅 ${p.involvement} pts</span>
-            </div>
-        `).join("");
-        if(activePlayers.length === 0) rankingDiv.innerHTML = "<div>No active players (all eliminated?) Reset pyramid</div>";
-    }
-    
-    function autoSelectTopRanked() {
-        // Reset previous selections
-        players.forEach(p => p.selectedForMatch = false);
-        const activeSorted = players.filter(p => !p.eliminated).sort((a,b) => b.involvement - a.involvement);
-        // select top 7 (or less)
-        const selected = activeSorted.slice(0, Math.min(7, activeSorted.length));
-        selected.forEach(p => p.selectedForMatch = true);
-        displaySelectedPlayers();
-        saveToLocal();
-    }
-    
-    function displaySelectedPlayers() {
-        const selectedDiv = document.getElementById("selectedPlayersList");
-        const selected = players.filter(p => p.selectedForMatch && !p.eliminated);
-        if(selected.length === 0) {
-            selectedDiv.innerHTML = "<div>No players selected yet. Use 'SELECT TOP RANKED'.</div>";
-            return;
-        }
-        selectedDiv.innerHTML = selected.map(p => `<div style="background:#3a281c; margin:0.2rem; padding:0.3rem; border-radius:1rem;">🔥 ${p.name} (${p.ageGroup}) - ${p.involvement} pts</div>`).join("");
-    }
-    
-    function resetFullPyramid() {
-        // Reset state: age index 0, champion team "The Wolves", reset all player eliminations and involvement
-        currentAgeIndex = 0;
-        currentChampionTeam = "The Wolves";
-        challengerTeamName = "Vipers FC";
-        players.forEach(p => {
-            p.eliminated = false;
-            p.involvement = 0;
-            p.selectedForMatch = false;
-        });
-        document.getElementById("eliminationMessage").innerHTML = "🔄 PYRAMID RESET. U13 restart. All players alive.";
-        renderMatchArea();
-        renderRankings();
-        displaySelectedPlayers();
-        saveToLocal();
-    }
-    
-    function saveToLocal() {
+    // Pyramid state (U13 -> U20 survival)
+    let currentAgeIndex = 0;         // 0 = U13
+    let currentChampionTeam = "Hunger Wolves";
+    let challengerTeamName = "Vipers";
+    let pyramidEliminated = false;    // if current champion conceded >3 in last match simulation, team eliminated.
+
+    // Helper: load/save localstorage
+    function saveData() {
         const state = {
+            players,
             currentAgeIndex,
             currentChampionTeam,
             challengerTeamName,
-            players
+            pyramidEliminated
         };
-        localStorage.setItem("gauntletPyramid", JSON.stringify(state));
+        localStorage.setItem("hungerballAcademy", JSON.stringify(state));
     }
-    
-    function loadFromLocal() {
-        const saved = localStorage.getItem("gauntletPyramid");
+
+    function loadData() {
+        const saved = localStorage.getItem("hungerballAcademy");
         if(saved) {
             try {
                 const data = JSON.parse(saved);
-                currentAgeIndex = data.currentAgeIndex;
-                currentChampionTeam = data.currentChampionTeam;
-                challengerTeamName = data.challengerTeamName;
-                players = data.players;
+                players = data.players || [];
+                currentAgeIndex = data.currentAgeIndex ?? 0;
+                currentChampionTeam = data.currentChampionTeam ?? "Hunger Wolves";
+                challengerTeamName = data.challengerTeamName ?? "Vipers";
+                pyramidEliminated = data.pyramidEliminated ?? false;
             } catch(e) {}
         }
-        renderMatchArea();
-        renderRankings();
-        displaySelectedPlayers();
+        if(players.length === 0) {
+            // Seed some demo players
+            players = [
+                { id: Date.now()+1, name: "Lucas Mendoza", position: "ST", dob: "2012-05-12", ageGroup: "U13", involvement: 42, eliminated: false },
+                { id: Date.now()+2, name: "Mateo Rojas", position: "CM", dob: "2012-08-22", ageGroup: "U13", involvement: 38, eliminated: false },
+                { id: Date.now()+3, name: "Santiago Cruz", position: "CB", dob: "2012-02-01", ageGroup: "U13", involvement: 29, eliminated: false },
+                { id: Date.now()+4, name: "Thiago Paredes", position: "LW", dob: "2012-11-11", ageGroup: "U13", involvement: 51, eliminated: false },
+                { id: Date.now()+5, name: "Benicio Flores", position: "GK", dob: "2012-07-19", ageGroup: "U13", involvement: 33, eliminated: false },
+                { id: Date.now()+6, name: "Joaquin Lema", position: "RB", dob: "2012-09-03", ageGroup: "U13", involvement: 27, eliminated: false },
+                { id: Date.now()+7, name: "Facundo Vera", position: "CDM", dob: "2011-12-10", ageGroup: "U14", involvement: 44, eliminated: false },
+            ];
+        }
+        renderAll();
     }
-    
-    // Event bindings
-    document.getElementById("nextOpponentBtn")?.addEventListener("click", advanceWinnerToNextAge);
-    document.getElementById("resetGauntletBtn")?.addEventListener("click", resetFullPyramid);
-    document.getElementById("autoSelectBtn")?.addEventListener("click", autoSelectTopRanked);
-    
-    loadFromLocal();
+
+    function addPlayer(name, position, dob, ageGroup) {
+        if(!name.trim()) return;
+        const newPlayer = {
+            id: Date.now(),
+            name: name.trim(),
+            position: position,
+            dob: dob,
+            ageGroup: ageGroup,
+            involvement: 0,
+            eliminated: false
+        };
+        players.push(newPlayer);
+        saveData();
+        renderAll();
+    }
+
+    // MIDWEEK IN-HOUSE GAME: simulate internal matches that update involvement based on position + random hunger factor
+    function simulateMidweekGame() {
+        // Only non-eliminated players can improve
+        let activePlayers = players.filter(p => !p.eliminated);
+        if(activePlayers.length === 0) {
+            document.getElementById("midweekLog").innerHTML = "❌ No active players (all eliminated?). Add players or reset pyramid.";
+            return;
+        }
+        let log = "⚡ MIDWEEK GRADING RESULTS:<br>";
+        activePlayers.forEach(p => {
+            // involvement gain based on position and randomness (hunger aggression)
+            let base = 15;
+            if(p.position === "ST" || p.position === "LW" || p.position === "RW") base += 8;
+            if(p.position === "CM" || p.position === "CAM") base += 6;
+            if(p.position === "GK") base += 4;
+            let gain = Math.floor(Math.random() * 25) + base;
+            p.involvement += gain;
+            log += `🔥 ${p.name} (${p.position}) +${gain} → ${p.involvement} pts<br>`;
+        });
+        // Also add pyramid survival effect: if pyramid eliminated, champion team can't be updated but players from current age group get penalty
+        const currentAgeGroup = getCurrentAgeGroupString();
+        if(pyramidEliminated) {
+            let eliminatedGroupPlayers = players.filter(p => p.ageGroup === currentAgeGroup && !p.eliminated);
+            eliminatedGroupPlayers.forEach(p => { p.involvement = Math.max(0, p.involvement - 15); });
+            log += `<span style="color:#ff8866;">⚠️ Pyramid elimination: ${currentAgeGroup} players lost -15 involvement.</span><br>`;
+        }
+        document.getElementById("midweekLog").innerHTML = log;
+        saveData();
+        renderAll();
+    }
+
+    function getCurrentAgeGroupString() {
+        const groups = ["U13","U14","U15","U16","U17","U18","U19","U20"];
+        return groups[currentAgeIndex] || "U13";
+    }
+
+    // Pyramind advance: if champion not eliminated, move to next age group
+    function advancePyramid() {
+        if(pyramidEliminated) {
+            document.getElementById("midweekLog").innerHTML = "❌ Cannot advance: current champion team is ELIMINATED (conceded >3). Reset pyramid first.";
+            return;
+        }
+        const nextIdx = currentAgeIndex + 1;
+        if(nextIdx >= 8) {
+            document.getElementById("midweekLog").innerHTML = "🏆🏆 ULTIMATE GAUNTLET VICTORY! ACADEMY LEGENDS! 🏆🏆";
+            return;
+        }
+        currentAgeIndex = nextIdx;
+        // reset challenger name for new age group
+        challengerTeamName = `Vipers ${getCurrentAgeGroupString()}`;
+        pyramidEliminated = false;
+        saveData();
+        document.getElementById("midweekLog").innerHTML = `🚀 CHAMPION ${currentChampionTeam} advances to ${getCurrentAgeGroupString()}! Challenger: ${challengerTeamName}`;
+        renderAll();
+    }
+
+    function resetPyramid() {
+        currentAgeIndex = 0;
+        currentChampionTeam = "Hunger Wolves";
+        challengerTeamName = "Vipers U13";
+        pyramidEliminated = false;
+        // players are not eliminated by pyramid reset but we keep their involvement; they just restart challenge.
+        saveData();
+        document.getElementById("midweekLog").innerHTML = "🔄 Pyramid reset to U13. Champion Hunger Wolves defends against Vipers U13.";
+        renderAll();
+    }
+
+    // SELECTION FOR WEEKEND MATCH: based on positional ranking + involvement
+    function selectWeekendLineup() {
+        const activePlayers = players.filter(p => !p.eliminated);
+        if(activePlayers.length === 0) {
+            document.getElementById("weekendSelection").innerHTML = "No eligible players. Add players or reset academy.";
+            return;
+        }
+        // Group by position: need best GK, best RB, best CB, best LB, best CDM, best CM, best CAM, best RW, best LW, best ST (flexible 11)
+        const positionsOrder = ["GK", "RB", "CB", "LB", "CDM", "CM", "CAM", "RW", "LW", "ST"];
+        // we'll pick top per position, and for multiple CB/CM we can take top 2 etc. But we make 11 players: 1 GK, 2 CB, 2 CM etc basic.
+        let selectedMap = new Map(); // position -> best player(s)
+        // get best per position
+        let bestPerPos = {};
+        for(let pos of positionsOrder) {
+            let posPlayers = activePlayers.filter(p => p.position === pos).sort((a,b) => b.involvement - a.involvement);
+            if(posPlayers.length > 0) bestPerPos[pos] = posPlayers[0];
+        }
+        // Build starting XI:
+        let starting = [];
+        if(bestPerPos["GK"]) starting.push(bestPerPos["GK"]);
+        // defense: RB, LB, and top 2 CB if exist
+        if(bestPerPos["RB"]) starting.push(bestPerPos["RB"]);
+        if(bestPerPos["LB"]) starting.push(bestPerPos["LB"]);
+        let allCB = activePlayers.filter(p => p.position === "CB").sort((a,b) => b.involvement - a.involvement);
+        if(allCB.length >= 1) starting.push(allCB[0]);
+        if(allCB.length >= 2) starting.push(allCB[1]);
+        // midfield: CDM, CM, CAM (take best)
+        if(bestPerPos["CDM"]) starting.push(bestPerPos["CDM"]);
+        let allCM = activePlayers.filter(p => p.position === "CM").sort((a,b) => b.involvement - a.involvement);
+        if(allCM.length >= 1) starting.push(allCM[0]);
+        if(bestPerPos["CAM"]) starting.push(bestPerPos["CAM"]);
+        // wingers & ST
+        if(bestPerPos["RW"]) starting.push(bestPerPos["RW"]);
+        if(bestPerPos["LW"]) starting.push(bestPerPos["LW"]);
+        if(bestPerPos["ST"]) starting.push(bestPerPos["ST"]);
+        // fill remaining slots with highest involvement regardless pos to make 11
+        let remainingSlots = 11 - starting.length;
+        if(remainingSlots > 0) {
+            let alreadySelectedIds = new Set(starting.map(p => p.id));
+            let otherPlayers = activePlayers.filter(p => !alreadySelectedIds.has(p.id)).sort((a,b) => b.involvement - a.involvement);
+            for(let i=0; i<remainingSlots && i<otherPlayers.length; i++) {
+                starting.push(otherPlayers[i]);
+            }
+        }
+        // render weekend lineup
+        const weekendDiv = document.getElementById("weekendSelection");
+        if(starting.length === 0) weekendDiv.innerHTML = "No lineup generated.";
+        else {
+            let html = `<strong>🔥 OFFICIAL WEEKEND MATCH SQUAD (Top ranked by position)</strong><br>`;
+            starting.forEach(p => {
+                html += `⚡ ${p.name} (${p.position}) · ${p.involvement} pts<br>`;
+            });
+            weekendDiv.innerHTML = html;
+        }
+        saveData();
+    }
+
+    // RENDER all UI: players table, global ranking, positional ranking
+    function renderAll() {
+        renderPlayersTable();
+        renderGlobalRanking();
+        renderPositionalRanking();
+        updatePyramidStatusText();
+    }
+
+    function renderPlayersTable() {
+        const tbody = document.getElementById("playersTableBody");
+        if(!tbody) return;
+        tbody.innerHTML = "";
+        players.forEach(p => {
+            const row = tbody.insertRow();
+            if(p.eliminated) row.classList.add("eliminated");
+            row.insertCell(0).innerText = p.name;
+            row.insertCell(1).innerHTML = `<span class="position-badge">${p.position}</span>`;
+            row.insertCell(2).innerText = p.ageGroup;
+            row.insertCell(3).innerText = p.involvement;
+            row.insertCell(4).innerText = p.eliminated ? "ELIMINATED" : "ACTIVE";
+            const delBtn = document.createElement("button");
+            delBtn.innerText = "❌";
+            delBtn.style.background = "none";
+            delBtn.style.border = "none";
+            delBtn.style.color = "#ff8866";
+            delBtn.style.cursor = "pointer";
+            delBtn.onclick = () => { removePlayer(p.id); };
+            const cell = row.insertCell(5);
+            cell.appendChild(delBtn);
+        });
+    }
+
+    function removePlayer(id) {
+        players = players.filter(p => p.id !== id);
+        saveData();
+        renderAll();
+    }
+
+    function renderGlobalRanking() {
+        const active = players.filter(p => !p.eliminated).sort((a,b) => b.involvement - a.involvement);
+        const container = document.getElementById("globalRankingList");
+        if(active.length === 0) { container.innerHTML = "<div>No active players.</div>"; return; }
+        container.innerHTML = active.map(p => `<div class="player-rank-item"><span>${p.name} (${p.ageGroup}) ${p.position}</span><span style="font-weight:bold;">${p.involvement} pts</span></div>`).join("");
+    }
+
+    function renderPositionalRanking() {
+        const active = players.filter(p => !p.eliminated);
+        const positions = ["GK","RB","CB","LB","CDM","CM","CAM","RW","LW","ST"];
+        const container = document.getElementById("positionalRanking");
+        let html = "";
+        for(let pos of positions) {
+            let posPlayers = active.filter(p => p.position === pos).sort((a,b) => b.involvement - a.involvement);
+            if(posPlayers.length > 0) {
+                let top = posPlayers[0];
+                html += `<div class="player-rank-item"><span>🥇 ${pos} · ${top.name}</span><span>${top.involvement} pts</span></div>`;
+            } else {
+                html += `<div class="player-rank-item"><span>${pos} · no player</span><span>—</span></div>`;
+            }
+        }
+        container.innerHTML = html;
+    }
+
+    function updatePyramidStatusText() {
+        const statusDiv = document.getElementById("pyramidStatus");
+        const currentAge = getCurrentAgeGroupString();
+        let elimMsg = pyramidEliminated ? " ⚠️ CHAMPION ELIMINATED (conceded >3)" : "";
+        statusDiv.innerHTML = `🏆 PYRAMID: ${currentAge} · Champion: ${currentChampionTeam} vs ${challengerTeamName}${elimMsg}<br>⚡ Concede >3 goals = team eliminated. Winner stays.`;
+    }
+
+    function resetFullAcademy() {
+        if(confirm("⚠️ DELETE ALL PLAYERS AND RESET PYRAMID? This cannot be undone.")) {
+            players = [];
+            currentAgeIndex = 0;
+            currentChampionTeam = "Hunger Wolves";
+            challengerTeamName = "Vipers U13";
+            pyramidEliminated = false;
+            saveData();
+            renderAll();
+            document.getElementById("weekendSelection").innerHTML = "Academy reset. Add players to begin.";
+            document.getElementById("midweekLog").innerHTML = "Academy reset. Use 'Add Player' to build your hunger squad.";
+        }
+    }
+
+    // Event listeners
+    document.getElementById("addPlayerBtn")?.addEventListener("click", () => {
+        const name = document.getElementById("playerName").value;
+        const pos = document.getElementById("playerPosition").value;
+        const dob = document.getElementById("playerDob").value;
+        const ageGroup = document.getElementById("playerAgeGroup").value;
+        if(!name) { alert("Enter player name"); return; }
+        if(!dob) { alert("Enter date of birth"); return; }
+        addPlayer(name, pos, dob, ageGroup);
+        document.getElementById("playerName").value = "";
+        document.getElementById("playerDob").value = "";
+    });
+    document.getElementById("simulateMidweekBtn")?.addEventListener("click", simulateMidweekGame);
+    document.getElementById("advancePyramidBtn")?.addEventListener("click", advancePyramid);
+    document.getElementById("resetPyramidBtn")?.addEventListener("click", resetPyramid);
+    document.getElementById("selectWeekendBtn")?.addEventListener("click", selectWeekendLineup);
+    document.getElementById("resetAllDataBtn")?.addEventListener("click", resetFullAcademy);
+
+    loadData();
 </script>
 </body>
 </html>
