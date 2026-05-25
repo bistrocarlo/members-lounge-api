@@ -850,7 +850,7 @@
     let timeLeft = 45 * 60;
     let chatUnsubscribe = null;
     let leagueRules = "⚽ Kickoff: 8:00pm SHARP at Clifton Park\n👑 Captain rotates weekly\n✅ RSVP by Sunday 6pm\n🎭 Guests welcome!\n👕 Bring white and dark shirts\n📝 Match reports auto-generated";
-    let playerTeamRecords = {};
+    let playerWinLossRecords = {};
     
     let weatherData = {
         temp: "18°C",
@@ -1078,89 +1078,126 @@
         return stats;
     }
     
-    async function updatePlayerTeamRecords(gameDate, yellowScore, orangeScore, assignments) {
-        if (yellowScore === orangeScore) return; // Draw - no win/loss recorded
+    // Calculate win/loss records based on actual match results
+    function calculateWinLossRecords() {
+        const records = {};
         
-        const winner = yellowScore > orangeScore ? "yellow" : "orange";
+        // Initialize records for all players
+        for (let p of players) {
+            records[p] = {
+                wins: 0,
+                losses: 0,
+                draws: 0,
+                gamesPlayed: 0,
+                winPercentage: 0
+            };
+        }
         
-        for (let [player, team] of Object.entries(assignments)) {
-            if (!playerTeamRecords[player]) {
-                playerTeamRecords[player] = { 
-                    yellowWins: 0, 
-                    yellowLosses: 0, 
-                    orangeWins: 0, 
-                    orangeLosses: 0,
-                    totalWins: 0,
-                    totalLosses: 0
-                };
+        // Go through each past match result
+        for (let [gameDate, match] of Object.entries(matchResults)) {
+            if (match.yellowScore === undefined || match.orangeScore === undefined) continue;
+            
+            // Determine winner
+            let winner = null;
+            if (match.yellowScore > match.orangeScore) winner = "yellow";
+            else if (match.orangeScore > match.yellowScore) winner = "orange";
+            else winner = "draw";
+            
+            // Get team assignments for this game
+            const assignments = teamAssignments[gameDate] || {};
+            
+            // Get all players who played in this game
+            const participants = getAllParticipants(gameDate);
+            const allPlayers = [...participants.players, ...participants.guests.map(g => g.name)];
+            
+            // For each player, update their record based on which team they were on
+            for (let player of allPlayers) {
+                const playerTeam = assignments[player];
+                
+                if (records[player]) {
+                    records[player].gamesPlayed++;
+                    
+                    if (winner === "draw") {
+                        records[player].draws++;
+                    } else if (playerTeam === winner) {
+                        records[player].wins++;
+                    } else if (playerTeam === "yellow" || playerTeam === "orange") {
+                        records[player].losses++;
+                    }
+                }
+            }
+        }
+        
+        // Calculate win percentages
+        for (let p of players) {
+            const totalGames = records[p].wins + records[p].losses + records[p].draws;
+            if (totalGames > 0) {
+                records[p].winPercentage = (records[p].wins / totalGames) * 100;
+                records[p].gamesPlayed = totalGames;
+            } else {
+                records[p].winPercentage = 0;
+            }
+        }
+        
+        return records;
+    }
+    
+    function getWinPercentageRankings() {
+        const records = calculateWinLossRecords();
+        const rankings = [];
+        
+        for (let p of players) {
+            if (records[p].gamesPlayed >= 3) { // Minimum 3 games to be ranked
+                rankings.push({
+                    name: p,
+                    winPct: records[p].winPercentage,
+                    wins: records[p].wins,
+                    losses: records[p].losses,
+                    draws: records[p].draws,
+                    games: records[p].gamesPlayed
+                });
+            }
+        }
+        
+        return rankings.sort((a, b) => b.winPct - a.winPct);
+    }
+    
+    async function updatePlayerWinLossRecords(gameDate, yellowScore, orangeScore, assignments) {
+        if (yellowScore === undefined || orangeScore === undefined) return;
+        
+        // Determine winner
+        let winner = null;
+        if (yellowScore > orangeScore) winner = "yellow";
+        else if (orangeScore > yellowScore) winner = "orange";
+        
+        // Get all players who played
+        const participants = getAllParticipants(gameDate);
+        const allPlayers = [...participants.players, ...participants.guests.map(g => g.name)];
+        
+        // Initialize records if needed
+        if (!playerWinLossRecords[gameDate]) {
+            playerWinLossRecords[gameDate] = {};
+        }
+        
+        for (let player of allPlayers) {
+            const playerTeam = assignments[player];
+            
+            if (!playerWinLossRecords[gameDate][player]) {
+                playerWinLossRecords[gameDate][player] = { team: playerTeam, result: null };
             }
             
-            if (team === winner) {
-                // Player is on winning team
-                if (team === "yellow") {
-                    playerTeamRecords[player].yellowWins++;
-                    playerTeamRecords[player].totalWins++;
-                } else if (team === "orange") {
-                    playerTeamRecords[player].orangeWins++;
-                    playerTeamRecords[player].totalWins++;
-                }
-            } else {
-                // Player is on losing team
-                if (team === "yellow") {
-                    playerTeamRecords[player].yellowLosses++;
-                    playerTeamRecords[player].totalLosses++;
-                } else if (team === "orange") {
-                    playerTeamRecords[player].orangeLosses++;
-                    playerTeamRecords[player].totalLosses++;
-                }
+            if (winner === "draw") {
+                playerWinLossRecords[gameDate][player].result = "draw";
+            } else if (playerTeam === winner) {
+                playerWinLossRecords[gameDate][player].result = "win";
+            } else if (playerTeam === "yellow" || playerTeam === "orange") {
+                playerWinLossRecords[gameDate][player].result = "loss";
             }
         }
         
         if (firebaseReady && db) {
-            await db.collection("config").doc("playerTeamRecords").set(playerTeamRecords);
+            await db.collection("config").doc("playerWinLossRecords").set(playerWinLossRecords);
         }
-    }
-    
-    function getWinPercentageRankings() {
-        const rankings = [];
-        for (let p of players) {
-            const record = playerTeamRecords[p] || { 
-                yellowWins: 0, 
-                yellowLosses: 0, 
-                orangeWins: 0, 
-                orangeLosses: 0,
-                totalWins: 0,
-                totalLosses: 0
-            };
-            
-            // Calculate total games from attendance records for this player
-            const playerGames = attendance.filter(a => a.player === p && a.status === 'in').length;
-            const openingGames = playerProfiles[p]?.openingBalanceGames || 0;
-            const totalGamesPlayed = playerGames + openingGames;
-            
-            // Use the tracked wins/losses from the records
-            const totalWins = record.totalWins || (record.yellowWins + record.orangeWins);
-            const totalLosses = record.totalLosses || (record.yellowLosses + record.orangeLosses);
-            const totalRecordedGames = totalWins + totalLosses;
-            
-            // Win percentage based ONLY on games where we have team assignment data
-            const winPct = totalRecordedGames > 0 ? (totalWins / totalRecordedGames) * 100 : 0;
-            
-            rankings.push({
-                name: p,
-                winPct: winPct,
-                wins: totalWins,
-                losses: totalLosses,
-                games: totalRecordedGames,
-                totalGamesPlayed: totalGamesPlayed,
-                yellowWins: record.yellowWins || 0,
-                yellowLosses: record.yellowLosses || 0,
-                orangeWins: record.orangeWins || 0,
-                orangeLosses: record.orangeLosses || 0
-            });
-        }
-        // Filter out players with no recorded games and sort by win percentage
-        return rankings.filter(r => r.games > 0).sort((a, b) => b.winPct - a.winPct);
     }
     
     function getPowerRankings() {
@@ -1278,7 +1315,7 @@
         }
         
         const assignments = teamAssignments[date] || {};
-        await updatePlayerTeamRecords(date, yellowScore, orangeScore, assignments);
+        await updatePlayerWinLossRecords(date, yellowScore, orangeScore, assignments);
         
         refreshAll();
         alert("✅ Match result saved! Rankings updated.");
@@ -1428,14 +1465,14 @@
                 db.collection("matchComments").get(),
                 db.collection("trashTalk").orderBy("timestamp", "desc").limit(50).get(),
                 db.collection("config").doc("leagueRules").get(),
-                db.collection("config").doc("playerTeamRecords").get()
+                db.collection("config").doc("playerWinLossRecords").get()
             ]);
             
             if (profDoc.exists) playerProfiles = profDoc.data();
             if (tDoc.exists) teamAssignments = tDoc.data();
             if (rDoc.exists) matchResults = rDoc.data();
             if (rulesDoc.exists) leagueRules = rulesDoc.data().rules || leagueRules;
-            if (recordsDoc.exists) playerTeamRecords = recordsDoc.data();
+            if (recordsDoc.exists) playerWinLossRecords = recordsDoc.data();
             
             attendance = attSnap.docs.map(d => d.data());
             guests = guestSnap.docs.map(d => d.data());
@@ -1887,18 +1924,18 @@
         const topGoals = [...allStats].sort((a, b) => b.goals - a.goals).slice(0, 15);
         const topAssists = [...allStats].sort((a, b) => b.assists - a.assists).slice(0, 15);
         const topGames = [...allStats].sort((a, b) => b.gamesPlayed - a.gamesPlayed).slice(0, 15);
-        const winRankings = getWinPercentageRankings().filter(r => r.games >= 1).slice(0, 15);
+        const winRankings = getWinPercentageRankings();
         
         container.innerHTML = `
             <div class="card">
                 <h2><i class="fas fa-trophy"></i> ALL-TIME LEADERBOARD</h2>
                 
                 <div style="margin-bottom: 24px;">
-                    <h3><i class="fas fa-chart-line"></i> 🏆 WIN PERCENTAGE RANKINGS</h3>
-                    <p class="text-muted" style="margin-bottom: 12px;">Based on games with recorded team assignments</p>
+                    <h3><i class="fas fa-chart-line"></i> 🏆 WIN PERCENTAGE RANKINGS (Min 3 games)</h3>
+                    <p class="text-muted" style="margin-bottom: 12px;">Based on actual match results - tracking wins and losses regardless of team</p>
                     <table class="data-table">
                         <thead>
-                            <tr><th>#</th><th>Player</th><th>Win %</th><th>W-L</th><th>🟡 W-L</th><th>🟠 W-L</th><th>Games*</th></tr>
+                            <tr><th>#</th><th>Player</th><th>Win %</th><th>W-L-D</th><th>Games</th></tr>
                         </thead>
                         <tbody>
                             ${winRankings.map((p, i) => `
@@ -1906,15 +1943,13 @@
                                     <td><strong>${i + 1}</strong> ${i === 0 ? '👑' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : ''))}</td>
                                     <td>${renderMiniAvatar(p.name)} ${escapeHtml(p.name)}</td>
                                     <td class="win-pct-high">${p.winPct.toFixed(1)}%</td>
-                                    <td>${p.wins}-${p.losses}</td>
-                                    <td>${p.yellowWins}-${p.yellowLosses}</td>
-                                    <td>${p.orangeWins}-${p.orangeLosses}</td>
+                                    <td>${p.wins}-${p.losses}-${p.draws}</td>
                                     <td>${p.games}</td>
                                 </tr>
                             `).join('')}
+                            ${winRankings.length === 0 ? '<tr><td colspan="5" class="text-muted" style="text-align: center;">No players with 3+ games yet</td></tr>' : ''}
                         </tbody>
-                    </table>
-                    <div class="text-muted" style="margin-top: 8px; font-size: 11px;">*Games with recorded team data</div>
+                     </table>
                 </div>
                 
                 <div style="margin-bottom: 24px;">
@@ -1922,9 +1957,9 @@
                     <table class="data-table">
                         <thead><tr><th>#</th><th>Player</th><th>Goals</th></tr></thead>
                         <tbody>
-                            ${topGoals.map((p, i) => `<tr><td><strong>${i + 1}</strong></td><td>${renderMiniAvatar(p.name)} ${escapeHtml(p.name)}</td><td><strong>${p.goals}</strong></td></tr>`).join('')}
+                            ${topGoals.map((p, i) => `<tr><td><strong>${i + 1}</strong></td><td>${renderMiniAvatar(p.name)} ${escapeHtml(p.name)}</td><td><strong>${p.goals}</strong></td>`).join('')}
                         </tbody>
-                    </table>
+                     </table>
                 </div>
                 
                 <div style="margin-bottom: 24px;">
@@ -1932,9 +1967,9 @@
                     <table class="data-table">
                         <thead><tr><th>#</th><th>Player</th><th>Assists</th></tr></thead>
                         <tbody>
-                            ${topAssists.map((p, i) => `<tr><td><strong>${i + 1}</strong></td><td>${renderMiniAvatar(p.name)} ${escapeHtml(p.name)}</td><td><strong>${p.assists}</strong></td></tr>`).join('')}
+                            ${topAssists.map((p, i) => `<tr><td><strong>${i + 1}</strong></td><td>${renderMiniAvatar(p.name)} ${escapeHtml(p.name)}</td><td><strong>${p.assists}</strong></td>`).join('')}
                         </tbody>
-                    </table>
+                     </table>
                 </div>
                 
                 <div>
@@ -1942,9 +1977,9 @@
                     <table class="data-table">
                         <thead><tr><th>#</th><th>Player</th><th>Games</th></tr></thead>
                         <tbody>
-                            ${topGames.map((p, i) => `<tr><td><strong>${i + 1}</strong></td><td>${renderMiniAvatar(p.name)} ${escapeHtml(p.name)}</td><td><strong>${p.gamesPlayed}</strong></td></tr>`).join('')}
+                            ${topGames.map((p, i) => `<tr><td><strong>${i + 1}</strong></td><td>${renderMiniAvatar(p.name)} ${escapeHtml(p.name)}</td><td><strong>${p.gamesPlayed}</strong></td>`).join('')}
                         </tbody>
-                    </table>
+                     </table>
                 </div>
             </div>
         `;
@@ -1975,7 +2010,7 @@
                             </tr>
                         `).join('')}
                     </tbody>
-                </table>
+                 </table>
             </div>
         `;
     }
