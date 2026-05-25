@@ -769,6 +769,19 @@
             border-radius: 16px;
             margin-bottom: 8px;
         }
+        
+        .delete-result-btn {
+            background: #dc3545;
+            font-size: 12px;
+            padding: 5px 12px;
+            margin-left: 10px;
+        }
+        
+        .warning-text {
+            color: #dc3545;
+            font-size: 11px;
+            margin-top: 8px;
+        }
     </style>
 </head>
 <body>
@@ -1035,15 +1048,20 @@
             if (stats.has(p)) stats.get(p).gamesPlayed += opening;
         }
         
-        for (let match of Object.values(matchResults)) {
+        // Calculate goals and assists from match results - only count each match once
+        for (let [gameDate, match] of Object.entries(matchResults)) {
             if (match.goals) {
                 for (let [scorer, count] of Object.entries(match.goals)) {
-                    if (stats.has(scorer)) stats.get(scorer).goals += count;
+                    if (stats.has(scorer)) {
+                        stats.get(scorer).goals += count;
+                    }
                 }
             }
             if (match.assists) {
                 for (let [assister, count] of Object.entries(match.assists)) {
-                    if (stats.has(assister)) stats.get(assister).assists += count;
+                    if (stats.has(assister)) {
+                        stats.get(assister).assists += count;
+                    }
                 }
             }
             if (match.mvp && stats.has(match.mvp)) {
@@ -1301,6 +1319,14 @@
     }
     
     async function saveMatchResult(date, yellowScore, orangeScore, goals, assists, mvp, injuries) {
+        // Check if there's already a result for this date - warn admin
+        if (matchResults[date] && matchResults[date].timestamp) {
+            const confirmOverwrite = confirm(`⚠️ WARNING: A match result already exists for this date!\n\nExisting: 🟡 ${matchResults[date].yellowScore} - ${matchResults[date].orangeScore} 🟠\n\nDo you want to overwrite it? This will update all statistics.`);
+            if (!confirmOverwrite) {
+                return;
+            }
+        }
+        
         matchResults[date] = {
             yellowScore,
             orangeScore,
@@ -1318,7 +1344,21 @@
         await updatePlayerWinLossRecords(date, yellowScore, orangeScore, assignments);
         
         refreshAll();
-        alert("✅ Match result saved! Rankings updated.");
+        alert("✅ Match result saved! Statistics updated.");
+    }
+    
+    async function deleteMatchResult(date) {
+        if (!confirm(`⚠️ PERMANENT ACTION: Are you sure you want to delete the match result for ${date}?\n\nThis will remove all goals, assists, and MVP data for this match from all statistics.`)) {
+            return;
+        }
+        
+        delete matchResults[date];
+        if (firebaseReady && db) {
+            await db.collection("config").doc("matchResults").set(matchResults);
+        }
+        
+        refreshAll();
+        alert("✅ Match result deleted!");
     }
     
     async function saveComment(date, author, text) {
@@ -1748,6 +1788,7 @@
                     <div class="match-header">
                         <div><i class="fas fa-calendar-alt"></i> ${week.label}</div>
                         <div class="match-result">🟡 ${match.yellowScore} - ${match.orangeScore} 🟠</div>
+                        ${isAdminLoggedIn ? `<button class="delete-result-btn" onclick="window.deleteMatchResult('${week.dateStr}')"><i class="fas fa-trash"></i> Delete</button>` : ''}
                     </div>
                     
                     <div class="teams-section">
@@ -1810,6 +1851,10 @@
             input.value = "";
             renderHistoryPage();
         }
+    };
+    
+    window.deleteMatchResult = async function(date) {
+        await deleteMatchResult(date);
     };
     
     window.shareMatchReport = function(date) {
@@ -1949,17 +1994,16 @@
                             `).join('')}
                             ${winRankings.length === 0 ? '<tr><td colspan="5" class="text-muted" style="text-align: center;">No players with 3+ games yet</td></tr>' : ''}
                         </tbody>
-                     </table>
-                </div>
+                      </div>
                 
                 <div style="margin-bottom: 24px;">
                     <h3><i class="fas fa-futbol"></i> TOP GOAL SCORERS</h3>
                     <table class="data-table">
                         <thead><tr><th>#</th><th>Player</th><th>Goals</th></tr></thead>
                         <tbody>
-                            ${topGoals.map((p, i) => `<tr><td><strong>${i + 1}</strong></td><td>${renderMiniAvatar(p.name)} ${escapeHtml(p.name)}</td><td><strong>${p.goals}</strong></td>`).join('')}
+                            ${topGoals.map((p, i) => `<tr><td><strong>${i + 1}</strong></td><td>${renderMiniAvatar(p.name)} ${escapeHtml(p.name)}</td><td><strong>${p.goals}</strong></td></tr>`).join('')}
                         </tbody>
-                     </table>
+                    ……
                 </div>
                 
                 <div style="margin-bottom: 24px;">
@@ -1967,9 +2011,9 @@
                     <table class="data-table">
                         <thead><tr><th>#</th><th>Player</th><th>Assists</th></tr></thead>
                         <tbody>
-                            ${topAssists.map((p, i) => `<tr><td><strong>${i + 1}</strong></td><td>${renderMiniAvatar(p.name)} ${escapeHtml(p.name)}</td><td><strong>${p.assists}</strong></td>`).join('')}
+                            ${topAssists.map((p, i) => `<tr><td><strong>${i + 1}</strong></td><td>${renderMiniAvatar(p.name)} ${escapeHtml(p.name)}</td><td><strong>${p.assists}</strong></td></tr>`).join('')}
                         </tbody>
-                     </table>
+                    ……
                 </div>
                 
                 <div>
@@ -1977,9 +2021,9 @@
                     <table class="data-table">
                         <thead><tr><th>#</th><th>Player</th><th>Games</th></tr></thead>
                         <tbody>
-                            ${topGames.map((p, i) => `<tr><td><strong>${i + 1}</strong></td><td>${renderMiniAvatar(p.name)} ${escapeHtml(p.name)}</td><td><strong>${p.gamesPlayed}</strong></td>`).join('')}
+                            ${topGames.map((p, i) => `<tr><td><strong>${i + 1}</strong></td><td>${renderMiniAvatar(p.name)} ${escapeHtml(p.name)}</td><td><strong>${p.gamesPlayed}</strong></td></tr>`).join('')}
                         </tbody>
-                     </table>
+                    ……
                 </div>
             </div>
         `;
@@ -2010,7 +2054,7 @@
                             </tr>
                         `).join('')}
                     </tbody>
-                 </table>
+                ……
             </div>
         `;
     }
@@ -2259,7 +2303,8 @@
             </div>
             
             <div class="card">
-                <h2><i class="fas fa-chart-simple"></i> Add Match Result</h2>
+                <h2><i class="fas fa-chart-simple"></i> Add/Edit Match Result</h2>
+                <p class="warning-text"><i class="fas fa-exclamation-triangle"></i> Warning: Saving a new result will overwrite any existing result for that week!</p>
                 <select id="resultWeekSelect">
                     <option value="">-- Select Week --</option>
                     ${allWeeks.map(w => `<option value="${w.dateStr}">${w.label}</option>`).join('')}
@@ -2325,6 +2370,7 @@
                     <select id="resultMvp"><option value="">-- Select MVP --</option>${playerOptions}</select>
                 </div>
                 <button id="saveResultBtn" style="width: 100%; margin-top: 16px;"><i class="fas fa-save"></i> Save Match Result</button>
+                ${existing.yellowScore !== undefined ? `<button id="deleteResultBtn" style="width: 100%; margin-top: 8px; background: #dc3545;"><i class="fas fa-trash"></i> Delete Current Result</button>` : ''}
             `;
             
             let goals = existing.goals ? Object.entries(existing.goals).map(([p, c]) => ({ player: p, count: c })) : [];
@@ -2337,7 +2383,7 @@
                 goalsDiv.innerHTML = goals.map((g, idx) => `
                     <div class="stats-row">
                         <select class="goalPlayerSelect" data-idx="${idx}" style="flex: 2;">${playerOptions}</select>
-                        <input type="number" class="goalCountInput" data-idx="${idx}" value="${g.count}" style="width: 70px;">
+                        <input type="number" class="goalCountInput" data-idx="${idx}" value="${g.count}" style="width: 70px;" min="1">
                         <button class="removeGoalBtn" data-idx="${idx}" style="background: #dc3545;"><i class="fas fa-trash"></i></button>
                     </div>
                 `).join('') || '<div class="text-muted">No goals added</div>';
@@ -2361,7 +2407,7 @@
                 assistsDiv.innerHTML = assists.map((a, idx) => `
                     <div class="stats-row">
                         <select class="assistPlayerSelect" data-idx="${idx}" style="flex: 2;">${playerOptions}</select>
-                        <input type="number" class="assistCountInput" data-idx="${idx}" value="${a.count}" style="width: 70px;">
+                        <input type="number" class="assistCountInput" data-idx="${idx}" value="${a.count}" style="width: 70px;" min="1">
                         <button class="removeAssistBtn" data-idx="${idx}" style="background: #dc3545;"><i class="fas fa-trash"></i></button>
                     </div>
                 `).join('') || '<div class="text-muted">No assists added</div>';
@@ -2401,7 +2447,12 @@
                 assists.forEach(a => { if (a.player && a.count > 0) assistsObj[a.player] = (assistsObj[a.player] || 0) + a.count; });
                 const mvp = document.getElementById("resultMvp").value;
                 await saveMatchResult(week, yellow, orange, goalsObj, assistsObj, mvp, []);
-                alert("✅ Match result saved!");
+            });
+            
+            document.getElementById("deleteResultBtn")?.addEventListener("click", async () => {
+                await deleteMatchResult(week);
+                document.getElementById("resultWeekSelect").value = "";
+                formPanel.innerHTML = "";
             });
         });
     }
