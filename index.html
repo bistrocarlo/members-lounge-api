@@ -1,14 +1,545 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="https://base44.com/logo_v2.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="manifest" href="/manifest.json" />
-    <title>Base44 APP</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Monday Soccer | Post-Match Stats Poll</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #e5e5e5;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* WhatsApp bubble style container */
+        .poll-container {
+            max-width: 500px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Header mock */
+        .whatsapp-header {
+            background: #075E54;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 24px 24px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .whatsapp-header i {
+            font-size: 24px;
+        }
+
+        .whatsapp-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .whatsapp-header span {
+            background: #25D366;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Main card */
+        .poll-card {
+            background: white;
+            padding: 24px 20px;
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .match-info {
+            background: #f0f2f5;
+            padding: 14px;
+            border-radius: 20px;
+            margin-bottom: 24px;
+            text-align: center;
+            border-left: 4px solid #25D366;
+        }
+
+        .match-info p {
+            margin: 4px 0;
+            color: #1a1a2e;
+        }
+
+        .player-selector {
+            margin-bottom: 24px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #374151;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 28px;
+            font-size: 16px;
+            font-family: 'Inter', sans-serif;
+            background: white;
+            transition: all 0.2s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #25D366;
+            box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.1);
+        }
+
+        .stats-row {
+            margin-bottom: 20px;
+        }
+
+        .number-input {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f8f9fa;
+            border-radius: 60px;
+            padding: 6px;
+            border: 1.5px solid #e2e8f0;
+        }
+
+        .number-input button {
+            background: white;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            font-size: 22px;
+            font-weight: 800;
+            cursor: pointer;
+            color: #075E54;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.1s;
+        }
+
+        .number-input button:active {
+            transform: scale(0.95);
+            background: #e9ecef;
+        }
+
+        .number-input input {
+            text-align: center;
+            font-size: 22px;
+            font-weight: 700;
+            border: none;
+            background: transparent;
+            padding: 8px 0;
+            width: 70px;
+        }
+
+        .number-input input:focus {
+            box-shadow: none;
+        }
+
+        .stat-icon {
+            font-size: 28px;
+            margin-right: 12px;
+        }
+
+        .stat-label {
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .submit-btn {
+            background: #25D366;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 60px;
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 16px;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.2s;
+        }
+
+        .submit-btn:active {
+            transform: scale(0.97);
+        }
+
+        .preview-box {
+            background: #dcf8c5;
+            border-radius: 20px;
+            padding: 16px;
+            margin-top: 24px;
+            border: 1px solid #a5d6a5;
+        }
+
+        .preview-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #2e7d32;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .preview-message {
+            font-family: monospace;
+            font-size: 13px;
+            background: white;
+            padding: 12px;
+            border-radius: 16px;
+            word-break: break-word;
+            color: #1e1e2f;
+        }
+
+        .copy-btn {
+            background: #075E54;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 40px;
+            width: 100%;
+            margin-top: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .copy-btn:active {
+            transform: scale(0.98);
+        }
+
+        .toast-msg {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e1e2f;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 13px;
+            z-index: 1000;
+            animation: fadeInUp 0.2s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .footnote {
+            text-align: center;
+            font-size: 11px;
+            color: #6c757d;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="poll-container">
+    <!-- Fake WhatsApp header for vibes -->
+    <div class="whatsapp-header">
+        <i class="fab fa-whatsapp"></i>
+        <h2>Monday Night Squad</h2>
+        <span>Post-Match Poll</span>
+    </div>
+
+    <div class="poll-card">
+        <div class="match-info">
+            <i class="fas fa-futbol" style="color: #25D366; margin-right: 6px;"></i>
+            <strong>Clifton Park · Monday 7:45pm</strong>
+            <p id="matchDateDisplay">Loading match date...</p>
+        </div>
+
+        <!-- Player dropdown -->
+        <div class="player-selector">
+            <label><i class="fas fa-user"></i> Who's submitting stats?</label>
+            <select id="playerNameSelect">
+                <option value="">-- Choose your name --</option>
+                <option value="Alex Rowe">Alex Rowe</option>
+                <option value="Ali Mekawy">Ali Mekawy</option>
+                <option value="Carlo Pavia">Carlo Pavia</option>
+                <option value="Charlie Pavia">Charlie Pavia</option>
+                <option value="Chris Del Monaco">Chris Del Monaco</option>
+                <option value="Chris Margelis">Chris Margelis</option>
+                <option value="Chris Sophocli">Chris Sophocli</option>
+                <option value="Danny Sammartino">Danny Sammartino</option>
+                <option value="Dante Sammartino">Dante Sammartino</option>
+                <option value="David">David</option>
+                <option value="Dimitri">Dimitri</option>
+                <option value="Enzo">Enzo</option>
+                <option value="Farid">Farid</option>
+                <option value="Faros">Faros</option>
+                <option value="Frank Marcaccio">Frank Marcaccio</option>
+                <option value="George Babatsikos">George Babatsikos</option>
+                <option value="George Theodoropoulos">George Theodoropoulos</option>
+                <option value="Ivan">Ivan</option>
+                <option value="James Zoumis">James Zoumis</option>
+                <option value="James Martino">James Martino</option>
+                <option value="Joe Trimboli">Joe Trimboli</option>
+                <option value="Joseph">Joseph</option>
+                <option value="Kiarash Piani">Kiarash Piani</option>
+                <option value="Leo">Leo</option>
+                <option value="Manoli">Manoli</option>
+                <option value="Marco Mercuri">Marco Mercuri</option>
+                <option value="Mario">Mario</option>
+                <option value="Morris Del Monte">Morris Del Monte</option>
+                <option value="Nector Laskaris">Nector Laskaris</option>
+                <option value="Paul Hardalas">Paul Hardalas</option>
+                <option value="Perri Theodorlis">Perri Theodorlis</option>
+                <option value="Peter Disensi">Peter Disensi</option>
+                <option value="Ralph Risoli">Ralph Risoli</option>
+                <option value="Rocco Mammoliti">Rocco Mammoliti</option>
+                <option value="Paul Salustro">Paul Salustro</option>
+                <option value="Stevan Brankovic">Stevan Brankovic</option>
+                <option value="Theo">Theo</option>
+                <option value="Tony El Hajj">Tony El Hajj</option>
+                <option value="Vasilis">Vasilis</option>
+            </select>
+        </div>
+
+        <!-- Goals counter -->
+        <div class="stats-row">
+            <div class="stat-label">
+                <i class="fas fa-futbol stat-icon" style="color: #eab308;"></i>
+                <span>⚽ How many GOALS did you score?</span>
+            </div>
+            <div class="number-input">
+                <button id="goalMinus">-</button>
+                <input type="number" id="goalCount" value="0" min="0" max="10" step="1">
+                <button id="goalPlus">+</button>
+            </div>
+        </div>
+
+        <!-- Assists counter -->
+        <div class="stats-row">
+            <div class="stat-label">
+                <i class="fas fa-magic stat-icon" style="color: #3b82f6;"></i>
+                <span>🎯 How many ASSISTS did you have?</span>
+            </div>
+            <div class="number-input">
+                <button id="assistMinus">-</button>
+                <input type="number" id="assistCount" value="0" min="0" max="10" step="1">
+                <button id="assistPlus">+</button>
+            </div>
+        </div>
+
+        <!-- Submit & share -->
+        <button class="submit-btn" id="generatePollBtn">
+            <i class="fab fa-whatsapp"></i> Generate & Share on WhatsApp
+        </button>
+
+        <!-- Preview box: shows exactly what will be sent -->
+        <div class="preview-box" id="previewBox">
+            <div class="preview-title">
+                <i class="fas fa-eye"></i> Preview message
+            </div>
+            <div class="preview-message" id="previewMsg">
+                Select your name and stats above 👆
+            </div>
+            <button class="copy-btn" id="copyPreviewBtn">
+                <i class="fas fa-copy"></i> Copy to clipboard
+            </button>
+        </div>
+        <div class="footnote">
+            <i class="fas fa-shield-alt"></i> Honesty system — every goal/assist helps your stats & rankings!
+        </div>
+    </div>
+</div>
+
+<script>
+    // Helper to get next Monday's date (match day)
+    function getNextMonday() {
+        const today = new Date();
+        const day = today.getDay(); // 0 = Sunday, 1 = Monday...
+        const daysUntilMonday = (day === 0 ? 1 : 8 - day);
+        const nextMonday = new Date(today);
+        nextMonday.setDate(today.getDate() + daysUntilMonday);
+        return nextMonday;
+    }
+
+    function formatMatchDate() {
+        const monday = getNextMonday();
+        return monday.toLocaleDateString('en-AU', { 
+            weekday: 'long', 
+            day: 'numeric', 
+            month: 'long', 
+            year: 'numeric' 
+        });
+    }
+
+    // Set match date in header
+    document.getElementById('matchDateDisplay').innerText = formatMatchDate();
+
+    // DOM elements
+    const playerSelect = document.getElementById('playerNameSelect');
+    const goalInput = document.getElementById('goalCount');
+    const assistInput = document.getElementById('assistCount');
+    const goalMinus = document.getElementById('goalMinus');
+    const goalPlus = document.getElementById('goalPlus');
+    const assistMinus = document.getElementById('assistMinus');
+    const assistPlus = document.getElementById('assistPlus');
+    const generateBtn = document.getElementById('generatePollBtn');
+    const previewMsgDiv = document.getElementById('previewMsg');
+    const copyBtn = document.getElementById('copyPreviewBtn');
+
+    // Helper: update preview message live
+    function updatePreview() {
+        const playerName = playerSelect.value;
+        const goals = parseInt(goalInput.value) || 0;
+        const assists = parseInt(assistInput.value) || 0;
+
+        if (!playerName) {
+            previewMsgDiv.innerHTML = '⚠️ Please select your name first.';
+            return;
+        }
+
+        const matchDate = formatMatchDate();
+        // Build the WhatsApp message — clean, honest poll format
+        const message = `⚽ *MONDAY NIGHT SOCCER - POST MATCH STATS* ⚽\n\n📅 ${matchDate} | Clifton Park\n👤 *Player:* ${playerName}\n\n✅ *Goals scored:* ${goals}\n✅ *Assists made:* ${assists}\n\n> Honest stats help the team 🙌\n#MondayNightFootball`;
+
+        previewMsgDiv.innerHTML = message.replace(/\n/g, '<br>');
+    }
+
+    // Listen to changes
+    playerSelect.addEventListener('change', updatePreview);
+    goalInput.addEventListener('input', updatePreview);
+    assistInput.addEventListener('input', updatePreview);
+
+    // Goal +/-
+    goalPlus.addEventListener('click', () => {
+        let val = parseInt(goalInput.value) || 0;
+        val = Math.min(val + 1, 10);
+        goalInput.value = val;
+        updatePreview();
+    });
+    goalMinus.addEventListener('click', () => {
+        let val = parseInt(goalInput.value) || 0;
+        val = Math.max(val - 1, 0);
+        goalInput.value = val;
+        updatePreview();
+    });
+
+    // Assist +/-
+    assistPlus.addEventListener('click', () => {
+        let val = parseInt(assistInput.value) || 0;
+        val = Math.min(val + 1, 10);
+        assistInput.value = val;
+        updatePreview();
+    });
+    assistMinus.addEventListener('click', () => {
+        let val = parseInt(assistInput.value) || 0;
+        val = Math.max(val - 1, 0);
+        assistInput.value = val;
+        updatePreview();
+    });
+
+    // Make sure manual input stays within range
+    goalInput.addEventListener('change', () => {
+        let val = parseInt(goalInput.value);
+        if (isNaN(val)) val = 0;
+        val = Math.min(Math.max(val, 0), 10);
+        goalInput.value = val;
+        updatePreview();
+    });
+    assistInput.addEventListener('change', () => {
+        let val = parseInt(assistInput.value);
+        if (isNaN(val)) val = 0;
+        val = Math.min(Math.max(val, 0), 10);
+        assistInput.value = val;
+        updatePreview();
+    });
+
+    // Show toast
+    function showToast(msg) {
+        let toast = document.createElement('div');
+        toast.className = 'toast-msg';
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
+    }
+
+    // Generate and open WhatsApp with the message
+    generateBtn.addEventListener('click', () => {
+        const playerName = playerSelect.value;
+        if (!playerName) {
+            alert('👋 Please select your name first!');
+            return;
+        }
+
+        const goals = parseInt(goalInput.value) || 0;
+        const assists = parseInt(assistInput.value) || 0;
+        const matchDate = formatMatchDate();
+
+        const whatsappMessage = `⚽ *MONDAY NIGHT SOCCER - POST MATCH STATS* ⚽%0a%0a📅 ${matchDate} | Clifton Park%0a👤 *Player:* ${playerName}%0a%0a✅ *Goals scored:* ${goals}%0a✅ *Assists made:* ${assists}%0a%0a> Honest stats help the team 🙌%0a#MondayNightFootball`;
+
+        // Encode for WhatsApp
+        const url = `https://wa.me/?text=${whatsappMessage}`;
+        
+        // Optional: show a quick confirm
+        if (confirm(`Ready to share your stats on WhatsApp?\n\nGoals: ${goals} | Assists: ${assists}`)) {
+            window.open(url, '_blank');
+            showToast('📱 Opening WhatsApp...');
+        }
+    });
+
+    // Copy preview to clipboard
+    copyBtn.addEventListener('click', () => {
+        const rawText = previewMsgDiv.innerText || previewMsgDiv.textContent;
+        if (!rawText || rawText.includes('Select your name')) {
+            alert('Please select your name and set stats first');
+            return;
+        }
+        navigator.clipboard.writeText(rawText).then(() => {
+            showToast('✅ Copied to clipboard! Paste in WhatsApp group.');
+        }).catch(() => {
+            alert('Could not copy manually');
+        });
+    });
+
+    // Initial preview
+    updatePreview();
+</script>
+</body>
 </html>
