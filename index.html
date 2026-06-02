@@ -811,6 +811,39 @@
             width: auto;
             margin: 0;
         }
+        
+        .admin-only {
+            border: 2px solid #ffcd00;
+            background: #fff8e7;
+        }
+        
+        .guest-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .guest-stats {
+            font-size: 11px;
+            color: #6c757d;
+            margin-left: 10px;
+        }
+        
+        .delete-guest-btn {
+            background: #dc3545;
+            padding: 4px 12px;
+            font-size: 11px;
+        }
+        
+        .edit-guest-btn {
+            background: #ffc107;
+            color: #2c2c2c;
+            padding: 4px 12px;
+            font-size: 11px;
+            margin-right: 6px;
+        }
     </style>
 </head>
 <body>
@@ -852,8 +885,11 @@
         "James Martino", "Joe Trimboli", "Joseph", "Kiarash Piani", "Leo", "Manoli",
         "Marco Mercuri", "Mario", "Morris Del Monte", "Nector Laskaris", "Paul Hardalas",
         "Perri Theodorlis", "Peter Disensi", "Ralph Risoli", "Rocco Mammoliti",
-        "Paul Salustro", "Stevan Brankovic", "Theo", "Tony El Hajj", "Vasilis"
+        "Paul Salustro", "Stevan Brankovic", "Theo", "Tony El Hajj", "Vasilis", "Aiden", "Alessandro", "Stefan D"
     ].sort();
+    
+    // ==================== MASTER GUEST LIST ====================
+    let masterGuests = [];
     
     const ACHIEVEMENTS = [
         { id: "debut", name: "First Game", desc: "Play your first match", icon: "🌟" },
@@ -881,7 +917,7 @@
     let teamAssignments = {};
     let matchResults = {};
     let attendance = [];
-    let guests = [];
+    let weeklyGuests = [];
     let matchComments = [];
     let trashTalkPosts = [];
     let isAdminLoggedIn = false;
@@ -894,6 +930,7 @@
     let playerWinLossRecords = {};
     let cachedStats = null;
     let statsDirty = true;
+    let adminSessionKey = null;
     
     let weatherData = {
         temp: "18°C",
@@ -902,6 +939,143 @@
         rainChance: 10,
         wind: "12 km/h"
     };
+    
+    // ==================== SECURE ADMIN AUTHENTICATION ====================
+    function verifyAdminPassword(inputPassword) {
+        const encodedHash = "IUZ5dG9vZm5pbWFkYQ==";
+        const reversedHash = atob(encodedHash);
+        const correctPassword = reversedHash.split('').reverse().join('');
+        return inputPassword === correctPassword;
+    }
+    
+    function checkAdminSession() {
+        if (!adminSessionKey) return false;
+        const sessionData = sessionStorage.getItem('mns_admin_session');
+        if (!sessionData) return false;
+        try {
+            const parsed = JSON.parse(sessionData);
+            if (Date.now() > parsed.expiry) {
+                sessionStorage.removeItem('mns_admin_session');
+                return false;
+            }
+            return parsed.key === adminSessionKey;
+        } catch(e) { return false; }
+    }
+    
+    function setAdminSession() {
+        adminSessionKey = 'admin_' + Date.now() + '_' + Math.random().toString(36).substr(2, 10);
+        sessionStorage.setItem('mns_admin_session', JSON.stringify({
+            key: adminSessionKey,
+            expiry: Date.now() + (24 * 60 * 60 * 1000)
+        }));
+    }
+    
+    function clearAdminSession() {
+        adminSessionKey = null;
+        sessionStorage.removeItem('mns_admin_session');
+    }
+    
+    Object.defineProperty(window, 'isAdminLoggedIn', {
+        get: function() { return isAdminLoggedIn && checkAdminSession(); },
+        set: function(val) { 
+            if (!checkAdminSession() && val === true) return;
+            isAdminLoggedIn = val;
+        }
+    });
+    
+    // ==================== MASTER GUEST LIST FUNCTIONS ====================
+    async function loadMasterGuests() {
+        if (!firebaseReady || !db) return;
+        try {
+            const doc = await db.collection("config").doc("masterGuests").get();
+            if (doc.exists) {
+                masterGuests = doc.data().guests || [];
+            } else {
+                masterGuests = [];
+            }
+        } catch(e) { console.warn("Failed to load master guests", e); }
+    }
+    
+    async function saveMasterGuests() {
+        if (!firebaseReady || !db) return;
+        try {
+            await db.collection("config").doc("masterGuests").set({ guests: masterGuests });
+        } catch(e) { console.warn("Failed to save master guests", e); }
+    }
+    
+    async function addMasterGuest(guestName, addedBy) {
+        const existing = masterGuests.find(g => g.name.toLowerCase() === guestName.toLowerCase());
+        if (existing) {
+            existing.lastAppearance = new Date().toISOString().split('T')[0];
+            existing.totalGames = (existing.totalGames || 0) + 1;
+            await saveMasterGuests();
+            return existing;
+        }
+        const newGuest = {
+            id: Date.now().toString(),
+            name: guestName,
+            firstAppearance: new Date().toISOString().split('T')[0],
+            lastAppearance: new Date().toISOString().split('T')[0],
+            totalGames: 1,
+            addedBy: addedBy
+        };
+        masterGuests.push(newGuest);
+        await saveMasterGuests();
+        return newGuest;
+    }
+    
+    async function updateGuestLastAppearance(guestName, gameDate) {
+        const guest = masterGuests.find(g => g.name.toLowerCase() === guestName.toLowerCase());
+        if (guest) {
+            guest.lastAppearance = gameDate;
+            guest.totalGames = (guest.totalGames || 0) + 1;
+            await saveMasterGuests();
+        }
+    }
+    
+    async function deleteMasterGuest(guestId) {
+        if (!isAdminLoggedIn || !checkAdminSession()) {
+            alert("Admin access required");
+            return false;
+        }
+        const guest = masterGuests.find(g => g.id === guestId);
+        if (!guest) return false;
+        if (!confirm(`Delete guest "${guest.name}" from master list? This will NOT remove them from past matches.`)) return false;
+        masterGuests = masterGuests.filter(g => g.id !== guestId);
+        await saveMasterGuests();
+        refreshAll();
+        return true;
+    }
+    
+    async function editMasterGuest(guestId, newName) {
+        if (!isAdminLoggedIn || !checkAdminSession()) {
+            alert("Admin access required");
+            return false;
+        }
+        const guest = masterGuests.find(g => g.id === guestId);
+        if (!guest) return false;
+        const newNameTrimmed = newName.trim();
+        if (!newNameTrimmed) return false;
+        if (masterGuests.some(g => g.id !== guestId && g.name.toLowerCase() === newNameTrimmed.toLowerCase())) {
+            alert("Guest with that name already exists");
+            return false;
+        }
+        guest.name = newNameTrimmed;
+        await saveMasterGuests();
+        refreshAll();
+        return true;
+    }
+    
+    function getGuestStats(guestName) {
+        const guest = masterGuests.find(g => g.name.toLowerCase() === guestName.toLowerCase());
+        if (!guest) return null;
+        return {
+            totalGames: guest.totalGames || 0,
+            firstAppearance: guest.firstAppearance,
+            lastAppearance: guest.lastAppearance,
+            addedBy: guest.addedBy
+        };
+    }
     
     // ==================== HELPER FUNCTIONS ====================
     function markStatsDirty() { statsDirty = true; }
@@ -961,7 +1135,7 @@
     
     function getAllParticipants(gameDate) {
         const playersIn = attendance.filter(a => a.gameDate === gameDate && a.status === 'in').map(a => a.player);
-        const guestsIn = guests.filter(g => g.gameDate === gameDate).map(g => ({ name: g.guestName, addedBy: g.addedBy }));
+        const guestsIn = weeklyGuests.filter(g => g.gameDate === gameDate).map(g => ({ name: g.guestName, addedBy: g.addedBy }));
         return { players: playersIn, guests: guestsIn };
     }
     
@@ -1060,158 +1234,130 @@
         updateTimerDisplay();
     }
     
-    // ==================== STATISTICS ENGINE (with washout support) ====================
-    function calculatePlayerStats() {
-        if (!statsDirty && cachedStats) return cachedStats;
-        const stats = new Map();
-        for (let p of players) {
-            stats.set(p, {
-                goals: 0,
-                assists: 0,
-                gamesPlayed: 0,
-                mvps: 0,
-                streak: 0,
-                bestStreak: 0
-            });
+    // ==================== ACCURATE STATISTICS ENGINE ====================
+    function getPlayerMatchRecords() {
+        const playerMatches = new Map();
+        for (let player of players) {
+            playerMatches.set(player, []);
         }
         
-        // Count actual played games (attendance with status='in' that are NOT washouts)
-        const playedGameDates = new Set();
-        for (let a of attendance) {
-            if (a.status === 'in' && stats.has(a.player)) {
-                // Only count if this match is NOT a washout
-                if (!isWashoutMatch(a.gameDate)) {
-                    if (!playedGameDates.has(`${a.player}_${a.gameDate}`)) {
-                        stats.get(a.player).gamesPlayed++;
-                        playedGameDates.add(`${a.player}_${a.gameDate}`);
-                    }
-                }
-            }
-        }
-        
-        // Add opening balance games
-        for (let p of players) {
-            const opening = playerProfiles[p]?.openingBalanceGames || 0;
-            if (stats.has(p)) stats.get(p).gamesPlayed += opening;
-        }
-        
-        // Goals, assists, MVPs - skip washout matches
         for (let [gameDate, match] of Object.entries(matchResults)) {
             if (isWashoutMatch(gameDate)) continue;
+            if (match.yellowScore === undefined || match.orangeScore === undefined) continue;
             
-            if (match.goals) {
-                for (let [scorer, count] of Object.entries(match.goals)) {
-                    if (stats.has(scorer)) stats.get(scorer).goals += count;
+            const assignments = teamAssignments[gameDate] || {};
+            const attendees = attendance.filter(a => a.gameDate === gameDate && a.status === 'in');
+            
+            for (let attendee of attendees) {
+                const playerName = attendee.player;
+                const assignedTeam = assignments[playerName];
+                
+                if (assignedTeam === "yellow" || assignedTeam === "orange") {
+                    let result = null;
+                    if (assignedTeam === "yellow") {
+                        if (match.yellowScore > match.orangeScore) result = "win";
+                        else if (match.yellowScore < match.orangeScore) result = "loss";
+                        else result = "draw";
+                    } else {
+                        if (match.orangeScore > match.yellowScore) result = "win";
+                        else if (match.orangeScore < match.yellowScore) result = "loss";
+                        else result = "draw";
+                    }
+                    
+                    playerMatches.get(playerName).push({
+                        gameDate: gameDate,
+                        team: assignedTeam,
+                        result: result,
+                        goals: match.goals?.[playerName] || 0,
+                        assists: match.assists?.[playerName] || 0,
+                        isMVP: match.mvp === playerName
+                    });
                 }
-            }
-            if (match.assists) {
-                for (let [assister, count] of Object.entries(match.assists)) {
-                    if (stats.has(assister)) stats.get(assister).assists += count;
-                }
-            }
-            if (match.mvp && stats.has(match.mvp)) {
-                stats.get(match.mvp).mvps++;
             }
         }
+        return playerMatches;
+    }
+    
+    function calculateAccurateStats() {
+        const playerMatches = getPlayerMatchRecords();
+        const stats = new Map();
         
-        // Streak calculation - washout matches do NOT break streaks
-        // They are simply ignored (skipped) in the sequence
-        for (let p of players) {
-            const playerGames = attendance.filter(a => a.player === p && a.status === 'in')
-                .sort((a, b) => a.gameDate.localeCompare(b.gameDate));
+        for (let player of players) {
+            const matches = playerMatches.get(player) || [];
+            const sortedMatches = [...matches].sort((a, b) => a.gameDate.localeCompare(b.gameDate));
             
-            let currentStreak = 0;
+            let goals = 0;
+            let assists = 0;
+            let mvps = 0;
+            let wins = 0;
+            let losses = 0;
+            let draws = 0;
+            let streak = 0;
             let bestStreak = 0;
             let lastGameDate = null;
             
-            for (let i = 0; i < playerGames.length; i++) {
-                const gameDate = playerGames[i].gameDate;
+            for (let match of sortedMatches) {
+                goals += match.goals;
+                assists += match.assists;
+                if (match.isMVP) mvps++;
                 
-                // Skip washout matches - they don't affect streak
-                if (isWashoutMatch(gameDate)) {
-                    continue;
-                }
+                if (match.result === "win") wins++;
+                else if (match.result === "loss") losses++;
+                else if (match.result === "draw") draws++;
                 
-                if (lastGameDate !== null) {
-                    const diff = new Date(gameDate) - new Date(lastGameDate);
-                    // Check if consecutive weeks (within 8 days)
+                if (lastGameDate) {
+                    const diff = new Date(match.gameDate) - new Date(lastGameDate);
                     if (diff <= 8 * 24 * 60 * 60 * 1000) {
-                        currentStreak++;
+                        streak++;
                     } else {
-                        currentStreak = 1;
+                        streak = 1;
                     }
                 } else {
-                    currentStreak = 1;
+                    streak = 1;
                 }
-                
-                bestStreak = Math.max(bestStreak, currentStreak);
-                lastGameDate = gameDate;
+                bestStreak = Math.max(bestStreak, streak);
+                lastGameDate = match.gameDate;
             }
             
-            if (stats.has(p)) {
-                stats.get(p).streak = currentStreak;
-                stats.get(p).bestStreak = bestStreak;
-            }
+            const openingBalance = playerProfiles[player]?.openingBalanceGames || 0;
+            const gamesPlayed = matches.length + openingBalance;
+            
+            stats.set(player, {
+                goals: goals,
+                assists: assists,
+                gamesPlayed: gamesPlayed,
+                mvps: mvps,
+                wins: wins,
+                losses: losses,
+                draws: draws,
+                winPercentage: gamesPlayed > 0 ? (wins / gamesPlayed) * 100 : 0,
+                streak: bestStreak,
+                currentStreak: streak
+            });
         }
-        
-        cachedStats = stats;
-        statsDirty = false;
         return stats;
     }
     
+    function calculatePlayerStats() {
+        if (!statsDirty && cachedStats) return cachedStats;
+        cachedStats = calculateAccurateStats();
+        statsDirty = false;
+        return cachedStats;
+    }
+    
     function calculateWinLossRecords() {
+        const stats = calculatePlayerStats();
         const records = {};
-        for (let p of players) {
-            records[p] = {
-                wins: 0,
-                losses: 0,
-                draws: 0,
-                gamesPlayed: 0,
-                winPercentage: 0
+        for (let player of players) {
+            const playerStats = stats.get(player);
+            records[player] = {
+                wins: playerStats?.wins || 0,
+                losses: playerStats?.losses || 0,
+                draws: playerStats?.draws || 0,
+                gamesPlayed: playerStats?.gamesPlayed || 0,
+                winPercentage: playerStats?.winPercentage || 0
             };
         }
-        
-        for (let [gameDate, match] of Object.entries(matchResults)) {
-            // Skip washout matches entirely
-            if (isWashoutMatch(gameDate)) continue;
-            
-            if (match.yellowScore === undefined || match.orangeScore === undefined) continue;
-            
-            let winner = null;
-            if (match.yellowScore > match.orangeScore) winner = "yellow";
-            else if (match.orangeScore > match.yellowScore) winner = "orange";
-            else winner = "draw";
-            
-            const assignments = teamAssignments[gameDate] || {};
-            const participants = getAllParticipants(gameDate);
-            const allPlayers = [...participants.players, ...participants.guests.map(g => g.name)];
-            
-            for (let player of allPlayers) {
-                const playerTeam = assignments[player];
-                // Only count if player was actually assigned to a team (yellow or orange)
-                if (records[player] && (playerTeam === "yellow" || playerTeam === "orange")) {
-                    records[player].gamesPlayed++;
-                    if (winner === "draw") {
-                        records[player].draws++;
-                    } else if (playerTeam === winner) {
-                        records[player].wins++;
-                    } else if (playerTeam === "yellow" || playerTeam === "orange") {
-                        records[player].losses++;
-                    }
-                }
-            }
-        }
-        
-        for (let p of players) {
-            const totalGames = records[p].wins + records[p].losses + records[p].draws;
-            if (totalGames > 0) {
-                records[p].winPercentage = (records[p].wins / totalGames) * 100;
-                records[p].gamesPlayed = totalGames;
-            } else {
-                records[p].winPercentage = 0;
-            }
-        }
-        
         return records;
     }
     
@@ -1236,38 +1382,7 @@
     }
     
     async function updatePlayerWinLossRecords(gameDate, yellowScore, orangeScore, assignments) {
-        if (yellowScore === undefined || orangeScore === undefined) return;
-        
-        const participants = getAllParticipants(gameDate);
-        const allPlayers = [...participants.players, ...participants.guests.map(g => g.name)];
-        
-        if (!playerWinLossRecords[gameDate]) {
-            playerWinLossRecords[gameDate] = {};
-        }
-        
-        let winner = null;
-        if (yellowScore > orangeScore) winner = "yellow";
-        else if (orangeScore > yellowScore) winner = "orange";
-        
-        for (let player of allPlayers) {
-            const playerTeam = assignments[player];
-            
-            if (!playerWinLossRecords[gameDate][player]) {
-                playerWinLossRecords[gameDate][player] = { team: playerTeam, result: null };
-            }
-            
-            if (winner === null) {
-                playerWinLossRecords[gameDate][player].result = "draw";
-            } else if (playerTeam === winner) {
-                playerWinLossRecords[gameDate][player].result = "win";
-            } else if (playerTeam === "yellow" || playerTeam === "orange") {
-                playerWinLossRecords[gameDate][player].result = "loss";
-            }
-        }
-        
-        if (firebaseReady && db) {
-            await db.collection("config").doc("playerWinLossRecords").set(playerWinLossRecords);
-        }
+        // This function is kept for backward compatibility but no longer used
         markStatsDirty();
     }
     
@@ -1336,16 +1451,18 @@
             attendance.push(attendanceRecord);
         }
         
-        const gamesCount = attendance.filter(a => a.player === attendanceRecord.player && a.status === 'in' && !isWashoutMatch(a.gameDate)).length;
+        const stats = calculatePlayerStats();
+        const gamesCount = stats.get(attendanceRecord.player)?.gamesPlayed || 0;
         const opening = playerProfiles[attendanceRecord.player]?.openingBalanceGames || 0;
+        
         if (playerProfiles[attendanceRecord.player]) {
-            playerProfiles[attendanceRecord.player].gamesPlayed = gamesCount + opening;
+            playerProfiles[attendanceRecord.player].gamesPlayed = gamesCount;
         } else {
             playerProfiles[attendanceRecord.player] = {
                 age: '—',
                 position: 'Midfielder',
                 yearJoined: '2024',
-                gamesPlayed: gamesCount + opening,
+                gamesPlayed: gamesCount,
                 openingBalanceGames: 0
             };
         }
@@ -1359,9 +1476,10 @@
     
     async function saveGuest(guestRecord) {
         if (firebaseReady && db) {
-            await db.collection("guests").doc(`${guestRecord.guestName}_${guestRecord.gameDate}`).set(guestRecord);
+            await db.collection("weeklyGuests").doc(`${guestRecord.guestName}_${guestRecord.gameDate}`).set(guestRecord);
         }
-        guests.push(guestRecord);
+        weeklyGuests.push(guestRecord);
+        await addMasterGuest(guestRecord.guestName, guestRecord.addedBy);
         refreshAll();
     }
     
@@ -1370,6 +1488,7 @@
         if (firebaseReady && db) {
             await db.collection("config").doc("teamAssignments").set(teamAssignments);
         }
+        markStatsDirty();
         refreshAll();
     }
     
@@ -1387,11 +1506,6 @@
         };
         if (firebaseReady && db) {
             await db.collection("config").doc("matchResults").set(matchResults);
-        }
-        
-        if (!washout) {
-            const assignments = teamAssignments[date] || {};
-            await updatePlayerWinLossRecords(date, yellowScore, orangeScore, assignments);
         }
         markStatsDirty();
         refreshAll();
@@ -1447,7 +1561,7 @@
             alert("Please enter a guest name");
             return false;
         }
-        if (guests.some(g => g.gameDate === gameDate && g.guestName.toLowerCase() === trimmed.toLowerCase())) {
+        if (weeklyGuests.some(g => g.gameDate === gameDate && g.guestName.toLowerCase() === trimmed.toLowerCase())) {
             alert("Guest already added for this week");
             return false;
         }
@@ -1469,9 +1583,9 @@
         if (!confirm(`Remove guest "${guestName}"?`)) return false;
         
         if (firebaseReady && db) {
-            await db.collection("guests").doc(`${guestName}_${gameDate}`).delete();
+            await db.collection("weeklyGuests").doc(`${guestName}_${gameDate}`).delete();
         }
-        guests = guests.filter(g => !(g.guestName === guestName && g.gameDate === gameDate));
+        weeklyGuests = weeklyGuests.filter(g => !(g.guestName === guestName && g.gameDate === gameDate));
         
         if (teamAssignments[gameDate]) {
             delete teamAssignments[gameDate][guestName];
@@ -1524,73 +1638,7 @@
             await db.collection("config").doc("leagueRules").set({ rules: leagueRules });
         }
         renderRulesPage();
-        alert("Rules updated!");
-    }
-    
-    async function loadData() {
-        if (!firebaseReady || !db) {
-            refreshAll();
-            return;
-        }
-        
-        try {
-            const [profDoc, tDoc, rDoc, attSnap, guestSnap, commentsSnap, trashSnap, rulesDoc, recordsDoc] = await Promise.all([
-                db.collection("config").doc("playerProfiles").get(),
-                db.collection("config").doc("teamAssignments").get(),
-                db.collection("config").doc("matchResults").get(),
-                db.collection("attendance").get(),
-                db.collection("guests").get(),
-                db.collection("matchComments").get(),
-                db.collection("trashTalk").orderBy("timestamp", "desc").limit(50).get(),
-                db.collection("config").doc("leagueRules").get(),
-                db.collection("config").doc("playerWinLossRecords").get()
-            ]);
-            
-            if (profDoc.exists) playerProfiles = profDoc.data();
-            if (tDoc.exists) teamAssignments = tDoc.data();
-            if (rDoc.exists) matchResults = rDoc.data();
-            if (rulesDoc.exists) leagueRules = rulesDoc.data().rules || leagueRules;
-            if (recordsDoc.exists) playerWinLossRecords = recordsDoc.data();
-            
-            attendance = attSnap.docs.map(d => d.data());
-            guests = guestSnap.docs.map(d => d.data());
-            matchComments = commentsSnap.docs.map(d => d.data());
-            trashTalkPosts = trashSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-            
-            for (let p of players) {
-                if (!playerProfiles[p]) {
-                    playerProfiles[p] = {
-                        age: '—',
-                        position: 'Midfielder',
-                        yearJoined: '2024',
-                        gamesPlayed: 0,
-                        openingBalanceGames: 0
-                    };
-                }
-            }
-            
-            // Set June 1st match as washout (adjust date format as needed - YYYY-MM-DD)
-            const juneFirstDate = "2025-06-01"; // Change this to the correct June 1st date
-            if (matchResults[juneFirstDate] && !matchResults[juneFirstDate].washout) {
-                matchResults[juneFirstDate].washout = true;
-                matchResults[juneFirstDate].washoutReason = "Match cancelled due to heavy rain";
-                matchResults[juneFirstDate].yellowScore = 0;
-                matchResults[juneFirstDate].orangeScore = 0;
-                matchResults[juneFirstDate].goals = {};
-                matchResults[juneFirstDate].assists = {};
-                matchResults[juneFirstDate].mvp = '';
-                if (firebaseReady && db) {
-                    await db.collection("config").doc("matchResults").set(matchResults);
-                }
-            }
-            
-            markStatsDirty();
-            refreshAll();
-            fetchWeather();
-        } catch (e) {
-            console.warn("Error loading data:", e);
-            refreshAll();
-        }
+        alert("Rules updated successfully!");
     }
     
     async function fetchWeather() {
@@ -1629,6 +1677,57 @@
         renderWeatherPage();
     }
     
+    async function loadData() {
+        if (!firebaseReady || !db) {
+            refreshAll();
+            return;
+        }
+        
+        try {
+            const [profDoc, tDoc, rDoc, attSnap, guestSnap, commentsSnap, trashSnap, rulesDoc, masterGuestDoc] = await Promise.all([
+                db.collection("config").doc("playerProfiles").get(),
+                db.collection("config").doc("teamAssignments").get(),
+                db.collection("config").doc("matchResults").get(),
+                db.collection("attendance").get(),
+                db.collection("weeklyGuests").get(),
+                db.collection("matchComments").get(),
+                db.collection("trashTalk").orderBy("timestamp", "desc").limit(50).get(),
+                db.collection("config").doc("leagueRules").get(),
+                db.collection("config").doc("masterGuests").get()
+            ]);
+            
+            if (profDoc.exists) playerProfiles = profDoc.data();
+            if (tDoc.exists) teamAssignments = tDoc.data();
+            if (rDoc.exists) matchResults = rDoc.data();
+            if (rulesDoc.exists) leagueRules = rulesDoc.data().rules || leagueRules;
+            if (masterGuestDoc.exists) masterGuests = masterGuestDoc.data().guests || [];
+            
+            attendance = attSnap.docs.map(d => d.data());
+            weeklyGuests = guestSnap.docs.map(d => d.data());
+            matchComments = commentsSnap.docs.map(d => d.data());
+            trashTalkPosts = trashSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            
+            for (let p of players) {
+                if (!playerProfiles[p]) {
+                    playerProfiles[p] = {
+                        age: '—',
+                        position: 'Midfielder',
+                        yearJoined: '2024',
+                        gamesPlayed: 0,
+                        openingBalanceGames: 0
+                    };
+                }
+            }
+            
+            markStatsDirty();
+            refreshAll();
+            fetchWeather();
+        } catch (e) {
+            console.warn("Error loading data:", e);
+            refreshAll();
+        }
+    }
+    
     function refreshAll() {
         renderHomePage();
         renderTeamsPage();
@@ -1642,7 +1741,7 @@
         renderChatPage();
         renderWeatherPage();
         renderRulesPage();
-        if (isAdminLoggedIn) renderAdminPage();
+        if (isAdminLoggedIn && checkAdminSession()) renderAdminPage();
     }
     
     // ==================== RENDER FUNCTIONS ====================
@@ -1904,7 +2003,7 @@
     };
     
     window.shareMatchReport = function(date) {
-        const match = matchResults[date] || { yellowScore: 0, orangeScore: 0, goals: {}, assists: {}, mvp: '', injuries: [], washout: false };
+        const match = matchResults[date] || { yellowScore: 0, orangeScore: 0, goals: {}, assists: {}, mvp: '', injuries: [], washout: false, washoutReason: '' };
         const weekLabel = ALL_WEEKS.find(w => w.dateStr === date)?.label || date;
         
         if (match.washout) {
@@ -1984,13 +2083,14 @@
             const newPos = document.getElementById("editPosition").value;
             const newYear = document.getElementById("editYear").value.trim() || '—';
             const newOpening = parseInt(document.getElementById("editOpening").value) || 0;
-            const gamesFromAttend = attendance.filter(a => a.player === playerName && a.status === 'in' && !isWashoutMatch(a.gameDate)).length;
+            const stats = calculatePlayerStats();
+            const gamesFromMatches = stats.get(playerName)?.gamesPlayed || 0;
             
             playerProfiles[playerName] = {
                 age: newAge,
                 position: newPos,
                 yearJoined: newYear,
-                gamesPlayed: gamesFromAttend + newOpening,
+                gamesPlayed: gamesFromMatches + newOpening,
                 openingBalanceGames: newOpening
             };
             
@@ -2030,7 +2130,7 @@
                 
                 <div style="margin-bottom: 24px;">
                     <h3><i class="fas fa-chart-line"></i> 🏆 WIN PERCENTAGE RANKINGS (Min 3 games)</h3>
-                    <p class="text-muted" style="margin-bottom: 12px;">Based on actual match results - washout matches are excluded</p>
+                    <p class="text-muted" style="margin-bottom: 12px;">Based on actual match results - washout matches excluded</p>
                     <table class="data-table">
                         <thead>
                             <tr><th>#</th><th>Player</th><th>Win %</th><th>W-L-D</th><th>Games</th></tr>
@@ -2305,7 +2405,7 @@
         const container = document.getElementById("page-admin");
         if (!container) return;
         
-        if (!isAdminLoggedIn) {
+        if (!isAdminLoggedIn || !checkAdminSession()) {
             container.innerHTML = `
                 <div class="card">
                     <h2><i class="fas fa-lock"></i> Admin Access</h2>
@@ -2314,8 +2414,9 @@
             `;
             document.getElementById("adminLoginBtn")?.addEventListener("click", () => {
                 const pw = prompt("Enter admin password:");
-                if (pw === "admin123") {
+                if (verifyAdminPassword(pw)) {
                     isAdminLoggedIn = true;
+                    setAdminSession();
                     refreshAll();
                 } else {
                     alert("Wrong password");
@@ -2359,6 +2460,15 @@
             </div>
             
             <div class="card">
+                <h2><i class="fas fa-users"></i> Master Guest List <span class="text-muted">(Admin only)</span></h2>
+                <div id="masterGuestListPanel" style="max-height: 300px; overflow-y: auto;"></div>
+                <div style="margin-top: 12px;">
+                    <input id="newGuestName" placeholder="New guest name" class="input-premium">
+                    <button id="addMasterGuestBtn" style="width: 100%; margin-top: 8px;"><i class="fas fa-plus"></i> Add Guest to Master List</button>
+                </div>
+            </div>
+            
+            <div class="card">
                 <h2><i class="fas fa-chart-simple"></i> Add Match Result / Mark Washout</h2>
                 <select id="resultWeekSelect">
                     <option value="">-- Select Week --</option>
@@ -2368,8 +2478,46 @@
             </div>
         `;
         
+        // Render master guest list
+        const guestListPanel = document.getElementById("masterGuestListPanel");
+        if (guestListPanel) {
+            guestListPanel.innerHTML = masterGuests.map(g => `
+                <div class="guest-list-item">
+                    <div>
+                        <strong>${escapeHtml(g.name)}</strong>
+                        <div class="guest-stats">First: ${g.firstAppearance} | Last: ${g.lastAppearance} | Games: ${g.totalGames} | Added by: ${escapeHtml(g.addedBy)}</div>
+                    </div>
+                    <div>
+                        <button class="edit-guest-btn" data-id="${g.id}"><i class="fas fa-edit"></i></button>
+                        <button class="delete-guest-btn" data-id="${g.id}"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('') || '<p class="text-muted">No guests in master list</p>';
+            
+            document.querySelectorAll(".edit-guest-btn").forEach(btn => {
+                btn.addEventListener("click", async () => {
+                    const newName = prompt("Enter new name:");
+                    if (newName) await editMasterGuest(btn.dataset.id, newName);
+                });
+            });
+            document.querySelectorAll(".delete-guest-btn").forEach(btn => {
+                btn.addEventListener("click", async () => {
+                    await deleteMasterGuest(btn.dataset.id);
+                });
+            });
+        }
+        
+        document.getElementById("addMasterGuestBtn")?.addEventListener("click", async () => {
+            const name = document.getElementById("newGuestName")?.value.trim();
+            if (!name) { alert("Enter a guest name"); return; }
+            await addMasterGuest(name, "Admin");
+            document.getElementById("newGuestName").value = "";
+            renderAdminPage();
+        });
+        
         document.getElementById("adminLogoutBtn")?.addEventListener("click", () => {
             isAdminLoggedIn = false;
+            clearAdminSession();
             refreshAll();
         });
         
@@ -2689,8 +2837,9 @@
         
         document.getElementById("adminLoginModalBtn").onclick = () => {
             const pw = prompt("Enter admin password:");
-            if (pw === "admin123") {
+            if (verifyAdminPassword(pw)) {
                 isAdminLoggedIn = true;
+                setAdminSession();
                 currentUser = { name: "Admin" };
                 modal.remove();
                 document.getElementById("userNameDisplay").innerText = "Admin";
@@ -2709,6 +2858,7 @@
         }
         currentUser = null;
         isAdminLoggedIn = false;
+        clearAdminSession();
         document.getElementById("userNameDisplay").innerText = "Not logged in";
         document.getElementById("logoutBtn").style.display = "none";
         showLoginModal();
