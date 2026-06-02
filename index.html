@@ -334,6 +334,20 @@
             font-size: 14px;
         }
         
+        .match-result.washout {
+            background: #dc3545;
+        }
+        
+        .washout-banner {
+            background: #dc3545;
+            color: white;
+            text-align: center;
+            padding: 12px;
+            font-weight: 700;
+            margin: 0 16px 16px 16px;
+            border-radius: 12px;
+        }
+        
         .teams-section {
             padding: 18px;
             background: #1a2a3a;
@@ -785,6 +799,18 @@
             gap: 8px;
             margin-top: 12px;
         }
+        
+        .washout-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 12px 0;
+        }
+        
+        .washout-checkbox input {
+            width: auto;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -819,7 +845,7 @@
     
     // ==================== MASTER PLAYER DATABASE ====================
     const MASTER_PLAYERS = [
-        "Alessandro Barini", "Alex Rowe", "Ali Mekawy", "Carlo Pavia", "Charlie Pavia", "Chris Del Monaco",
+        "Alex Rowe", "Ali Mekawy", "Carlo Pavia", "Charlie Pavia", "Chris Del Monaco",
         "Chris Margelis", "Chris Sophocli", "Danny Sammartino", "Dante Sammartino",
         "David", "Dimitri", "Enzo", "Farid", "Faros", "Frank Marcaccio",
         "George Babatsikos", "George Theodoropoulos", "Ivan", "James Zoumis",
@@ -860,12 +886,11 @@
     let trashTalkPosts = [];
     let isAdminLoggedIn = false;
     let currentUser = null;
-    let weeklyCaptain = "Alex Rowe";
     let timerInterval = null;
     let currentHalf = 1;
     let timeLeft = 45 * 60;
     let chatUnsubscribe = null;
-    let leagueRules = "⚽ Kickoff: 7:45pm SHARP at Clifton Park\n👑 Captain rotates weekly\n✅ RSVP by Sunday 6pm\n🎭 Guests welcome!\n👕 Bring white and dark shirts\n📝 Match reports auto-generated";
+    let leagueRules = "⚽ Kickoff: 7:45pm SHARP at Clifton Park\n✅ RSVP by Sunday 6pm\n🎭 Guests welcome!\n👕 Bring white and dark shirts\n📝 Match reports auto-generated";
     let playerWinLossRecords = {};
     let cachedStats = null;
     let statsDirty = true;
@@ -938,6 +963,11 @@
         const playersIn = attendance.filter(a => a.gameDate === gameDate && a.status === 'in').map(a => a.player);
         const guestsIn = guests.filter(g => g.gameDate === gameDate).map(g => ({ name: g.guestName, addedBy: g.addedBy }));
         return { players: playersIn, guests: guestsIn };
+    }
+    
+    function isWashoutMatch(gameDate) {
+        const match = matchResults[gameDate];
+        return match && match.washout === true;
     }
     
     function escapeHtml(s) {
@@ -1030,7 +1060,7 @@
         updateTimerDisplay();
     }
     
-    // ==================== STATISTICS ENGINE (with caching) ====================
+    // ==================== STATISTICS ENGINE (with washout support) ====================
     function calculatePlayerStats() {
         if (!statsDirty && cachedStats) return cachedStats;
         const stats = new Map();
@@ -1045,18 +1075,30 @@
             });
         }
         
-        attendance.forEach(a => {
+        // Count actual played games (attendance with status='in' that are NOT washouts)
+        const playedGameDates = new Set();
+        for (let a of attendance) {
             if (a.status === 'in' && stats.has(a.player)) {
-                stats.get(a.player).gamesPlayed++;
+                // Only count if this match is NOT a washout
+                if (!isWashoutMatch(a.gameDate)) {
+                    if (!playedGameDates.has(`${a.player}_${a.gameDate}`)) {
+                        stats.get(a.player).gamesPlayed++;
+                        playedGameDates.add(`${a.player}_${a.gameDate}`);
+                    }
+                }
             }
-        });
+        }
         
+        // Add opening balance games
         for (let p of players) {
             const opening = playerProfiles[p]?.openingBalanceGames || 0;
             if (stats.has(p)) stats.get(p).gamesPlayed += opening;
         }
         
-        for (let match of Object.values(matchResults)) {
+        // Goals, assists, MVPs - skip washout matches
+        for (let [gameDate, match] of Object.entries(matchResults)) {
+            if (isWashoutMatch(gameDate)) continue;
+            
             if (match.goals) {
                 for (let [scorer, count] of Object.entries(match.goals)) {
                     if (stats.has(scorer)) stats.get(scorer).goals += count;
@@ -1072,14 +1114,27 @@
             }
         }
         
+        // Streak calculation - washout matches do NOT break streaks
+        // They are simply ignored (skipped) in the sequence
         for (let p of players) {
             const playerGames = attendance.filter(a => a.player === p && a.status === 'in')
                 .sort((a, b) => a.gameDate.localeCompare(b.gameDate));
+            
             let currentStreak = 0;
             let bestStreak = 0;
+            let lastGameDate = null;
+            
             for (let i = 0; i < playerGames.length; i++) {
-                if (i > 0) {
-                    const diff = new Date(playerGames[i].gameDate) - new Date(playerGames[i - 1].gameDate);
+                const gameDate = playerGames[i].gameDate;
+                
+                // Skip washout matches - they don't affect streak
+                if (isWashoutMatch(gameDate)) {
+                    continue;
+                }
+                
+                if (lastGameDate !== null) {
+                    const diff = new Date(gameDate) - new Date(lastGameDate);
+                    // Check if consecutive weeks (within 8 days)
                     if (diff <= 8 * 24 * 60 * 60 * 1000) {
                         currentStreak++;
                     } else {
@@ -1088,8 +1143,11 @@
                 } else {
                     currentStreak = 1;
                 }
+                
                 bestStreak = Math.max(bestStreak, currentStreak);
+                lastGameDate = gameDate;
             }
+            
             if (stats.has(p)) {
                 stats.get(p).streak = currentStreak;
                 stats.get(p).bestStreak = bestStreak;
@@ -1114,6 +1172,9 @@
         }
         
         for (let [gameDate, match] of Object.entries(matchResults)) {
+            // Skip washout matches entirely
+            if (isWashoutMatch(gameDate)) continue;
+            
             if (match.yellowScore === undefined || match.orangeScore === undefined) continue;
             
             let winner = null;
@@ -1127,7 +1188,8 @@
             
             for (let player of allPlayers) {
                 const playerTeam = assignments[player];
-                if (records[player]) {
+                // Only count if player was actually assigned to a team (yellow or orange)
+                if (records[player] && (playerTeam === "yellow" || playerTeam === "orange")) {
                     records[player].gamesPlayed++;
                     if (winner === "draw") {
                         records[player].draws++;
@@ -1233,7 +1295,8 @@
         if (!playerStats) return [];
         
         const earned = [];
-        for (let match of Object.values(matchResults)) {
+        for (let [gameDate, match] of Object.entries(matchResults)) {
+            if (isWashoutMatch(gameDate)) continue;
             if (match.goals && match.goals[playerName] >= 3 && !earned.find(a => a.id === "hattrick")) {
                 earned.push({ ...ACHIEVEMENTS.find(a => a.id === "hattrick"), earned: true });
             }
@@ -1273,7 +1336,7 @@
             attendance.push(attendanceRecord);
         }
         
-        const gamesCount = attendance.filter(a => a.player === attendanceRecord.player && a.status === 'in').length;
+        const gamesCount = attendance.filter(a => a.player === attendanceRecord.player && a.status === 'in' && !isWashoutMatch(a.gameDate)).length;
         const opening = playerProfiles[attendanceRecord.player]?.openingBalanceGames || 0;
         if (playerProfiles[attendanceRecord.player]) {
             playerProfiles[attendanceRecord.player].gamesPlayed = gamesCount + opening;
@@ -1310,25 +1373,29 @@
         refreshAll();
     }
     
-    async function saveMatchResult(date, yellowScore, orangeScore, goals, assists, mvp, injuries) {
+    async function saveMatchResult(date, yellowScore, orangeScore, goals, assists, mvp, injuries, washout = false, washoutReason = "") {
         matchResults[date] = {
-            yellowScore,
-            orangeScore,
-            goals: goals || {},
-            assists: assists || {},
-            mvp: mvp || '',
+            yellowScore: washout ? 0 : yellowScore,
+            orangeScore: washout ? 0 : orangeScore,
+            goals: washout ? {} : (goals || {}),
+            assists: washout ? {} : (assists || {}),
+            mvp: washout ? '' : (mvp || ''),
             injuries: injuries || [],
+            washout: washout,
+            washoutReason: washoutReason || (washout ? "Match cancelled due to weather" : ""),
             timestamp: Date.now()
         };
         if (firebaseReady && db) {
             await db.collection("config").doc("matchResults").set(matchResults);
         }
         
-        const assignments = teamAssignments[date] || {};
-        await updatePlayerWinLossRecords(date, yellowScore, orangeScore, assignments);
+        if (!washout) {
+            const assignments = teamAssignments[date] || {};
+            await updatePlayerWinLossRecords(date, yellowScore, orangeScore, assignments);
+        }
         markStatsDirty();
         refreshAll();
-        alert("✅ Match result saved! Rankings updated.");
+        alert(washout ? "✅ Match marked as WASHOUT. No statistics affected." : "✅ Match result saved! Rankings updated.");
     }
     
     async function saveComment(date, author, text) {
@@ -1457,7 +1524,7 @@
             await db.collection("config").doc("leagueRules").set({ rules: leagueRules });
         }
         renderRulesPage();
-        alert("Rules updated successfully!");
+        alert("Rules updated!");
     }
     
     async function loadData() {
@@ -1499,6 +1566,21 @@
                         gamesPlayed: 0,
                         openingBalanceGames: 0
                     };
+                }
+            }
+            
+            // Set June 1st match as washout (adjust date format as needed - YYYY-MM-DD)
+            const juneFirstDate = "2025-06-01"; // Change this to the correct June 1st date
+            if (matchResults[juneFirstDate] && !matchResults[juneFirstDate].washout) {
+                matchResults[juneFirstDate].washout = true;
+                matchResults[juneFirstDate].washoutReason = "Match cancelled due to heavy rain";
+                matchResults[juneFirstDate].yellowScore = 0;
+                matchResults[juneFirstDate].orangeScore = 0;
+                matchResults[juneFirstDate].goals = {};
+                matchResults[juneFirstDate].assists = {};
+                matchResults[juneFirstDate].mvp = '';
+                if (firebaseReady && db) {
+                    await db.collection("config").doc("matchResults").set(matchResults);
                 }
             }
             
@@ -1679,7 +1761,7 @@
         
         container.innerHTML = `
             <div class="info-bar">
-                <i class="fas fa-users"></i> ${gameLabel} • 7:45pm • Captain: ${weeklyCaptain}
+                <i class="fas fa-users"></i> ${gameLabel} • 7:45pm • Clifton Park
             </div>
             
             <div class="card">
@@ -1717,7 +1799,7 @@
         document.getElementById("shareTeamsWhatsApp")?.addEventListener("click", () => {
             const yellowList = yellowTeam.map(p => `${p.name}${p.isGuest ? ' (Guest)' : ''}`).join('\n');
             const orangeList = orangeTeam.map(p => `${p.name}${p.isGuest ? ' (Guest)' : ''}`).join('\n');
-            const teamSheet = `⚽ *MONDAY NIGHT SOCCER - TEAM SHEET* ⚽\n📅 ${gameLabel} | 7:45pm Clifton Park\n\n🟡 *YELLOW TEAM* (${yellowTeam.length} players)\n${yellowList || '—'}\n\n🟠 *ORANGE TEAM* (${orangeTeam.length} players)\n${orangeList || '—'}\n\n👑 Captain: ${weeklyCaptain}`;
+            const teamSheet = `⚽ *MONDAY NIGHT SOCCER - TEAM SHEET* ⚽\n📅 ${gameLabel} | 7:45pm Clifton Park\n\n🟡 *YELLOW TEAM* (${yellowTeam.length} players)\n${yellowList || '—'}\n\n🟠 *ORANGE TEAM* (${orangeTeam.length} players)\n${orangeList || '—'}`;
             window.open(`https://wa.me/?text=${encodeURIComponent(teamSheet)}`, '_blank');
         });
     }
@@ -1736,21 +1818,15 @@
         let html = `<div class="card"><h2><i class="fas fa-history"></i> Match History</h2>`;
         
         for (let week of pastWeeks) {
+            const match = matchResults[week.dateStr] || { yellowScore: 0, orangeScore: 0, goals: {}, assists: {}, mvp: '', injuries: [], washout: false, washoutReason: '' };
+            const isWashout = match.washout === true;
+            
             const participants = getAllParticipants(week.dateStr);
             const assignments = teamAssignments[week.dateStr] || {};
             const allPlayers = [...participants.players, ...participants.guests.map(g => g.name)];
             
             const yellowPlayers = allPlayers.filter(p => assignments[p] === "yellow");
             const orangePlayers = allPlayers.filter(p => assignments[p] === "orange");
-            
-            const match = matchResults[week.dateStr] || {
-                yellowScore: 0,
-                orangeScore: 0,
-                goals: {},
-                assists: {},
-                mvp: '',
-                injuries: []
-            };
             
             const comments = matchComments.filter(c => c.gameDate === week.dateStr);
             const commentId = week.dateStr.replace(/-/g, '');
@@ -1759,8 +1835,9 @@
                 <div class="match-card">
                     <div class="match-header">
                         <div><i class="fas fa-calendar-alt"></i> ${week.label}</div>
-                        <div class="match-result">🟡 ${match.yellowScore} - ${match.orangeScore} 🟠</div>
+                        <div class="match-result ${isWashout ? 'washout' : ''}">${isWashout ? '🚫 WASHOUT' : `🟡 ${match.yellowScore} - ${match.orangeScore} 🟠`}</div>
                     </div>
+                    ${isWashout ? `<div class="washout-banner"><i class="fas fa-cloud-rain"></i> ${escapeHtml(match.washoutReason || 'Match cancelled due to weather')} — No statistics recorded</div>` : ''}
                     
                     <div class="teams-section">
                         <div class="team-row">
@@ -1777,9 +1854,10 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="score-big">${match.yellowScore} - ${match.orangeScore}</div>
+                        ${!isWashout ? `<div class="score-big">${match.yellowScore} - ${match.orangeScore}</div>` : ''}
                     </div>
                     
+                    ${!isWashout ? `
                     <div class="goals-section">
                         <div><i class="fas fa-futbol"></i> <strong>GOAL SCORERS</strong></div>
                         <div>
@@ -1788,6 +1866,7 @@
                         ${Object.keys(match.assists || {}).length ? `<div style="margin-top: 8px;"><span class="goal-badge" style="border-left-color: #28a745;">🎯 Assists: ${Object.entries(match.assists).map(([a, c]) => `${escapeHtml(a)}(${c})`).join(', ')}</span></div>` : ''}
                         ${match.mvp ? `<div style="margin-top: 8px;"><span class="goal-badge" style="border-left-color: #f59e0b;">🏆 MVP: ${escapeHtml(match.mvp)}</span></div>` : ''}
                     </div>
+                    ` : ''}
                     
                     <div class="comments-section" style="padding: 14px 18px;">
                         <div><i class="fas fa-comments"></i> <strong>MATCH COMMENTS</strong></div>
@@ -1825,11 +1904,17 @@
     };
     
     window.shareMatchReport = function(date) {
-        const match = matchResults[date] || { yellowScore: 0, orangeScore: 0, goals: {}, assists: {}, mvp: '', injuries: [] };
+        const match = matchResults[date] || { yellowScore: 0, orangeScore: 0, goals: {}, assists: {}, mvp: '', injuries: [], washout: false };
         const weekLabel = ALL_WEEKS.find(w => w.dateStr === date)?.label || date;
-        const goalText = Object.entries(match.goals).map(([p, c]) => `• ${p}: ${c} goal${c > 1 ? 's' : ''}`).join('\n') || "• No goals scored";
-        const report = `📰 *MONDAY NIGHT SOCCER - MATCH REPORT* 📰\n*${weekLabel.toUpperCase()}*\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n*FINAL SCORE*\n🟡 YELLOW ${match.yellowScore} - ${match.orangeScore} 🟠\n\n*GOAL SCORERS*\n${goalText}\n\n*MAN OF THE MATCH*\n🏆 ${match.mvp || "Not awarded"}\n\n#MondayNightSoccer`;
-        window.open(`https://wa.me/?text=${encodeURIComponent(report)}`, '_blank');
+        
+        if (match.washout) {
+            const report = `📰 *MONDAY NIGHT SOCCER - MATCH REPORT* 📰\n*${weekLabel.toUpperCase()}*\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n🚫 *MATCH WASHOUT* 🚫\n${match.washoutReason || 'Cancelled due to weather'}\n\nNo statistics recorded.\n\n#MondayNightSoccer`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(report)}`, '_blank');
+        } else {
+            const goalText = Object.entries(match.goals).map(([p, c]) => `• ${p}: ${c} goal${c > 1 ? 's' : ''}`).join('\n') || "• No goals scored";
+            const report = `📰 *MONDAY NIGHT SOCCER - MATCH REPORT* 📰\n*${weekLabel.toUpperCase()}*\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n*FINAL SCORE*\n🟡 YELLOW ${match.yellowScore} - ${match.orangeScore} 🟠\n\n*GOAL SCORERS*\n${goalText}\n\n*MAN OF THE MATCH*\n🏆 ${match.mvp || "Not awarded"}\n\n#MondayNightSoccer`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(report)}`, '_blank');
+        }
     };
     
     function renderProfilesPage() {
@@ -1899,7 +1984,7 @@
             const newPos = document.getElementById("editPosition").value;
             const newYear = document.getElementById("editYear").value.trim() || '—';
             const newOpening = parseInt(document.getElementById("editOpening").value) || 0;
-            const gamesFromAttend = attendance.filter(a => a.player === playerName && a.status === 'in').length;
+            const gamesFromAttend = attendance.filter(a => a.player === playerName && a.status === 'in' && !isWashoutMatch(a.gameDate)).length;
             
             playerProfiles[playerName] = {
                 age: newAge,
@@ -1945,7 +2030,7 @@
                 
                 <div style="margin-bottom: 24px;">
                     <h3><i class="fas fa-chart-line"></i> 🏆 WIN PERCENTAGE RANKINGS (Min 3 games)</h3>
-                    <p class="text-muted" style="margin-bottom: 12px;">Based on actual match results - tracking wins and losses regardless of team</p>
+                    <p class="text-muted" style="margin-bottom: 12px;">Based on actual match results - washout matches are excluded</p>
                     <table class="data-table">
                         <thead>
                             <tr><th>#</th><th>Player</th><th>Win %</th><th>W-L-D</th><th>Games</th></tr>
@@ -2007,7 +2092,7 @@
         container.innerHTML = `
             <div class="card">
                 <h2><i class="fas fa-chart-line"></i> POWER RANKINGS</h2>
-                <p class="text-muted" style="margin-bottom: 16px;">Formula: Goals×3 + Assists×2 + Games + MVPs×5</p>
+                <p class="text-muted" style="margin-bottom: 16px;">Formula: Goals×3 + Assists×2 + Games + MVPs×5 (washout matches excluded)</p>
                 <table class="data-table">
                     <thead>
                         <tr><th>#</th><th>Player</th><th>Score</th><th>G</th><th>A</th><th>MVP</th><th>🔥</th></tr>
@@ -2048,7 +2133,7 @@
                 <div style="background: #e8f0fe; border-radius: 20px; padding: 16px; margin-bottom: 16px; text-align: center;">
                     <div style="font-size: 32px;">${renderMiniAvatar(currentUser.name, 60)}</div>
                     <div><strong>${escapeHtml(currentUser.name)}</strong></div>
-                    <div class="text-muted">⚽ ${stats?.goals || 0} goals | 🎯 ${stats?.assists || 0} assists | 🏆 ${stats?.mvps || 0} MVPs</div>
+                    <div class="text-muted">⚽ ${stats?.goals || 0} goals | 🎯 ${stats?.assists || 0} assists | 🏆 ${stats?.mvps || 0} MVPs | 🔥 ${stats?.streak || 0} game streak</div>
                 </div>
                 
                 <div class="achievement-grid">
@@ -2274,7 +2359,7 @@
             </div>
             
             <div class="card">
-                <h2><i class="fas fa-chart-simple"></i> Add Match Result</h2>
+                <h2><i class="fas fa-chart-simple"></i> Add Match Result / Mark Washout</h2>
                 <select id="resultWeekSelect">
                     <option value="">-- Select Week --</option>
                     ${allWeeks.map(w => `<option value="${w.dateStr}">${w.label}</option>`).join('')}
@@ -2319,36 +2404,64 @@
             const allPlayers = [...participants.players, ...participants.guests.map(g => g.name)];
             const playerOptions = allPlayers.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
             const existing = matchResults[week] || {};
+            const isCurrentlyWashout = existing.washout === true;
             
             formPanel.innerHTML = `
-                <div style="display: flex; gap: 12px;">
-                    <input type="number" id="resultYellow" placeholder="Yellow Score" value="${existing.yellowScore || 0}" style="flex: 1;">
-                    <input type="number" id="resultOrange" placeholder="Orange Score" value="${existing.orangeScore || 0}" style="flex: 1;">
+                <div class="washout-checkbox">
+                    <input type="checkbox" id="washoutCheckbox" ${isCurrentlyWashout ? 'checked' : ''}>
+                    <label for="washoutCheckbox"><strong>🚫 Mark as WASHOUT</strong> (match cancelled - no statistics recorded)</label>
                 </div>
-                <div style="margin-top: 12px;">
-                    <label><strong>⚽ Goal Scorers</strong></label>
-                    <div id="goalsList"></div>
-                    <button id="addGoalBtn" type="button" class="btn-outline" style="margin-top: 6px;"><i class="fas fa-plus"></i> Add Goal Scorer</button>
+                <div id="nonWashoutFields" style="${isCurrentlyWashout ? 'display: none;' : ''}">
+                    <div style="display: flex; gap: 12px;">
+                        <input type="number" id="resultYellow" placeholder="Yellow Score" value="${existing.yellowScore || 0}" style="flex: 1;">
+                        <input type="number" id="resultOrange" placeholder="Orange Score" value="${existing.orangeScore || 0}" style="flex: 1;">
+                    </div>
+                    <div style="margin-top: 12px;">
+                        <label><strong>⚽ Goal Scorers</strong></label>
+                        <div id="goalsList"></div>
+                        <button id="addGoalBtn" type="button" class="btn-outline" style="margin-top: 6px;"><i class="fas fa-plus"></i> Add Goal Scorer</button>
+                    </div>
+                    <div style="margin-top: 12px;">
+                        <label><strong>🎯 Assists</strong></label>
+                        <div id="assistsList"></div>
+                        <button id="addAssistBtn" type="button" class="btn-outline" style="margin-top: 6px;"><i class="fas fa-plus"></i> Add Assist</button>
+                    </div>
+                    <div style="margin-top: 12px;">
+                        <label><strong>🏆 MVP</strong></label>
+                        <select id="resultMvp"><option value="">-- Select MVP --</option>${playerOptions}</select>
+                    </div>
                 </div>
-                <div style="margin-top: 12px;">
-                    <label><strong>🎯 Assists</strong></label>
-                    <div id="assistsList"></div>
-                    <button id="addAssistBtn" type="button" class="btn-outline" style="margin-top: 6px;"><i class="fas fa-plus"></i> Add Assist</button>
-                </div>
-                <div style="margin-top: 12px;">
-                    <label><strong>🏆 MVP</strong></label>
-                    <select id="resultMvp"><option value="">-- Select MVP --</option>${playerOptions}</select>
+                <div id="washoutReasonField" style="${isCurrentlyWashout ? '' : 'display: none;'} margin-top: 12px;">
+                    <input type="text" id="washoutReason" placeholder="Reason for washout (e.g., Heavy rain)" value="${escapeHtml(existing.washoutReason || '')}">
                 </div>
                 <button id="saveResultBtn" style="width: 100%; margin-top: 16px;"><i class="fas fa-save"></i> Save Match Result</button>
             `;
             
-            let goals = existing.goals ? Object.entries(existing.goals).map(([p, c]) => ({ player: p, count: c })) : [];
-            let assists = existing.assists ? Object.entries(existing.assists).map(([p, c]) => ({ player: p, count: c })) : [];
+            const washoutCheckbox = document.getElementById("washoutCheckbox");
+            const nonWashoutFields = document.getElementById("nonWashoutFields");
+            const washoutReasonField = document.getElementById("washoutReasonField");
             
-            if (existing.mvp) document.getElementById("resultMvp").value = existing.mvp;
+            washoutCheckbox?.addEventListener("change", (e) => {
+                const isWashout = e.target.checked;
+                nonWashoutFields.style.display = isWashout ? 'none' : 'block';
+                washoutReasonField.style.display = isWashout ? 'block' : 'none';
+            });
+            
+            let goals = [];
+            let assists = [];
+            
+            if (!isCurrentlyWashout && existing.goals) {
+                goals = Object.entries(existing.goals).map(([p, c]) => ({ player: p, count: c }));
+                assists = Object.entries(existing.assists || {}).map(([p, c]) => ({ player: p, count: c }));
+            }
+            
+            if (existing.mvp && !isCurrentlyWashout && document.getElementById("resultMvp")) {
+                document.getElementById("resultMvp").value = existing.mvp;
+            }
             
             function rebuildGoalUI() {
                 const goalsDiv = document.getElementById("goalsList");
+                if (!goalsDiv) return;
                 goalsDiv.innerHTML = goals.map((g, idx) => `
                     <div class="stats-row">
                         <select class="goalPlayerSelect" data-idx="${idx}" style="flex: 2;">${playerOptions}</select>
@@ -2373,6 +2486,7 @@
             
             function rebuildAssistUI() {
                 const assistsDiv = document.getElementById("assistsList");
+                if (!assistsDiv) return;
                 assistsDiv.innerHTML = assists.map((a, idx) => `
                     <div class="stats-row">
                         <select class="assistPlayerSelect" data-idx="${idx}" style="flex: 2;">${playerOptions}</select>
@@ -2408,15 +2522,20 @@
             rebuildAssistUI();
             
             document.getElementById("saveResultBtn")?.addEventListener("click", async () => {
-                const yellow = parseInt(document.getElementById("resultYellow").value) || 0;
-                const orange = parseInt(document.getElementById("resultOrange").value) || 0;
-                const goalsObj = {};
-                goals.forEach(g => { if (g.player && g.count > 0) goalsObj[g.player] = (goalsObj[g.player] || 0) + g.count; });
-                const assistsObj = {};
-                assists.forEach(a => { if (a.player && a.count > 0) assistsObj[a.player] = (assistsObj[a.player] || 0) + a.count; });
-                const mvp = document.getElementById("resultMvp").value;
-                await saveMatchResult(week, yellow, orange, goalsObj, assistsObj, mvp, []);
-                alert("✅ Match result saved!");
+                const isWashout = document.getElementById("washoutCheckbox")?.checked || false;
+                const washoutReason = document.getElementById("washoutReason")?.value || "Match cancelled due to weather";
+                
+                let yellow = 0, orange = 0, goalsObj = {}, assistsObj = {}, mvp = "";
+                
+                if (!isWashout) {
+                    yellow = parseInt(document.getElementById("resultYellow")?.value) || 0;
+                    orange = parseInt(document.getElementById("resultOrange")?.value) || 0;
+                    goals.forEach(g => { if (g.player && g.count > 0) goalsObj[g.player] = (goalsObj[g.player] || 0) + g.count; });
+                    assists.forEach(a => { if (a.player && a.count > 0) assistsObj[a.player] = (assistsObj[a.player] || 0) + a.count; });
+                    mvp = document.getElementById("resultMvp")?.value || "";
+                }
+                
+                await saveMatchResult(week, yellow, orange, goalsObj, assistsObj, mvp, [], isWashout, washoutReason);
             });
         });
     }
