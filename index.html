@@ -3,108 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Belfioti · Live Orders & Inventory</title>
+    <title>Belfioti · Modern QR System</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;font-family:'Century Gothic','Segoe UI',sans-serif;}
-        body{background:#0a1620;color:#e8ddb0;padding:16px;}
+        body{background:#0a1620;color:#e8ddb0;padding:20px;}
         .container{max-width:1400px;margin:0 auto;}
-        .header{background:#07161f;border-bottom:3px solid #d4af37;border-radius:16px 16px 0 0;padding:20px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;}
-        h1{color:#d4af37;font-size:1.8rem;}
-        .abn{background:#0a1822;padding:6px 12px;border-radius:20px;font-size:0.75rem;}
-        .tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
-        .tab-btn{background:#0f212e;border:1px solid #d4af3740;padding:10px 20px;border-radius:30px;cursor:pointer;color:#e8ddb0;transition:0.2s;}
+        .header{background:#07161f;border-bottom:3px solid #d4af37;border-radius:20px 20px 0 0;padding:25px;margin-bottom:25px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;}
+        h1{color:#d4af37;font-size:2rem;}
+        .subhead{font-size:0.7rem;color:#aaa;margin-top:5px;}
+        .abn{background:#0a1822;padding:8px 16px;border-radius:30px;font-size:0.75rem;border:1px solid #d4af37;}
+        .tabs{display:flex;gap:10px;margin-bottom:25px;flex-wrap:wrap;}
+        .tab-btn{background:#0f212e;border:none;padding:12px 24px;border-radius:40px;cursor:pointer;color:#e8ddb0;font-size:0.9rem;}
         .tab-btn.active{background:#d4af37;color:#0a1620;font-weight:bold;}
         .tab-content{display:none;}
         .tab-content.active{display:block;}
-        .grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;margin-bottom:20px;}
-        .card{background:#0f212e;border-radius:16px;padding:20px;border:1px solid #d4af3740;}
-        .card h2{color:#d4af37;margin-bottom:15px;border-left:3px solid #d4af37;padding-left:10px;font-size:1.2rem;}
-        label{display:block;margin:10px 0 4px;font-size:0.75rem;color:#c9d1d9;}
-        select,input,textarea,button{width:100%;padding:10px;border-radius:10px;border:1px solid #2c4a5e;background:#0a1822;color:#fff;font-size:0.9rem;margin:4px 0;}
+        .grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:25px;margin-bottom:25px;}
+        .card{background:#0f212e;border-radius:20px;padding:25px;border:1px solid #d4af3730;}
+        .card h2{color:#d4af37;margin-bottom:20px;border-left:3px solid #d4af37;padding-left:12px;}
+        label{display:block;margin:12px 0 5px;font-size:0.7rem;color:#c9d1d9;}
+        select,input,textarea,button{width:100%;padding:12px;border-radius:12px;border:1px solid #2c4a5e;background:#0a1822;color:#fff;font-size:0.9rem;margin:5px 0;}
         button{background:#d4af37;color:#0a1620;font-weight:bold;border:none;cursor:pointer;}
         button:active{transform:scale(0.98);}
         .btn-red{background:#8b3a2a;color:white;}
         .balance-box{background:#07161f;border-radius:12px;padding:15px;text-align:center;margin:15px 0;border:1px solid #d4af37;}
         .balance-number{font-size:2rem;font-weight:bold;color:#d4af37;}
+        .product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:15px;margin-top:15px;}
+        .product-card{background:#07161f;border-radius:16px;padding:15px;border-left:3px solid #d4af37;}
+        .product-code{font-family:monospace;font-size:0.7rem;color:#d4af37;background:#0a1822;display:inline-block;padding:3px 8px;border-radius:8px;}
+        .qr-small{width:80px;height:80px;margin-top:10px;}
         .orders-list{max-height:500px;overflow-y:auto;}
-        .order-item{background:#07161f;border-radius:12px;padding:12px;margin-bottom:10px;border-left:3px solid #d4af37;}
-        .status-pending{background:#8b6b2c;padding:2px 8px;border-radius:20px;font-size:0.7rem;display:inline-block;}
-        .status-completed{background:#2c6e3a;padding:2px 8px;border-radius:20px;font-size:0.7rem;display:inline-block;}
+        .order-item{background:#07161f;border-radius:12px;padding:15px;margin-bottom:12px;border-left:3px solid #d4af37;}
+        .status-pending{background:#8b6b2c;padding:4px 12px;border-radius:20px;font-size:0.7rem;display:inline-block;}
+        .status-completed{background:#2c6e3a;padding:4px 12px;border-radius:20px;font-size:0.7rem;display:inline-block;}
         table{width:100%;border-collapse:collapse;font-size:0.7rem;}
-        th{background:#d4af37;color:#0a1620;padding:8px;text-align:left;}
-        td{padding:8px;border-bottom:1px solid #2c4a5e;}
-        .message{font-size:0.75rem;margin-top:8px;text-align:center;}
-        canvas{max-height:200px;width:100%;}
-        .footer{text-align:center;font-size:0.65rem;margin-top:20px;padding-top:15px;border-top:1px solid #2c4a5e;}
-        @media(max-width:700px){body{padding:10px;}.header{flex-direction:column;gap:10px;text-align:center;}}
+        th{background:#d4af37;color:#0a1620;padding:10px;text-align:left;}
+        td{padding:10px;border-bottom:1px solid #2c4a5e;}
+        .footer{text-align:center;font-size:0.65rem;margin-top:30px;padding-top:20px;border-top:1px solid #2c4a5e;}
+        @media(max-width:700px){body{padding:10px;}.header{flex-direction:column;text-align:center;gap:10px;}}
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <div><h1>🍞 BELFIOTI</h1><div style="font-size:0.7rem;">Pasca Vale, Melbourne · Live Orders</div></div>
+        <div><h1>🥖 BELFIOTI</h1><div class="subhead">Pascoe Vale, Melbourne · Artisan Bread</div></div>
         <div class="abn">ABN: 12 345 678 901</div>
     </div>
     <div class="tabs">
         <button class="tab-btn active" data-tab="orders">📦 Live Orders</button>
+        <button class="tab-btn" data-tab="products">🏷️ Products & QR</button>
         <button class="tab-btn" data-tab="inventory">🏪 Inventory</button>
         <button class="tab-btn" data-tab="prices">💰 Set Prices</button>
         <button class="tab-btn" data-tab="ledger">📒 Ledger</button>
     </div>
+    
+    <!-- TAB 1: LIVE ORDERS -->
     <div id="ordersTab" class="tab-content active">
         <div class="grid-2">
             <div class="card">
                 <h2>📝 New Customer Order</h2>
                 <label>Customer Name</label><input type="text" id="custName" placeholder="e.g., Mario's Restaurant">
                 <label>Product</label><select id="orderProduct"></select>
-                <label>Quantity (packages)</label><input type="number" id="orderQty" value="1" step="1">
-                <label>Delivery Address</label><textarea id="orderAddress" rows="2" placeholder="Street, suburb, Melbourne"></textarea>
+                <label>Package Size</label><select id="orderSize"><option value="500g">500g - $<span id="price500"></span></option><option value="1kg">1kg - $<span id="price1kg"></span></option></select>
+                <label>Quantity</label><input type="number" id="orderQty" value="1" step="1">
+                <label>Delivery Address</label><textarea id="orderAddress" rows="2" placeholder="Street, Pascoe Vale, Melbourne"></textarea>
                 <button id="placeOrderBtn">📞 Place Order</button>
-                <div id="orderMsg" class="message"></div>
+                <div id="orderMsg" style="margin-top:10px;font-size:0.75rem;text-align:center;"></div>
             </div>
             <div class="card">
-                <h2>🕐 Live Orders from Customers</h2>
+                <h2>🕐 Live Customer Orders</h2>
                 <div id="liveOrders" class="orders-list"><div style="text-align:center;padding:20px;">Loading orders...</div></div>
             </div>
         </div>
     </div>
+    
+    <!-- TAB 2: PRODUCTS WITH QR CODES -->
+    <div id="productsTab" class="tab-content">
+        <div class="card">
+            <h2>🏷️ Product Catalog · QR Codes</h2>
+            <div id="productGrid" class="product-grid"></div>
+        </div>
+    </div>
+    
+    <!-- TAB 3: INVENTORY -->
     <div id="inventoryTab" class="tab-content">
         <div class="grid-2">
             <div class="card">
                 <h2>🏪 Store & Driver</h2>
-                <label>Store:</label><select id="storeSelect"><option>Pasca Vale HQ</option><option>Main Street</option><option>Westfield Plaza</option><option>Harbor View</option></select>
-                <label>Driver:</label><select id="driverSelect"><option>Driver Andrew</option><option>Driver Mike</option><option>Driver Sarah</option><option>Driver Juan</option></select>
-                <div class="balance-box"><div>Current Balance (loaves)</div><div class="balance-number" id="currentBalance">0</div><div>Closing leftover: <span id="closingPreview">0</span></div></div>
-                <div style="display:flex;gap:8px;"><input type="number" id="openingAmount" placeholder="Opening loaves" value="50"><button id="setOpeningBtn">📦 Set Opening</button></div>
-                <button id="closeShiftBtn" class="btn-red">🔒 Close Shift (Record Leftover)</button>
+                <select id="storeSelect"><option>Pascoe Vale HQ</option><option>Main Street</option><option>Westfield Plaza</option><option>Sydney Road</option></select>
+                <select id="driverSelect"><option>Driver Andrew</option><option>Driver Mike</option><option>Driver Sarah</option><option>Driver Juan</option></select>
+                <div class="balance-box"><div>Current Balance (kg)</div><div class="balance-number" id="currentBalance">0</div><div>Closing: <span id="closingPreview">0</span></div></div>
+                <input type="number" id="openingAmount" placeholder="Opening Stock (kg)" value="100">
+                <button id="setOpeningBtn">📦 Set Opening</button>
+                <button id="closeShiftBtn" class="btn-red">🔒 Close Shift</button>
             </div>
             <div class="card">
-                <h2>🥖 Staff Fly-by Entry</h2>
-                <label>Product:</label><select id="invProductSelect"></select>
-                <label>Quantity:</label><input type="number" id="invQty" value="5" step="1">
-                <div style="display:flex;gap:8px;"><button id="addFreshBtn">➕ ADD FRESH</button><button id="removeOldBtn" class="btn-red">🗑️ REMOVE OLD</button></div>
-                <div id="invMsg" class="message"></div>
+                <h2>🥖 Staff Entry</h2>
+                <select id="invProductSelect"></select>
+                <select id="invSizeSelect"><option value="500g">500g packet</option><option value="1kg">1kg packet</option></select>
+                <input type="number" id="invQty" value="5" step="1">
+                <div style="display:flex;gap:10px;"><button id="addFreshBtn">➕ Add Stock</button><button id="removeOldBtn" class="btn-red">🗑️ Remove/Sell</button></div>
+                <div id="invMsg" style="margin-top:10px;font-size:0.75rem;text-align:center;"></div>
             </div>
             <div class="card">
-                <h2>📈 Live Sales Chart</h2>
+                <h2>📈 Sales Chart</h2>
                 <canvas id="salesChart"></canvas>
-                <div class="message" style="font-size:0.65rem;">Last 10 actions (gold = add, red = remove)</div>
             </div>
         </div>
     </div>
+    
+    <!-- TAB 4: PRICES -->
     <div id="pricesTab" class="tab-content">
-        <div class="card"><h2>💰 Set Product Prices (AUD)</h2><div id="priceList"></div><button id="savePricesBtn">💾 Save All Prices</button><div id="priceMsg" class="message"></div></div>
+        <div class="card"><h2>💰 Set Prices (AUD)</h2><div id="priceList"></div><button id="savePricesBtn">💾 Save All Prices</button><div id="priceMsg" style="margin-top:10px;"></div></div>
     </div>
+    
+    <!-- TAB 5: LEDGER -->
     <div id="ledgerTab" class="tab-content">
-        <div class="card"><h2>📒 Complete Ledger · What's Available & Left</h2><div style="overflow-x:auto;max-height:400px;overflow-y:auto;"><table><thead><tr><th>Time</th><th>Store</th><th>Driver</th><th>Product</th><th>Action</th><th>Qty</th><th>Balance</th></tr></thead><tbody id="ledgerBody"></tbody></table></div><button id="exportLedgerBtn">📎 Export CSV</button><button id="resetInventoryBtn" class="btn-red" style="margin-top:8px;">⚠️ Reset Local Inventory</button></div>
+        <div class="card"><h2>📒 Complete Ledger</h2><div style="overflow-x:auto;max-height:400px;"><table><thead><tr><th>Time</th><th>Store</th><th>Driver</th><th>Product</th><th>Package</th><th>Action</th><th>Qty</th><th>Balance(kg)</th></tr></thead><tbody id="ledgerBody"></tbody></table></div><button id="exportBtn">📎 Export CSV</button></div>
     </div>
-    <div class="footer">BELFIOTI · Handmade Bread · Pasca Vale, Melbourne · Made by Andrew</div>
+    
+    <div class="footer">BELFIOTI · Artisan Bread · Pascoe Vale, Melbourne · Handmade by Andrew</div>
 </div>
+
 <script>
-var firebaseConfig = {
+// FIREBASE CONFIG
+const firebaseConfig = {
     apiKey: "AIzaSyA_fHxVLIvsmvCTe-5LxIdGChoOF9US9hs",
     authDomain: "belfioti-orders.firebaseapp.com",
     projectId: "belfioti-orders",
@@ -113,240 +139,325 @@ var firebaseConfig = {
     appId: "1:211389704320:web:fd42204382707a59a15e65"
 };
 firebase.initializeApp(firebaseConfig);
-var db = firebase.firestore();
-var products = ["White Loaf","Whole Wheat","Sourdough","Baguette","Rye Bread","Ciabatta","Multigrain","Focaccia","Pane di Casa"];
-var productPrices = {};
-var balances = {};
-var ledger = [];
-var salesChart = null;
-var stores = ["Pasca Vale HQ","Main Street","Westfield Plaza","Harbor View"];
-var drivers = ["Driver Andrew","Driver Mike","Driver Sarah","Driver Juan"];
+const db = firebase.firestore();
 
-function loadPrices() {
-    db.collection("settings").doc("productPrices").get().then(function(doc) {
-        if (doc.exists) {
-            productPrices = doc.data();
-        } else {
-            for (var i = 0; i < products.length; i++) { productPrices[products[i]] = 6.50; }
-            productPrices["Sourdough"] = 7.50;
-            productPrices["Ciabatta"] = 5.90;
-            db.collection("settings").doc("productPrices").set(productPrices);
-        }
-        renderPriceList();
-        updateSelects();
-    });
+// PRODUCTS WITH UNIQUE CODES
+const products = [
+    { name: "White Loaf", code: "BLF-WHT-001", basePrice: 6.50 },
+    { name: "Whole Wheat", code: "BLF-WHW-002", basePrice: 7.00 },
+    { name: "Sourdough", code: "BLF-SRD-003", basePrice: 8.50 },
+    { name: "Baguette", code: "BLF-BGT-004", basePrice: 5.50 },
+    { name: "Rye Bread", code: "BLF-RYE-005", basePrice: 7.50 },
+    { name: "Ciabatta", code: "BLF-CIA-006", basePrice: 6.00 },
+    { name: "Focaccia", code: "BLF-FOC-007", basePrice: 8.00 },
+    { name: "Pane di Casa", code: "BLF-PDC-008", basePrice: 7.80 }
+];
+
+let prices = { 500g: {}, 1kg: {} };
+let balances = {};
+let ledger = [];
+let salesChart = null;
+
+// Helper: Convert kg to packets
+function kgToPackets(kg, size) { return size === "500g" ? kg * 2 : kg; }
+function packetsToKg(qty, size) { return size === "500g" ? qty / 2 : qty; }
+
+// Generate QR code URL for product
+function getProductQRUrl(productCode, size) {
+    return `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=BELFIOTI%7C${productCode}%7C${size}%7C${new Date().toISOString().slice(0,10)}`;
 }
+
+// Load prices from Firebase
+async function loadPrices() {
+    const doc = await db.collection("settings").doc("productPrices").get();
+    if (doc.exists) {
+        const data = doc.data();
+        prices["500g"] = data["500g"] || {};
+        prices["1kg"] = data["1kg"] || {};
+    }
+    for (let p of products) {
+        if (!prices["500g"][p.name]) prices["500g"][p.name] = p.basePrice * 0.6;
+        if (!prices["1kg"][p.name]) prices["1kg"][p.name] = p.basePrice;
+    }
+    renderPriceList();
+    updateSelects();
+    renderProductGrid();
+}
+
 function renderPriceList() {
-    var container = document.getElementById("priceList");
+    const container = document.getElementById("priceList");
     if (!container) return;
-    container.innerHTML = "";
-    for (var i = 0; i < products.length; i++) {
-        var p = products[i];
-        var div = document.createElement("div");
+    container.innerHTML = "<h3 style='margin-bottom:15px;'>500g Packets</h3>";
+    for (let p of products) {
+        const div = document.createElement("div");
         div.style.display = "flex";
         div.style.gap = "10px";
         div.style.margin = "10px 0";
         div.style.alignItems = "center";
-        div.innerHTML = '<span style="flex:2;">' + p + '</span><span>$</span><input type="number" id="price_' + p.replace(/\s/g,'') + '" value="' + (productPrices[p] || 6.50) + '" step="0.5" style="flex:1;">';
+        div.innerHTML = `<span style="flex:2;">${p.name} (500g)</span><span>$</span><input type="number" id="price_500g_${p.name.replace(/\s/g,'')}" value="${prices["500g"][p.name]}" step="0.5" style="flex:1;">`;
+        container.appendChild(div);
+    }
+    container.innerHTML += "<h3 style='margin:20px 0 15px;'>1kg Packets</h3>";
+    for (let p of products) {
+        const div = document.createElement("div");
+        div.style.display = "flex";
+        div.style.gap = "10px";
+        div.style.margin = "10px 0";
+        div.style.alignItems = "center";
+        div.innerHTML = `<span style="flex:2;">${p.name} (1kg)</span><span>$</span><input type="number" id="price_1kg_${p.name.replace(/\s/g,'')}" value="${prices["1kg"][p.name]}" step="0.5" style="flex:1;">`;
         container.appendChild(div);
     }
 }
-function savePrices() {
-    for (var i = 0; i < products.length; i++) {
-        var p = products[i];
-        var input = document.getElementById("price_" + p.replace(/\s/g,''));
-        if (input) productPrices[p] = parseFloat(input.value);
+
+async function savePrices() {
+    for (let p of products) {
+        const price500 = document.getElementById(`price_500g_${p.name.replace(/\s/g,'')}`);
+        const price1kg = document.getElementById(`price_1kg_${p.name.replace(/\s/g,'')}`);
+        if (price500) prices["500g"][p.name] = parseFloat(price500.value);
+        if (price1kg) prices["1kg"][p.name] = parseFloat(price1kg.value);
     }
-    db.collection("settings").doc("productPrices").set(productPrices).then(function() {
-        document.getElementById("priceMsg").innerHTML = "✓ Prices saved!";
-        setTimeout(function() { document.getElementById("priceMsg").innerHTML = ""; }, 2000);
-        updateSelects();
-    });
+    await db.collection("settings").doc("productPrices").set(prices);
+    document.getElementById("priceMsg").innerHTML = "✓ Prices saved!";
+    setTimeout(() => document.getElementById("priceMsg").innerHTML = "", 2000);
+    updateSelects();
 }
+
 function updateSelects() {
-    var orderSel = document.getElementById("orderProduct");
-    var invSel = document.getElementById("invProductSelect");
+    const orderSel = document.getElementById("orderProduct");
+    const invSel = document.getElementById("invProductSelect");
     if (orderSel) {
         orderSel.innerHTML = "";
-        for (var i = 0; i < products.length; i++) {
-            var p = products[i];
-            var opt = document.createElement("option");
-            opt.value = p;
-            opt.innerText = p + " - $" + (productPrices[p] || 6.50).toFixed(2);
+        for (let p of products) {
+            const opt = document.createElement("option");
+            opt.value = p.name;
+            opt.innerText = `${p.name} (${p.code})`;
             orderSel.appendChild(opt);
         }
     }
     if (invSel) {
         invSel.innerHTML = "";
-        for (var i = 0; i < products.length; i++) {
-            var p = products[i];
-            var opt = document.createElement("option");
-            opt.value = p;
-            opt.innerText = p;
+        for (let p of products) {
+            const opt = document.createElement("option");
+            opt.value = p.name;
+            opt.innerText = `${p.name} (${p.code})`;
             invSel.appendChild(opt);
         }
     }
+    updatePriceDisplay();
 }
-function placeOrder() {
-    var name = document.getElementById("custName").value.trim();
-    var product = document.getElementById("orderProduct").value;
-    var qty = parseInt(document.getElementById("orderQty").value);
-    var address = document.getElementById("orderAddress").value.trim();
+
+function updatePriceDisplay() {
+    const product = document.getElementById("orderProduct").value;
+    const price500Span = document.getElementById("price500");
+    const price1kgSpan = document.getElementById("price1kg");
+    if (price500Span) price500Span.innerText = (prices["500g"][product] || 0).toFixed(2);
+    if (price1kgSpan) price1kgSpan.innerText = (prices["1kg"][product] || 0).toFixed(2);
+}
+
+function renderProductGrid() {
+    const container = document.getElementById("productGrid");
+    if (!container) return;
+    container.innerHTML = "";
+    for (let p of products) {
+        const qrUrl500 = getProductQRUrl(p.code, "500g");
+        const qrUrl1kg = getProductQRUrl(p.code, "1kg");
+        const div = document.createElement("div");
+        div.className = "product-card";
+        div.innerHTML = `
+            <div><strong>${p.name}</strong></div>
+            <div class="product-code">${p.code}</div>
+            <div style="display:flex;gap:20px;margin-top:15px;flex-wrap:wrap;">
+                <div><div>500g</div><img src="${qrUrl500}" class="qr-small" alt="QR"><div>$${(prices["500g"][p.name] || 0).toFixed(2)}</div></div>
+                <div><div>1kg</div><img src="${qrUrl1kg}" class="qr-small" alt="QR"><div>$${(prices["1kg"][p.name] || 0).toFixed(2)}</div></div>
+            </div>
+        `;
+        container.appendChild(div);
+    }
+}
+
+// PLACE ORDER
+async function placeOrder() {
+    const name = document.getElementById("custName").value.trim();
+    const product = document.getElementById("orderProduct").value;
+    const size = document.getElementById("orderSize").value;
+    const qty = parseInt(document.getElementById("orderQty").value);
+    const address = document.getElementById("orderAddress").value.trim();
+    
     if (!name || !product || !qty || qty <= 0 || !address) {
-        document.getElementById("orderMsg").innerHTML = "❌ Please fill all fields";
+        document.getElementById("orderMsg").innerHTML = "❌ Fill all fields";
         return;
     }
-    var total = (productPrices[product] || 6.50) * qty;
-    db.collection("orders").add({
+    
+    const price = size === "500g" ? prices["500g"][product] : prices["1kg"][product];
+    const total = price * qty;
+    const productCode = products.find(p => p.name === product).code;
+    
+    await db.collection("orders").add({
         customerName: name,
         product: product,
+        productCode: productCode,
+        packageSize: size,
         quantity: qty,
         address: address,
         total: total,
         status: "pending",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(function() {
-        document.getElementById("custName").value = "";
-        document.getElementById("orderQty").value = "1";
-        document.getElementById("orderAddress").value = "";
-        document.getElementById("orderMsg").innerHTML = "✅ Order placed! Total: $" + total.toFixed(2);
-        setTimeout(function() { document.getElementById("orderMsg").innerHTML = ""; }, 3000);
     });
+    
+    document.getElementById("custName").value = "";
+    document.getElementById("orderQty").value = "1";
+    document.getElementById("orderAddress").value = "";
+    document.getElementById("orderMsg").innerHTML = `✅ Order placed! Total: $${total.toFixed(2)}`;
+    setTimeout(() => document.getElementById("orderMsg").innerHTML = "", 3000);
 }
+
+// LIVE ORDERS LISTENER
 function listenForOrders() {
-    db.collection("orders").orderBy("timestamp", "desc").limit(50).onSnapshot(function(snapshot) {
-        var container = document.getElementById("liveOrders");
+    db.collection("orders").orderBy("timestamp", "desc").limit(50).onSnapshot((snapshot) => {
+        const container = document.getElementById("liveOrders");
         if (!container) return;
         if (snapshot.empty) {
             container.innerHTML = "<div style='text-align:center;padding:20px;'>No orders yet</div>";
             return;
         }
-        var html = "";
-        snapshot.forEach(function(doc) {
-            var o = doc.data();
-            var date = o.timestamp && o.timestamp.toDate ? o.timestamp.toDate().toLocaleString() : "Just now";
-            var statusClass = o.status === "pending" ? "status-pending" : "status-completed";
-            var completeButton = "";
-            if (o.status === "pending") {
-                completeButton = '<button onclick="markComplete(\'' + doc.id + '\')" style="width:auto;padding:2px 12px;margin-left:8px;font-size:0.7rem;">✓ Complete</button>';
-            }
-            html += '<div class="order-item"><div><strong>' + escapeHtml(o.customerName) + '</strong> · ' + o.product + ' x' + o.quantity + '</div><div style="font-size:0.7rem;">📍 ' + escapeHtml(o.address) + '</div><div style="font-size:0.7rem;">💰 $' + (o.total || 0).toFixed(2) + '</div><div style="font-size:0.65rem;">🕐 ' + date + '</div><div><span class="' + statusClass + '">' + o.status + '</span>' + completeButton + '</div></div>';
+        let html = "";
+        snapshot.forEach(doc => {
+            const o = doc.data();
+            const date = o.timestamp?.toDate?.() ? o.timestamp.toDate().toLocaleString() : "Just now";
+            html += `<div class="order-item">
+                        <div><strong>${escapeHtml(o.customerName)}</strong> · ${o.product} (${o.packageSize}) x${o.quantity}</div>
+                        <div style="font-size:0.7rem;">📍 ${escapeHtml(o.address)}</div>
+                        <div style="font-size:0.7rem;">💰 $${(o.total || 0).toFixed(2)}</div>
+                        <div style="font-size:0.65rem;">📦 Code: ${o.productCode || 'N/A'}</div>
+                        <div style="margin-top:8px;"><span class="status-${o.status}">${o.status}</span>
+                        ${o.status === "pending" ? `<button onclick="markComplete('${doc.id}')" style="width:auto;padding:4px 16px;margin-left:10px;font-size:0.7rem;">✓ Complete</button>` : ''}</div>
+                    </div>`;
         });
         container.innerHTML = html;
     });
 }
+
 function escapeHtml(str) { return str.replace(/[&<>]/g, function(m) { if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m; }); }
-window.markComplete = function(orderId) { db.collection("orders").doc(orderId).update({ status: "completed" }); };
+
+window.markComplete = async function(orderId) {
+    await db.collection("orders").doc(orderId).update({ status: "completed" });
+};
+
+// INVENTORY SYSTEM (in kg)
 function getCurrentKey() { return document.getElementById("storeSelect").value + "|" + document.getElementById("driverSelect").value; }
-function updateBalanceDisplay() { var bal = balances[getCurrentKey()] || 0; document.getElementById("currentBalance").innerText = bal; document.getElementById("closingPreview").innerText = bal; }
-function addLedgerEntry(store, driver, product, action, qty, balanceAfter) { ledger.unshift({ timestamp: new Date().toLocaleString(), store: store, driver: driver, product: product, action: action, qty: qty, balanceAfter: balanceAfter }); if (ledger.length > 500) ledger.pop(); localStorage.setItem("belfioti_ledger", JSON.stringify(ledger)); renderLedger(); updateChart(); }
+function updateBalanceDisplay() { const bal = balances[getCurrentKey()] || 0; document.getElementById("currentBalance").innerText = bal.toFixed(1); document.getElementById("closingPreview").innerText = bal.toFixed(1); }
+
+function addLedgerEntry(store, driver, product, pkgSize, action, qtyPackets, balanceAfterKg) {
+    ledger.unshift({ timestamp: new Date().toLocaleString(), store, driver, product, pkgSize, action, qtyPackets, balanceAfterKg });
+    if (ledger.length > 500) ledger.pop();
+    localStorage.setItem("belfioti_ledger", JSON.stringify(ledger));
+    renderLedger();
+    updateChart();
+}
+
 function inventoryAction(isAdd) {
-    var store = document.getElementById("storeSelect").value;
-    var driver = document.getElementById("driverSelect").value;
-    var product = document.getElementById("invProductSelect").value;
-    var qty = parseInt(document.getElementById("invQty").value);
-    if (isNaN(qty) || qty <= 0) { document.getElementById("invMsg").innerHTML = "❌ Enter valid quantity"; return; }
-    var key = getCurrentKey();
-    var current = balances[key] || 0;
-    var newBalance, actionName;
-    if (isAdd) { newBalance = current + qty; actionName = "ADD"; }
-    else { if (current < qty) { document.getElementById("invMsg").innerHTML = "❌ Only " + current + " available"; return; } newBalance = current - qty; actionName = "REMOVE"; }
-    balances[key] = newBalance;
-    addLedgerEntry(store, driver, product, actionName, qty, newBalance);
+    const store = document.getElementById("storeSelect").value;
+    const driver = document.getElementById("driverSelect").value;
+    const product = document.getElementById("invProductSelect").value;
+    const size = document.getElementById("invSizeSelect").value;
+    const packetQty = parseInt(document.getElementById("invQty").value);
+    
+    if (isNaN(packetQty) || packetQty <= 0) { document.getElementById("invMsg").innerHTML = "❌ Enter valid quantity"; return; }
+    
+    const kgChange = packetsToKg(packetQty, size);
+    const key = getCurrentKey();
+    let currentKg = balances[key] || 0;
+    let newKg, actionName;
+    
+    if (isAdd) {
+        newKg = currentKg + kgChange;
+        actionName = "ADD_STOCK";
+    } else {
+        if (currentKg < kgChange) { document.getElementById("invMsg").innerHTML = `❌ Only ${currentKg.toFixed(1)}kg available`; return; }
+        newKg = currentKg - kgChange;
+        actionName = "SELL/REMOVE";
+    }
+    
+    balances[key] = newKg;
+    addLedgerEntry(store, driver, product, size, actionName, packetQty, newKg);
     localStorage.setItem("belfioti_balances", JSON.stringify(balances));
     updateBalanceDisplay();
-    document.getElementById("invMsg").innerHTML = "✓ " + (actionName === "ADD" ? "Added" : "Removed") + " " + qty;
-    setTimeout(function() { document.getElementById("invMsg").innerHTML = ""; }, 2000);
+    document.getElementById("invMsg").innerHTML = `✓ ${isAdd ? "Added" : "Removed"} ${packetQty} x ${size} (${kgChange.toFixed(1)}kg)`;
+    setTimeout(() => document.getElementById("invMsg").innerHTML = "", 2000);
 }
+
 function setOpeningBalance() {
-    var store = document.getElementById("storeSelect").value;
-    var driver = document.getElementById("driverSelect").value;
-    var key = store + "|" + driver;
-    var val = parseInt(document.getElementById("openingAmount").value);
-    if (isNaN(val) || val < 0) return;
-    balances[key] = val;
-    addLedgerEntry(store, driver, "Opening", "SET_OPENING", val, val);
+    const store = document.getElementById("storeSelect").value;
+    const driver = document.getElementById("driverSelect").value;
+    const key = store + "|" + driver;
+    const kgVal = parseFloat(document.getElementById("openingAmount").value);
+    if (isNaN(kgVal) || kgVal < 0) return;
+    balances[key] = kgVal;
+    addLedgerEntry(store, driver, "Opening", "-", "SET_OPENING", 0, kgVal);
     localStorage.setItem("belfioti_balances", JSON.stringify(balances));
     updateBalanceDisplay();
 }
+
 function closeShift() {
-    var store = document.getElementById("storeSelect").value;
-    var driver = document.getElementById("driverSelect").value;
-    var key = getCurrentKey();
-    var leftover = balances[key] || 0;
-    if (confirm("Close shift for " + store + " / " + driver + "? Leftover: " + leftover + " loaves")) {
-        addLedgerEntry(store, driver, "ALL", "CLOSE_SHIFT", leftover, 0);
+    const store = document.getElementById("storeSelect").value;
+    const driver = document.getElementById("driverSelect").value;
+    const key = getCurrentKey();
+    const leftover = balances[key] || 0;
+    if (confirm(`Close shift for ${store} / ${driver}? Leftover: ${leftover.toFixed(1)}kg`)) {
+        addLedgerEntry(store, driver, "ALL", "-", "CLOSE_SHIFT", 0, 0);
         balances[key] = 0;
         localStorage.setItem("belfioti_balances", JSON.stringify(balances));
         updateBalanceDisplay();
     }
 }
+
 function renderLedger() {
-    var tbody = document.getElementById("ledgerBody");
+    const tbody = document.getElementById("ledgerBody");
     if (!tbody) return;
     if (ledger.length === 0) { tbody.innerHTML = '<tr><td colspan="7">No entries yet</td></tr>'; return; }
     tbody.innerHTML = "";
-    for (var i = 0; i < Math.min(ledger.length, 150); i++) {
-        var e = ledger[i];
-        var row = tbody.insertRow();
+    for (let e of ledger.slice(0, 150)) {
+        const row = tbody.insertRow();
         row.insertCell(0).innerText = e.timestamp;
         row.insertCell(1).innerText = e.store;
         row.insertCell(2).innerText = e.driver;
         row.insertCell(3).innerText = e.product;
-        row.insertCell(4).innerText = e.action;
-        row.insertCell(5).innerText = e.qty;
-        row.insertCell(6).innerText = e.balanceAfter;
+        row.insertCell(4).innerText = e.pkgSize || "-";
+        row.insertCell(5).innerText = e.action;
+        row.insertCell(6).innerText = e.qtyPackets;
+        row.insertCell(7).innerText = e.balanceAfterKg?.toFixed(1) || "0";
     }
 }
+
 function updateChart() {
-    var ctx = document.getElementById("salesChart");
+    const ctx = document.getElementById("salesChart");
     if (!ctx) return;
-    var recent = [];
-    for (var i = ledger.length-1; i >= Math.max(0, ledger.length-10); i--) { recent.push(ledger[i]); }
-    var labels = [], data = [];
-    for (var i = 0; i < recent.length; i++) {
-        var t = recent[i];
-        labels.push(t.product ? t.product.substring(0,6) : "?");
-        if (t.action === "ADD") data.push(t.qty);
-        else if (t.action === "REMOVE") data.push(-t.qty);
-        else data.push(0);
-    }
+    const recent = [...ledger].reverse().slice(-10);
+    const labels = recent.map(t => t.product?.substring(0,6) || "?");
+    const data = recent.map(t => t.action === "ADD_STOCK" ? t.qtyPackets : (t.action === "SELL/REMOVE" ? -t.qtyPackets : 0));
     if (salesChart) salesChart.destroy();
     salesChart = new Chart(ctx, {
         type: 'bar',
-        data: { labels: labels.length ? labels : ["No data"], datasets: [{ label: 'Stock change', data: data.length ? data : [0], backgroundColor: data.map(function(v) { return v >= 0 ? '#d4af37' : '#8b3a2a'; }), borderRadius: 6 }] },
+        data: { labels: labels.length ? labels : ["No data"], datasets: [{ label: 'Packets (+add / -sell)', data: data.length ? data : [0], backgroundColor: data.map(v => v >= 0 ? '#d4af37' : '#8b3a2a'), borderRadius: 6 }] },
         options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { labels: { color: '#e8ddb0', font: { size: 9 } } } }, scales: { y: { ticks: { color: '#aaa' } }, x: { ticks: { color: '#aaa', font: { size: 8 } } } } }
     });
 }
+
 function exportCSV() {
-    if (ledger.length === 0) { alert("No data to export"); return; }
-    var csv = [["Timestamp","Store","Driver","Product","Action","Quantity","Balance"]];
-    for (var i = 0; i < ledger.length; i++) { var r = ledger[i]; csv.push([r.timestamp, r.store, r.driver, r.product, r.action, r.qty, r.balanceAfter]); }
-    var csvContent = "";
-    for (var i = 0; i < csv.length; i++) { var row = csv[i]; var quoted = []; for (var j = 0; j < row.length; j++) { quoted.push('"' + row[j] + '"'); } csvContent += quoted.join(",") + "\n"; }
-    var blob = new Blob([csvContent], { type: "text/csv" });
-    var link = document.createElement("a");
+    if (ledger.length === 0) { alert("No data"); return; }
+    let csv = [["Timestamp","Store","Driver","Product","Package","Action","Qty Packets","Balance(kg)"]];
+    for (let r of ledger) csv.push([r.timestamp, r.store, r.driver, r.product, r.pkgSize || "-", r.action, r.qtyPackets, r.balanceAfterKg]);
+    const csvContent = csv.map(row => row.map(cell => `"${cell}"`).join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = "belfioti_ledger_" + new Date().toISOString().slice(0,19) + ".csv";
+    link.download = `belfioti_ledger_${new Date().toISOString().slice(0,19)}.csv`;
     link.click();
-    URL.revokeObjectURL(link.href);
 }
-function resetInventory() {
-    if (confirm("Reset local inventory? This clears balances and ledger.")) {
-        balances = {};
-        ledger = [];
-        localStorage.setItem("belfioti_balances", JSON.stringify(balances));
-        localStorage.setItem("belfioti_ledger", JSON.stringify(ledger));
-        updateBalanceDisplay();
-        renderLedger();
-        updateChart();
-        document.getElementById("invMsg").innerHTML = "✓ Local inventory reset";
-        setTimeout(function() { if(document.getElementById("invMsg")) document.getElementById("invMsg").innerHTML = ""; }, 2000);
-    }
-}
+
 function loadLocalData() {
-    var savedBal = localStorage.getItem("belfioti_balances");
-    var savedLed = localStorage.getItem("belfioti_ledger");
+    const savedBal = localStorage.getItem("belfioti_balances");
+    const savedLed = localStorage.getItem("belfioti_ledger");
     if (savedBal) balances = JSON.parse(savedBal);
     if (savedLed) ledger = JSON.parse(savedLed);
     if (!balances) balances = {};
@@ -355,32 +466,34 @@ function loadLocalData() {
     renderLedger();
     updateChart();
 }
-var tabs = document.querySelectorAll(".tab-btn");
-for (var i = 0; i < tabs.length; i++) {
-    tabs[i].addEventListener("click", function(btn) {
-        return function() {
-            var tabId = btn.dataset.tab;
-            var allContents = document.querySelectorAll(".tab-content");
-            for (var j = 0; j < allContents.length; j++) { allContents[j].classList.remove("active"); }
-            document.getElementById(tabId + "Tab").classList.add("active");
-            var allBtns = document.querySelectorAll(".tab-btn");
-            for (var j = 0; j < allBtns.length; j++) { allBtns[j].classList.remove("active"); }
-            btn.classList.add("active");
-            if (tabId === "ledger") renderLedger();
-            if (tabId === "inventory") updateChart();
-        };
-    }(tabs[i]));
-}
+
+// TAB SWITCHING
+document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+        const tabId = btn.dataset.tab;
+        document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+        document.getElementById(tabId + "Tab").classList.add("active");
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        if (tabId === "products") renderProductGrid();
+        if (tabId === "ledger") renderLedger();
+        if (tabId === "inventory") updateChart();
+    });
+});
+
+// EVENT LISTENERS
 document.getElementById("placeOrderBtn").onclick = placeOrder;
 document.getElementById("setOpeningBtn").onclick = setOpeningBalance;
-document.getElementById("addFreshBtn").onclick = function() { inventoryAction(true); };
-document.getElementById("removeOldBtn").onclick = function() { inventoryAction(false); };
+document.getElementById("addFreshBtn").onclick = () => inventoryAction(true);
+document.getElementById("removeOldBtn").onclick = () => inventoryAction(false);
 document.getElementById("closeShiftBtn").onclick = closeShift;
 document.getElementById("savePricesBtn").onclick = savePrices;
-document.getElementById("exportLedgerBtn").onclick = exportCSV;
-document.getElementById("resetInventoryBtn").onclick = resetInventory;
+document.getElementById("exportBtn").onclick = exportCSV;
+document.getElementById("orderProduct").onchange = updatePriceDisplay;
 document.getElementById("storeSelect").onchange = updateBalanceDisplay;
 document.getElementById("driverSelect").onchange = updateBalanceDisplay;
+
+// INIT
 loadLocalData();
 loadPrices();
 listenForOrders();
