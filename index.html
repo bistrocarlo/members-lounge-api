@@ -3,49 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Belfioti · Artisan Pasta</title>
+    <title>Belfioti · Artisan Pasta · Pascoe Vale</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;font-family:'Century Gothic','Segoe UI',sans-serif;}
-        body{background:#0a1620;color:#e8ddb0;min-height:100vh;}
+        body{background:#0a1620;color:#e8ddb0;}
         .container{max-width:1200px;margin:0 auto;padding:20px;}
-        .login-container{max-width:400px;margin:100px auto;background:#0f212e;padding:40px;border-radius:20px;border:1px solid #d4af37;}
-        h1{color:#d4af37;font-size:2rem;margin-bottom:10px;}
-        h2{color:#d4af37;margin-bottom:20px;border-left:3px solid #d4af37;padding-left:12px;}
-        input,select,textarea,button{width:100%;padding:12px;border-radius:10px;border:1px solid #2c4a5e;background:#0a1822;color:#fff;margin:10px 0;font-size:1rem;}
-        button{background:#d4af37;color:#0a1620;font-weight:bold;border:none;cursor:pointer;}
-        button:active{transform:scale(0.98);}
+        
+        /* Header */
         .header{background:#07161f;border-bottom:2px solid #d4af37;padding:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;}
-        .abn{font-size:0.7rem;background:#0a1822;padding:6px 12px;border-radius:20px;}
+        .logo h1{color:#d4af37;font-size:1.8rem;}
+        .logo p{font-size:0.7rem;color:#aaa;}
+        .abn{font-size:0.7rem;background:#0a1822;padding:6px 12px;border-radius:20px;border:1px solid #d4af37;}
+        
+        /* Buttons */
+        button{background:#d4af37;color:#0a1620;font-weight:bold;border:none;cursor:pointer;padding:12px 24px;border-radius:10px;font-size:1rem;}
+        button:active{transform:scale(0.98);}
+        .btn-outline{background:transparent;border:1px solid #d4af37;color:#d4af37;}
+        .btn-danger{background:#8b3a2a;color:white;}
+        
+        /* Cards */
+        .card{background:#0f212e;border-radius:16px;padding:25px;border:1px solid #d4af3730;margin-bottom:20px;}
+        .card h2{color:#d4af37;margin-bottom:20px;border-left:3px solid #d4af37;padding-left:12px;}
+        
+        /* Forms */
+        input,select,textarea{width:100%;padding:12px;border-radius:10px;border:1px solid #2c4a5e;background:#0a1822;color:#fff;margin:8px 0;font-size:1rem;}
+        
+        /* Grid */
         .grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;}
-        .card{background:#0f212e;border-radius:16px;padding:20px;border:1px solid #d4af3730;margin-bottom:20px;}
-        .pasta-item{display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid #2c4a5e;}
-        .pasta-name{flex:2;}
-        .pasta-price{flex:1;color:#d4af37;}
-        .pasta-qty{flex:1;}
-        .pasta-qty input{width:80px;margin:0;text-align:center;}
+        .grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;}
+        
+        /* Product Card */
+        .product-card{background:#07161f;border-radius:12px;padding:15px;text-align:center;border-left:3px solid #d4af37;}
+        .product-price{color:#d4af37;font-size:1.2rem;margin:10px 0;}
+        .product-qty input{width:80px;text-align:center;margin:5px auto;}
+        
+        /* Cart */
+        .cart-item{display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid #2c4a5e;}
         .total-box{background:#07161f;padding:20px;border-radius:12px;text-align:center;margin:20px 0;}
         .total-amount{font-size:2rem;color:#d4af37;font-weight:bold;}
-        .invoice-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;}
-        .invoice-actions button{flex:1;min-width:120px;}
-        .orders-list{max-height:500px;overflow-y:auto;}
-        .order-item{background:#07161f;border-radius:12px;padding:15px;margin-bottom:10px;border-left:3px solid #d4af37;}
-        .status-pending{background:#8b6b2c;padding:2px 10px;border-radius:20px;font-size:0.7rem;}
-        .status-completed{background:#2c6e3a;padding:2px 10px;border-radius:20px;font-size:0.7rem;}
+        
+        /* Tables */
         table{width:100%;border-collapse:collapse;font-size:0.75rem;}
         th{background:#d4af37;color:#0a1620;padding:10px;text-align:left;}
         td{padding:8px;border-bottom:1px solid #2c4a5e;}
+        
+        /* Tabs */
         .tabs{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
         .tab-btn{background:#0f212e;border:none;padding:10px 20px;border-radius:30px;cursor:pointer;color:#e8ddb0;}
         .tab-btn.active{background:#d4af37;color:#0a1620;font-weight:bold;}
         .tab-content{display:none;}
         .tab-content.active{display:block;}
+        
+        /* Orders */
+        .orders-list{max-height:500px;overflow-y:auto;}
+        .order-item{background:#07161f;border-radius:12px;padding:15px;margin-bottom:10px;border-left:3px solid #d4af37;}
+        .status-pending{background:#8b6b2c;padding:2px 10px;border-radius:20px;font-size:0.7rem;display:inline-block;}
+        .status-completed{background:#2c6e3a;padding:2px 10px;border-radius:20px;font-size:0.7rem;display:inline-block;}
+        
         .footer{text-align:center;font-size:0.65rem;margin-top:30px;padding-top:20px;border-top:1px solid #2c4a5e;}
-        .error{color:#cc6666;font-size:0.8rem;margin-top:5px;}
-        @media(max-width:700px){.pasta-item{flex-wrap:wrap;gap:10px;}.pasta-qty input{width:100%;}}
+        .error{color:#cc6666;font-size:0.8rem;}
+        .success{color:#6aab5a;font-size:0.8rem;}
+        
+        @media(max-width:700px){.header{flex-direction:column;text-align:center;gap:10px;}}
     </style>
 </head>
 <body>
@@ -64,63 +87,39 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// ========== COMPANY DETAILS ==========
+const company = {
+    name: "Belfioti Pasta Artisans",
+    abn: "12 345 678 901",
+    gst: "Registered for GST",
+    address: "Unit 4, 12 Pasta Lane, Pascoe Vale VIC 3044",
+    phone: "(03) 1234 5678",
+    email: "orders@belfioti.com.au"
+};
+
 // ========== 12 ITALIAN PASTAS ==========
 const pastas = [
-    { id: 1, name: "Spaghetti", code: "BLF-SPG-001", basePrice: 12.90 },
-    { id: 2, name: "Fettuccine", code: "BLF-FET-002", basePrice: 13.90 },
-    { id: 3, name: "Penne Rigate", code: "BLF-PEN-003", basePrice: 11.90 },
-    { id: 4, name: "Linguine", code: "BLF-LIN-004", basePrice: 12.90 },
-    { id: 5, name: "Tagliatelle", code: "BLF-TAG-005", basePrice: 14.50 },
-    { id: 6, name: "Pappardelle", code: "BLF-PAP-006", basePrice: 15.90 },
-    { id: 7, name: "Rigatoni", code: "BLF-RIG-007", basePrice: 11.90 },
-    { id: 8, name: "Orecchiette", code: "BLF-ORE-008", basePrice: 14.90 },
-    { id: 9, name: "Fusilli", code: "BLF-FUS-009", basePrice: 11.90 },
-    { id: 10, name: "Gnocchi", code: "BLF-GNO-010", basePrice: 16.90 },
-    { id: 11, name: "Cannelloni", code: "BLF-CAN-011", basePrice: 13.90 },
-    { id: 12, name: "Lasagne Sheets", code: "BLF-LAS-012", basePrice: 12.90 }
+    { id: 1, name: "Spaghetti", code: "BLF-SPG-001", basePrice: 12.90, description: "Classic long pasta, perfect with tomato sauces" },
+    { id: 2, name: "Fettuccine", code: "BLF-FET-002", basePrice: 13.90, description: "Flat ribbons, ideal for cream sauces" },
+    { id: 3, name: "Penne Rigate", code: "BLF-PEN-003", basePrice: 11.90, description: "Tube-shaped with ridges, holds sauce well" },
+    { id: 4, name: "Linguine", code: "BLF-LIN-004", basePrice: 12.90, description: "Narrow flat pasta, great with seafood" },
+    { id: 5, name: "Tagliatelle", code: "BLF-TAG-005", basePrice: 14.50, description: "Egg-based ribbons, Bolognese classic" },
+    { id: 6, name: "Pappardelle", code: "BLF-PAP-006", basePrice: 15.90, description: "Wide ribbons, perfect for rich meat sauces" },
+    { id: 7, name: "Rigatoni", code: "BLF-RIG-007", basePrice: 11.90, description: "Large tubes, excellent for baked dishes" },
+    { id: 8, name: "Orecchiette", code: "BLF-ORE-008", basePrice: 14.90, description: "Ear-shaped, captures vegetable sauces" },
+    { id: 9, name: "Fusilli", code: "BLF-FUS-009", basePrice: 11.90, description: "Spiral shapes, great for pasta salads" },
+    { id: 10, name: "Gnocchi", code: "BLF-GNO-010", basePrice: 16.90, description: "Soft potato dumplings, very digestible" },
+    { id: 11, name: "Cannelloni", code: "BLF-CAN-011", basePrice: 13.90, description: "Large tubes for stuffing and baking" },
+    { id: 12, name: "Lasagne Sheets", code: "BLF-LAS-012", basePrice: 12.90, description: "Flat sheets for layered baked pasta" }
 ];
 
 let prices = {};
+let customers = {};
 let currentUser = null;
-let orderQuantities = {};
-let allOrders = [];
-let adminOrdersListener = null;
+let cart = {};
+let ordersListener = null;
 
-// ========== AUTHENTICATION ==========
-const validUsers = {
-    "customer1": { password: "pastalover", name: "Maria G.", type: "customer" },
-    "customer2": { password: "italian123", name: "Tony R.", type: "customer" },
-    "andrew": { password: "belfioti2024", name: "Andrew", type: "admin" }
-};
-
-function showLogin() {
-    document.getElementById("app").innerHTML = `
-        <div class="login-container">
-            <h1 style="text-align:center;">Belfioti Pasta</h1>
-            <p style="text-align:center;margin-bottom:30px;">Pascoe Vale, Melbourne<br>Imported Flour · Imported Water · Very Digestible</p>
-            <input type="text" id="username" placeholder="Username" autocomplete="off">
-            <input type="password" id="password" placeholder="Password">
-            <button id="loginBtn">Sign In</button>
-            <div id="loginError" class="error" style="text-align:center;"></div>
-            <div style="margin-top:20px;font-size:0.7rem;text-align:center;color:#aaa;">Customers: customer1 / pastalover<br>Admin: andrew / belfioti2024</div>
-        </div>
-    `;
-    document.getElementById("loginBtn").onclick = () => {
-        const user = document.getElementById("username").value;
-        const pass = document.getElementById("password").value;
-        if (validUsers[user] && validUsers[user].password === pass) {
-            currentUser = { username: user, ...validUsers[user] };
-            loadPrices().then(() => {
-                if (currentUser.type === "admin") renderAdminDashboard();
-                else renderCustomerOrder();
-            });
-        } else {
-            document.getElementById("loginError").innerText = "Invalid username or password";
-        }
-    };
-}
-
-// ========== LOAD PRICES FROM FIREBASE ==========
+// ========== LOAD DATA FROM FIREBASE ==========
 async function loadPrices() {
     const doc = await db.collection("settings").doc("pastaPrices").get();
     if (doc.exists) {
@@ -129,7 +128,24 @@ async function loadPrices() {
         pastas.forEach(p => { prices[p.name] = p.basePrice; });
         await db.collection("settings").doc("pastaPrices").set(prices);
     }
-    return prices;
+}
+
+async function loadCustomers() {
+    const snapshot = await db.collection("customers").get();
+    customers = {};
+    snapshot.forEach(doc => {
+        customers[doc.id] = doc.data();
+    });
+    if (Object.keys(customers).length === 0) {
+        const defaultCustomers = {
+            "marios": { password: "pasta123", name: "Mario's Restaurant", email: "mario@example.com", phone: "0412 345 678" },
+            "olivia": { password: "italian456", name: "Olivia", email: "olivia@example.com", phone: "0423 456 789" }
+        };
+        for (let [user, data] of Object.entries(defaultCustomers)) {
+            await db.collection("customers").doc(user).set(data);
+            customers[user] = data;
+        }
+    }
 }
 
 async function savePrices() {
@@ -139,20 +155,126 @@ async function savePrices() {
     }
     await db.collection("settings").doc("pastaPrices").set(prices);
     alert("Prices saved");
-    if (currentUser.type === "admin") renderAdminDashboard();
 }
 
-// ========== CUSTOMER ORDER PAGE ==========
-function renderCustomerOrder() {
+// ========== MARKETING LANDING PAGE ==========
+function renderLandingPage() {
+    document.getElementById("app").innerHTML = `
+        <div class="header">
+            <div class="logo">
+                <h1>Belfioti Pasta</h1>
+                <p>Imported Italian Flour · Pure Australian Water · Very Digestible</p>
+            </div>
+            <div class="abn">ABN: ${company.abn}</div>
+        </div>
+        <div class="container">
+            <div class="card" style="text-align:center;">
+                <h2>Artisan Pasta Made in Pascoe Vale, Melbourne</h2>
+                <p style="font-size:1.1rem;margin:20px 0;">We use only the finest imported Italian flour and pure Australian water to create pasta that is exceptionally digestible and rich in flavour.</p>
+                <button id="shopNowBtn">Shop Now</button>
+                <button id="adminLoginBtn" class="btn-outline" style="margin-left:10px;">Admin Login</button>
+            </div>
+            
+            <div class="grid-3">
+                <div class="product-card">
+                    <h3>Imported Flour</h3>
+                    <p>Premium Italian semolina from Abruzzo</p>
+                </div>
+                <div class="product-card">
+                    <h3>Pure Water</h3>
+                    <p>Filtered Australian mountain water</p>
+                </div>
+                <div class="product-card">
+                    <h3>Very Digestible</h3>
+                    <p>Slow-dried for easier digestion</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Our 12 Artisan Pastas</h2>
+                <div class="grid-3" id="landingPastas"></div>
+            </div>
+            
+            <div class="footer">
+                <p>${company.name} · ${company.address} · ${company.phone} · ${company.email}</p>
+                <p>ABN: ${company.abn} · ${company.gst}</p>
+            </div>
+        </div>
+    `;
+    
+    const landingGrid = document.getElementById("landingPastas");
+    if (landingGrid) {
+        landingGrid.innerHTML = "";
+        for (let p of pastas.slice(0, 6)) {
+            landingGrid.innerHTML += `
+                <div class="product-card">
+                    <strong>${p.name}</strong>
+                    <div class="product-price">$${(prices[p.name] || p.basePrice).toFixed(2)} / 500g</div>
+                    <p style="font-size:0.7rem;">${p.description}</p>
+                </div>
+            `;
+        }
+    }
+    
+    document.getElementById("shopNowBtn").onclick = () => showLogin("customer");
+    document.getElementById("adminLoginBtn").onclick = () => showLogin("admin");
+}
+
+// ========== LOGIN ==========
+function showLogin(type) {
+    document.getElementById("app").innerHTML = `
+        <div class="container" style="max-width:400px;margin:100px auto;">
+            <div class="card">
+                <h2 style="text-align:center;">${type === "admin" ? "Admin Login" : "Customer Login"}</h2>
+                <input type="text" id="username" placeholder="Username">
+                <input type="password" id="password" placeholder="Password">
+                <button id="loginBtn">Login</button>
+                <button id="backBtn" class="btn-outline" style="margin-top:10px;">Back to Home</button>
+                <div id="loginError" class="error" style="margin-top:10px;text-align:center;"></div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById("loginBtn").onclick = async () => {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        
+        if (type === "admin") {
+            if (username === "andrew" && password === "belfioti2024") {
+                currentUser = { username: "andrew", name: "Andrew", type: "admin" };
+                await loadPrices();
+                await loadCustomers();
+                renderAdminDashboard();
+            } else {
+                document.getElementById("loginError").innerText = "Invalid admin credentials";
+            }
+        } else {
+            await loadCustomers();
+            if (customers[username] && customers[username].password === password) {
+                currentUser = { username: username, name: customers[username].name, email: customers[username].email, phone: customers[username].phone, type: "customer" };
+                await loadPrices();
+                renderCustomerShop();
+            } else {
+                document.getElementById("loginError").innerText = "Invalid customer credentials";
+            }
+        }
+    };
+    document.getElementById("backBtn").onclick = renderLandingPage;
+}
+
+// ========== CUSTOMER SHOPPING CART PAGE ==========
+function renderCustomerShop() {
+    cart = JSON.parse(localStorage.getItem(`cart_${currentUser.username}`) || "{}");
+    
     let pastaHtml = "";
     for (let p of pastas) {
-        const currentQty = orderQuantities[p.name] || 0;
+        const qty = cart[p.name] || 0;
         pastaHtml += `
-            <div class="pasta-item">
-                <div class="pasta-name"><strong>${p.name}</strong><br><span style="font-size:0.65rem;color:#aaa;">${p.code}</span></div>
-                <div class="pasta-price">$${(prices[p.name] || p.basePrice).toFixed(2)} / 500g</div>
-                <div class="pasta-qty">
-                    <input type="number" id="qty_${p.id}" value="${currentQty}" min="0" max="99" step="1" style="width:80px;">
+            <div class="product-card">
+                <div><strong>${p.name}</strong><br><span style="font-size:0.65rem;">${p.code}</span></div>
+                <div class="product-price">$${(prices[p.name] || p.basePrice).toFixed(2)} / 500g</div>
+                <div class="product-qty">
+                    <input type="number" id="qty_${p.id}" value="${qty}" min="0" max="99" step="1">
                 </div>
             </div>
         `;
@@ -160,194 +282,213 @@ function renderCustomerOrder() {
     
     document.getElementById("app").innerHTML = `
         <div class="header">
-            <div><h1>Belfioti Pasta</h1><div style="font-size:0.7rem;">Pascoe Vale, Melbourne · Imported Flour & Water · Very Digestible</div></div>
-            <div class="abn">ABN: 12 345 678 901</div>
+            <div class="logo">
+                <h1>Belfioti Pasta</h1>
+                <p>Welcome, ${currentUser.name}</p>
+            </div>
+            <div class="abn">ABN: ${company.abn}</div>
         </div>
         <div class="container">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-                <h2>Welcome, ${currentUser.name}</h2>
-                <button id="logoutBtn" style="width:auto;padding:8px 20px;">Logout</button>
+            <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                <button id="logoutBtn" class="btn-outline">Logout</button>
             </div>
-            <div class="card">
-                <h2>Our 12 Artisan Pastas</h2>
-                <p style="margin-bottom:15px;font-size:0.8rem;">Made with imported Italian flour and pure Australian water. Highly digestible.</p>
-                <div id="pastaList">${pastaHtml}</div>
-                <div class="total-box">
-                    <div>Total Amount</div>
-                    <div class="total-amount" id="totalAmount">$0.00</div>
+            <div class="grid-2">
+                <div class="card">
+                    <h2>Our Pastas</h2>
+                    <div class="grid-2" id="pastaGrid">${pastaHtml}</div>
                 </div>
-                <div class="invoice-actions">
-                    <button id="generateInvoiceBtn">Generate Invoice</button>
-                    <button id="emailInvoiceBtn">Email Invoice</button>
-                    <button id="smsInvoiceBtn">SMS Invoice</button>
-                    <button id="shareInvoiceBtn">Share Message</button>
+                <div class="card">
+                    <h2>Shopping Cart</h2>
+                    <div id="cartItems"></div>
+                    <div class="total-box">
+                        <div>Subtotal (excl. GST)</div>
+                        <div class="total-amount" id="subtotal">$0.00</div>
+                        <div>GST (10%)</div>
+                        <div class="total-amount" id="gstAmount">$0.00</div>
+                        <div>Total (incl. GST)</div>
+                        <div class="total-amount" id="cartTotal">$0.00</div>
+                    </div>
+                    <button id="checkoutBtn">Proceed to Checkout</button>
+                    <button id="clearCartBtn" class="btn-outline">Clear Cart</button>
                 </div>
-                <div id="orderStatus" style="margin-top:15px;text-align:center;font-size:0.8rem;color:#d4af37;"></div>
             </div>
-            <div class="footer">Belfioti · Handmade Artisan Pasta · Pascoe Vale, Melbourne</div>
+            <div class="footer">${company.name} · ${company.address} · ${company.gst}</div>
         </div>
     `;
     
-    // Attach quantity change listeners
     for (let p of pastas) {
         const input = document.getElementById(`qty_${p.id}`);
         if (input) {
             input.onchange = () => {
                 const val = parseInt(input.value) || 0;
-                orderQuantities[p.name] = val;
-                updateTotal();
+                if (val === 0) delete cart[p.name];
+                else cart[p.name] = val;
+                localStorage.setItem(`cart_${currentUser.username}`, JSON.stringify(cart));
+                updateCartDisplay();
             };
         }
     }
     
-    document.getElementById("logoutBtn").onclick = () => { currentUser = null; orderQuantities = {}; showLogin(); };
-    document.getElementById("generateInvoiceBtn").onclick = generateInvoice;
-    document.getElementById("emailInvoiceBtn").onclick = () => sendInvoice("email");
-    document.getElementById("smsInvoiceBtn").onclick = () => sendInvoice("sms");
-    document.getElementById("shareInvoiceBtn").onclick = () => sendInvoice("share");
-    updateTotal();
+    document.getElementById("logoutBtn").onclick = () => { currentUser = null; renderLandingPage(); };
+    document.getElementById("clearCartBtn").onclick = () => { cart = {}; localStorage.setItem(`cart_${currentUser.username}`, "{}"); updateCartDisplay(); for(let p of pastas){ const inp = document.getElementById(`qty_${p.id}`); if(inp) inp.value = 0; } };
+    document.getElementById("checkoutBtn").onclick = generateInvoice;
+    
+    updateCartDisplay();
 }
 
-function updateTotal() {
-    let total = 0;
-    for (let p of pastas) {
-        const qty = orderQuantities[p.name] || 0;
-        total += qty * (prices[p.name] || p.basePrice);
+function updateCartDisplay() {
+    const cartDiv = document.getElementById("cartItems");
+    let subtotal = 0;
+    let html = "";
+    for (let [name, qty] of Object.entries(cart)) {
+        const price = prices[name] || pastas.find(p => p.name === name)?.basePrice || 0;
+        const itemTotal = price * qty;
+        subtotal += itemTotal;
+        html += `<div class="cart-item"><span>${name} x${qty}</span><span>$${itemTotal.toFixed(2)}</span></div>`;
     }
-    document.getElementById("totalAmount").innerText = `$${total.toFixed(2)}`;
-    return total;
+    if (Object.keys(cart).length === 0) html = "<p>Cart is empty</p>";
+    cartDiv.innerHTML = html;
+    
+    const gst = subtotal * 0.1;
+    const total = subtotal + gst;
+    document.getElementById("subtotal").innerText = `$${subtotal.toFixed(2)}`;
+    document.getElementById("gstAmount").innerText = `$${gst.toFixed(2)}`;
+    document.getElementById("cartTotal").innerText = `$${total.toFixed(2)}`;
 }
 
 async function generateInvoice() {
-    const total = updateTotal();
-    const items = [];
-    for (let p of pastas) {
-        const qty = orderQuantities[p.name] || 0;
-        if (qty > 0) {
-            items.push({ name: p.name, code: p.code, qty: qty, price: prices[p.name] || p.basePrice, subtotal: qty * (prices[p.name] || p.basePrice) });
-        }
-    }
-    
-    if (items.length === 0) {
-        document.getElementById("orderStatus").innerText = "Please select at least one pasta";
+    if (Object.keys(cart).length === 0) {
+        alert("Cart is empty");
         return;
     }
     
+    let subtotal = 0;
+    const items = [];
+    for (let [name, qty] of Object.entries(cart)) {
+        const price = prices[name] || pastas.find(p => p.name === name)?.basePrice || 0;
+        const itemTotal = price * qty;
+        subtotal += itemTotal;
+        items.push({ name, code: pastas.find(p => p.name === name)?.code, qty, price, subtotal: itemTotal });
+    }
+    const gst = subtotal * 0.1;
+    const total = subtotal + gst;
+    
     const invoice = {
-        invoiceNumber: "INV-" + Date.now(),
-        customerName: currentUser.name,
+        invoiceNumber: "BELF-" + Date.now(),
         date: new Date().toLocaleString(),
+        customerName: currentUser.name,
+        customerEmail: currentUser.email,
+        customerPhone: currentUser.phone,
         items: items,
+        subtotal: subtotal,
+        gst: gst,
         total: total,
         status: "pending"
     };
     
-    // Save to Firebase
     await db.collection("orders").add({
         ...invoice,
         customerUsername: currentUser.username,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
     
-    // Generate HTML invoice for display
-    let itemsHtml = "";
-    for (let i of items) {
-        itemsHtml += `<tr><td>${i.name}</td><td>${i.code}</td><td>${i.qty}</td><td>$${i.price.toFixed(2)}</td><td>$${i.subtotal.toFixed(2)}</td></tr>`;
+    // Generate PDF Invoice
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    let y = 20;
+    doc.setFont("helvetica");
+    doc.setFontSize(18);
+    doc.text("Belfioti Pasta Artisans", 20, y);
+    y += 8;
+    doc.setFontSize(10);
+    doc.text(company.address, 20, y);
+    y += 5;
+    doc.text(`ABN: ${company.abn} | ${company.gst}`, 20, y);
+    y += 5;
+    doc.text(`Phone: ${company.phone} | Email: ${company.email}`, 20, y);
+    y += 15;
+    
+    doc.setFontSize(12);
+    doc.text(`INVOICE`, 20, y);
+    y += 8;
+    doc.setFontSize(10);
+    doc.text(`Invoice Number: ${invoice.invoiceNumber}`, 20, y);
+    y += 5;
+    doc.text(`Date: ${invoice.date}`, 20, y);
+    y += 5;
+    doc.text(`Customer: ${invoice.customerName}`, 20, y);
+    y += 5;
+    if (invoice.customerEmail) doc.text(`Email: ${invoice.customerEmail}`, 20, y);
+    y += 5;
+    if (invoice.customerPhone) doc.text(`Phone: ${invoice.customerPhone}`, 20, y);
+    y += 10;
+    
+    doc.setFillColor(212, 175, 55);
+    doc.rect(20, y, 170, 8, "F");
+    doc.setTextColor(10, 22, 32);
+    doc.text("Product", 25, y + 5);
+    doc.text("Qty", 100, y + 5);
+    doc.text("Price", 130, y + 5);
+    doc.text("Total", 160, y + 5);
+    y += 10;
+    doc.setTextColor(232, 221, 176);
+    
+    for (let item of items) {
+        doc.text(item.name.substring(0, 20), 25, y);
+        doc.text(`${item.qty}`, 105, y);
+        doc.text(`$${item.price.toFixed(2)}`, 130, y);
+        doc.text(`$${item.subtotal.toFixed(2)}`, 160, y);
+        y += 6;
+        if (y > 270) { doc.addPage(); y = 20; }
     }
     
-    const invoiceHtml = `
-        <div style="font-family:'Century Gothic',sans-serif;padding:20px;max-width:600px;margin:0 auto;">
-            <h1 style="color:#d4af37;">Belfioti Pasta</h1>
-            <p>Pascoe Vale, Melbourne<br>ABN: 12 345 678 901</p>
-            <hr>
-            <p><strong>Invoice:</strong> ${invoice.invoiceNumber}</p>
-            <p><strong>Customer:</strong> ${invoice.customerName}</p>
-            <p><strong>Date:</strong> ${invoice.date}</p>
-            <hr>
-            <table style="width:100%;border-collapse:collapse;">
-                <thead><tr><th>Product</th><th>Code</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead>
-                <tbody>${itemsHtml}</tbody>
-            </table>
-            <hr>
-            <h2 style="text-align:right;">Total: $${invoice.total.toFixed(2)}</h2>
-            <p style="font-size:0.7rem;margin-top:20px;">Thank you for ordering from Belfioti.<br>Imported Italian flour · Very digestible</p>
-        </div>
-    `;
+    y += 10;
+    doc.text(`Subtotal: $${invoice.subtotal.toFixed(2)}`, 130, y);
+    y += 6;
+    doc.text(`GST (10%): $${invoice.gst.toFixed(2)}`, 130, y);
+    y += 8;
+    doc.setFontSize(12);
+    doc.setTextColor(212, 175, 55);
+    doc.text(`TOTAL: $${invoice.total.toFixed(2)}`, 130, y);
     
-    // Store invoice data for sharing
-    window.currentInvoice = { html: invoiceHtml, invoice: invoice };
+    doc.save(`Belfioti_Invoice_${invoice.invoiceNumber}.pdf`);
     
-    document.getElementById("orderStatus").innerHTML = `Invoice generated! Total: $${total.toFixed(2)}`;
-    setTimeout(() => document.getElementById("orderStatus").innerHTML = "", 3000);
+    alert(`Invoice generated!\nTotal: $${invoice.total.toFixed(2)} (incl. GST)\nPDF downloaded.`);
     
-    // Open print/download dialog
-    const win = window.open();
-    win.document.write(invoiceHtml);
-    win.document.close();
-    
-    // Clear quantities after order
-    for (let p of pastas) {
-        orderQuantities[p.name] = 0;
-        const input = document.getElementById(`qty_${p.id}`);
-        if (input) input.value = 0;
-    }
-    updateTotal();
-}
-
-async function sendInvoice(method) {
-    if (!window.currentInvoice) {
-        document.getElementById("orderStatus").innerText = "Generate invoice first";
-        return;
-    }
-    
-    const invoice = window.currentInvoice.invoice;
-    const total = invoice.total;
-    
-    if (method === "email") {
-        const email = prompt("Enter customer email address:");
-        if (email) {
-            document.getElementById("orderStatus").innerHTML = `Invoice would be emailed to ${email}`;
-            // In production: use EmailJS or backend API
-        }
-    } else if (method === "sms") {
-        const phone = prompt("Enter phone number (Australian):");
-        if (phone) {
-            document.getElementById("orderStatus").innerHTML = `Invoice would be sent via SMS to ${phone}`;
-        }
-    } else if (method === "share") {
-        const message = `Belfioti Invoice ${invoice.invoiceNumber}\nTotal: $${total.toFixed(2)}\nThank you for your order!`;
-        if (navigator.share) {
-            await navigator.share({ title: "Belfioti Invoice", text: message });
-        } else {
-            navigator.clipboard.writeText(message);
-            document.getElementById("orderStatus").innerHTML = "Invoice details copied to clipboard";
-        }
-    }
+    cart = {};
+    localStorage.setItem(`cart_${currentUser.username}`, "{}");
+    renderCustomerShop();
 }
 
 // ========== ADMIN DASHBOARD ==========
 function renderAdminDashboard() {
     document.getElementById("app").innerHTML = `
         <div class="header">
-            <div><h1>Belfioti Pasta · Admin Portal</h1><div style="font-size:0.7rem;">Pascoe Vale, Melbourne</div></div>
-            <div class="abn">ABN: 12 345 678 901</div>
+            <div class="logo">
+                <h1>Belfioti Pasta · Admin Portal</h1>
+                <p>Welcome, Andrew</p>
+            </div>
+            <div class="abn">ABN: ${company.abn}</div>
         </div>
         <div class="container">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-                <h2>Welcome, Andrew</h2>
-                <button id="logoutBtn" style="width:auto;padding:8px 20px;">Logout</button>
+            <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                <button id="logoutBtn" class="btn-outline">Logout</button>
             </div>
             <div class="tabs">
                 <button class="tab-btn active" data-tab="orders">Live Orders</button>
                 <button class="tab-btn" data-tab="prices">Set Prices</button>
-                <button class="tab-btn" data-tab="inventory">Inventory</button>
+                <button class="tab-btn" data-tab="customers">Manage Customers</button>
+                <button class="tab-btn" data-tab="company">Company Details</button>
             </div>
+            
             <div id="ordersTab" class="tab-content active">
                 <div class="card">
                     <h2>Live Customer Orders</h2>
                     <div id="liveOrders" class="orders-list">Loading orders...</div>
                 </div>
             </div>
+            
             <div id="pricesTab" class="tab-content">
                 <div class="card">
                     <h2>Set Pasta Prices (AUD per 500g)</h2>
@@ -355,34 +496,41 @@ function renderAdminDashboard() {
                     <button id="savePricesBtn">Save Prices</button>
                 </div>
             </div>
-            <div id="inventoryTab" class="tab-content">
+            
+            <div id="customersTab" class="tab-content">
                 <div class="card">
-                    <h2>Inventory Management</h2>
-                    <label>Store Location</label>
-                    <select id="storeSelect"><option>Pascoe Vale HQ</option><option>Main Street</option><option>Westfield Plaza</option></select>
-                    <label>Driver</label>
-                    <select id="driverSelect"><option>Driver Andrew</option><option>Driver Mike</option><option>Driver Sarah</option></select>
-                    <div class="balance-box" style="background:#07161f;padding:15px;border-radius:12px;margin:15px 0;text-align:center;">
-                        <div>Current Stock (kg)</div>
-                        <div style="font-size:2rem;color:#d4af37;" id="currentBalance">0</div>
-                    </div>
-                    <input type="number" id="openingAmount" placeholder="Opening Stock (kg)" value="100">
-                    <button id="setOpeningBtn">Set Opening Stock</button>
-                    <select id="invPastaSelect"></select>
-                    <input type="number" id="invQty" placeholder="Quantity (kg)" value="5">
-                    <div style="display:flex;gap:10px;margin-top:10px;">
-                        <button id="addStockBtn">Add Stock</button>
-                        <button id="removeStockBtn" style="background:#8b3a2a;">Remove/Sell</button>
-                    </div>
-                    <button id="closeShiftBtn" style="margin-top:10px;background:#8b3a2a;">Close Shift</button>
-                    <div id="invMsg" style="margin-top:10px;font-size:0.75rem;"></div>
+                    <h2>Customer Management</h2>
+                    <div id="customersList"></div>
+                    <h3 style="margin-top:20px;">Add New Customer</h3>
+                    <input type="text" id="newUsername" placeholder="Username">
+                    <input type="text" id="newPassword" placeholder="Password">
+                    <input type="text" id="newName" placeholder="Full Name">
+                    <input type="email" id="newEmail" placeholder="Email">
+                    <input type="text" id="newPhone" placeholder="Phone">
+                    <button id="addCustomerBtn">Add Customer</button>
+                    <div id="customerMsg" class="success" style="margin-top:10px;"></div>
                 </div>
             </div>
-            <div class="footer">Belfioti · Handmade Artisan Pasta · Pascoe Vale, Melbourne</div>
+            
+            <div id="companyTab" class="tab-content">
+                <div class="card">
+                    <h2>Company Tax Information</h2>
+                    <p><strong>Business Name:</strong> ${company.name}</p>
+                    <p><strong>ABN:</strong> ${company.abn}</p>
+                    <p><strong>GST Registration:</strong> ${company.gst}</p>
+                    <p><strong>Address:</strong> ${company.address}</p>
+                    <p><strong>Phone:</strong> ${company.phone}</p>
+                    <p><strong>Email:</strong> ${company.email}</p>
+                    <hr style="margin:15px 0;border-color:#2c4a5e;">
+                    <p style="font-size:0.8rem;">Tax invoices include 10% GST as required by Australian tax law.</p>
+                </div>
+            </div>
+            
+            <div class="footer">${company.name} · ${company.address} · ${company.gst}</div>
         </div>
     `;
     
-    // Load prices into admin panel
+    // Price list
     const priceContainer = document.getElementById("priceList");
     if (priceContainer) {
         priceContainer.innerHTML = "";
@@ -398,53 +546,52 @@ function renderAdminDashboard() {
     }
     
     document.getElementById("savePricesBtn").onclick = savePrices;
-    document.getElementById("logoutBtn").onclick = () => { if(adminOrdersListener) adminOrdersListener(); currentUser = null; showLogin(); };
+    document.getElementById("logoutBtn").onclick = () => { if(ordersListener) ordersListener(); currentUser = null; renderLandingPage(); };
     
-    // Inventory setup
-    const invSelect = document.getElementById("invPastaSelect");
-    if (invSelect) {
-        invSelect.innerHTML = "";
-        for (let p of pastas) {
-            const opt = document.createElement("option");
-            opt.value = p.name;
-            opt.innerText = `${p.name} (${p.code})`;
-            invSelect.appendChild(opt);
+    // Customers list
+    async function renderCustomersList() {
+        await loadCustomers();
+        const container = document.getElementById("customersList");
+        if (container) {
+            container.innerHTML = "<h3>Existing Customers</h3>";
+            for (let [user, data] of Object.entries(customers)) {
+                container.innerHTML += `<div style="padding:10px;border-bottom:1px solid #2c4a5e;"><strong>${user}</strong> - ${data.name} - ${data.email || 'No email'} - ${data.phone || 'No phone'}</div>`;
+            }
         }
     }
     
-    // Load inventory from localStorage
-    let balances = JSON.parse(localStorage.getItem("belfioti_inventory") || "{}");
-    function getInventoryKey() { return document.getElementById("storeSelect").value + "|" + document.getElementById("driverSelect").value; }
-    function updateInventoryDisplay() { document.getElementById("currentBalance").innerText = (balances[getInventoryKey()] || 0).toFixed(1); }
-    updateInventoryDisplay();
-    
-    document.getElementById("setOpeningBtn").onclick = () => {
-        const key = getInventoryKey();
-        const val = parseFloat(document.getElementById("openingAmount").value);
-        if (!isNaN(val)) { balances[key] = val; localStorage.setItem("belfioti_inventory", JSON.stringify(balances)); updateInventoryDisplay(); }
+    document.getElementById("addCustomerBtn").onclick = async () => {
+        const username = document.getElementById("newUsername").value.trim();
+        const password = document.getElementById("newPassword").value;
+        const name = document.getElementById("newName").value;
+        const email = document.getElementById("newEmail").value;
+        const phone = document.getElementById("newPhone").value;
+        
+        if (!username || !password || !name) {
+            document.getElementById("customerMsg").innerText = "Username, password and name required";
+            return;
+        }
+        
+        if (customers[username]) {
+            document.getElementById("customerMsg").innerText = "Username already exists";
+            return;
+        }
+        
+        await db.collection("customers").doc(username).set({ password, name, email, phone });
+        await loadCustomers();
+        renderCustomersList();
+        document.getElementById("customerMsg").innerText = `Customer ${username} added successfully`;
+        document.getElementById("newUsername").value = "";
+        document.getElementById("newPassword").value = "";
+        document.getElementById("newName").value = "";
+        document.getElementById("newEmail").value = "";
+        document.getElementById("newPhone").value = "";
+        setTimeout(() => document.getElementById("customerMsg").innerText = "", 3000);
     };
-    document.getElementById("addStockBtn").onclick = () => {
-        const key = getInventoryKey();
-        const qty = parseFloat(document.getElementById("invQty").value);
-        if (!isNaN(qty) && qty > 0) { balances[key] = (balances[key] || 0) + qty; localStorage.setItem("belfioti_inventory", JSON.stringify(balances)); updateInventoryDisplay(); document.getElementById("invMsg").innerText = `Added ${qty}kg`; setTimeout(()=>document.getElementById("invMsg").innerText="",2000); }
-    };
-    document.getElementById("removeStockBtn").onclick = () => {
-        const key = getInventoryKey();
-        const qty = parseFloat(document.getElementById("invQty").value);
-        const current = balances[key] || 0;
-        if (!isNaN(qty) && qty > 0 && current >= qty) { balances[key] = current - qty; localStorage.setItem("belfioti_inventory", JSON.stringify(balances)); updateInventoryDisplay(); document.getElementById("invMsg").innerText = `Removed ${qty}kg`; setTimeout(()=>document.getElementById("invMsg").innerText="",2000); }
-        else if (current < qty) document.getElementById("invMsg").innerText = "Insufficient stock";
-    };
-    document.getElementById("closeShiftBtn").onclick = () => {
-        const key = getInventoryKey();
-        if (confirm("Close shift? Stock will reset to 0.")) { balances[key] = 0; localStorage.setItem("belfioti_inventory", JSON.stringify(balances)); updateInventoryDisplay(); }
-    };
-    document.getElementById("storeSelect").onchange = updateInventoryDisplay;
-    document.getElementById("driverSelect").onchange = updateInventoryDisplay;
     
     // Live orders listener
-    if (adminOrdersListener) adminOrdersListener();
-    adminOrdersListener = db.collection("orders").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+    if (ordersListener) ordersListener();
+    ordersListener = db.collection("orders").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
         const container = document.getElementById("liveOrders");
         if (!container) return;
         if (snapshot.empty) { container.innerHTML = "<div style='padding:20px;text-align:center;'>No orders yet</div>"; return; }
@@ -460,7 +607,8 @@ function renderAdminDashboard() {
                         <div><strong>${o.customerName}</strong> - ${o.invoiceNumber || "Order"}</div>
                         <div style="font-size:0.7rem;">${date}</div>
                         <div style="font-size:0.75rem;margin:8px 0;">${itemsHtml || `${o.items?.length || 0} items`}</div>
-                        <div><strong>Total: $${(o.total || 0).toFixed(2)}</strong></div>
+                        <div>Subtotal: $${(o.subtotal || 0).toFixed(2)} | GST: $${(o.gst || 0).toFixed(2)}</div>
+                        <div><strong>Total (incl. GST): $${(o.total || 0).toFixed(2)}</strong></div>
                         <div style="margin-top:8px;"><span class="status-${o.status || 'pending'}">${o.status || 'pending'}</span>
                         ${(o.status === 'pending' || !o.status) ? `<button onclick="markOrderComplete('${doc.id}')" style="width:auto;padding:4px 12px;margin-left:10px;font-size:0.7rem;">Mark Complete</button>` : ''}</div>
                     </div>`;
@@ -470,19 +618,20 @@ function renderAdminDashboard() {
     
     window.markOrderComplete = async (id) => { await db.collection("orders").doc(id).update({ status: "completed" }); };
     
-    // Setup tab switching
+    // Tab switching
     document.querySelectorAll(".tab-btn").forEach(btn => {
         btn.onclick = () => {
             document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
             document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
             document.getElementById(btn.dataset.tab + "Tab").classList.add("active");
+            if (btn.dataset.tab === "customers") renderCustomersList();
         };
     });
 }
 
 // ========== START ==========
-showLogin();
+renderLandingPage();
 </script>
 </body>
 </html>
